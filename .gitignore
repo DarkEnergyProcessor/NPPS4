@@ -1,0 +1,8 @@
+.vscode
+data
+download-temp
+venv
+*.pyc
+credentials.json
+maintenance.txt
+server_key.pem
