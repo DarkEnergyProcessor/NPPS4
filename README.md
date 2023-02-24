@@ -28,6 +28,8 @@ Before starting the server, you need 2 things:
 python make_server_key.py
 ```
 
+The public key, for your game client will be printed to stdout in PEM format.
+
 ### Get client game database.
 
 NPPS needs the client game data. **In the future this should be provided once the game service ended.**
