@@ -43,6 +43,72 @@ class DownloadUpdate(sifemu.SIFEmuRequest):
         }
 
 
+class DownloadBatch(sifemu.SIFEmuRequest):
+    def __init__(
+        self,
+        package_type: int,
+        excluded_package_ids: list[int] | None = None,
+        *,
+        client_version: str | None = None,
+        os: str | None = None,
+    ):
+        super().__init__("download", "batch")
+        self.package_type = package_type
+        self.exclude = excluded_package_ids or []
+        self.client_version = client_version
+        self.os = os
+
+    def add_more_context(self, sifemu: sifemu.SIFEmu):
+        if self.os is None:
+            self.os = sifemu.get_os()
+        if self.os not in ("iOS", "Android"):
+            raise ValueError("OS must be either iOS or Android")
+        if self.client_version is None:
+            self.client_version = sifemu.get_client_version()
+
+    def get_data(self):
+        return {
+            "client_version": self.client_version,
+            "os": self.os,
+            "package_type": self.package_type,
+            "excluded_package_ids": self.exclude,
+        }
+
+
+class DownloadAdditional(sifemu.SIFEmuRequest):
+    def __init__(
+        self,
+        package_type: int,
+        package_id: int,
+        *,
+        client_version: str | None = None,
+        os: str | None = None,
+    ):
+        super().__init__("download", "additional")
+        self.package_type = package_type
+        self.package_id = package_id
+        self.client_version = client_version
+        self.os = os
+
+    def add_more_context(self, sifemu: sifemu.SIFEmu):
+        if self.os is None:
+            self.os = sifemu.get_os()
+        if self.os not in ("iOS", "Android"):
+            raise ValueError("OS must be either iOS or Android")
+        if self.client_version is None:
+            self.client_version = sifemu.get_client_version()
+
+    def get_data(self):
+        return {
+            "client_version": self.client_version,
+            "target_os": self.os,
+            "type": "0",
+            "package_type": self.package_type,
+            "package_id": self.package_id,
+            "region": "392",
+        }
+
+
 class UserInfo(sifemu.SIFEmuRequest):
     def __init__(self):
         super().__init__("user", "userInfo")
@@ -64,7 +130,7 @@ with open("credentials.json", "r", encoding="UTF-8") as f:
 os.makedirs("download-temp", exist_ok=True)
 
 if os.path.exists("download-temp/download_data.json"):
-    raise Exception("Update is in progress. Forgot to call `update_data.py`?")
+    raise Exception("Update is in progress. Forgot to call `apply_update_data.py`?")
 
 
 if external_server_info is None:
@@ -110,9 +176,6 @@ if __name__ == "__main__":
             external_version=external_server_info["server_version"],
         )
     )
-    with open("download-temp/download_data.json", "w", encoding="UTF-8") as f:
-        json.dump(response, f)
-
     download_update_data.main(response)
 
-__all__ = ["sif"]
+__all__ = ["sif", "DownloadBatch", "DownloadAdditional"]

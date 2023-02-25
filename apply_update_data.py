@@ -19,19 +19,8 @@ def main(download_data):
         zipfiles.append(filename)
         with zipfile.ZipFile(filename, "r") as archive:
             print(f"Loading {filename}")
-            file_map = {}  # type: dict[str, zipfile.ZipInfo]
-            for infos in archive.infolist():
-                if infos.filename.startswith("en/"):
-                    dest = EXTERNAL_DATA_ROOT + infos.filename[3:]
-                    file_map[dest] = infos
-                else:
-                    dest = EXTERNAL_DATA_ROOT + infos.filename
-                    if dest in file_map:
-                        if not file_map[dest].filename.startswith("en/"):
-                            file_map[dest] = infos
-                    else:
-                        file_map[dest] = infos
-            for dest, info in file_map.items():
+            for info in archive.infolist():
+                dest = EXTERNAL_DATA_ROOT + info.filename
                 if info.file_size > 0:
                     print(f"Extracting {info.filename}")
                     os.makedirs(os.path.dirname(dest), exist_ok=True)

@@ -11,6 +11,9 @@ def main(download_data):
     if download_data is None:
         with open("download-temp/download_data.json", "r", encoding="UTF-8") as f:
             download_data = json.load(f)
+    else:
+        with open("download-temp/download_data.json", "w", encoding="UTF-8") as f:
+            json.dump(download_data, f)
     print("Total download size", sum(map(lambda x: int(x["size"]), download_data)), "bytes")
     session = None
     dlcount = len(download_data)
