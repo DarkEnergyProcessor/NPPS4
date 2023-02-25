@@ -124,9 +124,6 @@ except FileNotFoundError:
 with open("data/install/config/server_info.json", "r", encoding="UTF-8") as f:
     install_server_info = json.load(f)
 
-with open("credentials.json", "r", encoding="UTF-8") as f:
-    credentials = json.load(f)
-
 os.makedirs("download-temp", exist_ok=True)
 
 if os.path.exists("download-temp/download_data.json"):
@@ -148,12 +145,36 @@ else:
 
 print("Client version", client_version)
 
-sif = sifemu.SIFEmu(application_id=external_server_info["application_key"].encode("UTF-8"))
-sif.set_bundle_version("9.11")
-sif.set_os_ios("iPad13_8 iPad 16.2")
+
+def new_sifemu():
+    global external_server_info
+    print("application key", external_server_info["application_key"])
+    sif = sifemu.SIFEmu(application_id=external_server_info["application_key"].encode("UTF-8"))
+    sif.set_bundle_version("9.11")
+    sif.set_client_version(client_version)
+    sif.set_os_ios("iPad13_8 iPad 16.2")
+    return sif
+
+
+sif = new_sifemu()
+
+if os.path.exists("credentials.json"):
+    with open("credentials.json", "r", encoding="UTF-8") as f:
+        credentials = json.load(f)
+else:
+    sif.generate_credentials()
+    print("/login/authkey")
+    sif.initial_token()
+    credentials = {}
+    print("/login/startUp")
+    credentials["LOVELIVE_ID"], credentials["LOVELIVE_PW"] = sif.startup()
+    with open("credentials.json", "w", encoding="UTF-8") as f:
+        json.dump(credentials, f)
+    print("Account created")
+    sif = new_sifemu()
+
 sif.set_username(credentials["LOVELIVE_ID"])
 sif.set_password(credentials["LOVELIVE_PW"])
-sif.set_client_version(client_version)
 print("/login/authkey")
 sif.initial_token()
 print("/login/login")

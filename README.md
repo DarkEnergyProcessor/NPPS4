@@ -34,15 +34,7 @@ The public key, for your game client will be printed to stdout in PEM format.
 
 NPPS needs the client game data. **In the future this should be provided once the game service ended.**
 
-For time being, create new SIF account and put the account credentials as `credentials.json`:
-```json
-{
-	"LOVELIVE_ID": "your login_key",
-	"LOVELIVE_PW": "your login_passwd"
-}
-```
-
-Then extract the game "install" assets (protip: `AppAssets.zip` in Android) to `data/install`. Afterwards:
+For time being, extract the game "install" assets (protip: `AppAssets.zip` in Android) to `data/install`. Afterwards:
 
 ```
 python update_data.py
