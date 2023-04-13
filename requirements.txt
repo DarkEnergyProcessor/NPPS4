@@ -1,3 +1,7 @@
-flask
-flask-sqlalchemy
+alembic
+fastapi
+httpx
 pycryptodomex
+sqlalchemy
+tomli; python_version<"3.11"
+uvicorn[standard]
