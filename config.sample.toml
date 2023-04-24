@@ -1,0 +1,72 @@
+# NPPS4 sample configuration file.
+
+[main]
+# This is main configuration.
+
+# Should be the X-Message-Code sent by client be verified?
+verify_xmc = true
+
+# Where's the data directory?
+# Path is relative to the project root directory.
+data_directory = "data"
+
+[download]
+# This is in-game-download-related configuration.
+# Client requires client files to function.
+# Server requires client database to function too.
+
+# Which download backend to use? Available backends are:
+# "none" - None. Any `/download/` endpoint request will result in error.
+#          You MUST provide the server the database file it needs in
+#          `<data directory>/db` folder, otherwise the server will refuse to
+#          start!
+# "n4dlapi" - NPPS4 Download API (recommended). This is the recommended
+#             backend with standarized API. A reference implementation to
+#             host your own NPPS4 Download API is available at here:
+#             https://github.com/DarkEnergyProcessor/NPPS4-DLAPI
+#             Currently, NPPS4 requires NPPS4 Download API server that
+#             implements version 1 of the protocol.
+# "internal" - Locally mirrored game data according to folder structure
+#              according to https://github.com/DarkEnergyProcessor/NPPS4-DLAPI
+#              generation 1.1.
+backend = "none"
+
+# Send patched server_info.json automatically?
+send_patched_server_info = true
+
+[download.none]
+# What's the latest client version?
+client_version = "59.4"
+
+[download.n4dlapi]
+# NPPS4 Download API protocol is an RESTful-based HTTP protocol on how to
+# retrieve SIF-related files.
+# More information can be found in here:
+# https://github.com/DarkEnergyProcessor/NPPS4-DLAPI
+
+# Where's the NPPS4 Download API is hosted?
+# This option accepts URL path without trailing slashes. For example, if your
+# NPPS4 Download API server is hosted through `http://example.com/n4dlapi` and
+# such that `http://example.com/n4dlapi/api/publicinfo` gives public
+# information about the NPPS4 Download API server, then specify
+# "http://example.com/n4dlapi"
+server = "https://localhost:8000"
+
+# What's the Shared Key used to communicate with the NPPS4 Download API
+# server?
+# If your NPPS4 Download API server is public, then specify empty string.
+shared_key = ""
+
+[download.internal]
+# Where's the "archive-root" directory is stored?
+# Path is relative to the project root directory.
+archive_root = "archive-root"
+
+[advanced]
+# This is advanced configuration.
+# In most cases, you don't have to change anything.
+
+# The server application key.
+application_key = "b6e6c940a93af2357ea3e0ace0b98afc"
+# Consumer key.
+consumer_key = "lovelive_test"
