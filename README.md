@@ -19,27 +19,41 @@ Starting Up
 -----
 
 Before starting the server, you need 2 things:
-1. Generate private key.
+1. Get private key.
 2. Get client game database.
 
-### Generate private key.
+### Get private key.
 
-Note: An NPPS4-default private key is already provided. But first, copy `default_server_key.pem` to `server_key.pem` to use it.
-A private key is required due to internal verification done in the game files.
+> **Warning**: A private key is required due to internal request-response verification done in the game. You must
+have private key set-up!
 
-Extract the server public key using this command
+#### Using provided private key
+
+NPPS4 provides default private key which is used to develop other private servers by the SIF community.
+and compatible with community-patched APK.
+
+To use this private key, simply copy `default_server_key.pem` to `server_key.pem`.
+
+To get the public key, run:
 
 ```
 python make_server_key.py -p
 ```
 
-The public key, for your game client will be printed to stdout in PEM format.
+#### Using your own private key
 
-To replace the private key, simply remove `-p`.
+To generate a new private key, run:
+
+```
+python make_server_key.py
+```
+
+The public key, for your game client will be printed to stdout in PEM format. Patch your game to use the
+newly-provided public key.
 
 ### Get client game database.
 
-TODO:
+TODO: We'll provide game files when it's ready.
 
 Database
 -----
