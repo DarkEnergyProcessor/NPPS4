@@ -3,6 +3,6 @@ data
 download-temp
 venv
 *.pyc
-credentials.json
+config.toml
 maintenance.txt
 server_key.pem
