@@ -1,7 +1,7 @@
 Null-Pointer Private Server: Revisited
 =====
 
-WIP SIF 9.10+ private server written using Flask.
+WIP SIF 9.11 private server written using FastAPI.
 
 Requirements
 -----
@@ -25,6 +25,7 @@ Before starting the server, you need 2 things:
 ### Generate private key.
 
 Note: An NPPS4-default private key is already provided. But first, copy `default_server_key.pem` to `server_key.pem` to use it.
+A private key is required due to internal verification done in the game files.
 
 Extract the server public key using this command
 
