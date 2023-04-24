@@ -3,11 +3,11 @@ import sqlalchemy.ext.declarative
 import sqlalchemy.orm
 
 from . import common
+from ... import config
 
-from typing import cast, Union
 
-
-Base = sqlalchemy.ext.declarative.declarative_base()
+class Base(sqlalchemy.orm.DeclarativeBase):
+    pass
 
 
 class LiveTrack(Base, common.MaybeEncrypted):
@@ -29,17 +29,17 @@ class LiveTrack(Base, common.MaybeEncrypted):
     ```"""
 
     __tablename__ = "live_track_m"
-    live_track_id: int = cast(int, sqlalchemy.Column(sqlalchemy.Integer, primary_key=True))
-    name = cast(str, sqlalchemy.Column(common.String))
-    name_en = cast(Union[str, None], sqlalchemy.Column(common.String, nullable=True))
-    name_kana = cast(str, sqlalchemy.Column(common.String))
-    name_kana_en = cast(Union[str, None], sqlalchemy.Column(common.String, nullable=True))
-    title_asset = cast(str, sqlalchemy.Column(common.String))
-    title_asset_en = cast(Union[str, None], sqlalchemy.Column(common.String, nullable=True))
-    sound_asset = cast(str, sqlalchemy.Column(common.String))
-    member_category = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    member_tag_id = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    unit_type_id = cast(Union[int, None], sqlalchemy.Column(sqlalchemy.Integer, nullable=True))
+    live_track_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
+    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String, nullable=True)
+    name_kana: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
+    name_kana_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String, nullable=True)
+    title_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
+    title_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String, nullable=True)
+    sound_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
+    member_category: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    member_tag_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    unit_type_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column(nullable=True)
 
 
 class LiveSetting(Base, common.MaybeEncrypted):
@@ -72,46 +72,48 @@ class LiveSetting(Base, common.MaybeEncrypted):
     ```"""
 
     __tablename__ = "live_setting_m"
-    live_setting_id = cast(int, sqlalchemy.Column(sqlalchemy.Integer, primary_key=True))
-    live_track_id = cast(
-        int, sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("live_track_m.live_track_id"))
+    live_setting_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    live_track_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        sqlalchemy.ForeignKey("live_track_m.live_track_id")
     )
-    difficulty = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    stage_level = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    attribute_icon_id = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    live_icon_asset = cast(str, sqlalchemy.Column(common.String))
-    live_icon_asset_en = cast(Union[str, None], sqlalchemy.Column(common.String, nullable=True))
-    asset_movie_id = cast(str, sqlalchemy.Column(common.String))
-    asset_background_id = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    notes_setting_asset = cast(str, sqlalchemy.Column(common.String))
-    notes_setting_asset_en = cast(Union[str, None], sqlalchemy.Column(common.String))
-    c_rank_score = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    b_rank_score = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    a_rank_score = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    s_rank_score = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    c_rank_combo = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    b_rank_combo = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    a_rank_combo = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    s_rank_combo = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    ac_flag = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    swing_flag = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    lane_count = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
+    difficulty: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    stage_level: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    attribute_icon_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    live_icon_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
+    live_icon_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String, nullable=True)
+    asset_movie_id: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
+    asset_background_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    notes_setting_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
+    notes_setting_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(
+        common.String, nullable=True
+    )
+    c_rank_score: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    b_rank_score: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    a_rank_score: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    s_rank_score: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    c_rank_combo: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    b_rank_combo: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    a_rank_combo: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    s_rank_combo: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    ac_flag: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    swing_flag: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    lane_count: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
 class Live:
-    live_difficulty_id = cast(int, sqlalchemy.Column(sqlalchemy.Integer, primary_key=True))
-    live_setting_id = cast(
-        int, sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("live_setting_m.live_setting_id"))
+    live_difficulty_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    live_setting_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        sqlalchemy.ForeignKey("live_setting_m.live_setting_id")
     )
 
 
 class CommonLive:
-    capital_type = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    capital_value = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    c_rank_complete = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    b_rank_complete = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    a_rank_complete = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    s_rank_complete = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
+    capital_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    capital_value: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    c_rank_complete: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    b_rank_complete: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    a_rank_complete: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    s_rank_complete: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
 class NormalLive(Base, CommonLive, Live):
@@ -131,7 +133,7 @@ class NormalLive(Base, CommonLive, Live):
     ```"""
 
     __tablename__ = "normal_live_m"
-    default_unlocked_flag = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
+    default_unlocked_flag: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
 class SpecialLive(Base, CommonLive, Live):
@@ -153,9 +155,9 @@ class SpecialLive(Base, CommonLive, Live):
     ```"""
 
     __tablename__ = "special_live_m"
-    exclude_clear_count_flag = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    exclude_effort_point_flag = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    exclude_live_bonus_flag = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
+    exclude_clear_count_flag: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    exclude_effort_point_flag: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    exclude_live_bonus_flag: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
 class FreeLive(Base, Live):
@@ -169,7 +171,7 @@ class FreeLive(Base, Live):
     ```"""
 
     __tablename__ = "free_live_m"
-    random_flag = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
+    random_flag: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
 class LiveCombo(Base):
@@ -183,9 +185,9 @@ class LiveCombo(Base):
     ```"""
 
     __tablename__ = "live_combo_m"
-    combo_cnt = cast(int, sqlalchemy.Column(sqlalchemy.Integer, primary_key=True))
-    score_rate = cast(float, sqlalchemy.Column(common.Float))
-    add_love_cnt = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
+    combo_cnt: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    score_rate: sqlalchemy.orm.Mapped[float] = sqlalchemy.orm.mapped_column(common.Float)
+    add_love_cnt: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
 class LiveUnitRewardLot(Base):
@@ -202,22 +204,22 @@ class LiveUnitRewardLot(Base):
     ```"""
 
     __tablename__ = "live_unit_reward_lot_m"
-    live_unit_reward_lot_id = cast(int, sqlalchemy.Column(sqlalchemy.Integer, primary_key=True))
-    difficulty = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    condition_type = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    rank = cast(Union[int, None], sqlalchemy.Column(sqlalchemy.Integer, nullable=True))
-    live_unit_reward_group_id = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    weight = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
+    live_unit_reward_lot_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    difficulty: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    condition_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    rank: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column(nullable=True)
+    live_unit_reward_group_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    weight: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
 class CommonGoalReward:
-    live_goal_type = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    rank = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    add_type = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    item_id = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    item_category_id = cast(Union[int, None], sqlalchemy.Column(sqlalchemy.Integer, nullable=True))
-    amount = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    item_option = cast(Union[str, None], sqlalchemy.Column(common.String, nullable=True))
+    live_goal_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    rank: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    add_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    item_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    item_category_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column(nullable=True)
+    amount: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    item_option: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String, nullable=True)
 
 
 class LiveGoalRewardCommon(Base, CommonGoalReward):
@@ -238,9 +240,9 @@ class LiveGoalRewardCommon(Base, CommonGoalReward):
     ```"""
 
     __tablename__ = "live_goal_reward_common_m"
-    live_goal_reward_common_id = cast(int, sqlalchemy.Column(sqlalchemy.Integer, primary_key=True))
-    live_type = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    difficulty = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
+    live_goal_reward_common_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    live_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    difficulty: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
 class LiveGoalReward(Base, CommonGoalReward):
@@ -260,8 +262,8 @@ class LiveGoalReward(Base, CommonGoalReward):
     ```"""
 
     __tablename__ = "live_goal_reward_m"
-    live_goal_reward_id = cast(int, sqlalchemy.Column(sqlalchemy.Integer, primary_key=True))
-    live_difficulty_id = cast(int, sqlalchemy.Column(sqlalchemy.Integer, index=True))
+    live_goal_reward_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    live_difficulty_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
 
 
 class LiveNoteScoreFactor(Base):
@@ -275,9 +277,9 @@ class LiveNoteScoreFactor(Base):
     ```"""
 
     __tablename__ = "live_note_score_factor_m"
-    effect_id = cast(int, sqlalchemy.Column(sqlalchemy.Integer, primary_key=True))
-    difficulty = cast(int, sqlalchemy.Column(sqlalchemy.Integer, primary_key=True))
-    score_factor = cast(float, sqlalchemy.Column(common.Float, primary_key=True))
+    effect_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    difficulty: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    score_factor: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
 
 
 class LiveCutinBrightness(Base):
@@ -290,8 +292,8 @@ class LiveCutinBrightness(Base):
     ```"""
 
     __tablename__ = "live_cutin_brightness_m"
-    live_cutin_brightness_id = cast(int, sqlalchemy.Column(sqlalchemy.Integer, primary_key=True))
-    brightness = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
+    live_cutin_brightness_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    brightness: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
 class TrainingMode(Base):
@@ -305,9 +307,9 @@ class TrainingMode(Base):
     ```"""
 
     __tablename__ = "training_mode_m"
-    training_mode_id = cast(int, sqlalchemy.Column(sqlalchemy.Integer, primary_key=True))
-    recovery_cost = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
-    start_date = cast(str, sqlalchemy.Column(common.String, primary_key=True))
+    training_mode_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    recovery_cost: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    start_date: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String, primary_key=True)
 
 
 class LiveTime(Base):
@@ -320,11 +322,10 @@ class LiveTime(Base):
     ```"""
 
     __tablename__ = "live_time_m"
-    live_track_id = cast(
-        int,
-        sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("live_track_m.live_track_id"), primary_key=True),
+    live_track_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        sqlalchemy.ForeignKey("live_track_m.live_track_id"), primary_key=True
     )
-    live_time = cast(float, sqlalchemy.Column(common.Float))
+    live_time: sqlalchemy.orm.Mapped[float] = sqlalchemy.orm.mapped_column(common.Float)
 
 
 class LiveSkillIcon(Base, common.MaybeEncrypted):
@@ -340,18 +341,20 @@ class LiveSkillIcon(Base, common.MaybeEncrypted):
     ```"""
 
     __tablename__ = "live_skill_icon_m"
-    skill_effect_type = cast(int, sqlalchemy.Column(sqlalchemy.Integer, primary_key=True))
-    icon_asset = cast(str, sqlalchemy.Column(common.String))
-    icon_asset_en = cast(Union[str, None], sqlalchemy.Column(common.String, nullable=True))
-    icon_order = cast(int, sqlalchemy.Column(sqlalchemy.Integer))
+    skill_effect_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    icon_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
+    icon_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String, nullable=True)
+    icon_order: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-class LiveSession(sqlalchemy.orm.scoped_session[sqlalchemy.orm.Session]):
-    pass
-
-
-engine = sqlalchemy.create_engine("sqlite+pysqlite:///file:data/external/db/live/live.db_?mode=ro&uri=true")
+engine = None
 
 
 def get_session():
-    return cast(LiveSession, sqlalchemy.orm.scoped_session(sqlalchemy.orm.sessionmaker(bind=engine)))
+    global engine
+    if engine is None:
+        engine = sqlalchemy.create_engine(
+            f"sqlite+pysqlite:///file:{config.get_data_directory()}/db/live.db_?mode=ro&uri=true"
+        )
+    session = sqlalchemy.orm.scoped_session(sqlalchemy.orm.sessionmaker(bind=engine))
+    return session
