@@ -24,21 +24,21 @@ Before starting the server, you need 2 things:
 
 ### Generate private key.
 
+Note: An NPPS4-default private key is already provided. But first, copy `default_server_key.pem` to `server_key.pem` to use it.
+
+Extract the server public key using this command
+
 ```
-python make_server_key.py
+python make_server_key.py -p
 ```
 
 The public key, for your game client will be printed to stdout in PEM format.
 
+To replace the private key, simply remove `-p`.
+
 ### Get client game database.
 
-NPPS needs the client game data. **In the future this should be provided once the game service ended.**
-
-For time being, extract the game "install" assets (protip: `AppAssets.zip` in Android) to `data/install`. Afterwards:
-
-```
-python update_data.py
-```
+TODO:
 
 Database
 -----

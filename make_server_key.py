@@ -1,4 +1,5 @@
 import os
+import sys
 
 import Cryptodome.PublicKey.RSA
 
@@ -23,6 +24,8 @@ if os.path.exists("server_key.pem"):
     with open("server_key.pem", "r", encoding="UTF-8") as f:
         key = Cryptodome.PublicKey.RSA.import_key(f.read())
         print_public_key(key)
+    if "-p" in sys.argv:
+        raise SystemExit(0)
     if not ask_confirm("WARNING: server_key.pem already exist. Overwrite?"):
         print("Key not overwritten")
         raise SystemExit(0)
