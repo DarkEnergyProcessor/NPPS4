@@ -40,9 +40,13 @@ url = "sqlite+pysqlite:///data/main.sqlite3"
 # "internal" - Locally mirrored game data according to folder structure
 #              according to https://github.com/DarkEnergyProcessor/NPPS4-DLAPI
 #              generation 1.1.
+#              CURRENTLY NOT IMPLEMENTED!
 backend = "none"
 
 # Send patched server_info.json automatically?
+# This requires honky-py (installed as part of NPPS4 requirements) or
+# libhonoka. There's no reason to turn this off unless your download API
+# or archive already provides patched server_info.json.
 send_patched_server_info = true
 
 [download.none]
@@ -77,6 +81,8 @@ archive_root = "archive-root"
 # This is advanced configuration.
 # In most cases, you don't have to change anything.
 
+# Base XORPAD key.
+base_xorpad = "eit4Ahph4aiX4ohmephuobei6SooX9xo"
 # The server application key.
 application_key = "b6e6c940a93af2357ea3e0ace0b98afc"
 # Consumer key.

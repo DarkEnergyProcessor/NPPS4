@@ -42,6 +42,12 @@ python make_server_key.py -p
 
 #### Using your own private key
 
+> **Warning**: The private key **must** be 1024-bit RSA stored in PEM format!
+
+If you already have your existing private key, simply put them as `server_key.pem`.
+
+#### Generating your own private key
+
 To generate a new private key, run:
 
 ```
