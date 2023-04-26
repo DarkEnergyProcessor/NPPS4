@@ -2,7 +2,9 @@ alembic
 fastapi
 https://github.com/DarkEnergyProcessor/honky-py/releases/download/0.1.0/honkypy-0.1.0-py3-none-any.whl
 httpx
+itsdangerous
 pycryptodomex
+python-multipart
 sqlalchemy
 tomli; python_version<"3.11"
 uvicorn[standard]
