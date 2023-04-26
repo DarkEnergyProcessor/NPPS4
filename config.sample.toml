@@ -10,6 +10,11 @@ verify_xmc = true
 # Path is relative to the project root directory.
 data_directory = "data"
 
+# Secret key used for various things.
+# If this secret key is compromised, please change it!
+# Also you definitely must change this!
+secret_key = "Hello World"
+
 [database]
 # This is database-related configuration.
 # NPPS4 uses SQLAlchemy for its ORM mapper library.
