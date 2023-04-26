@@ -3,7 +3,10 @@ import dataclasses
 import pickle
 import random
 
+import Cryptodome.Cipher.PKCS1_v1_5
+import Cryptodome.Cipher.AES
 import Cryptodome.Hash.SHA1
+import Cryptodome.Util.Padding
 import Cryptodome.Signature.pkcs1_15
 import itsdangerous.serializer
 
@@ -28,10 +31,10 @@ def sif_version_string(version: tuple[int, int]):
     return "%d.%d" % version
 
 
-def sign_message(content: bytes, request_xmc: bytes | None):
+def sign_message(content: bytes, request_xmc_hex: str | None):
     sha1 = Cryptodome.Hash.SHA1.new(content)
-    if request_xmc is not None:
-        sha1.update(request_xmc)
+    if request_xmc_hex is not None:
+        sha1.update(request_xmc_hex.encode("UTF-8"))
     sign = Cryptodome.Signature.pkcs1_15.new(config.get_server_rsa())
     return str(base64.b64encode(sign.sign(sha1)), "UTF-8")
 
@@ -43,7 +46,7 @@ class TokenData:
     user_id: int
 
 
-TOKEN_SERIALIZER = itsdangerous.serializer.Serializer(config.get_secret_key())
+TOKEN_SERIALIZER = itsdangerous.serializer.Serializer(config.get_secret_key(), serializer=pickle)
 SALT_SIZE = 8
 
 
@@ -51,9 +54,8 @@ def encapsulate_token(server_key: bytes, client_key: bytes, user_id: int):
     global TOKEN_SERIALIZER, SALT_SIZE
 
     data = TokenData(client_key, server_key, user_id)
-    encoded_data = pickle.dumps(data)
     salt = randbytes(SALT_SIZE)
-    result: bytes = TOKEN_SERIALIZER.dumps(encoded_data, salt)
+    result: bytes = TOKEN_SERIALIZER.dumps(data, salt)  # type: ignore
     return str(base64.b64encode(salt + result), "UTF-8")
 
 
@@ -63,8 +65,18 @@ def decapsulate_token(token_data: str):
     token = base64.b64decode(token_data)
     salt, result = token[:SALT_SIZE], token[SALT_SIZE:]
     try:
-        encoded_data: bytes = TOKEN_SERIALIZER.loads(result, salt)
-        data: TokenData = pickle.loads(encoded_data)
+        data: TokenData = TOKEN_SERIALIZER.loads(result, salt)
         return data
     except itsdangerous.BadSignature:
         return None
+
+
+def decrypt_rsa(data: bytes):
+    pkcs = Cryptodome.Cipher.PKCS1_v1_5.new(config.get_server_rsa())
+    return pkcs.decrypt(data, None)
+
+
+def decrypt_aes(key: bytes, data: bytes):
+    aes = Cryptodome.Cipher.AES.new(key, Cryptodome.Cipher.AES.MODE_CBC, iv=data[:16])
+    data = aes.decrypt(data[16:])
+    return data[: -data[-1]]
