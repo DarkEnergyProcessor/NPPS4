@@ -10,6 +10,7 @@ import pydantic
 class LoginRequest(pydantic.BaseModel):
     login_key: str
     login_passwd: str
+    devtoken: str
 
 
 class LoginResponse(pydantic.BaseModel):
@@ -38,7 +39,7 @@ def login(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> LoginRes
     return LoginResponse(user_id=1)
 
 
-@idol.register("/login/authkey", check_version=False, batchable=False)
+@idol.register("/login/authkey", check_version=False, batchable=False, xmc_verify=idol.XMCVerifyMode.NONE)
 def authkey(context: idol.SchoolIdolParams, request: AuthkeyRequest) -> AuthkeyResponse:
     """Generate authentication key."""
     client_key = util.decrypt_rsa(base64.b64decode(request.dummy_token))

@@ -1,5 +1,7 @@
 import base64
 import dataclasses
+import hashlib
+import hmac
 import pickle
 import random
 
@@ -80,3 +82,14 @@ def decrypt_aes(key: bytes, data: bytes):
     aes = Cryptodome.Cipher.AES.new(key, Cryptodome.Cipher.AES.MODE_CBC, iv=data[:16])
     data = aes.decrypt(data[16:])
     return data[: -data[-1]]
+
+
+def xorbytes(a: bytes, b: bytes):
+    if len(a) != len(b):
+        raise ValueError("size does not match")
+    return bytes(c ^ d for c, d in zip(a, b))
+
+
+def hmac_sha1(message: bytes, key: bytes):
+    digest = hmac.new(key, message, digestmod=hashlib.sha1)
+    return digest.digest()

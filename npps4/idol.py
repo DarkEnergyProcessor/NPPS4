@@ -13,7 +13,7 @@ from .app import app_main
 from . import config
 from . import util
 
-from typing import Annotated, Callable, TypeVar, Generic
+from typing import Annotated, Callable, TypeVar, Generic, cast
 
 
 class Language(str, enum.Enum):
@@ -26,6 +26,13 @@ class PlatformType(enum.IntEnum):
     Android = 2
 
 
+class XMCVerifyMode(enum.IntEnum):
+    NONE = 0
+    SHARED = 1
+    # self.xor(self.xor_base[16:], application_key[:16]) + self.xor(self.xor_base[:16], application_key[16:])
+    CROSS = 2
+
+
 class SchoolIdolParams:
     def __init__(
         self,
@@ -34,6 +41,7 @@ class SchoolIdolParams:
         client_version: Annotated[str, fastapi.Header(alias="Client-Version")],
         lang: Annotated[Language, fastapi.Header(alias="LANG")],
         platform_type: Annotated[PlatformType, fastapi.Header(alias="Platform-Type")],
+        request_data: Annotated[bytes | None, fastapi.Form(exclude=True)],
     ):
         authorize_parsed = dict(urllib.parse.parse_qsl(authorize))
         if authorize_parsed.get("consumerKey") != "lovelive_test":
@@ -56,6 +64,7 @@ class SchoolIdolParams:
         self.lang: Language = lang
         self.platform: PlatformType = platform_type
         self.x_message_code = request.headers.get("X-Message-Code")
+        self.raw_request_data = request_data
 
 
 class SchoolIdolAuthParams(SchoolIdolParams):
@@ -66,19 +75,17 @@ class SchoolIdolAuthParams(SchoolIdolParams):
         client_version: Annotated[str, fastapi.Header(alias="Client-Version")],
         lang: Annotated[Language, fastapi.Header(alias="LANG")],
         platform_type: Annotated[PlatformType, fastapi.Header(alias="Platform-Type")],
+        request_data: Annotated[bytes | None, fastapi.Form(exclude=True)],
     ):
-        super().__init__(request, authorize, client_version, lang, platform_type)
-        self.token: util.TokenData | None = None
+        super().__init__(request, authorize, client_version, lang, platform_type, request_data)
+        token = None
         if self.token_text is not None:
-            self.token = util.decapsulate_token(self.token_text)
+            token = util.decapsulate_token(self.token_text)
 
-        if self.token is None:
+        if token is None:
             raise fastapi.HTTPException(422, detail="Invalid token")
 
-
-class ReleaseInfoData(pydantic.BaseModel):
-    id: int
-    key: str
+        self.token = token
 
 
 _S = TypeVar("_S", bound=pydantic.BaseModel)
@@ -86,7 +93,7 @@ _S = TypeVar("_S", bound=pydantic.BaseModel)
 
 class ResponseData(pydantic.generics.GenericModel, Generic[_S]):
     response_data: _S
-    release_info: list[ReleaseInfoData] = []
+    release_info: list[config.ReleaseInfoData] = []
     status_code: int = 200
 
 
@@ -109,13 +116,13 @@ def _get_request_data(model: type[pydantic.BaseModel]):
         request_data: Annotated[pydantic.Json[model], fastapi.Form()],
         xmc: Annotated[str, fastapi.Header(alias="X-Message-Code")],
     ):
-        # TODO: verify xmc
-        return request_data, xmc
+        return request_data
 
     return actual_getter
 
 
-def client_check(context: SchoolIdolParams, check_version: bool = True):
+def client_check(context: SchoolIdolParams, check_version: bool, xmc_verify: XMCVerifyMode):
+    # Maintenance check
     if config.is_maintenance():
         return fastapi.responses.JSONResponse(
             [],
@@ -124,6 +131,28 @@ def client_check(context: SchoolIdolParams, check_version: bool = True):
                 "Maintenance": "1",
             },
         )
+
+    # XMC check
+    if config.need_xmc_verify() and context.raw_request_data is not None and xmc_verify != XMCVerifyMode.NONE:
+        if context.x_message_code is None:
+            raise fastapi.HTTPException(422, "Invalid X-Message-Code")
+        if not isinstance(context, SchoolIdolAuthParams):
+            raise fastapi.HTTPException(422, "Invalid X-Message-Code (no token)")
+
+        if xmc_verify == XMCVerifyMode.SHARED:
+            hmac_key = util.xorbytes(context.token.client_key, context.token.server_key)
+        elif xmc_verify == XMCVerifyMode.CROSS:
+            base = config.get_base_xorpad()
+            appkey = config.get_application_key()
+            hmac_key = util.xorbytes(base[16:], appkey[:16]) + util.xorbytes(base[:16], appkey[16:])
+        else:
+            raise fastapi.HTTPException(500, "Invalid X-Message-Code verification mode")
+
+        xmc = util.hmac_sha1(context.raw_request_data, hmac_key)
+        if xmc.hex().upper() != context.x_message_code.upper():
+            raise fastapi.HTTPException(422, "X-Message-Code does not match")
+
+    # Client-Version check
     if check_version:
         if config.get_latest_version() != context.client_version:
             return fastapi.responses.JSONResponse([], 200)
@@ -147,7 +176,13 @@ API_ROUTER_MAP: dict[str, Endpoint] = {}
 RESPONSE_HEADERS = {"Server-Version": {"type": "string"}, "X-Message-Sign": {"type": "string"}}
 
 
-def register(endpoint: str, *, check_version: bool = True, batchable: bool = True):
+def register(
+    endpoint: str,
+    *,
+    check_version: bool = True,
+    batchable: bool = True,
+    xmc_verify: XMCVerifyMode = XMCVerifyMode.SHARED
+):
     def wrap0(f: Callable[[_T, _U], _V] | Callable[[_T], _V]):
         nonlocal endpoint, check_version, batchable
 
@@ -172,8 +207,8 @@ def register(endpoint: str, *, check_version: bool = True, batchable: bool = Tru
                 responses={200: {"headers": RESPONSE_HEADERS}},
             )
             def wrap1(context: Annotated[_T, fastapi.Depends(params[0])]):
-                nonlocal ret, check_version
-                check = client_check(context, check_version)
+                nonlocal ret, check_version, xmc_verify
+                check = client_check(context, check_version, xmc_verify)
                 if check is None:
                     result: _V = f(context)  # type: ignore
                     # TODO: Response headers
@@ -191,10 +226,10 @@ def register(endpoint: str, *, check_version: bool = True, batchable: bool = Tru
             )
             def wrap2(
                 context: Annotated[_T, fastapi.Depends(params[0])],
-                request: Annotated[tuple[_U, bytes], fastapi.Depends(_get_request_data(params[1]))],
+                request: Annotated[tuple[_U, bytes, bytes], fastapi.Depends(_get_request_data(params[1]))],
             ):
-                nonlocal ret, check_version
-                check = client_check(context, check_version)
+                nonlocal ret, check_version, xmc_verify
+                check = client_check(context, check_version, xmc_verify)
                 if check is None:
                     result: _V = f(context, request[0])  # type: ignore
                     # TODO: Response headers
