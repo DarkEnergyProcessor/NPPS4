@@ -1,9 +1,9 @@
 import base64
-import random
 
 from .. import idol
 from .. import util
 
+import fastapi
 import pydantic
 
 
@@ -17,7 +17,8 @@ class LoginResponse(pydantic.BaseModel):
 
 
 class AuthkeyRequest(pydantic.BaseModel):
-    pass
+    dummy_token: str
+    auth_data: str
 
 
 class AuthkeyResponse(pydantic.BaseModel):
@@ -32,18 +33,25 @@ def login(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> LoginRes
     print(context)
     print(context.client_version)
     print(context.lang)
-    print(context.token)
+    print(context.token_text)
     print(request.login_key, request.login_passwd)
     return LoginResponse(user_id=1)
 
 
 @idol.register("/login/authkey", check_version=False, batchable=False)
-def authkey(context: idol.SchoolIdolParams) -> AuthkeyResponse:
+def authkey(context: idol.SchoolIdolParams, request: AuthkeyRequest) -> AuthkeyResponse:
     """Generate authentication key."""
-    global SYSRAND
+    client_key = util.decrypt_rsa(base64.b64decode(request.dummy_token))
+    if client_key is None:
+        raise fastapi.HTTPException(400, "Bad client key")
+    auth_data = util.decrypt_aes(client_key[:16], base64.b64decode(request.auth_data))
+    server_key = util.randbytes(32)
+    token = util.encapsulate_token(server_key, client_key, 0)
+    print("My client key is", client_key)
+    print("And my auth_data is", auth_data)
     return AuthkeyResponse(
-        authorize_token=base64.b64encode(util.randbytes(16)).decode("UTF-8"),
-        dummy_token=base64.b64encode(util.randbytes(16)).decode("UTF-8"),
+        authorize_token=token,
+        dummy_token=str(base64.b64encode(server_key), "UTF-8"),
     )
 
 
