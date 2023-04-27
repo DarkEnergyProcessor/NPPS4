@@ -11,7 +11,7 @@ import pydantic.generics
 import sqlalchemy.orm
 
 from . import error
-from .. import app_main
+from .. import app
 from .. import config
 from .. import db
 from .. import util
@@ -252,14 +252,14 @@ def register(
 
         if len(params) == 1:
 
-            @app_main.post(
+            @app.main.post(
                 endpoint,
                 name=f.__name__,
                 description=f.__doc__,
                 response_model=ResponseData[ret],
                 responses={200: {"headers": RESPONSE_HEADERS}},
             )
-            @app_main.get(
+            @app.main.get(
                 endpoint,
                 name=f.__name__,
                 description=f.__doc__,
@@ -281,7 +281,7 @@ def register(
 
         else:
 
-            @app_main.post(
+            @app.main.post(
                 endpoint,
                 name=f.__name__,
                 description=f.__doc__,

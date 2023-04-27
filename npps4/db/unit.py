@@ -19,6 +19,7 @@ class UnitAttribute(Base):
     )
     ```"""
 
+    __tablename__ = "unit_attribute_m"
     attribute_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
     name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
     name_en: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String, nullable=True)
@@ -68,6 +69,7 @@ class UnitType(Base, common.MaybeEncrypted):
     )
     ```"""
 
+    __tablename__ = "unit_type_m"
     unit_type_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
     name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
     name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String, nullable=True)
@@ -96,7 +98,9 @@ engine = sqlalchemy.create_engine(
     f"sqlite+pysqlite:///file:{config.get_data_directory()}/db/unit.db_?mode=ro&uri=true",
     connect_args={"check_same_thread": False},
 )
-scoped_session = sqlalchemy.orm.scoped_session(sqlalchemy.orm.sessionmaker(bind=engine))
+sessionmaker = sqlalchemy.orm.sessionmaker()
+sessionmaker.configure(binds={Base: engine})
+scoped_session = sqlalchemy.orm.scoped_session(sessionmaker)
 
 
 def get_session():

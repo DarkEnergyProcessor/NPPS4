@@ -1,20 +1,31 @@
 import base64
 import hashlib
 import hmac
+import re
 
 import sqlalchemy
+import sqlalchemy.ext.declarative
 import sqlalchemy.orm
 
 from . import common
-from . import util
 from .. import config
+from .. import util
 from ..idol import system
 
 SALT_SIZE = 16
+SNAKECASE_RE1 = re.compile("(.)([A-Z][a-z]+)")
+SNAKECASE_RE2 = re.compile("__([A-Z])")
+SNAKECASE_RE3 = re.compile("([a-z0-9])([A-Z])")
 
 
 class Base(sqlalchemy.orm.DeclarativeBase):
-    pass
+    @sqlalchemy.orm.declared_attr.directive
+    def __tablename__(cls):
+        name = cls.__name__
+        name = re.sub(SNAKECASE_RE1, r"\1_\2", name)
+        name = re.sub(SNAKECASE_RE2, r"_\1", name)
+        name = re.sub(SNAKECASE_RE3, r"\1_\2", name)
+        return name.lower()
 
 
 class User(Base):
@@ -72,6 +83,8 @@ def get_session():
     global engine, scoped_session
     if engine is None or scoped_session is None:
         engine = sqlalchemy.create_engine(config.get_database_url(), connect_args={"check_same_thread": False})
-        scoped_session = sqlalchemy.orm.scoped_session(sqlalchemy.orm.sessionmaker(bind=engine))
+        sessionmaker = sqlalchemy.orm.sessionmaker()
+        sessionmaker.configure(binds={Base: engine})
+        scoped_session = sqlalchemy.orm.scoped_session(sessionmaker)
     session = scoped_session()
     return session

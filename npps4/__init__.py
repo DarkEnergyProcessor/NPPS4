@@ -2,7 +2,9 @@
 from . import setup
 
 from . import game
-from .app import app, main as app_main, webview as app_webview
+from . import app
 
-app.include_router(app_main)
-app.include_router(app_webview)
+app.core.include_router(app.main)
+app.core.include_router(app.webview)
+
+uvicorn_main = app.core

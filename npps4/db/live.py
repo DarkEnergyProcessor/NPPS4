@@ -350,7 +350,9 @@ engine = sqlalchemy.create_engine(
     f"sqlite+pysqlite:///file:{config.get_data_directory()}/db/live.db_?mode=ro&uri=true",
     connect_args={"check_same_thread": False},
 )
-scoped_session = sqlalchemy.orm.scoped_session(sqlalchemy.orm.sessionmaker(bind=engine))
+sessionmaker = sqlalchemy.orm.sessionmaker()
+sessionmaker.configure(binds={Base: engine})
+scoped_session = sqlalchemy.orm.scoped_session(sessionmaker)
 
 
 def get_session():
