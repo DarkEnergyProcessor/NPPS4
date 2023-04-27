@@ -91,3 +91,11 @@ PERFORM_XMC_VERIFY: bool = CONFIG_DATA["main"]["verify_xmc"]
 def need_xmc_verify():
     global PERFORM_XMC_VERIFY
     return PERFORM_XMC_VERIFY
+
+
+DATABASE_URL: str = CONFIG_DATA["database"]["url"]
+
+
+def get_database_url():
+    global DATABASE_URL
+    return DATABASE_URL
