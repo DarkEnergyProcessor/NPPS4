@@ -38,8 +38,15 @@ class XMCVerifyMode(enum.IntEnum):
 
 class Database:
     def __init__(self) -> None:
+        self._mainsession: sqlalchemy.orm.Session | None = None
         self._livesession: sqlalchemy.orm.Session | None = None
         self._unitsession: sqlalchemy.orm.Session | None = None
+
+    @property
+    def main(self):
+        if self._mainsession is None:
+            self._mainsession = db.main.get_session()
+        return self._mainsession
 
     @property
     def live(self):
@@ -152,11 +159,11 @@ _V = TypeVar("_V", bound=pydantic.BaseModel)
 
 @dataclasses.dataclass
 class Endpoint(Generic[_T, _U, _V]):
-    context_class: type[SchoolIdolParams | SchoolIdolAuthParams]
+    context_class: type[SchoolIdolParams | SchoolIdolAuthParams | SchoolIdolUserParams]
     request_class: type[pydantic.BaseModel] | None
-    function: Callable[[SchoolIdolParams | SchoolIdolAuthParams, pydantic.BaseModel], pydantic.BaseModel] | Callable[
-        [SchoolIdolParams | SchoolIdolAuthParams], pydantic.BaseModel
-    ]
+    function: Callable[
+        [SchoolIdolParams | SchoolIdolAuthParams | SchoolIdolUserParams, pydantic.BaseModel], pydantic.BaseModel
+    ] | Callable[[SchoolIdolParams | SchoolIdolAuthParams | SchoolIdolUserParams], pydantic.BaseModel]
 
 
 def _get_request_data(model: type[pydantic.BaseModel]):
