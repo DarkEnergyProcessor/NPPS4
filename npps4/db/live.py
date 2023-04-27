@@ -3,7 +3,7 @@ import sqlalchemy.ext.declarative
 import sqlalchemy.orm
 
 from . import common
-from ... import config
+from .. import config
 
 
 class Base(sqlalchemy.orm.DeclarativeBase):
@@ -347,14 +347,14 @@ class LiveSkillIcon(Base, common.MaybeEncrypted):
     icon_order: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-engine = None
+engine = sqlalchemy.create_engine(
+    f"sqlite+pysqlite:///file:{config.get_data_directory()}/db/live.db_?mode=ro&uri=true",
+    connect_args={"check_same_thread": False},
+)
+scoped_session = sqlalchemy.orm.scoped_session(sqlalchemy.orm.sessionmaker(bind=engine))
 
 
 def get_session():
-    global engine
-    if engine is None:
-        engine = sqlalchemy.create_engine(
-            f"sqlite+pysqlite:///file:{config.get_data_directory()}/db/live.db_?mode=ro&uri=true"
-        )
-    session = sqlalchemy.orm.scoped_session(sqlalchemy.orm.sessionmaker(bind=engine))
+    global scoped_session
+    session = scoped_session()
     return session

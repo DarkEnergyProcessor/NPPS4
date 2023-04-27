@@ -8,10 +8,13 @@ import urllib.parse
 import fastapi
 import pydantic
 import pydantic.generics
+import sqlalchemy.orm
 
-from .app import app_main
-from . import config
-from . import util
+from . import error
+from .. import app_main
+from .. import config
+from .. import db
+from .. import util
 
 from typing import Annotated, Callable, TypeVar, Generic, cast
 
@@ -31,6 +34,30 @@ class XMCVerifyMode(enum.IntEnum):
     SHARED = 1
     # self.xor(self.xor_base[16:], application_key[:16]) + self.xor(self.xor_base[:16], application_key[16:])
     CROSS = 2
+
+
+class Database:
+    def __init__(self) -> None:
+        self._livesession: sqlalchemy.orm.Session | None = None
+        self._unitsession: sqlalchemy.orm.Session | None = None
+
+    @property
+    def live(self):
+        if self._livesession is None:
+            self._livesession = db.live.get_session()
+        return self._livesession
+
+    @property
+    def unit(self):
+        if self._unitsession is None:
+            self._unitsession = db.unit.get_session()
+        return self._unitsession
+
+    def cleanup(self):
+        if self._livesession is not None:
+            self._livesession.close()
+        if self._unitsession is not None:
+            self._unitsession.close()
 
 
 class SchoolIdolParams:
@@ -65,6 +92,7 @@ class SchoolIdolParams:
         self.platform: PlatformType = platform_type
         self.x_message_code = request.headers.get("X-Message-Code")
         self.raw_request_data = request_data
+        self.db = Database()
 
 
 class SchoolIdolAuthParams(SchoolIdolParams):
@@ -83,9 +111,24 @@ class SchoolIdolAuthParams(SchoolIdolParams):
             token = util.decapsulate_token(self.token_text)
 
         if token is None:
-            raise fastapi.HTTPException(422, detail="Invalid token")
+            raise fastapi.HTTPException(403, detail="Invalid token")
 
         self.token = token
+
+
+class SchoolIdolUserParams(SchoolIdolAuthParams):
+    def __init__(
+        self,
+        request: fastapi.Request,
+        authorize: Annotated[str, fastapi.Header(alias="Authorize")],
+        client_version: Annotated[str, fastapi.Header(alias="Client-Version")],
+        lang: Annotated[Language, fastapi.Header(alias="LANG")],
+        platform_type: Annotated[PlatformType, fastapi.Header(alias="Platform-Type")],
+        request_data: Annotated[bytes | None, fastapi.Form(exclude=True)],
+    ):
+        super().__init__(request, authorize, client_version, lang, platform_type, request_data)
+        if self.token.user_id == 0:
+            raise fastapi.HTTPException(403, detail="Not logged in!")
 
 
 _S = TypeVar("_S", bound=pydantic.BaseModel)
@@ -95,6 +138,11 @@ class ResponseData(pydantic.generics.GenericModel, Generic[_S]):
     response_data: _S
     release_info: list[config.ReleaseInfoData] = []
     status_code: int = 200
+
+
+class ErrorResponse(pydantic.BaseModel):
+    error_code: int
+    detail: str | None
 
 
 _T = TypeVar("_T", bound=SchoolIdolParams)
@@ -159,9 +207,14 @@ def client_check(context: SchoolIdolParams, check_version: bool, xmc_verify: XMC
     return None
 
 
-def build_response(context: SchoolIdolParams, response: pydantic.BaseModel):
-    response_data = {"response_data": response.dict(), "release_info": [], "status_code": 200}  # TODO
+def build_response(context: SchoolIdolParams, response: pydantic.BaseModel, status_code: int = 200):
+    response_data = {
+        "response_data": response.dict(),
+        "release_info": config.get_release_info_keys(),
+        "status_code": status_code,
+    }
     jsondata = json.dumps(response_data).encode("UTF-8")
+    context.db.cleanup()
     return fastapi.responses.Response(
         jsondata,
         media_type="application/json",
@@ -210,9 +263,13 @@ def register(
                 nonlocal ret, check_version, xmc_verify
                 check = client_check(context, check_version, xmc_verify)
                 if check is None:
-                    result: _V = f(context)  # type: ignore
-                    # TODO: Response headers
-                    return build_response(context, result)
+                    try:
+                        result: _V = f(context)  # type: ignore
+                        return build_response(context, result)
+                    except error.IdolError as e:
+                        return build_response(
+                            context, ErrorResponse(error_code=e.error_code, detail=e.detail), e.status_code
+                        )
                 return check
 
         else:

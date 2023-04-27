@@ -80,6 +80,11 @@ def get_release_info_keys() -> list[ReleaseInfoData]:
     return []
 
 
+def get_release_info_key_by_id(id: int) -> bytes | None:
+    # TODO
+    return None
+
+
 PERFORM_XMC_VERIFY: bool = CONFIG_DATA["main"]["verify_xmc"]
 
 

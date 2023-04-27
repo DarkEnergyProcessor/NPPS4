@@ -3,8 +3,7 @@ import sqlalchemy.ext.declarative
 import sqlalchemy.orm
 
 from . import common
-
-from typing import Optional
+from .. import config
 
 
 class Base(sqlalchemy.orm.DeclarativeBase):
@@ -92,3 +91,16 @@ class UnitType(Base, common.MaybeEncrypted):
     album_series_name_image_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(
         common.String, nullable=True
     )
+
+
+engine = sqlalchemy.create_engine(
+    f"sqlite+pysqlite:///file:{config.get_data_directory()}/db/unit.db_?mode=ro&uri=true",
+    connect_args={"check_same_thread": False},
+)
+scoped_session = sqlalchemy.orm.scoped_session(sqlalchemy.orm.sessionmaker(bind=engine))
+
+
+def get_session():
+    global scoped_session
+    session = scoped_session()
+    return session
