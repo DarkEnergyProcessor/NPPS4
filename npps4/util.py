@@ -4,6 +4,7 @@ import hashlib
 import hmac
 import pickle
 import random
+import time as timelib
 
 import Cryptodome.Cipher.PKCS1_v1_5
 import Cryptodome.Cipher.AES
@@ -93,3 +94,7 @@ def xorbytes(a: bytes, b: bytes):
 def hmac_sha1(message: bytes, key: bytes):
     digest = hmac.new(key, message, digestmod=hashlib.sha1)
     return digest.digest()
+
+
+def time():
+    return int(timelib.time())

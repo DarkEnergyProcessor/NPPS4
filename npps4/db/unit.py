@@ -1,5 +1,4 @@
 import sqlalchemy
-import sqlalchemy.ext.declarative
 import sqlalchemy.orm
 
 from . import common
