@@ -10,6 +10,8 @@ import Cryptodome.PublicKey.RSA
 import pydantic
 
 ROOT_DIR = os.path.normpath(os.path.dirname(__file__) + "/..")
+os.makedirs(os.path.join(ROOT_DIR, "data"), exist_ok=True)
+
 
 try:
     with open(os.path.normpath(os.path.join(ROOT_DIR, "config.toml")), "rb") as f:
