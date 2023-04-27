@@ -1,3 +1,6 @@
+# Must be loaded first!
+from . import setup
+
 from . import game
 from .app import app, main as app_main, webview as app_webview
 
