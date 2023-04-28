@@ -105,10 +105,14 @@ class SchoolIdolParams:
         except ValueError:
             self.timestamp = ts
 
+        # Note: Due to how FastAPI works, the `request_data` form is retrieved TWICE!
+        # One in here, retrieved as raw bytes, and the other one is in _get_request_data
+        # as Pydantic model.
+        # This is necessary for proper X-Message-Code verification!
+        self.raw_request_data = request_data
         self.lang: Language = lang
         self.platform: PlatformType = platform_type
         self.x_message_code = request.headers.get("X-Message-Code")
-        self.raw_request_data = request_data
         self.db = Database()
 
 
@@ -305,13 +309,13 @@ def register(
             )
             def wrap2(
                 context: Annotated[_T, fastapi.Depends(params[0])],
-                request: Annotated[tuple[_U, bytes, bytes], fastapi.Depends(_get_request_data(params[1]))],
+                request: Annotated[_U, fastapi.Depends(_get_request_data(params[1]))],
             ):
                 nonlocal ret, check_version, xmc_verify
                 check = client_check(context, check_version, xmc_verify)
                 if check is None:
                     try:
-                        result: _V = f(context, request[0])  # type: ignore
+                        result: _V = f(context, request)  # type: ignore
                         context.db.commit()
                         return build_response(context, result)
                     except error.IdolError as e:
