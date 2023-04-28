@@ -1,12 +1,8 @@
-import base64
-import time
-
 from .. import idol
 from .. import util
 from ..idol import user
 from ..idol import error
 
-import fastapi
 import pydantic
 
 
@@ -85,5 +81,5 @@ def userinfo(context: idol.SchoolIdolUserParams) -> UserInfoResponse:
             update_date=util.timestamp_to_datetime(u.update_date),
             tutorial_state=u.tutorial_state,
         ),
-        server_timestamp=int(time.time()),
+        server_timestamp=util.time(),
     )
