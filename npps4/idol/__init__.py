@@ -228,9 +228,17 @@ def client_check(context: SchoolIdolParams, check_version: bool, xmc_verify: XMC
     return None
 
 
-def build_response(context: SchoolIdolParams, response: pydantic.BaseModel, status_code: int = 200):
+def build_response(context: SchoolIdolParams, response: pydantic.BaseModel | error.IdolError):
+    if isinstance(response, error.IdolError):
+        response_data_dict = {"error_code": response.error_code, "detail": response.detail}
+        status_code = response.status_code
+        http_code = response.http_code
+    else:
+        response_data_dict = response.dict()
+        status_code = http_code = 200
+
     response_data = {
-        "response_data": response.dict(),
+        "response_data": response_data_dict,
         "release_info": config.get_release_info_keys(),
         "status_code": status_code,
     }
@@ -238,16 +246,22 @@ def build_response(context: SchoolIdolParams, response: pydantic.BaseModel, stat
     context.db.cleanup()
     return fastapi.responses.Response(
         jsondata,
-        media_type="application/json",
-        headers={
+        http_code,
+        {
             "Server-Version": util.sif_version_string(config.get_latest_version()),
             "X-Message-Sign": util.sign_message(jsondata, context.x_message_code),
+            "status_code": str(status_code),
         },
+        "application/json",
     )
 
 
 API_ROUTER_MAP: dict[str, Endpoint] = {}
-RESPONSE_HEADERS = {"Server-Version": {"type": "string"}, "X-Message-Sign": {"type": "string"}}
+RESPONSE_HEADERS = {
+    "Server-Version": {"type": "string"},
+    "X-Message-Sign": {"type": "string"},
+    "status_code": {"type": "string"},
+}
 
 
 def register(
@@ -290,9 +304,7 @@ def register(
                         return build_response(context, result)
                     except error.IdolError as e:
                         context.db.rollback()
-                        return build_response(
-                            context, ErrorResponse(error_code=e.error_code, detail=e.detail), e.status_code
-                        )
+                        return build_response(context, e)
                     except Exception:
                         context.db.rollback()
                         raise
@@ -320,9 +332,7 @@ def register(
                         return build_response(context, result)
                     except error.IdolError as e:
                         context.db.rollback()
-                        return build_response(
-                            context, ErrorResponse(error_code=e.error_code, detail=e.detail), e.status_code
-                        )
+                        return build_response(context, e)
                     except Exception:
                         context.db.rollback()
                         raise
