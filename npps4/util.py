@@ -2,6 +2,7 @@ import base64
 import dataclasses
 import hashlib
 import hmac
+import logging
 import pickle
 import random
 import time as timelib
@@ -14,8 +15,6 @@ import Cryptodome.Signature.pkcs1_15
 import itsdangerous.serializer
 
 from . import config
-
-from typing import Literal
 
 SYSRAND = random.SystemRandom()
 
@@ -98,3 +97,10 @@ def hmac_sha1(message: bytes, key: bytes):
 
 def time():
     return int(timelib.time())
+
+
+NPPS4_LOGGER = logging.getLogger("npps4")
+
+
+def log(*args: object, severity: int = logging.DEBUG, e: Exception | None = None):
+    NPPS4_LOGGER.log(severity, " ".join(map(str, args)), exc_info=e)
