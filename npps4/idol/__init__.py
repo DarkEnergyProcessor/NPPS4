@@ -3,6 +3,7 @@ import dataclasses
 import json
 import time
 import typing
+import types
 import urllib.parse
 
 import fastapi
@@ -16,7 +17,7 @@ from .. import config
 from .. import db
 from .. import util
 
-from typing import Annotated, Callable, TypeVar, Generic, cast
+from typing import Annotated, Callable, TypeVar, Generic
 
 
 class Language(str, enum.Enum):
@@ -164,7 +165,7 @@ class SchoolIdolUserParams(SchoolIdolAuthParams):
             raise fastapi.HTTPException(403, detail="Not logged in!")
 
 
-_S = TypeVar("_S", bound=pydantic.BaseModel)
+_S = TypeVar("_S", bound=pydantic.BaseModel | list[pydantic.BaseModel])
 
 
 class ResponseData(pydantic.generics.GenericModel, Generic[_S]):
@@ -180,16 +181,20 @@ class ErrorResponse(pydantic.BaseModel):
 
 _T = TypeVar("_T", bound=SchoolIdolParams)
 _U = TypeVar("_U", bound=pydantic.BaseModel)
-_V = TypeVar("_V", bound=pydantic.BaseModel)
+_V = TypeVar("_V", bound=pydantic.BaseModel, covariant=True)
 
 
 @dataclasses.dataclass
 class Endpoint(Generic[_T, _U, _V]):
     context_class: type[SchoolIdolParams | SchoolIdolAuthParams | SchoolIdolUserParams]
     request_class: type[pydantic.BaseModel] | None
+    is_request_list: bool
     function: Callable[
-        [SchoolIdolParams | SchoolIdolAuthParams | SchoolIdolUserParams, pydantic.BaseModel], pydantic.BaseModel
-    ] | Callable[[SchoolIdolParams | SchoolIdolAuthParams | SchoolIdolUserParams], pydantic.BaseModel]
+        [SchoolIdolParams | SchoolIdolAuthParams | SchoolIdolUserParams, pydantic.BaseModel | list[pydantic.BaseModel]],
+        pydantic.BaseModel | list[pydantic.BaseModel],
+    ] | Callable[
+        [SchoolIdolParams | SchoolIdolAuthParams | SchoolIdolUserParams], pydantic.BaseModel | list[pydantic.BaseModel]
+    ]
 
 
 def _get_request_data(model: type[pydantic.BaseModel]):
@@ -240,18 +245,34 @@ def client_check(context: SchoolIdolParams, check_version: bool, xmc_verify: XMC
     return None
 
 
-def build_response(context: SchoolIdolParams, response: pydantic.BaseModel | error.IdolError | None):
+_PossibleResponse = pydantic.BaseModel | list[pydantic.BaseModel] | error.IdolError | Exception | None
+
+
+def assemble_response_data(response: _PossibleResponse):
     if isinstance(response, error.IdolError):
-        response_data_dict = {"error_code": response.error_code, "detail": response.detail}
+        response_data = {"error_code": response.error_code, "detail": response.detail}
         status_code = response.status_code
         http_code = response.http_code
+    elif isinstance(response, Exception):
+        response_data = {
+            "error_code": error.ERROR_CODE_LIB_ERROR,
+            "detail": f"{type(response).__name__}: {str(response)}",
+        }
+        status_code = http_code = 500
     elif response is None:
-        response_data_dict = []
+        response_data = []
+        status_code = http_code = 200
+    elif isinstance(response, list):
+        response_data = [r.dict() for r in response]
         status_code = http_code = 200
     else:
-        response_data_dict = response.dict()
+        response_data = response.dict()
         status_code = http_code = 200
+    return response_data, status_code, http_code
 
+
+def build_response(context: SchoolIdolParams, response: _PossibleResponse):
+    response_data_dict, status_code, http_code = assemble_response_data(response)
     response_data = {
         "response_data": response_data_dict,
         "release_info": config.get_release_info_keys(),
@@ -271,6 +292,13 @@ def build_response(context: SchoolIdolParams, response: pydantic.BaseModel | err
     )
 
 
+def _get_real_param(param: type[_S]):
+    if isinstance(param, types.GenericAlias) and param.__origin__ is list:
+        return typing.get_args(param)[0], True
+    else:
+        return param, False
+
+
 API_ROUTER_MAP: dict[str, Endpoint] = {}
 RESPONSE_HEADERS = {
     "Server-Version": {"type": "string"},
@@ -279,19 +307,32 @@ RESPONSE_HEADERS = {
 }
 
 
+_PossibleEndpointFunction = (
+    Callable[[_T, _U], _V]  # Request is pydantic, response is pydantic
+    | Callable[[_T, list[_U]], _V]  # Request is list of pydantics, response is pydantic
+    | Callable[[_T, _U], list[_V]]  # Request is pydantic, response is list of pydantics
+    | Callable[[_T, list[_U]], list[_V]]  # Request is list of pydantics, response is list of pydantics
+    | Callable[[_T], _V]  # Request is none, response is pydantic
+    | Callable[[_T], list[_V]]  # Request is none, response is list of pydantics
+)
+
+
 def register(
     endpoint: str,
     *,
     check_version: bool = True,
     batchable: bool = True,
-    xmc_verify: XMCVerifyMode = XMCVerifyMode.SHARED
+    xmc_verify: XMCVerifyMode = XMCVerifyMode.SHARED,
 ):
-    def wrap0(f: Callable[[_T, _U], _V] | Callable[[_T], _V]):
+    def wrap0(f: _PossibleEndpointFunction[_T, _U, _V]):
         nonlocal endpoint, check_version, batchable
 
         signature = typing.get_type_hints(f)
         params: list[type] = list(map(lambda x: x[1], filter(lambda x: x[0] != "return", signature.items())))
         ret: type[_V | pydantic.BaseModel] = signature.get("return", pydantic.BaseModel)
+
+        if ret is pydantic.BaseModel:
+            util.log("Possible undefined return type for endpoint:", endpoint, severity=util.logging.WARNING)
 
         if len(params) == 1:
 
@@ -358,7 +399,73 @@ def register(
                 module_action = endpoint[1:]
             else:
                 module_action = endpoint
-            API_ROUTER_MAP[module_action] = Endpoint(params[0], params[1] if len(params) > 1 else None, f)  # type: ignore
+
+            if len(params) > 1:
+                real_request, is_request_list = _get_real_param(params[1])
+            else:
+                real_request, is_request_list = None, False
+            API_ROUTER_MAP[module_action] = Endpoint(
+                context_class=params[0],
+                request_class=real_request,  # type: ignore
+                is_request_list=is_request_list,
+                function=f,  # type: ignore
+            )
         return f
 
     return wrap0
+
+
+class BatchRequest(pydantic.BaseModel):
+    module: str
+    action: str
+
+
+class BatchResponse(pydantic.BaseModel):
+    result: dict | list
+    status: int
+    commandNum: bool = False
+    timeStamp: int
+
+
+@app.main.post("/api", response_model=ResponseData[list[BatchResponse]])  # type: ignore
+def api_endpoint(
+    context: Annotated[SchoolIdolUserParams, fastapi.Depends(SchoolIdolUserParams)],
+    request: Annotated[list[BatchRequest], fastapi.Depends(_get_request_data(list[BatchRequest]))],  # type: ignore
+    raw_request_data: Annotated[list[dict[str, object]], fastapi.Form(alias="request_data", exclude=True)],
+):
+    response = client_check(context, True, XMCVerifyMode.SHARED)
+
+    if response is None:
+        response_data: list[BatchResponse] = []
+
+        for request_data in raw_request_data:
+            module, action = request_data["module"], request_data["action"]
+
+            try:
+                # Find endpoint
+                endpoint = API_ROUTER_MAP.get(f"{module}/{action}")
+                if endpoint is None:
+                    raise error.IdolError(error.ERROR_CODE_LIB_ERROR, 404, http_code=404)
+
+                # *Sigh* have to reinvent the wheel.
+                if endpoint.request_class is not None:
+                    if endpoint.is_request_list:
+                        pydantic_request = list(map(endpoint.request_class.parse_obj, request_data))
+                    else:
+                        pydantic_request = endpoint.request_class.parse_obj(request_data)
+                    result = endpoint.function(context, pydantic_request)  # type: ignore
+                else:
+                    result = endpoint.function(context)  # type: ignore
+
+                context.db.commit()
+                current_response, status_code, http_code = assemble_response_data(result)
+            except Exception as e:
+                context.db.rollback()
+                if not isinstance(e, error.IdolError):
+                    util.log(f'Error processing "{module}/{action}"', severity=util.logging.ERROR, e=e)
+                current_response, status_code, http_code = assemble_response_data(e)
+
+            response_data.append(BatchResponse(result=current_response, status=status_code, timeStamp=util.time()))
+
+        response = build_response(context, response_data)  # type: ignore
+    return response
