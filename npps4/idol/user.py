@@ -2,6 +2,14 @@ from .. import db
 from .. import idol
 from ..idol import system
 
+from typing import overload
+
+
+def get(context: idol.SchoolIdolParams, id: int | None = None):
+    if isinstance(context, idol.SchoolIdolUserParams):
+        id = context.token.user_id
+    return context.db.main.get(db.main.User, id)
+
 
 def create(context: idol.SchoolIdolParams, key: str, passwd: str):
     user = db.main.User(key=key)

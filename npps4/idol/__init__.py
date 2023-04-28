@@ -78,6 +78,8 @@ class Database:
 
 
 class SchoolIdolParams:
+    """Context object used for unauthenticated request."""
+
     def __init__(
         self,
         request: fastapi.Request,
@@ -117,6 +119,11 @@ class SchoolIdolParams:
 
 
 class SchoolIdolAuthParams(SchoolIdolParams):
+    """Context object used for initially authenticated request.
+
+    Initially authenticated means there's no user associated with it.
+    """
+
     def __init__(
         self,
         request: fastapi.Request,
@@ -138,6 +145,11 @@ class SchoolIdolAuthParams(SchoolIdolParams):
 
 
 class SchoolIdolUserParams(SchoolIdolAuthParams):
+    """Context object used for fully authenticated request.
+
+    Fully authenticated means there's user associated with it.
+    """
+
     def __init__(
         self,
         request: fastapi.Request,
