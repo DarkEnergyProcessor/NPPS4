@@ -65,6 +65,16 @@ class Database:
             self._livesession.close()
         if self._unitsession is not None:
             self._unitsession.close()
+        if self._mainsession is not None:
+            self._mainsession.close()
+
+    def commit(self):
+        if self._mainsession is not None:
+            self._mainsession.commit()
+
+    def rollback(self):
+        if self._mainsession is not None:
+            self._mainsession.rollback()
 
 
 class SchoolIdolParams:
@@ -272,11 +282,16 @@ def register(
                 if check is None:
                     try:
                         result: _V = f(context)  # type: ignore
+                        context.db.commit()
                         return build_response(context, result)
                     except error.IdolError as e:
+                        context.db.rollback()
                         return build_response(
                             context, ErrorResponse(error_code=e.error_code, detail=e.detail), e.status_code
                         )
+                    except Exception:
+                        context.db.rollback()
+                        raise
                 return check
 
         else:
@@ -295,9 +310,18 @@ def register(
                 nonlocal ret, check_version, xmc_verify
                 check = client_check(context, check_version, xmc_verify)
                 if check is None:
-                    result: _V = f(context, request[0])  # type: ignore
-                    # TODO: Response headers
-                    return build_response(context, result)
+                    try:
+                        result: _V = f(context, request[0])  # type: ignore
+                        context.db.commit()
+                        return build_response(context, result)
+                    except error.IdolError as e:
+                        context.db.rollback()
+                        return build_response(
+                            context, ErrorResponse(error_code=e.error_code, detail=e.detail), e.status_code
+                        )
+                    except Exception:
+                        context.db.rollback()
+                        raise
                 return check
 
         if batchable:
