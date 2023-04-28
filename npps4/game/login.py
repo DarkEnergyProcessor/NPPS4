@@ -42,15 +42,15 @@ class StartupResponse(pydantic.BaseModel):
 @idol.register("/login/login", check_version=False, batchable=False)
 def login(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> LoginResponse:
     """Login user"""
-    client_key = context.token.client_key
-    key = util.decrypt_aes(client_key[:16], base64.b64decode(request.login_key))
-    passwd = util.decrypt_aes(client_key[:16], base64.b64decode(request.login_passwd))
-    print("Hello my key is", key)
+    key = util.xorbytes(context.token.client_key[:16], context.token.server_key[:16])
+    loginkey = util.decrypt_aes(key, base64.b64decode(request.login_key))
+    passwd = util.decrypt_aes(key, base64.b64decode(request.login_passwd))
+    print("Hello my key is", loginkey)
     print("And my passwd is", passwd)
     # Find user
-    u = user.find_by_key(context, str(key, "UTF-8"))
+    u = user.find_by_key(context, str(loginkey, "UTF-8"))
     if u is None or (not u.check_passwd(str(passwd, "UTF-8"))):
-        raise error.IdolError()
+        raise error.IdolError(error_code=407, status_code=600, detail="Login not found")
     # Login
     token = util.encapsulate_token(context.token.server_key, context.token.client_key, u.id)
     return LoginResponse(authorize_token=token, user_id=u.id, server_timestamp=util.time())
@@ -76,11 +76,10 @@ def authkey(context: idol.SchoolIdolParams, request: AuthkeyRequest) -> AuthkeyR
 @idol.register("/login/startUp", check_version=False, batchable=False)
 def startup(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> StartupResponse:
     """Register new account."""
-    client_key = context.token.client_key
-    key = util.decrypt_aes(client_key[:16], base64.b64decode(request.login_key))
-    passwd = util.decrypt_aes(client_key[:16], base64.b64decode(request.login_passwd))
-    print("Hello my key is", key)
+    key = util.xorbytes(context.token.client_key[:16], context.token.server_key[:16])
+    loginkey = util.decrypt_aes(key, base64.b64decode(request.login_key))
+    passwd = util.decrypt_aes(key, base64.b64decode(request.login_passwd))
+    print("Hello my key is", loginkey)
     print("And my passwd is", passwd)
-    with context.db.main:
-        u = user.create(context, str(key, "UTF-8"), str(passwd, "UTF-8"))
+    u = user.create(context, str(loginkey, "UTF-8"), str(passwd, "UTF-8"))
     return StartupResponse(user_id=str(u.id))

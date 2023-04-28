@@ -215,7 +215,10 @@ ERROR_CODE_DELETED_USER = 25002
 
 
 class IdolError(Exception):
-    def __init__(self, error_code: int = 200, status_code: int = 720, detail: str | None = None) -> None:
+    def __init__(
+        self, error_code: int = 200, status_code: int = 720, detail: str | None = None, *, http_code: int = 200
+    ) -> None:
         self.error_code = error_code
         self.status_code = status_code
         self.detail = detail
+        self.http_code = http_code
