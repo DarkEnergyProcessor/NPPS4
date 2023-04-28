@@ -236,15 +236,18 @@ def client_check(context: SchoolIdolParams, check_version: bool, xmc_verify: XMC
     # Client-Version check
     if check_version:
         if config.get_latest_version() != context.client_version:
-            return fastapi.responses.JSONResponse([], 200)
+            return build_response(context, None)
     return None
 
 
-def build_response(context: SchoolIdolParams, response: pydantic.BaseModel | error.IdolError):
+def build_response(context: SchoolIdolParams, response: pydantic.BaseModel | error.IdolError | None):
     if isinstance(response, error.IdolError):
         response_data_dict = {"error_code": response.error_code, "detail": response.detail}
         status_code = response.status_code
         http_code = response.http_code
+    elif response is None:
+        response_data_dict = []
+        status_code = http_code = 200
     else:
         response_data_dict = response.dict()
         status_code = http_code = 200
@@ -308,19 +311,19 @@ def register(
             )
             def wrap1(context: Annotated[_T, fastapi.Depends(params[0])]):
                 nonlocal ret, check_version, xmc_verify
-                check = client_check(context, check_version, xmc_verify)
-                if check is None:
+                response = client_check(context, check_version, xmc_verify)
+                if response is None:
                     try:
                         result: _V = f(context)  # type: ignore
                         context.db.commit()
-                        return build_response(context, result)
+                        response = build_response(context, result)
                     except error.IdolError as e:
                         context.db.rollback()
-                        return build_response(context, e)
+                        response = build_response(context, e)
                     except Exception:
                         context.db.rollback()
                         raise
-                return check
+                return response
 
         else:
 
@@ -336,19 +339,19 @@ def register(
                 request: Annotated[_U, fastapi.Depends(_get_request_data(params[1]))],
             ):
                 nonlocal ret, check_version, xmc_verify
-                check = client_check(context, check_version, xmc_verify)
-                if check is None:
+                response = client_check(context, check_version, xmc_verify)
+                if response is None:
                     try:
                         result: _V = f(context, request)  # type: ignore
                         context.db.commit()
-                        return build_response(context, result)
+                        response = build_response(context, result)
                     except error.IdolError as e:
                         context.db.rollback()
-                        return build_response(context, e)
+                        response = build_response(context, e)
                     except Exception:
                         context.db.rollback()
                         raise
-                return check
+                return response
 
         if batchable:
             if endpoint[0] == "/":
