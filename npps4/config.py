@@ -101,3 +101,11 @@ DATABASE_URL: str = CONFIG_DATA["database"]["url"]
 def get_database_url():
     global DATABASE_URL
     return DATABASE_URL
+
+
+CONSUMER_KEY: str = CONFIG_DATA["advanced"]["consumer_key"]
+
+
+def get_consumer_key():
+    global CONSUMER_KEY
+    return CONSUMER_KEY
