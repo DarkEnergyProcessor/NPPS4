@@ -85,6 +85,8 @@ def server_info(
         raise fastapi.HTTPException(422, detail="Unknown platform type")
 
     ver: str = util.sif_version_string(version)
+    end_point = make_endpoint(app.main.prefix, scheme, request)
+    end_point = end_point[end_point.index("/", 8) :]
     server_info = copy.deepcopy(SERVERINFO_TEMPLATE)
     server_info["domain"] = f"{scheme}://{request.url.netloc}"
     # TODO: Use request.url_for for these
@@ -93,7 +95,7 @@ def server_info(
     server_info["login_news_uri"] = make_endpoint(app.webview.prefix, scheme, request, "/announce/index")
     server_info["locked_user_uri"] = make_endpoint(app.webview.prefix, scheme, request, "/static/index?id=13")
     server_info["server_version"] = ver
-    server_info["end_point"] = make_endpoint(app.main.prefix, scheme, request)
+    server_info["end_point"] = end_point
     server_info["consumer_key"] = config.get_consumer_key()
     server_info["application_key"] = str(config.get_application_key(), "UTF-8")
     server_info["api_uri"] = dict(
@@ -108,6 +110,7 @@ def server_info(
             f.write(dctx.emit_header())
             f.write(dctx.decrypt_block(jsondata))
 
+    print(jsondata)
     return fastapi.responses.Response(
         result.getvalue(),
         200,
