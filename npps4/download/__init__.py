@@ -1,10 +1,12 @@
+import fastapi
+
 from . import none as none_backend
 from . import n4dlapi as n4dlapi_backend
 from . import internal as internal_backend
 
 from . import dltype
 from .. import config
-from .. import idol
+from .. import idoltype
 
 from typing import Protocol
 
@@ -24,25 +26,25 @@ class _DLBackend(Protocol):
 
     @staticmethod
     def get_update_files(
-        context: idol.SchoolIdolParams, platform: idol.PlatformType, from_client_version: tuple[int, int]
+        request: fastapi.Request, platform: idoltype.PlatformType, from_client_version: tuple[int, int]
     ) -> list[dltype.UpdateInfo]:
         ...
 
     @staticmethod
     def get_batch_files(
-        context: idol.SchoolIdolParams, platform: idol.PlatformType, package_type: int, exclude: list[int]
+        request: fastapi.Request, platform: idoltype.PlatformType, package_type: int, exclude: list[int]
     ) -> list[dltype.BatchInfo]:
         ...
 
     @staticmethod
     def get_single_package(
-        context: idol.SchoolIdolParams, platform: idol.PlatformType, package_type: int, package_id: int
-    ) -> list[dltype.BaseInfo]:
+        request: fastapi.Request, platform: idoltype.PlatformType, package_type: int, package_id: int
+    ) -> list[dltype.BaseInfo] | None:
         ...
 
     @staticmethod
     def get_raw_files(
-        context: idol.SchoolIdolParams, platform: idol.PlatformType, files: list[str]
+        request: fastapi.Request, platform: idoltype.PlatformType, files: list[str]
     ) -> list[dltype.BaseInfo]:
         ...
 
@@ -69,24 +71,24 @@ def get_db_path(name: str):
     return CURRENT_BACKEND.get_db_path(name)
 
 
-def get_update_files(context: idol.SchoolIdolParams, platform: idol.PlatformType, from_client_version: tuple[int, int]):
+def get_update_files(request: fastapi.Request, platform: idoltype.PlatformType, from_client_version: tuple[int, int]):
     global CURRENT_BACKEND
-    return CURRENT_BACKEND.get_update_files(context, platform, from_client_version)
+    return CURRENT_BACKEND.get_update_files(request, platform, from_client_version)
 
 
-def get_batch_files(context: idol.SchoolIdolParams, platform: idol.PlatformType, package_type: int, exclude: list[int]):
+def get_batch_files(request: fastapi.Request, platform: idoltype.PlatformType, package_type: int, exclude: list[int]):
     global CURRENT_BACKEND
-    return CURRENT_BACKEND.get_batch_files(context, platform, package_type, exclude)
+    return CURRENT_BACKEND.get_batch_files(request, platform, package_type, exclude)
 
 
-def get_single_package(context: idol.SchoolIdolParams, platform: idol.PlatformType, package_type: int, package_id: int):
+def get_single_package(request: fastapi.Request, platform: idoltype.PlatformType, package_type: int, package_id: int):
     global CURRENT_BACKEND
-    return CURRENT_BACKEND.get_single_package(context, platform, package_type, package_id)
+    return CURRENT_BACKEND.get_single_package(request, platform, package_type, package_id)
 
 
-def get_raw_files(context: idol.SchoolIdolParams, platform: idol.PlatformType, files: list[str]):
+def get_raw_files(request: fastapi.Request, platform: idoltype.PlatformType, files: list[str]):
     global CURRENT_BACKEND
-    return CURRENT_BACKEND.get_raw_files(context, platform, files)
+    return CURRENT_BACKEND.get_raw_files(request, platform, files)
 
 
 def get_formatted_release_keys():

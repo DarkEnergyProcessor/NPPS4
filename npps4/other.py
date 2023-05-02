@@ -8,7 +8,7 @@ import honkypy
 
 from . import app
 from . import config
-from . import idol
+from . import idoltype
 from . import util
 
 from typing import Annotated
@@ -66,7 +66,7 @@ def make_endpoint(route_prefix: str, scheme: str, request: fastapi.Request, endp
 def server_info(
     request: fastapi.Request,
     version: Annotated[tuple[int, int], fastapi.Depends(util.parse_sif_version)],
-    platform: idol.PlatformType,
+    platform: idoltype.PlatformType,
 ):
     """
     Create new zip archive containing new server_info.json for this private server.
