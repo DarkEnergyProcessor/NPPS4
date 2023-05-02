@@ -48,6 +48,24 @@ class UserInfoResponse(pydantic.BaseModel):
     server_timestamp: int
 
 
+class ChangeNameRequest(pydantic.BaseModel):
+    name: str
+
+
+class ChangeNameResponse(pydantic.BaseModel):
+    before_name: str
+    after_name: str
+
+
+@idol.register("/user/changeName", batchable=False)
+def user_changename(context: idol.SchoolIdolUserParams, request: ChangeNameRequest) -> ChangeNameResponse:
+    # TODO
+    if request.name == "Newcomer":
+        return ChangeNameResponse(before_name="Kemp", after_name=request.name)
+
+    raise error.IdolError(error.ERROR_CODE_NG_WORDS)
+
+
 @idol.register("/user/userInfo")
 def user_userinfo(context: idol.SchoolIdolUserParams) -> UserInfoResponse:
     u = user.get(context)
