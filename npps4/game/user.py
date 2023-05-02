@@ -60,6 +60,7 @@ class ChangeNameResponse(pydantic.BaseModel):
 @idol.register("/user/changeName", batchable=False)
 def user_changename(context: idol.SchoolIdolUserParams, request: ChangeNameRequest) -> ChangeNameResponse:
     # TODO
+    util.log("STUB /user/changeName", request, severity=util.logging.WARNING)
     if request.name == "Newcomer":
         return ChangeNameResponse(before_name="Kemp", after_name=request.name)
 
