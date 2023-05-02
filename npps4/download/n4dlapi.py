@@ -1,4 +1,6 @@
 import json
+import multiprocessing
+import multiprocessing.managers
 import os
 import urllib.parse
 
@@ -13,9 +15,12 @@ from typing import Any, Literal, overload
 NEED_PROTOCOL_VERSION = (1, 1)
 
 
-_public_info: dict[str, Any] | None = None
+_public_info = multiprocessing.Manager().dict({})
 _base_url: str = config.CONFIG_DATA["download"]["n4dlapi"]["server"]
 _shared_key: str = config.CONFIG_DATA["download"]["n4dlapi"]["shared_key"]
+
+if _base_url[-1] != "/":
+    _base_url = _base_url + "/"
 
 
 def _call_api_notry(endpoint: str, request_data: dict[str, Any] | list[Any] | None = None, /, *, raw: bool = False):
@@ -80,6 +85,7 @@ def get_db_path(name: str):
     target_db = f"{datadir}/db/{ver}/{name}.db_"
     if not os.path.isfile(target_db):
         # Download database
+        print("Downloading database:", name)
         db_data = _call_api(f"api/v1/getdb/{name}", raw=True)
         os.makedirs(os.path.dirname(target_db), exist_ok=True)
         with open(target_db, "wb") as f:
@@ -91,8 +97,9 @@ def get_db_path(name: str):
 def initialize():
     global _public_info, _base_url
     print("Getting public info API from external server")
-    _public_info = _call_api("api/publicinfo")
-    assert _public_info is not None
+    pubinfo = _call_api("api/publicinfo")
+    assert pubinfo is not None
+    _public_info.update(pubinfo)
 
     if (
         _public_info["dlapiVersion"]["major"] != NEED_PROTOCOL_VERSION[0]

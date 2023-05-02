@@ -2,7 +2,7 @@ import sqlalchemy
 import sqlalchemy.orm
 
 from . import common
-from .. import config
+from .. import download
 
 
 class Base(sqlalchemy.orm.DeclarativeBase):
@@ -95,7 +95,7 @@ class UnitType(Base, common.MaybeEncrypted):
 
 
 engine = sqlalchemy.create_engine(
-    f"sqlite+pysqlite:///file:{config.get_data_directory()}/db/unit.db_?mode=ro&uri=true",
+    f"sqlite+pysqlite:///file:{download.get_db_path('unit')}?mode=ro&uri=true",
     connect_args={"check_same_thread": False},
 )
 sessionmaker = sqlalchemy.orm.sessionmaker()

@@ -2,7 +2,7 @@ import sqlalchemy
 import sqlalchemy.orm
 
 from . import common
-from .. import config
+from .. import download
 
 
 class Base(sqlalchemy.orm.DeclarativeBase):
@@ -347,7 +347,7 @@ class LiveSkillIcon(Base, common.MaybeEncrypted):
 
 
 engine = sqlalchemy.create_engine(
-    f"sqlite+pysqlite:///file:{config.get_data_directory()}/db/live.db_?mode=ro&uri=true",
+    f"sqlite+pysqlite:///file:{download.get_db_path('live')}?mode=ro&uri=true",
     connect_args={"check_same_thread": False},
 )
 sessionmaker = sqlalchemy.orm.sessionmaker()
