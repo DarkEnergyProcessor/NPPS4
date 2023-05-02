@@ -116,6 +116,7 @@ class SchoolIdolParams:
         self.lang: Language = lang
         self.platform: PlatformType = platform_type
         self.x_message_code = request.headers.get("X-Message-Code")
+        self.request = request
         self.db = Database()
 
 
@@ -272,10 +273,12 @@ def assemble_response_data(response: _PossibleResponse):
 
 
 def build_response(context: SchoolIdolParams, response: _PossibleResponse):
+    from .. import download
+
     response_data_dict, status_code, http_code = assemble_response_data(response)
     response_data = {
         "response_data": response_data_dict,
-        "release_info": config.get_release_info_keys(),
+        "release_info": download.get_formatted_release_keys(),
         "status_code": status_code,
     }
     jsondata = json.dumps(response_data).encode("UTF-8")
