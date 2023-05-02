@@ -102,6 +102,8 @@ def time():
 
 
 NPPS4_LOGGER = logging.getLogger("npps4")
+NPPS4_LOGGER.addHandler(logging.StreamHandler())
+NPPS4_LOGGER.setLevel(logging.DEBUG)
 
 
 def log(*args: object, severity: int = logging.DEBUG, e: Exception | None = None):
