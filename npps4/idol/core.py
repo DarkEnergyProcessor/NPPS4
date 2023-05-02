@@ -170,7 +170,7 @@ class Endpoint(Generic[_T, _U, _V]):
     ]
 
 
-def _get_request_data(model: type[pydantic.BaseModel]):
+def _get_request_data(model: type[_U]):
     def actual_getter(
         request_data: Annotated[pydantic.Json[model], fastapi.Form()],
         xmc: Annotated[str, fastapi.Header(alias="X-Message-Code")],
@@ -395,6 +395,10 @@ class BatchRequest(pydantic.BaseModel):
     action: str
 
 
+class BatchRequestRoot(pydantic.BaseModel):
+    __root__: list[BatchRequest]
+
+
 class BatchResponse(pydantic.BaseModel):
     result: dict | list
     status: int
@@ -402,13 +406,18 @@ class BatchResponse(pydantic.BaseModel):
     timeStamp: int
 
 
-@app.main.post("/api", response_model=idoltype.ResponseData[list[BatchResponse]])  # type: ignore
+class BatchResponseRoot(pydantic.BaseModel):
+    __root__: list[BatchResponse]
+
+
+@app.main.post("/api", response_model=idoltype.ResponseData[BatchResponseRoot])  # type: ignore
 def api_endpoint(
     context: Annotated[SchoolIdolUserParams, fastapi.Depends(SchoolIdolUserParams)],
-    request: Annotated[list[BatchRequest], fastapi.Depends(_get_request_data(list[BatchRequest]))],  # type: ignore
-    raw_request_data: Annotated[list[dict[str, object]], fastapi.Form(alias="request_data", exclude=True)],
+    request: Annotated[list[BatchRequest], fastapi.Depends(_get_request_data(BatchRequestRoot))],
+    raw_req: Annotated[bytes, fastapi.Form(alias="request_data", exclude=True)],
 ):
     response = client_check(context, True, idoltype.XMCVerifyMode.SHARED)
+    raw_request_data = json.loads(raw_req)
 
     if response is None:
         response_data: list[BatchResponse] = []
@@ -420,7 +429,9 @@ def api_endpoint(
                 # Find endpoint
                 endpoint = API_ROUTER_MAP.get(f"{module}/{action}")
                 if endpoint is None:
-                    raise error.IdolError(error.ERROR_CODE_LIB_ERROR, 404, http_code=404)
+                    msg = f"Endpoint not found: {module}/{action}"
+                    util.log(msg, json.dumps(request_data), severity=util.logging.ERROR)
+                    raise error.IdolError(error.ERROR_CODE_LIB_ERROR, 404, msg, http_code=404)
 
                 # *Sigh* have to reinvent the wheel.
                 if endpoint.request_class is not None:
