@@ -69,6 +69,26 @@ def get_db_path(name: str):
     return CURRENT_BACKEND.get_db_path(name)
 
 
+def get_update_files(context: idol.SchoolIdolParams, platform: idol.PlatformType, from_client_version: tuple[int, int]):
+    global CURRENT_BACKEND
+    return CURRENT_BACKEND.get_update_files(context, platform, from_client_version)
+
+
+def get_batch_files(context: idol.SchoolIdolParams, platform: idol.PlatformType, package_type: int, exclude: list[int]):
+    global CURRENT_BACKEND
+    return CURRENT_BACKEND.get_batch_files(context, platform, package_type, exclude)
+
+
+def get_single_package(context: idol.SchoolIdolParams, platform: idol.PlatformType, package_type: int, package_id: int):
+    global CURRENT_BACKEND
+    return CURRENT_BACKEND.get_single_package(context, platform, package_type, package_id)
+
+
+def get_raw_files(context: idol.SchoolIdolParams, platform: idol.PlatformType, files: list[str]):
+    global CURRENT_BACKEND
+    return CURRENT_BACKEND.get_raw_files(context, platform, files)
+
+
 def get_formatted_release_keys():
     global CURRENT_BACKEND
     relkeys = CURRENT_BACKEND.get_release_keys()
