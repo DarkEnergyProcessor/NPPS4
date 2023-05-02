@@ -40,7 +40,9 @@ def _call_api_notry(endpoint: str, request_data: dict[str, Any] | list[Any] | No
     if request_data is not None:
         header["Content-Type"] = "application/json"
 
-    response = httpx.request("GET" if request_data is None else "POST", parse.geturl(), headers=header)
+    response = httpx.request(
+        "GET" if request_data is None else "POST", parse.geturl(), headers=header, json=request_data
+    )
     response.raise_for_status()
     if raw:
         return response.content
