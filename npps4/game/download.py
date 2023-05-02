@@ -67,7 +67,7 @@ class DownloadGetUrlResponse(pydantic.BaseModel):
 
 
 @idol.register("/download/update", check_version=False, batchable=False)
-def update(context: idol.SchoolIdolAuthParams, request: DownloadUpdateRequest) -> list[DownloadUpdateResponse]:
+def download_update(context: idol.SchoolIdolAuthParams, request: DownloadUpdateRequest) -> list[DownloadUpdateResponse]:
     try:
         install_version = util.parse_sif_version(request.install_version)
         external_version = util.parse_sif_version(request.external_version)
@@ -95,7 +95,7 @@ def update(context: idol.SchoolIdolAuthParams, request: DownloadUpdateRequest) -
 
 
 @idol.register("/download/batch", check_version=False, batchable=False)
-def batch(context: idol.SchoolIdolAuthParams, request: DownloadBatchRequest) -> list[DownloadResponse]:
+def download_batch(context: idol.SchoolIdolAuthParams, request: DownloadBatchRequest) -> list[DownloadResponse]:
     links = download.get_batch_files(
         context.request, _TARGET_OS_REMAP[request.os.value], int(request.package_type), request.excluded_package_ids
     )
@@ -103,13 +103,15 @@ def batch(context: idol.SchoolIdolAuthParams, request: DownloadBatchRequest) -> 
 
 
 @idol.register("/download/event", check_version=False, batchable=False)
-def event(context: idol.SchoolIdolAuthParams, request: DownloadBatchRequest) -> list[DownloadResponse]:
+def download_event(context: idol.SchoolIdolAuthParams, request: DownloadBatchRequest) -> list[DownloadResponse]:
     # TODO
     return []
 
 
 @idol.register("/download/additional", check_version=False, batchable=False)
-def additional(context: idol.SchoolIdolAuthParams, request: DownloadAdditionalRequest) -> list[DownloadResponse]:
+def download_additional(
+    context: idol.SchoolIdolAuthParams, request: DownloadAdditionalRequest
+) -> list[DownloadResponse]:
     links = download.get_single_package(
         context.request, _TARGET_OS_REMAP[request.target_os.value], int(request.package_type), request.package_id
     )
@@ -119,6 +121,6 @@ def additional(context: idol.SchoolIdolAuthParams, request: DownloadAdditionalRe
 
 
 @idol.register("/download/getUrl", check_version=False, batchable=False)
-def geturl(context: idol.SchoolIdolAuthParams, request: DownloadGetUrlRequest) -> DownloadGetUrlResponse:
+def download_geturl(context: idol.SchoolIdolAuthParams, request: DownloadGetUrlRequest) -> DownloadGetUrlResponse:
     links = download.get_raw_files(context.request, _TARGET_OS_REMAP[request.os.value], request.path_list)
     return DownloadGetUrlResponse(url_list=[link.url for link in links])

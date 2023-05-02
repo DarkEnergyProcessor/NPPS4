@@ -39,7 +39,7 @@ class StartupResponse(pydantic.BaseModel):
 
 
 @idol.register("/login/login", check_version=False, batchable=False)
-def login(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> LoginResponse:
+def login_login(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> LoginResponse:
     """Login user"""
 
     # Decrypt credentials
@@ -63,7 +63,7 @@ def login(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> LoginRes
 
 
 @idol.register("/login/authkey", check_version=False, batchable=False, xmc_verify=idol.XMCVerifyMode.NONE)
-def authkey(context: idol.SchoolIdolParams, request: AuthkeyRequest) -> AuthkeyResponse:
+def login_authkey(context: idol.SchoolIdolParams, request: AuthkeyRequest) -> AuthkeyResponse:
     """Generate authentication key."""
 
     # Decrypt client key
@@ -88,7 +88,7 @@ def authkey(context: idol.SchoolIdolParams, request: AuthkeyRequest) -> AuthkeyR
 
 
 @idol.register("/login/startUp", check_version=False, batchable=False)
-def startup(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> StartupResponse:
+def login_startup(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> StartupResponse:
     """Register new account."""
     key = util.xorbytes(context.token.client_key[:16], context.token.server_key[:16])
     loginkey = util.decrypt_aes(key, base64.b64decode(request.login_key))

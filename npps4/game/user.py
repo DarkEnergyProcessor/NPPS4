@@ -49,7 +49,7 @@ class UserInfoResponse(pydantic.BaseModel):
 
 
 @idol.register("/user/userInfo")
-def userinfo(context: idol.SchoolIdolUserParams) -> UserInfoResponse:
+def user_userinfo(context: idol.SchoolIdolUserParams) -> UserInfoResponse:
     u = user.get(context)
     if u is None:
         raise error.IdolError(error.ERROR_CODE_LIB_ERROR, 500, "User is not known", http_code=500)
