@@ -12,7 +12,7 @@ import pydantic
 class LoginRequest(pydantic.BaseModel):
     login_key: str
     login_passwd: str
-    devtoken: str
+    devtoken: str | None = None
 
 
 class LoginResponse(pydantic.BaseModel):
@@ -48,8 +48,8 @@ def login(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> LoginRes
     passwd = util.decrypt_aes(key, base64.b64decode(request.login_passwd))
 
     # Log
-    print("Hello my key is", loginkey)
-    print("And my passwd is", passwd)
+    util.log("Hello my key is", loginkey)
+    util.log("And my passwd is", passwd)
 
     # Find user
     u = user.find_by_key(context, str(loginkey, "UTF-8"))
@@ -67,7 +67,7 @@ def authkey(context: idol.SchoolIdolParams, request: AuthkeyRequest) -> AuthkeyR
 
     # Decrypt client key
     client_key = util.decrypt_rsa(base64.b64decode(request.dummy_token))
-    if client_key is None:
+    if not client_key:
         raise fastapi.HTTPException(400, "Bad client key")
     auth_data = util.decrypt_aes(client_key[:16], base64.b64decode(request.auth_data))
 
