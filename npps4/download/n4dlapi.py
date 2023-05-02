@@ -11,7 +11,7 @@ from .. import config
 from .. import idoltype
 from .. import util
 
-from typing import Any, Literal, overload
+from typing import Any, Literal, TypeVar, overload
 
 
 NEED_PROTOCOL_VERSION = (1, 1)
@@ -75,6 +75,17 @@ def _call_api(endpoint: str, request_data: dict[str, Any] | list[Any] | None = N
                 raise e from None
 
 
+_T = TypeVar("_T", bound=dltype.BaseInfo)
+
+
+def _fixup_links(links: list[_T], platform: int):
+    for link in links:
+        if link.url.startswith("https://") and platform == 2:
+            # Android doesn't support HTTPS
+            link.url = "http" + link.url[5:]
+    return links
+
+
 def get_server_version():
     global _public_info
     if _public_info is None:
@@ -103,14 +114,14 @@ def get_update_files(request: fastapi.Request, platform: idoltype.PlatformType, 
     result: list[dict[str, Any]] = _call_api(
         "api/v1/update", {"version": util.sif_version_string(from_client_version), "platform": int(platform)}
     )
-    return pydantic.parse_obj_as(list[dltype.UpdateInfo], result)
+    return _fixup_links(pydantic.parse_obj_as(list[dltype.UpdateInfo], result), int(platform))
 
 
 def get_batch_files(request: fastapi.Request, platform: idoltype.PlatformType, package_type: int, exclude: list[int]):
     result: list[dict[str, Any]] = _call_api(
         "api/v1/batch", {"package_type": package_type, "platform": int(platform), "exclude": exclude}
     )
-    return pydantic.parse_obj_as(list[dltype.BatchInfo], result)
+    return _fixup_links(pydantic.parse_obj_as(list[dltype.BatchInfo], result), int(platform))
 
 
 def get_single_package(request: fastapi.Request, platform: idoltype.PlatformType, package_type: int, package_id: int):
@@ -118,7 +129,7 @@ def get_single_package(request: fastapi.Request, platform: idoltype.PlatformType
         result: list[dict[str, Any]] = _call_api(
             "api/v1/download", {"package_type": package_type, "package_id": package_id, "platform": int(platform)}
         )
-        return pydantic.parse_obj_as(list[dltype.BaseInfo], result)
+        return _fixup_links(pydantic.parse_obj_as(list[dltype.BaseInfo], result), int(platform))
     except httpx.HTTPStatusError as e:
         if e.response.status_code == 404:
             return None
@@ -127,7 +138,7 @@ def get_single_package(request: fastapi.Request, platform: idoltype.PlatformType
 
 def get_raw_files(request: fastapi.Request, platform: idoltype.PlatformType, files: list[str]):
     result: list[dict[str, Any]] = _call_api("api/v1/getfile", {"files": files, "platform": int(platform)})
-    return pydantic.parse_obj_as(list[dltype.BaseInfo], result)
+    return _fixup_links(pydantic.parse_obj_as(list[dltype.BaseInfo], result), int(platform))
 
 
 def get_release_keys() -> dict[int, str]:
