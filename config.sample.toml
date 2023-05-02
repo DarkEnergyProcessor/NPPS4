@@ -43,9 +43,8 @@ url = "sqlite+pysqlite:///data/main.sqlite3"
 #             Currently, NPPS4 requires NPPS4 Download API server that
 #             implements version 1 of the protocol.
 # "internal" - Locally mirrored game data according to folder structure
-#              according to https://github.com/DarkEnergyProcessor/NPPS4-DLAPI
-#              generation 1.1.
-#              CURRENTLY NOT IMPLEMENTED!
+#              specified at https://github.com/DarkEnergyProcessor/NPPS4-DLAPI
+#              with generation 1.1 structure.
 backend = "none"
 
 # Send patched server_info.json automatically?

@@ -54,6 +54,7 @@ def login(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> LoginRes
     # Find user
     u = user.find_by_key(context, str(loginkey, "UTF-8"))
     if u is None or (not u.check_passwd(str(passwd, "UTF-8"))):
+        # This will send "Your data has been transfered succesfully" message to the SIF client.
         raise error.IdolError(error_code=407, status_code=600, detail="Login not found")
 
     # Login
