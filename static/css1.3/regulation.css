@@ -1,0 +1,52 @@
+@charset "utf-8";
+/* CSS Document */
+
+/************************
+  regulation.css
+  written：Yosuke Takada
+  date：2013/07/23
+  version：1.0
+*************************/
+
+/* ==========================================================
+
+	利用規約
+
+========================================================== */
+
+.title ul{
+	width:95%;
+	display:block;
+	height:78px;
+	line-height:78px;
+	color:#FFF;
+}
+
+.title ul li{
+	background:url('../img/help/tab_off.png');
+	display:inline;
+	height:79px;
+	width:25%;
+	float: left;
+	background-size:100% auto;
+	text-align:center;
+}
+
+/* タブ選択のクラス　*/
+.active{
+	background:url('../img/help/tab_on.png') !important;
+	background-position:0px 1px;
+}
+
+#wrapper_regu{ 
+	width:960px; 
+	position:relative;
+}
+
+/*コンテンツ部*/
+.content_regu{
+	width:95%;
+	background:url('../img/help/bg02.png') repeat-y;
+	background-size:100% auto;
+	padding:20px 0px;
+}

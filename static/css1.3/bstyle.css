@@ -1,0 +1,177 @@
+@charset "utf-8";
+/* CSS Document */
+
+/************************
+  tab.js
+  written：Yosuke Takada
+  date：2013/07/23
+  version：1.0
+*************************/
+
+/* ==========================================================
+
+	基本設定
+
+========================================================== */
+
+* { margin: 0; padding: 0; border: 0; }
+
+body { 
+	-webkit-user-select:none;
+	-webkit-touch-callout: none;
+	-webkit-text-size-adjust: none;
+	font-family: "HG丸ｺﾞｼｯｸM-PRO","Verdana","Osaka",sans-serif;/*Georgia, "Times New Roman", Times, serif; */
+	font-size: 27px;
+	line-height: 1.231;
+	background: transparent;
+}
+
+ol, ul { list-style: none; }
+
+/* Android4.0 バグ対応　<p>タグの背景を設定する    */
+p{ background-image: url('../img/help/bug_trans.png'); }
+
+a{ 
+	text-decoration:none;
+}
+
+#wrapper{ 
+	width:960px; 
+	position:relative;
+}
+
+
+/* ==========================================================
+
+	定義
+
+========================================================== */
+
+/* フォントサイズ
+===========================================================*/
+.fs20 {font-size: 20px;}
+.fs22 {font-size: 22px;}
+.fs24 {font-size: 24px}
+.fs28 {font-size: 28px;}
+.fs30 {font-size: 30px;}
+.fs32 {font-size: 32px;}
+.fs34 {font-size: 34px;}
+.fs36 {font-size: 36px;}
+.fs38 {font-size: 38px;}
+.fs40 {font-size: 40px;}
+.fs42 {font-size: 42px;}
+.fs44 {font-size: 44px;}
+.fs46 {font-size: 46px;}
+.fs48 {font-size: 48px;}
+.fs50 {font-size: 50px;}
+.fs52 {font-size: 52px;}
+.fs54 {font-size: 54px;}
+
+/* bg color
+===========================================================*/
+.bgwhite {background:#FFF;}
+
+/* フォントカラー
+===========================================================*/
+.red {color:#C03;}
+
+/* text-align・float
+===========================================================*/
+.taL { text-align:left; }
+.taC { text-align:center; }
+.taR { text-align:right; }
+.fL { float:left; }
+.fR { float:right; }
+
+/* margin
+===========================================================*/
+
+.m20{margin:20px;}
+
+.mr0{margin:0 auto;}
+.mr10{margin:10px 0px;}
+.mr12{margin:12px 0px;}
+.mr14{margin:14px 0px;}
+.mr16{margin:16px 0px;}
+.mr18{margin:18px 0px;}
+.mr20{margin:20px 0px;}
+
+.mt05 {margin-top:5px;}
+.mt10 {margin-top:10px;}
+.mt20 {margin-top:20px;}
+.mt30 {margin-top:30px;}
+.mt40 {margin-top:40px;}
+
+.mb0 {margin-bottom:0px !important;}
+.mb05 {margin-bottom:5px;}
+.mb10 {margin-bottom:10px;}
+.mb20 {margin-bottom:20px;}
+.mb30 {margin-bottom:30px;}
+.mb50 {margin-bottom:50px;}
+
+.ml0 {margin-left:0px !important;}
+.ml05 {margin-left:5px;}
+.ml10 {margin-left:10px;}
+.ml20 {margin-left:20px;}
+.ml30 {margin-left:30px;}
+.ml40 {margin-left:30px;}
+.ml50 {margin-left:50px;}
+.ml100 {margin-left:100px;}
+
+.mrl10 {margin-left:10px;}
+.mrr10 {margin-right:10px;}
+.mrl-10 {margin-right:-10px; margin-left:-10px;}
+.mr10 {margin-right:10px;}
+
+
+/* width
+===========================================================*/
+.width10 {width:10%;}
+.width20 {width:20%;}
+.width30 {width:30%;}
+.width40 {width:40%;}
+.width50 {width:50%;}
+.width60 {width:60%;}
+.width70 {width:70%;}
+.width80 {width:80%;}
+.width90 {width:90%;}
+.width100 {width:100%;}
+
+/* text-align
+===========================================================*/
+.tx_center{text-align:center;}
+.tx_left{text-align:left;}
+.tx_right{text-align:right;}
+
+
+
+/* ==========================================================
+
+	共通項目
+
+========================================================== */
+
+
+/*タイトル部*/
+.title{
+	text-align:left;
+}
+
+/*コンテンツ部*/
+.content{
+	width:95%;
+	margin-top:-7px;
+	background:url('../static/img/help/bg02.png') repeat-y;
+	background-size:100% auto;
+	padding:20px 0px;
+}
+
+.note{
+	margin:0px 20px;
+}
+
+/*フッター部*/
+.footer{
+	text-align:left;
+}
+

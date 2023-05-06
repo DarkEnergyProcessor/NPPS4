@@ -1,6 +1,7 @@
 import traceback
 
 import fastapi
+import fastapi.staticfiles
 import fastapi.responses
 
 core = fastapi.FastAPI()
@@ -22,3 +23,6 @@ def handler_500(request: fastapi.Request, exc: Exception):
         status_code=500,
         content={"exception": type(exc).__name__, "message": str(exc), "traceback": traceback.format_exception(exc)},
     )
+
+
+core.mount("/static", fastapi.staticfiles.StaticFiles(directory="static"), "static_file")
