@@ -57,6 +57,15 @@ class ChangeNameResponse(pydantic.BaseModel):
     after_name: str
 
 
+class UserNavi(pydantic.BaseModel):
+    user_id: int
+    unit_owning_user_id: int
+
+
+class UserGetNaviResponse(pydantic.BaseModel):
+    user: UserNavi
+
+
 @idol.register("/user/changeName", batchable=False)
 def user_changename(context: idol.SchoolIdolUserParams, request: ChangeNameRequest) -> ChangeNameResponse:
     # TODO
@@ -65,6 +74,13 @@ def user_changename(context: idol.SchoolIdolUserParams, request: ChangeNameReque
         return ChangeNameResponse(before_name="Kemp", after_name=request.name)
 
     raise error.IdolError(error.ERROR_CODE_NG_WORDS)
+
+
+@idol.register("/user/getNavi")
+def user_getnavi(context: idol.SchoolIdolUserParams) -> UserGetNaviResponse:
+    # TODO
+    util.log("STUB /user/getNavi", severity=util.logging.WARNING)
+    return UserGetNaviResponse(user=UserNavi(user_id=context.token.user_id, unit_owning_user_id=0))
 
 
 @idol.register("/user/userInfo")
