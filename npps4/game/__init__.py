@@ -3,6 +3,7 @@ from . import background
 from . import challenge
 from . import download
 from . import gdpr
+from . import handover
 from . import liveicon
 from . import livese
 from . import login
