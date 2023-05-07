@@ -29,7 +29,7 @@ have private key set-up!
 
 #### Using provided private key
 
-NPPS4 provides default private key which is used to develop other private servers by the SIF community.
+NPPS4 provides default private key which is used to develop other private servers by the community
 and compatible with community-patched APK.
 
 To use this private key, simply copy `default_server_key.pem` to `server_key.pem`.
@@ -70,10 +70,20 @@ If in doubt, SQLite3 is a safe choice if you don't need performance as it's alre
 
 Otherwise, install the additional dependencies depending on which backend you want to use.
 
+Configuration
+-----
+
+Copy out `config.sample.toml` to `config.toml` and modify as needed.
+
 Running
 -----
 
-After all is set, simply run:
+After all is set, initialize the database:
+```
+alembic upgrade head
+```
+
+Then run the server
 ```
 uvicorn npps4:uvicorn_main --port 51376
 ```
