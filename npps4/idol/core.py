@@ -1,4 +1,5 @@
 import dataclasses
+import enum
 import json
 import typing
 import types
@@ -302,9 +303,16 @@ def register(
     def wrap0(f: _PossibleEndpointFunction[_T, _U, _V]):
         nonlocal endpoint, check_version, batchable
 
+        if endpoint[0] == "/":
+            module_action = endpoint[1:]
+        else:
+            module_action = endpoint
+        module_name = module_action.split("/")[0]
+
         signature = typing.get_type_hints(f)
         params: list[type] = list(map(lambda x: x[1], filter(lambda x: x[0] != "return", signature.items())))
         ret: type[_V | pydantic.BaseModel] = signature.get("return", pydantic.BaseModel)
+        tags: list[str | enum.Enum] = [module_name]
 
         if ret is pydantic.BaseModel:
             util.log("Possible undefined return type for endpoint:", endpoint, severity=util.logging.WARNING)
@@ -317,6 +325,7 @@ def register(
                 description=f.__doc__,
                 response_model=idoltype.ResponseData[ret],
                 responses={200: {"headers": RESPONSE_HEADERS}},
+                tags=tags,
             )
             @app.main.get(
                 endpoint,
@@ -324,6 +333,7 @@ def register(
                 description=f.__doc__,
                 response_model=idoltype.ResponseData[ret],
                 responses={200: {"headers": RESPONSE_HEADERS}},
+                tags=tags,
             )
             def wrap1(context: Annotated[_T, fastapi.Depends(params[0])]):
                 nonlocal ret, check_version, xmc_verify
@@ -349,6 +359,7 @@ def register(
                 description=f.__doc__,
                 response_model=idoltype.ResponseData[ret],
                 responses={200: {"headers": RESPONSE_HEADERS}},
+                tags=tags,
             )
             def wrap2(
                 context: Annotated[_T, fastapi.Depends(params[0])],
@@ -370,11 +381,6 @@ def register(
                 return response
 
         if batchable:
-            if endpoint[0] == "/":
-                module_action = endpoint[1:]
-            else:
-                module_action = endpoint
-
             if len(params) > 1:
                 real_request, is_request_list = _get_real_param(params[1])
             else:
