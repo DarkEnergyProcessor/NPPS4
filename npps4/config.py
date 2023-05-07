@@ -99,3 +99,11 @@ CONSUMER_KEY: str = CONFIG_DATA["advanced"]["consumer_key"]
 def get_consumer_key():
     global CONSUMER_KEY
     return CONSUMER_KEY
+
+
+INJECT_SVINFO: bool = bool(CONFIG_DATA["download"]["send_patched_server_info"])
+
+
+def inject_server_info():
+    global INJECT_SVINFO
+    return INJECT_SVINFO
