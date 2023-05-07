@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<script>
+			function ready(fn) {
+				if (document.readyState !== "loading") {
+					fn()
+				} else {
+					document.addEventListener("DOMContentLoaded", fn)
+				}
+			}
+
+			ready(() => {
+				const inputElem = document.getElementById("api_input")
+				const outputElem = document.getElementById("api_output")
+				const resultElemRoot = document.getElementById("result")
+
+				let apiInputJSON = null;
+				let apiOutputJSON = null;
+
+				function makeTheElement(request, response) {
+					const module = request.module
+					const action = request.action
+
+					const reqJson = JSON.stringify(request, null, 2)
+					const resJson = JSON.stringify({response_data: response.result, status_code: response.status}, null, 2)
+
+					let p = document.createElement("p")
+					p.textContent = `/${module}/${action}`
+					let ta1 = document.createElement("textarea")
+					let ta2 = document.createElement("textarea")
+					ta1.setAttribute("readonly", "")
+					ta1.value = reqJson
+					ta2.setAttribute("readonly", "")
+					ta2.value = resJson
+
+					return [p, ta1, ta2]
+				}
+
+				function rebuildFromJSON() {
+					let fragment = document.createDocumentFragment()
+
+					if (apiInputJSON.length != apiOutputJSON.response_data.length) {
+						throw Error("request size mismatch. request " + apiInputJSON.length + " response " + apiOutputJSON.response_data.length)
+					}
+
+					for (let i = 0; i < apiInputJSON.length; i++) {
+						try {
+							const result = makeTheElement(apiInputJSON[i], apiOutputJSON.response_data[i])
+							fragment.append(...result)
+						} catch (e) {
+							let p = document.createElement("p")
+							p.textContent = `Error parsing index ${i + 1}: ${e.toString()}`
+							fragment.append(p)
+						}
+					}
+
+					resultElemRoot.replaceChildren(fragment)
+				}
+
+				function wrapInErrorHandler(name, f) {
+					return (...args) => {
+						try {
+							return f(...args)
+						} catch(e) {
+							resultElemRoot.textContent = "Error at " + name + ": " + e.toString()
+						}
+					}
+				}
+
+				inputElem.addEventListener("input", wrapInErrorHandler("input", ev => {
+					apiInputJSON = JSON.parse(ev.target.value)
+					rebuildFromJSON()
+				}))
+				outputElem.addEventListener("input", wrapInErrorHandler("output", ev => {
+					apiOutputJSON = JSON.parse(ev.target.value)
+					rebuildFromJSON()
+				}))
+			})
+		</script>
+		<style>
+			textarea {
+				min-height: 7.5em;
+				width: calc(100% - 0.5em);
+				resize: vertical
+			}
+		</style>
+	</head>
+	<body>
+		<h1>/api call splitter</h1>
+		<section>
+			<p>/api request</p>
+			<textarea id="api_input"></textarea>
+			<p>/api response</p>
+			<textarea id="api_output"></textarea>
+		</section>
+		<hr>
+		<section id="result"></section>
+	</body>
+</html>
