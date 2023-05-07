@@ -4,9 +4,16 @@ import fastapi
 import fastapi.staticfiles
 import fastapi.responses
 
-core = fastapi.FastAPI()
+NPPS4_VERSION = (0, 0, 1)
+
+core = fastapi.FastAPI(title="NPPS4", version="%d.%d.%d" % NPPS4_VERSION, docs_url="/")
 main = fastapi.APIRouter(prefix="/main.php")
 webview = fastapi.APIRouter(prefix="/webview.php", default_response_class=fastapi.responses.HTMLResponse)
+
+
+@core.get("/docs", include_in_schema=False)
+def docs_handler():
+    return fastapi.responses.RedirectResponse("/", 302)
 
 
 @core.exception_handler(404)
