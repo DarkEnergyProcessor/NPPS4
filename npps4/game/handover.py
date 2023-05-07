@@ -17,11 +17,13 @@ class KIDInfoResponse(pydantic.BaseModel):
 
 @idol.register("/handover/exec", batchable=False)
 def handover_exec(context: idol.SchoolIdolUserParams, request: HandoverExecRequest):
+    # TODO
     util.log("STUB /handover/exec", request, severity=util.logging.WARNING)
     raise error.IdolError(error.ERROR_HANDOVER_INVALID_ID_OR_CODE, 600)
 
 
 @idol.register("/handover/kidInfo")
 def handover_kidinfo(context: idol.SchoolIdolUserParams) -> KIDInfoResponse:
+    # TODO
     util.log("STUB /handover/kidInfo", severity=util.logging.WARNING)
     return KIDInfoResponse(auth_url=str(context.request.url), server_timestamp=util.time())
