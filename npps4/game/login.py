@@ -95,6 +95,26 @@ class TopInfoOnceResponse(pydantic.BaseModel):
     open_v98: bool
 
 
+class StarterUnitListInfo(pydantic.BaseModel):
+    unit_id: int
+    is_rank_max: bool
+
+
+class StarterUnitInitialSetInfo(pydantic.BaseModel):
+    unit_initial_set_id: int
+    unit_list: list[StarterUnitListInfo]
+    center_unit_id: int
+
+
+class StarterMemberCategory(pydantic.BaseModel):
+    member_category: int
+    unit_initial_set: list[StarterUnitInitialSetInfo]
+
+
+class StarterUnitListResponse(pydantic.BaseModel):
+    member_category_list: list[StarterMemberCategory]
+
+
 @idol.register("/login/login", check_version=False, batchable=False)
 def login_login(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> LoginResponse:
     """Login user"""
@@ -219,4 +239,46 @@ def login_topinfoonce(context: idol.SchoolIdolUserParams) -> TopInfoOnceResponse
         open_accessory=True,
         arena_si_skill_unique_check=True,
         open_v98=True,
+    )
+
+
+TEMPLATE_DECK = [13, 9, 8, 23, 0, 24, 21, 20, 19]
+INITIAL_UNIT_IDS = [
+    # Unfortunately the game doesn't preload the R card asset anymore.
+    # so this is not configurable.
+    # Myus
+    [1131, 1789, 378, 1997, 2085, 703, 367, 330, 1912],  # UR
+    # range(49, 58),  # R
+    # Aqua
+    [1308, 1813, 1298, 2158, 1743, 2200, 2310, 2236, 1372],  # UR
+    # range(788, 797),  # R
+]
+
+
+def _generate_deck_list(unit_id: int):
+    template_copy = TEMPLATE_DECK.copy()
+    template_copy[4] = unit_id
+    return template_copy
+
+
+@idol.register("/login/unitList")
+def login_unitlist(context: idol.SchoolIdolUserParams) -> StarterUnitListResponse:
+    return StarterUnitListResponse(
+        member_category_list=[
+            StarterMemberCategory(
+                member_category=catid,
+                unit_initial_set=[
+                    StarterUnitInitialSetInfo(
+                        unit_initial_set_id=initial_id,
+                        unit_list=[
+                            StarterUnitListInfo(unit_id=uid, is_rank_max=uid == center_uid)
+                            for uid in _generate_deck_list(center_uid)
+                        ],
+                        center_unit_id=center_uid,
+                    )
+                    for initial_id, center_uid in enumerate(unit_list, 1 + (catid - 1) * 10)
+                ],
+            )
+            for catid, unit_list in enumerate(INITIAL_UNIT_IDS, 1)
+        ]
     )
