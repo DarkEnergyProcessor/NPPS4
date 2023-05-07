@@ -16,6 +16,7 @@ from . import livese
 from . import login
 from . import marathon
 from . import multiunit
+from . import museum
 from . import navigation
 from . import notice
 from . import payment

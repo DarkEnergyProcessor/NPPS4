@@ -18,6 +18,19 @@ class UnitInfoResponse(pydantic.BaseModel):
     waiting: list
 
 
+class UnitAccessoryInfoResponse(pydantic.BaseModel):
+    accessory_list: list
+    wearing_info: list
+    especial_create_flag: bool
+
+
+@idol.register("/unit/accessoryAll")
+def unit_accessoryall(context: idol.SchoolIdolUserParams) -> UnitAccessoryInfoResponse:
+    # TODO
+    util.log("STUB /unit/accessoryAll", severity=util.logging.WARNING)
+    return UnitAccessoryInfoResponse(accessory_list=[], wearing_info=[], especial_create_flag=False)
+
+
 @idol.register("/unit/deckInfo")
 def unit_deckinfo(context: idol.SchoolIdolUserParams):
     # TODO
