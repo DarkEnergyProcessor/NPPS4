@@ -39,6 +39,7 @@ def unit_supporterall(context: idol.SchoolIdolUserParams) -> SupporterInfoRespon
     return SupporterInfoResponse(unit_support_list=[])
 
 
+@idol.register("/unit/unitAll")
 def unit_unitall(context: idol.SchoolIdolUserParams) -> UnitInfoResponse:
     # TODO
     util.log("STUB /unit/unitAll", severity=util.logging.WARNING)

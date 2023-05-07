@@ -10,6 +10,7 @@ from . import exchange
 from . import gdpr
 from . import handover
 from . import item
+from . import live
 from . import liveicon
 from . import livese
 from . import login
