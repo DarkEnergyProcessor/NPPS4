@@ -70,7 +70,7 @@ class SchoolIdolParams:
         client_version: Annotated[str, fastapi.Header(alias="Client-Version")],
         lang: Annotated[idoltype.Language, fastapi.Header(alias="LANG")],
         platform_type: Annotated[idoltype.PlatformType, fastapi.Header(alias="Platform-Type")],
-        request_data: Annotated[bytes | None, fastapi.Form(exclude=True)],
+        request_data: Annotated[bytes | None, fastapi.Form(exclude=True, include=False)] = None,
     ):
         authorize_parsed = dict(urllib.parse.parse_qsl(authorize))
         if authorize_parsed.get("consumerKey") != "lovelive_test":
@@ -94,7 +94,7 @@ class SchoolIdolParams:
         # One in here, retrieved as raw bytes, and the other one is in _get_request_data
         # as Pydantic model.
         # This is necessary for proper X-Message-Code verification!
-        self.raw_request_data = request_data
+        self.raw_request_data = request_data or b""
         self.lang = lang
         self.platform = platform_type
         self.x_message_code = request.headers.get("X-Message-Code")
@@ -115,7 +115,7 @@ class SchoolIdolAuthParams(SchoolIdolParams):
         client_version: Annotated[str, fastapi.Header(alias="Client-Version")],
         lang: Annotated[idoltype.Language, fastapi.Header(alias="LANG")],
         platform_type: Annotated[idoltype.PlatformType, fastapi.Header(alias="Platform-Type")],
-        request_data: Annotated[bytes | None, fastapi.Form(exclude=True)],
+        request_data: Annotated[bytes | None, fastapi.Form(exclude=True, include=False)] = None,
     ):
         super().__init__(request, authorize, client_version, lang, platform_type, request_data)
         token = None
@@ -141,7 +141,7 @@ class SchoolIdolUserParams(SchoolIdolAuthParams):
         client_version: Annotated[str, fastapi.Header(alias="Client-Version")],
         lang: Annotated[idoltype.Language, fastapi.Header(alias="LANG")],
         platform_type: Annotated[idoltype.PlatformType, fastapi.Header(alias="Platform-Type")],
-        request_data: Annotated[bytes | None, fastapi.Form(exclude=True)],
+        request_data: Annotated[bytes | None, fastapi.Form(exclude=True, include=False)] = None,
     ):
         super().__init__(request, authorize, client_version, lang, platform_type, request_data)
         if self.token.user_id == 0:
