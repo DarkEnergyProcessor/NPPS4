@@ -28,6 +28,7 @@
 
 					let p = document.createElement("p")
 					p.textContent = `/${module}/${action}`
+
 					let ta1 = document.createElement("textarea")
 					let ta2 = document.createElement("textarea")
 					ta1.setAttribute("readonly", "")
@@ -35,7 +36,16 @@
 					ta2.setAttribute("readonly", "")
 					ta2.value = resJson
 
-					return [p, ta1, ta2]
+					let compact = JSON.stringify(response.result)
+					let link = document.createElement("a")
+					link.classList.add("button")
+					link.setAttribute("href", "data:application/json;base64," + btoa(compact))
+					link.setAttribute("target", "_blank")
+					let button = document.createElement("button")
+					button.textContent = "Open response in new tab"
+					link.appendChild(button)
+
+					return [p, ta1, ta2, link]
 				}
 
 				function rebuildFromJSON() {
@@ -84,6 +94,12 @@
 				min-height: 7.5em;
 				width: calc(100% - 0.5em);
 				resize: vertical
+			}
+
+			a.button {
+				appearance: button;
+				text-decoration: none;
+				color: initial;
 			}
 		</style>
 	</head>
