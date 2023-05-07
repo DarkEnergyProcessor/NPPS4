@@ -114,7 +114,7 @@ TIMEZONE_JST = datetime.timezone(datetime.timedelta(hours=9))
 
 
 def timestamp_to_datetime(time: int | None = None):
-    time = time or int(timelib.time())
+    time = int(timelib.time()) if time is None else time
     dtobj = datetime.datetime.fromtimestamp(time, TIMEZONE_JST)
     return dtobj.strftime("%Y-%m-%d %H:%M:%S")
 
