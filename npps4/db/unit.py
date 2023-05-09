@@ -22,7 +22,7 @@ class UnitAttribute(Base):
     __tablename__ = "unit_attribute_m"
     attribute_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
     name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    name_en: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String, nullable=True)
+    name_en: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
 
 
 class UnitType(Base, common.MaybeEncrypted):
@@ -72,26 +72,18 @@ class UnitType(Base, common.MaybeEncrypted):
     __tablename__ = "unit_type_m"
     unit_type_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
     name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String, nullable=True)
+    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
     speaker_name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    speaker_name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String, nullable=True)
-    asset_background_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column(
-        sqlalchemy.Integer, nullable=True
-    )
-    image_button_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String, nullable=True)
-    image_button_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(
-        common.String, nullable=True
-    )
+    speaker_name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
+    asset_background_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column(sqlalchemy.Integer)
+    image_button_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
+    image_button_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
     background_color: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    background_color_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String, nullable=True)
-    name_image_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String, nullable=True)
-    name_image_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String, nullable=True)
-    album_series_name_image_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(
-        common.String, nullable=True
-    )
-    album_series_name_image_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(
-        common.String, nullable=True
-    )
+    background_color_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
+    name_image_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
+    name_image_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
+    album_series_name_image_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
+    album_series_name_image_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
     skit_icon_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
     named_skit_icon_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
     named_skit_icon_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)

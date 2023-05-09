@@ -30,15 +30,15 @@ class LiveTrack(Base, common.MaybeEncrypted):
     __tablename__ = "live_track_m"
     live_track_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
     name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String, nullable=True)
+    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
     name_kana: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    name_kana_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String, nullable=True)
+    name_kana_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
     title_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    title_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String, nullable=True)
+    title_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
     sound_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
     member_category: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     member_tag_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
-    unit_type_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column(nullable=True)
+    unit_type_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
 
 
 class LiveSetting(Base, common.MaybeEncrypted):
@@ -79,13 +79,11 @@ class LiveSetting(Base, common.MaybeEncrypted):
     stage_level: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     attribute_icon_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     live_icon_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    live_icon_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String, nullable=True)
+    live_icon_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
     asset_movie_id: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
     asset_background_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     notes_setting_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    notes_setting_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(
-        common.String, nullable=True
-    )
+    notes_setting_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
     c_rank_score: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     b_rank_score: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     a_rank_score: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
@@ -206,7 +204,7 @@ class LiveUnitRewardLot(Base):
     live_unit_reward_lot_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
     difficulty: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     condition_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
-    rank: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column(nullable=True)
+    rank: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
     live_unit_reward_group_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     weight: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
@@ -216,9 +214,9 @@ class CommonGoalReward:
     rank: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     add_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     item_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
-    item_category_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column(nullable=True)
+    item_category_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
     amount: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
-    item_option: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String, nullable=True)
+    item_option: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
 
 
 class LiveGoalRewardCommon(Base, CommonGoalReward):
@@ -342,7 +340,7 @@ class LiveSkillIcon(Base, common.MaybeEncrypted):
     __tablename__ = "live_skill_icon_m"
     skill_effect_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
     icon_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    icon_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String, nullable=True)
+    icon_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
     icon_order: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
