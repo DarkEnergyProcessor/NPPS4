@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=960, target-densitydpi=device-dpi, user-scalable=no">
+    <title>Maintenance</title>
+    <link rel="stylesheet" href="../../static/css1.3/bstyle.css">
+    <style type="text/css">
+        #app_uri_ios, #app_uri_android {display: none;}
+        div.content {background-color: white;}
+    </style>
+</head>
+
+<body>
+<div id="wrapper">
+    <div class="title">
+        <img src="../../static/img/help/bg01_maint.png" width="95%">
+    </div>
+
+    <div class="content">
+        <div class="note">
+            The server is currently under (unscheduled) maintenance :)
+            <br/>
+        </div>
+    </div>
+    <div class="footer">
+        <img src="../../static/img/help/bg03.png" width="95%">
+    </div>
+</div>
+
+<script>
+var engineIF = function(){};
+(function(engineIF){
+    var userAgent = navigator.userAgent.toLowerCase(),
+        isAndroid = userAgent.indexOf('android') > -1 || userAgent.indexOf('adr') > -1,
+        linkId = isAndroid ? "app_uri_android" : "app_uri_ios";
+
+    document.getElementById(linkId).style.display = "inline";
+
+    /*
+    if (!isAndroid) {
+        engineIF.prototype.cmd = function(keyString) {
+            location.href = "native://" + keyString;
+        }
+    }
+    */
+})(engineIF);
+</script>
+</body>
+</html>
