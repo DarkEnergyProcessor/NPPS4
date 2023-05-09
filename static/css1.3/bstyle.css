@@ -161,7 +161,7 @@ a{
 .content{
 	width:95%;
 	margin-top:-7px;
-	background:url('../static/img/help/bg02.png') repeat-y;
+	background:url('../img/help/bg02.png') repeat-y;
 	background-size:100% auto;
 	padding:20px 0px;
 }
