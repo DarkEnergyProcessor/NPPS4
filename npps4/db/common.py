@@ -1,5 +1,6 @@
 import sqlalchemy
 import sqlalchemy.orm
+import sqlalchemy.dialects.postgresql
 import sqlalchemy.dialects.mysql
 import sqlalchemy.dialects.oracle
 import sqlalchemy.dialects.sqlite
@@ -10,10 +11,11 @@ IDInteger = sqlalchemy.BigInteger().with_variant(sqlalchemy.dialects.sqlite.INTE
 
 type_map_override = {
     str: sqlalchemy.Text(),
-    float: sqlalchemy.Float(53)
+    float: sqlalchemy.Float(16)
     .with_variant(sqlalchemy.dialects.sqlite.REAL(), "sqlite")
     .with_variant(sqlalchemy.dialects.oracle.BINARY_DOUBLE(), "oracle")
-    .with_variant(sqlalchemy.dialects.mysql.DOUBLE(53), "mysql", "mariadb"),
+    .with_variant(sqlalchemy.dialects.mysql.DOUBLE(), "mysql", "mariadb")
+    .with_variant(sqlalchemy.dialects.postgresql.DOUBLE_PRECISION(), "postgresql"),
 }
 
 

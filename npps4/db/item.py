@@ -406,6 +406,7 @@ class Memories(Base, common.MaybeEncrypted):
     )
     ```"""
 
+    __tablename__ = "memories_m"
     memories_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
     img_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
     background_shader_param_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
