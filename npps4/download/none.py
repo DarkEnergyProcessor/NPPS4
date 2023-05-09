@@ -38,10 +38,6 @@ def get_single_package(
     return None
 
 
-def get_release_keys() -> dict[int, str]:
-    return {}
-
-
 def get_raw_files(request: fastapi.Request, platform: idoltype.PlatformType, files: list[str]):
     target = str(request.url)
     target = (target + "missing") if target[-1] == "/" else (target + "/missing")

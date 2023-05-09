@@ -9,6 +9,7 @@ import pydantic
 from . import dltype
 from .. import config
 from .. import idoltype
+from .. import release_key
 from .. import util
 
 from typing import Any, Literal, TypeVar, overload
@@ -20,7 +21,6 @@ NEED_PROTOCOL_VERSION = (1, 1)
 _public_info: dict[str, Any] = {}
 _base_url: str = config.CONFIG_DATA["download"]["n4dlapi"]["server"]
 _shared_key: str = config.CONFIG_DATA["download"]["n4dlapi"]["shared_key"]
-_release_keys: dict[int, str] = {}
 
 if _base_url[-1] != "/":
     _base_url = _base_url + "/"
@@ -141,11 +141,6 @@ def get_raw_files(request: fastapi.Request, platform: idoltype.PlatformType, fil
     return _fixup_links(pydantic.parse_obj_as(list[dltype.BaseInfo], result), int(platform))
 
 
-def get_release_keys() -> dict[int, str]:
-    global _release_keys
-    return _release_keys
-
-
 def initialize():
     global _public_info, _base_url
     print("Getting public info API from external server")
@@ -160,4 +155,4 @@ def initialize():
         )
 
     print("Getting release info keys")
-    _release_keys.update(_call_api("api/v1/release_info"))
+    release_key.update(_call_api("api/v1/release_info"))

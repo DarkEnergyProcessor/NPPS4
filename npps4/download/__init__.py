@@ -48,10 +48,6 @@ class _DLBackend(Protocol):
     ) -> list[dltype.BaseInfo]:
         ...
 
-    @staticmethod
-    def get_release_keys() -> dict[int, str]:
-        ...
-
 
 BACKENDS: dict[str, _DLBackend] = {"none": none_backend, "n4dlapi": n4dlapi_backend, "internal": internal_backend}
 
@@ -89,12 +85,6 @@ def get_single_package(request: fastapi.Request, platform: idoltype.PlatformType
 def get_raw_files(request: fastapi.Request, platform: idoltype.PlatformType, files: list[str]):
     global CURRENT_BACKEND
     return CURRENT_BACKEND.get_raw_files(request, platform, files)
-
-
-def get_formatted_release_keys():
-    global CURRENT_BACKEND
-    relkeys = CURRENT_BACKEND.get_release_keys()
-    return [{"id": k, "key": v} for k, v in relkeys.items()]
 
 
 CURRENT_BACKEND.initialize()

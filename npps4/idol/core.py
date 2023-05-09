@@ -11,10 +11,11 @@ import pydantic.generics
 import sqlalchemy.orm
 
 from . import error
-from .. import idoltype
 from .. import app
 from .. import config
 from .. import db
+from .. import idoltype
+from .. import release_key
 from .. import util
 
 from typing import Annotated, Callable, TypeVar, Generic
@@ -246,12 +247,10 @@ def assemble_response_data(response: _PossibleResponse):
 
 
 def build_response(context: SchoolIdolParams, response: _PossibleResponse):
-    from .. import download
-
     response_data_dict, status_code, http_code = assemble_response_data(response)
     response_data = {
         "response_data": response_data_dict,
-        "release_info": download.get_formatted_release_keys(),
+        "release_info": release_key.formatted(),
         "status_code": status_code,
     }
     jsondata = json.dumps(response_data).encode("UTF-8")

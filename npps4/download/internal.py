@@ -8,6 +8,7 @@ from . import dltype
 from .. import app
 from .. import config
 from .. import idoltype
+from .. import release_key
 from .. import util
 
 from typing import TypeVar, Generic, Callable, Any
@@ -167,11 +168,6 @@ def get_single_package(
     return result
 
 
-def get_release_keys():
-    release_info: dict[str, str] = _read_json(f"{_archive_root}/release_info.json")
-    return dict((int(k), v) for k, v in release_info.items())
-
-
 def get_raw_files(request: fastapi.Request, platform: idoltype.PlatformType, files: list[str]):
     latest = get_server_version()
     # Normalize path
@@ -214,5 +210,8 @@ def initialize():
 
     if generation["major"] != _NEED_GENERATION[0] or _NEED_GENERATION[1] > generation["minor"]:
         raise RuntimeError("The specified archive directory structure is out-of-date")
+
+    release_info: dict[str, str] = _read_json(f"{_archive_root}/release_info.json")
+    release_key.update(dict((int(k), v) for k, v in release_info.items()))
 
     app.core.mount("/archive-root", fastapi.staticfiles.StaticFiles(directory=_archive_root), "archive_root")
