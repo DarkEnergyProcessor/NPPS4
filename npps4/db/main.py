@@ -10,7 +10,7 @@ import sqlalchemy.orm
 from . import common
 from .. import config
 from .. import util
-from ..idol import system
+from ..idol.system import core
 
 SALT_SIZE = 16
 SNAKECASE_RE1 = re.compile("(.)([A-Z][a-z]+)")
@@ -38,7 +38,7 @@ class User(Base):
     level: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=1)
     exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
     previous_exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
-    next_exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=system.get_next_exp_cumulative(1))
+    next_exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=core.get_next_exp_cumulative(1))
     game_coin: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
     free_sns_coin: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
     paid_sns_coin: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)

@@ -1,6 +1,6 @@
-from .. import idol
-from ..db import main
-from ..idol import system
+from . import core
+from ... import idol
+from ...db import main
 
 from typing import overload
 
@@ -16,7 +16,7 @@ def create(context: idol.SchoolIdolParams, key: str, passwd: str):
     user.set_passwd(passwd)
     context.db.main.add(user)
     context.db.main.flush()
-    user.invite_code = system.get_invite_code(user.id)
+    user.invite_code = core.get_invite_code(user.id)
     context.db.main.flush()
     return user
 

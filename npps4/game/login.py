@@ -2,7 +2,7 @@ import base64
 
 from .. import idol
 from .. import util
-from ..idol import user
+from ..idol.system import user
 from ..idol import error
 
 import fastapi
