@@ -39,7 +39,7 @@
 					let compact = JSON.stringify(response.result)
 					let link = document.createElement("a")
 					link.classList.add("button")
-					link.setAttribute("href", "data:application/json;base64," + btoa(compact))
+					link.setAttribute("href", "data:application/json," + compact)
 					link.setAttribute("target", "_blank")
 					let button = document.createElement("button")
 					button.textContent = "Open response in new tab"
