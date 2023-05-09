@@ -26,4 +26,5 @@ def handover_exec(context: idol.SchoolIdolUserParams, request: HandoverExecReque
 def handover_kidinfo(context: idol.SchoolIdolUserParams) -> KIDInfoResponse:
     # TODO
     util.log("STUB /handover/kidInfo", severity=util.logging.WARNING)
+    raise error.IdolError(error.ERROR_KLAB_ID_SERVICE_MAINTENANCE, 600)
     return KIDInfoResponse(auth_url=str(context.request.url), server_timestamp=util.time())
