@@ -19,6 +19,8 @@ SNAKECASE_RE3 = re.compile("([a-z0-9])([A-Z])")
 
 
 class Base(sqlalchemy.orm.DeclarativeBase):
+    type_annotation_map = common.type_map_override
+
     @sqlalchemy.orm.declared_attr.directive
     def __tablename__(cls):
         name = cls.__name__
@@ -30,9 +32,9 @@ class Base(sqlalchemy.orm.DeclarativeBase):
 
 class User(Base):
     id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
-    key: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String, index=True)
-    passwd: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String, default="Kemp")
+    key: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(index=True)
+    passwd: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(default="Kemp")
     level: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=1)
     exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
     previous_exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)

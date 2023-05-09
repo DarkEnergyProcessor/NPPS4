@@ -6,7 +6,7 @@ from .. import download
 
 
 class Base(sqlalchemy.orm.DeclarativeBase):
-    pass
+    type_annotation_map = common.type_map_override
 
 
 class UnitAttribute(Base):
@@ -21,8 +21,8 @@ class UnitAttribute(Base):
 
     __tablename__ = "unit_attribute_m"
     attribute_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
-    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    name_en: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
+    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    name_en: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
 
 
 class UnitType(Base, common.MaybeEncrypted):
@@ -71,40 +71,40 @@ class UnitType(Base, common.MaybeEncrypted):
 
     __tablename__ = "unit_type_m"
     unit_type_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
-    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    speaker_name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    speaker_name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
+    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    speaker_name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    speaker_name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
     asset_background_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column(sqlalchemy.Integer)
-    image_button_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    image_button_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    background_color: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    background_color_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    name_image_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    name_image_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    album_series_name_image_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    album_series_name_image_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    skit_icon_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    named_skit_icon_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    named_skit_icon_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    name_plate_icon_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    age: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    age_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    birthday: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    birthday_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    school: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    school_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    hobby: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    hobby_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    blood_type: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    blood_type_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    height: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    height_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    three_size: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    three_size_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
+    image_button_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    image_button_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    background_color: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    background_color_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    name_image_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    name_image_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    album_series_name_image_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    album_series_name_image_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    skit_icon_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    named_skit_icon_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    named_skit_icon_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    name_plate_icon_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    age: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    age_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    birthday: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    birthday_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    school: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    school_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    hobby: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    hobby_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    blood_type: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    blood_type_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    height: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    height_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    three_size: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    three_size_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
     member_category: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
-    cv: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    cv_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
+    cv: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    cv_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
 
 
 class Unit(Base, common.MaybeEncrypted):
@@ -153,16 +153,16 @@ class Unit(Base, common.MaybeEncrypted):
     unit_number: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     unit_type_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     album_series_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
-    eponym: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    eponym_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
+    eponym: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    eponym_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
     normal_card_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     rank_max_card_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
-    normal_icon_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    normal_icon_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    rank_max_icon_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    rank_max_icon_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
+    normal_icon_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    normal_icon_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    rank_max_icon_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    rank_max_icon_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
     normal_unit_navi_asset_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     rank_max_unit_navi_asset_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     rarity: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
@@ -201,10 +201,10 @@ class MemberTag(Base, common.MaybeEncrypted):
 
     __tablename__ = "member_tag_m"
     member_tag_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
-    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    img_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    img_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
+    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    img_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    img_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
     display_flag: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     num_of_members: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
 
@@ -429,17 +429,17 @@ class UnitSkill(Base, common.MaybeEncrypted):
 
     __tablename__ = "unit_skill_m"
     unit_skill_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
-    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
+    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
     max_level: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     skill_effect_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     discharge_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     trigger_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     trigger_effect_type: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
     unit_skill_level_up_pattern_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
-    string_key_trigger: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    string_key_effect: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    string_key_long_description: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
+    string_key_trigger: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    string_key_effect: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    string_key_long_description: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
 
 
 engine = sqlalchemy.create_engine(

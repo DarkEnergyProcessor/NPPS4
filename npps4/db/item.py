@@ -6,7 +6,7 @@ from .. import download
 
 
 class Base(sqlalchemy.orm.DeclarativeBase):
-    pass
+    type_annotation_map = common.type_map_override
 
 
 class KGItem(Base, common.MaybeEncrypted):
@@ -38,17 +38,17 @@ class KGItem(Base, common.MaybeEncrypted):
     __tablename__ = "kg_item_m"
     item_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
     item_tab_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
-    name: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
+    name: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
     item_category_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column(index=True)
     item_sub_category_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
     effect_value: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
-    image_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    image_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    icon_image_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    icon_image_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    description: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    description_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
+    image_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    image_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    icon_image_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    icon_image_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    description: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    description_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
     rank: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
     enhancement_exp_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
     enhancement_pattern_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
@@ -75,12 +75,12 @@ class Award(Base, common.MaybeEncrypted):
 
     __tablename__ = "award_m"
     award_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
-    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    description: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    description_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    img_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    img_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
+    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    description: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    description_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    img_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    img_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
     sort: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     di_asset_display_flag: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
@@ -105,12 +105,12 @@ class Background(Base, common.MaybeEncrypted):
 
     __tablename__ = "background_m"
     background_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
-    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    description: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    description_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    img_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    thumbnail_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
+    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    description: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    description_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    img_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    thumbnail_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
     sort: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     background_shader_param_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
     background_flash_param_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
@@ -135,10 +135,10 @@ class LiveSE(Base):
 
     __tablename__ = "live_se_m"
     live_se_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
-    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    description: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    description_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
+    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    description: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    description_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
     sort: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
@@ -159,8 +159,8 @@ class LiveNotesIcon(Base, common.MaybeEncrypted):
 
     __tablename__ = "live_notes_icon_m"
     live_notes_icon_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
-    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
+    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
     sort: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
@@ -190,18 +190,18 @@ class RecoveryItem(Base, common.MaybeEncrypted):
 
     __tablename__ = "recovery_item_m"
     recovery_item_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
-    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
+    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
     recovery_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     recovery_value: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
-    small_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    small_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    middle_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    middle_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    large_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    large_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
-    description: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    description_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(common.String)
+    small_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    small_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    middle_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    middle_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    large_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    large_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    description: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    description_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
 
 
 class ChangeDelegateItem(Base):
@@ -374,8 +374,8 @@ class BuffItemUseLimitTime(Base):
 
     __tablename__ = "buff_item_use_limit_time_m"
     buff_item_use_limit_time_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
-    start_time: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
-    end_time: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
+    start_time: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    end_time: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
 
 
 class ItemExpire(Base):
@@ -391,7 +391,7 @@ class ItemExpire(Base):
     __tablename__ = "item_expire_m"
     add_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
     item_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
-    expire_date: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
+    expire_date: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
 
 
 class Memories(Base, common.MaybeEncrypted):
@@ -407,7 +407,7 @@ class Memories(Base, common.MaybeEncrypted):
     ```"""
 
     memories_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
-    img_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(common.String)
+    img_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
     background_shader_param_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
     background_flash_param_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
 
