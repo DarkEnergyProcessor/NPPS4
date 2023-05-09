@@ -183,7 +183,7 @@ class LiveCombo(Base):
 
     __tablename__ = "live_combo_m"
     combo_cnt: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
-    score_rate: sqlalchemy.orm.Mapped[float] = sqlalchemy.orm.mapped_column(common.Float)
+    score_rate: sqlalchemy.orm.Mapped[float] = sqlalchemy.orm.mapped_column()
     add_love_cnt: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
@@ -322,7 +322,7 @@ class LiveTime(Base):
     live_track_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
         sqlalchemy.ForeignKey("live_track_m.live_track_id"), primary_key=True
     )
-    live_time: sqlalchemy.orm.Mapped[float] = sqlalchemy.orm.mapped_column(common.Float)
+    live_time: sqlalchemy.orm.Mapped[float] = sqlalchemy.orm.mapped_column()
 
 
 class LiveSkillIcon(Base, common.MaybeEncrypted):

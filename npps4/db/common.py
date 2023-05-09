@@ -1,18 +1,20 @@
 import sqlalchemy
 import sqlalchemy.orm
+import sqlalchemy.dialects.mysql
 import sqlalchemy.dialects.oracle
 import sqlalchemy.dialects.sqlite
 
 
 IDInteger = sqlalchemy.BigInteger().with_variant(sqlalchemy.dialects.sqlite.INTEGER(), "sqlite")
-Float = (
-    sqlalchemy.Float(53)
+
+
+type_map_override = {
+    str: sqlalchemy.Text(),
+    float: sqlalchemy.Float(53)
     .with_variant(sqlalchemy.dialects.sqlite.REAL(), "sqlite")
     .with_variant(sqlalchemy.dialects.oracle.BINARY_DOUBLE(), "oracle")
-)
-
-
-type_map_override = {str: sqlalchemy.Text(), float: Float}
+    .with_variant(sqlalchemy.dialects.mysql.DOUBLE(53), "mysql", "mariadb"),
+}
 
 
 class MaybeEncrypted:
