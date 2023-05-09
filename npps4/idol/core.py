@@ -17,6 +17,11 @@ from .. import db
 from .. import idoltype
 from .. import release_key
 from .. import util
+from ..db import main
+from ..db import game_mater
+from ..db import item
+from ..db import live
+from ..db import unit
 
 from typing import Annotated, Callable, TypeVar, Generic
 
@@ -24,34 +29,52 @@ from typing import Annotated, Callable, TypeVar, Generic
 class Database:
     def __init__(self) -> None:
         self._mainsession: sqlalchemy.orm.Session | None = None
+        self._gmsession: sqlalchemy.orm.Session | None = None
+        self._itemsession: sqlalchemy.orm.Session | None = None
         self._livesession: sqlalchemy.orm.Session | None = None
         self._unitsession: sqlalchemy.orm.Session | None = None
 
     @property
     def main(self):
         if self._mainsession is None:
-            self._mainsession = db.main.get_session()
+            self._mainsession = main.get_session()
         return self._mainsession
+
+    @property
+    def game_mater(self):
+        if self._gmsession is None:
+            self._gmsession = game_mater.get_session()
+        return self._gmsession
+
+    @property
+    def item(self):
+        if self._itemsession is None:
+            self._itemsession = item.get_session()
+        return self._itemsession
 
     @property
     def live(self):
         if self._livesession is None:
-            self._livesession = db.live.get_session()
+            self._livesession = live.get_session()
         return self._livesession
 
     @property
     def unit(self):
         if self._unitsession is None:
-            self._unitsession = db.unit.get_session()
+            self._unitsession = unit.get_session()
         return self._unitsession
 
     def cleanup(self):
+        if self._mainsession is not None:
+            self._mainsession.close()
+        if self._gmsession is not None:
+            self._gmsession.close()
+        if self._itemsession is not None:
+            self._itemsession.close()
         if self._livesession is not None:
             self._livesession.close()
         if self._unitsession is not None:
             self._unitsession.close()
-        if self._mainsession is not None:
-            self._mainsession.close()
 
     def commit(self):
         if self._mainsession is not None:
