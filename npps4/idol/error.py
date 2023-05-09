@@ -152,22 +152,46 @@ ERROR_CODE_AWARD_ALREADY_GAINED = 4205
 ERROR_CODE_BACKGROUND_ALREADY_GAINED = 4206
 ERROR_CODE_AWARD_IS_CONTAINED_IN_BOX = 4207
 ERROR_CODE_BACKGROUND_IS_CONTAINED_IN_BOX = 4208
+
+# This Transfer Passcode is expired.
 ERROR_HANDOVER_EXPIRE = 4401
+# This Transfer Passcode is incorrect.
 ERROR_HANDOVER_NONE = 4402
+# You can't transfer data within the same device, nor if you still have purchased items such as :Loveca:Love Gems.
 ERROR_HANDOVER_SELF = 4403
+# This passcode has already been used.
 ERROR_HANDOVER_DISABLE_MU = 4404
+# Game data can't be transferred from this account.
+# Please wait for a while and try again.
 ERROR_HANDOVER_LOCKED_USER = 4405
+# Game data can't be transferred to this account.
+# Please wait for a while and try again.
 ERROR_HANDOVER_LOCKED_TARGET = 4406
+# Invaid Transfer ID or Transfer Passcode.
+# Please try again.
 ERROR_HANDOVER_INVALID_ID_OR_CODE = 4407
+# You can't  transfer your game data to a different OS as you still have Love Gems and/or purchased Scouting Tickets.
 ERROR_HANDOVER_PAYMENT_ITEM_POSSESSION = 4408
+
+# SIF ID cannot be accessed at this time.
 ERROR_KLAB_ID_SERVICE_NOT_AVAILABLE = 4490
+# Please log in again.
 ERROR_KLAB_ID_SERVICE_LOGIN_AGAIN = 4491
+# SIF ID is currently under maintenance.
 ERROR_KLAB_ID_SERVICE_MAINTENANCE = 4492
+# There is no Love Live! School Idol Festival game data registered to this SIF ID account.
 ERROR_KLAB_ID_SERVICE_NOT_REGISTERED = 4493
+# There is a Love Live! School Idol Festival game data registered to this SIF ID account.
+# Registered game data can be removed from Menu > Settings.
 ERROR_KLAB_ID_SERVICE_ALREADY_REGISTERED = 4494
+# A data mismatch was found.
+# You may be logged in to the incorrect SIF ID.
 ERROR_KLAB_ID_SERVICE_NOT_MATCH = 4495
+# An unexpected error has occured.
 ERROR_KLAB_ID_SERVICE_NOT_HAS_ENOUGH_SCOPE = 4496
+# An unexpected error has occured.
 ERROR_KLAB_ID_SERVICE_TASK_DISABLED = 8001
+
 ERROR_CODE_ONLINE_PLAY_COUNT_LIMIT_OVER = 4701
 ERROR_CODE_ONLINE_LIVE_HAS_GONE = 4702
 ERROR_CODE_FINAL_VOTE_OUT_TERM = 4710
