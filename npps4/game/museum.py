@@ -22,7 +22,7 @@ class MuseumInfoResponse(pydantic.BaseModel):
 @idol.register("/museum/info")
 def museum_info(context: idol.SchoolIdolUserParams) -> MuseumInfoResponse:
     # TODO
-    util.log("STUB /challenge/challengeInfo", severity=util.logging.WARNING)
+    util.log("STUB /museum/info", severity=util.logging.WARNING)
     return MuseumInfoResponse(
         museum_info=MuseumInfo(parameter=MuseumParameter(smile=0, pure=0, cool=0), contents_id_list=[])
     )
