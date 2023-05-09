@@ -1,14 +1,35 @@
 import traceback
+import urllib.parse
 
 import fastapi
-import fastapi.staticfiles
 import fastapi.responses
+import fastapi.staticfiles
+import fastapi.templating
+
+from . import errhand
+
+from typing import Annotated
 
 NPPS4_VERSION = (0, 0, 1)
 
 core = fastapi.FastAPI(title="NPPS4", version="%d.%d.%d" % NPPS4_VERSION, docs_url="/")
 main = fastapi.APIRouter(prefix="/main.php")
 webview = fastapi.APIRouter(prefix="/webview.php", default_response_class=fastapi.responses.HTMLResponse)
+templates = fastapi.templating.Jinja2Templates("templates")
+
+
+class _EndpointNotFound(Exception):
+    def __init__(self, endpoint) -> None:
+        super().__init__(endpoint)
+
+
+def get_token_manual(request: fastapi.Request):
+    str(request.headers)  # Don't remove this line!
+    authorize = request.headers.get("Authorize")
+    if authorize:
+        authorize_decoded = dict(urllib.parse.parse_qsl(authorize))
+        return authorize_decoded.get("token")
+    return None
 
 
 @core.get("/docs", include_in_schema=False)
@@ -18,17 +39,30 @@ def docs_handler():
 
 @core.exception_handler(404)
 def handler_404(request: fastapi.Request, exc: Exception):
+    dest = str(request.url)
+    token = get_token_manual(request)
+    if token and dest.find("main.php") != -1:
+        errhand.save_error(token, ["Endpoint not found", dest])
+
     return fastapi.responses.JSONResponse(
         status_code=404,
         content={"detail": f"Endpoint not found: {request.url}"},
+        headers={"Maintenance": "1"},
     )
 
 
 @core.exception_handler(500)
 def handler_500(request: fastapi.Request, exc: Exception):
+    dest = str(request.url)
+    token = get_token_manual(request)
+    tb = traceback.format_exception(exc)
+    if token and dest.find("main.php") != -1:
+        errhand.save_error(token, tb)
+
     return fastapi.responses.JSONResponse(
         status_code=500,
-        content={"exception": type(exc).__name__, "message": str(exc), "traceback": traceback.format_exception(exc)},
+        content={"exception": type(exc).__name__, "message": str(exc), "traceback": tb},
+        headers={"Maintenance": "1"},
     )
 
 

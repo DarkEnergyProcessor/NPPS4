@@ -1,3 +1,4 @@
+from . import ad
 from . import album
 from . import award
 from . import background
