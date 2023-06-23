@@ -59,7 +59,7 @@ newly-provided public key.
 
 ### Get client game database.
 
-TODO: We'll provide game files when it's ready.
+Please look here for instruction on making your own archive-root directory: https://gist.github.com/MikuAuahDark/ece4eb73b3396403c6a2f11610a783b8
 
 Database
 -----
