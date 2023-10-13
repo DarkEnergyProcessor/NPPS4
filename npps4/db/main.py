@@ -1,4 +1,3 @@
-import asyncio
 import base64
 import hashlib
 import hmac
@@ -69,6 +68,12 @@ class Background(common.Base):
     background_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     is_set: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column()
     insert_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=util.time)
+
+
+class TOSAgree(common.Base):
+    user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, sqlalchemy.ForeignKey(User.id), primary_key=True
+    )
 
 
 engine = sqlalchemy.ext.asyncio.create_async_engine(config.get_database_url())
