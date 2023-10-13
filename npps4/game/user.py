@@ -1,3 +1,4 @@
+from .. import config
 from .. import idol
 from .. import util
 from ..idol.system import user
@@ -68,12 +69,13 @@ class UserGetNaviResponse(pydantic.BaseModel):
 
 @idol.register("/user/changeName", batchable=False)
 async def user_changename(context: idol.SchoolIdolUserParams, request: ChangeNameRequest) -> ChangeNameResponse:
-    # TODO
-    util.log("STUB /user/changeName", request, severity=util.logging.WARNING)
-    if request.name == "Newcomer":
-        return ChangeNameResponse(before_name="Kemp", after_name=request.name)
+    if config.contains_badwords(request.name):
+        raise error.IdolError(error.ERROR_CODE_NG_WORDS)
 
-    raise error.IdolError(error.ERROR_CODE_NG_WORDS)
+    current_user = await user.get_current(context)
+    oldname = current_user.name
+    current_user.name = request.name
+    return ChangeNameResponse(before_name=oldname, after_name=request.name)
 
 
 @idol.register("/user/getNavi")
@@ -85,7 +87,7 @@ async def user_getnavi(context: idol.SchoolIdolUserParams) -> UserGetNaviRespons
 
 @idol.register("/user/userInfo")
 async def user_userinfo(context: idol.SchoolIdolUserParams) -> UserInfoResponse:
-    u = await user.get(context)
+    u = await user.get_current(context)
     if u is None:
         raise error.IdolError(error.ERROR_CODE_LIB_ERROR, 500, "User is not known", http_code=500)
     return UserInfoResponse(
