@@ -1,7 +1,6 @@
 import enum
 
 import pydantic
-import pydantic.generics
 
 from . import config
 
@@ -27,7 +26,7 @@ class XMCVerifyMode(enum.IntEnum):
 _S = TypeVar("_S", bound=pydantic.BaseModel | list[pydantic.BaseModel])
 
 
-class ResponseData(pydantic.generics.GenericModel, Generic[_S]):
+class ResponseData(pydantic.BaseModel, Generic[_S]):
     response_data: _S
     release_info: list[config.ReleaseInfoData] = []
     status_code: int = 200
