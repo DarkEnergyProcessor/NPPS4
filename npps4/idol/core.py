@@ -2,12 +2,10 @@ import dataclasses
 import enum
 import json
 import typing
-import types
 import urllib.parse
 
 import fastapi
 import pydantic
-import pydantic.generics
 import sqlalchemy.ext.asyncio
 
 from . import error
@@ -192,7 +190,7 @@ class Endpoint(Generic[_T, _U, _V]):
 
 def _get_request_data(model: type[_U]):
     def actual_getter(
-        request_data: Annotated[pydantic.Json[model], fastapi.Form()],
+        request_data: Annotated[model, fastapi.Form()],
         xmc: Annotated[str, fastapi.Header(alias="X-Message-Code")],
     ):
         return request_data

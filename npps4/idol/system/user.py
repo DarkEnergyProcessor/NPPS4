@@ -4,8 +4,6 @@ from . import core
 from ... import idol
 from ...db import main
 
-from typing import overload
-
 
 async def get(context: idol.SchoolIdolParams, id: int | None = None):
     if isinstance(context, idol.SchoolIdolUserParams):
