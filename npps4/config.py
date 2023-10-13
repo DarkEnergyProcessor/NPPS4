@@ -107,3 +107,16 @@ INJECT_SVINFO: bool = bool(CONFIG_DATA["download"]["send_patched_server_info"])
 def inject_server_info():
     global INJECT_SVINFO
     return INJECT_SVINFO
+
+
+BADWORDS: list[str] | None = CONFIG_DATA["game"]["badwords"]
+
+
+def contains_badwords(string: str):
+    if BADWORDS:
+        string = string.replace(" ", "")
+        for w in BADWORDS:
+            if w in string:
+                return True
+
+    return False

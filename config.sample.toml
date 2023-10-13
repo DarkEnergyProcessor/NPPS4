@@ -87,6 +87,12 @@ shared_key = ""
 # Path is relative to the project root directory.
 archive_root = "archive-root"
 
+[game]
+# Game-specific configuration
+
+# List of badwords. Bad words are words that can't be used in team formation, names, etc.
+badwords = []
+
 [advanced]
 # This is advanced configuration.
 # In most cases, you don't have to change anything.
