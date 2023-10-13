@@ -5,10 +5,19 @@ from ... import idol
 from ...db import main
 
 
-async def get(context: idol.SchoolIdolParams, id: int | None = None):
+async def get(context: idol.SchoolIdolParams, id: int):
     if isinstance(context, idol.SchoolIdolUserParams):
         id = context.token.user_id
+    else:
+        raise ValueError("must specify user id")
     return await context.db.main.get(main.User, id)
+
+
+async def get_current(context: idol.SchoolIdolUserParams):
+    result = await context.db.main.get(main.User, context.token.user_id)
+    if result is None:
+        raise ValueError("logic error, user is None")
+    return result
 
 
 async def create(context: idol.SchoolIdolParams, key: str, passwd: str):
