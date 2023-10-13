@@ -64,11 +64,12 @@ Please look here for instruction on making your own archive-root directory: http
 Database
 -----
 
-Please consult [SQLAlchemy supported database backends](https://docs.sqlalchemy.org/en/20/dialects/index.html) for more information.
-If in doubt, SQLite3 is a safe choice if you don't need performance as it's already Python built-in as
-[`sqlite3`](https://docs.python.org/3/library/sqlite3.html) module.
+Please consult [SQLAlchemy supported database backends](https://docs.sqlalchemy.org/en/20/dialects/index.html) for
+more information. If in doubt, SQLite3 is a safe choice if you don't need performance as it's already a part of NPPS4
+required dependencies.
 
-Otherwise, install the additional dependencies depending on which backend you want to use.
+Otherwise, install the additional dependencies depending on which backend you want to use. Ensure to install the 
+"async" version of the database packages!
 
 Configuration
 -----
