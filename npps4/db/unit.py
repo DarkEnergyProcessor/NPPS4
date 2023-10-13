@@ -1,15 +1,12 @@
 import sqlalchemy
+import sqlalchemy.ext.asyncio
 import sqlalchemy.orm
 
 from . import common
 from .. import download
 
 
-class Base(sqlalchemy.orm.DeclarativeBase):
-    type_annotation_map = common.type_map_override
-
-
-class UnitAttribute(Base):
+class UnitAttribute(common.GameDBBase):
     """```sql
     CREATE TABLE `unit_attribute_m` (
         `attribute_id` INTEGER NOT NULL,
@@ -25,7 +22,7 @@ class UnitAttribute(Base):
     name_en: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
 
 
-class UnitType(Base, common.MaybeEncrypted):
+class UnitType(common.GameDBBase, common.MaybeEncrypted):
     """```sql
     CREATE TABLE `unit_type_m` (
         `unit_type_id` INTEGER NOT NULL,
@@ -107,7 +104,7 @@ class UnitType(Base, common.MaybeEncrypted):
     cv_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
 
 
-class Unit(Base, common.MaybeEncrypted):
+class Unit(common.GameDBBase, common.MaybeEncrypted):
     """```sql
     CREATE TABLE `unit_m` (
         `unit_id` INTEGER NOT NULL,
@@ -184,7 +181,7 @@ class Unit(Base, common.MaybeEncrypted):
     sub_unit_type_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
 
 
-class MemberTag(Base, common.MaybeEncrypted):
+class MemberTag(common.GameDBBase, common.MaybeEncrypted):
     """```sql
     CREATE TABLE `member_tag_m` (
         `member_tag_id` INTEGER NOT NULL,
@@ -209,7 +206,7 @@ class MemberTag(Base, common.MaybeEncrypted):
     num_of_members: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
 
 
-class UnitTypeMemberTag(Base):
+class UnitTypeMemberTag(common.GameDBBase):
     """```sql
     CREATE TABLE `unit_type_member_tag_m` (
         `unit_type_id` INTEGER NOT NULL,
@@ -223,7 +220,7 @@ class UnitTypeMemberTag(Base):
     member_tag_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
 
 
-class UnitMemberTag(Base):
+class UnitMemberTag(common.GameDBBase):
     """```sql
     CREATE TABLE `unit_member_tag_m` (
         `unit_id` INTEGER NOT NULL,
@@ -237,7 +234,7 @@ class UnitMemberTag(Base):
     member_tag_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
 
 
-class UnitLevelUpPattern(Base):
+class UnitLevelUpPattern(common.GameDBBase):
     """```sql
     CREATE TABLE `unit_level_up_pattern_m` (
         `unit_level_up_pattern_id` INTEGER NOT NULL,
@@ -278,7 +275,7 @@ class _UnitFunctionVoiceCommon:
     function_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-class UnitBaseFunctionVoice(Base, _UnitVoiceCommon, _UnitFunctionVoiceCommon):
+class UnitBaseFunctionVoice(common.GameDBBase, _UnitVoiceCommon, _UnitFunctionVoiceCommon):
     """```sql
     CREATE TABLE `unit_base_function_voice_m` (
         `unit_base_function_voice_id` INTEGER NOT NULL,
@@ -297,7 +294,7 @@ class UnitBaseFunctionVoice(Base, _UnitVoiceCommon, _UnitFunctionVoiceCommon):
     unit_type_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-class UnitFunctionVoice(Base, _UnitVoiceCommon, _UnitFunctionVoiceCommon):
+class UnitFunctionVoice(common.GameDBBase, _UnitVoiceCommon, _UnitFunctionVoiceCommon):
     """```sql
     CREATE TABLE `unit_function_voice_m` (
         `unit_function_voice_id` INTEGER NOT NULL,
@@ -316,7 +313,7 @@ class UnitFunctionVoice(Base, _UnitVoiceCommon, _UnitFunctionVoiceCommon):
     unit_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-class UnitBaseRandomVoice(Base, _UnitVoiceCommon):
+class UnitBaseRandomVoice(common.GameDBBase, _UnitVoiceCommon):
     """```sql
     CREATE TABLE `unit_base_random_voice_m` (
         `unit_base_random_voice_id` INTEGER NOT NULL,
@@ -333,7 +330,7 @@ class UnitBaseRandomVoice(Base, _UnitVoiceCommon):
     unit_type_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-class UnitRandomVoice(Base, _UnitVoiceCommon):
+class UnitRandomVoice(common.GameDBBase, _UnitVoiceCommon):
     """```sql
     CREATE TABLE `unit_random_voice_m` (
         `unit_random_voice_id` INTEGER NOT NULL,
@@ -357,7 +354,7 @@ class _UnitTouchVoiceCommon:
     to_y: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-class UnitBaseTouchVoice(Base, _UnitTouchVoiceCommon, _UnitVoiceCommon):
+class UnitBaseTouchVoice(common.GameDBBase, _UnitTouchVoiceCommon, _UnitVoiceCommon):
     """```sql
     CREATE TABLE `unit_base_touch_voice_m` (
         `unit_base_touch_voice_id` INTEGER NOT NULL,
@@ -380,7 +377,7 @@ class UnitBaseTouchVoice(Base, _UnitTouchVoiceCommon, _UnitVoiceCommon):
     min_rarity: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-class UnitTouchVoice(Base, _UnitTouchVoiceCommon, _UnitVoiceCommon):
+class UnitTouchVoice(common.GameDBBase, _UnitTouchVoiceCommon, _UnitVoiceCommon):
     """```sql
     CREATE TABLE `unit_touch_voice_m` (
         `unit_touch_voice_id` INTEGER NOT NULL,
@@ -407,7 +404,7 @@ class UnitTouchVoice(Base, _UnitTouchVoiceCommon, _UnitVoiceCommon):
 # TODO: unit_birthday_voice_m
 
 
-class UnitSkill(Base, common.MaybeEncrypted):
+class UnitSkill(common.GameDBBase, common.MaybeEncrypted):
     """```sql
     CREATE TABLE `unit_skill_m` (
         `unit_skill_id` INTEGER NOT NULL,
@@ -442,16 +439,13 @@ class UnitSkill(Base, common.MaybeEncrypted):
     string_key_long_description: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
 
 
-engine = sqlalchemy.create_engine(
-    f"sqlite+pysqlite:///file:{download.get_db_path('unit')}?mode=ro&uri=true",
-    connect_args={"check_same_thread": False},
+engine = sqlalchemy.ext.asyncio.create_async_engine(
+    f"sqlite+aiosqlite:///file:{download.get_db_path('unit')}?mode=ro&uri=true",
 )
-sessionmaker = sqlalchemy.orm.sessionmaker()
-sessionmaker.configure(binds={Base: engine})
-scoped_session = sqlalchemy.orm.scoped_session(sessionmaker)
+sessionmaker = sqlalchemy.ext.asyncio.async_sessionmaker(engine)
+session = sessionmaker()
 
 
 def get_session():
-    global scoped_session
-    session = scoped_session()
+    global session
     return session

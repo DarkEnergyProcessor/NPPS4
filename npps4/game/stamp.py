@@ -643,7 +643,7 @@ STUB_DATA = b"""{
 
 
 @idol.register("/stamp/stampInfo")
-def stamp_stampinfo(context: idol.SchoolIdolUserParams) -> StampInfoResponse:
+async def stamp_stampinfo(context: idol.SchoolIdolUserParams) -> StampInfoResponse:
     # TODO
     util.log("STUB /stamp/stampInfo", severity=util.logging.WARNING)
-    return pydantic.parse_raw_as(StampInfoResponse, STUB_DATA)
+    return StampInfoResponse.model_validate_json(STUB_DATA)

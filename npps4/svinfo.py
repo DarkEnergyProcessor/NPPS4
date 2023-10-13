@@ -92,7 +92,7 @@ def generate_server_info(request: fastapi.Request, platform: int, version: tuple
         elif platform_type == 2:
             scheme = "http"
         else:
-            raise fastapi.HTTPException(422, detail="Unknown platform type")
+            raise fastapi.HTTPException(422, "Unknown platform type")
 
         ver: str = util.sif_version_string(version)
         end_point = make_endpoint(app.main.prefix, scheme, request)

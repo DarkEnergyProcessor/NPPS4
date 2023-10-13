@@ -9,7 +9,7 @@ class MultiUnitScenarioResponse(pydantic.BaseModel):
 
 
 @idol.register("/multiunit/multiunitscenarioStatus")
-def multiunit_multiunitscenariostatus(context: idol.SchoolIdolUserParams) -> MultiUnitScenarioResponse:
+async def multiunit_multiunitscenariostatus(context: idol.SchoolIdolUserParams) -> MultiUnitScenarioResponse:
     # TODO
     util.log("STUB /multiunit/multiunitscenarioStatus", severity=util.logging.WARNING)
     return MultiUnitScenarioResponse(multi_unit_scenario_status_list=[])

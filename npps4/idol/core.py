@@ -8,7 +8,7 @@ import urllib.parse
 import fastapi
 import pydantic
 import pydantic.generics
-import sqlalchemy.orm
+import sqlalchemy.ext.asyncio
 
 from . import error
 from .. import app
@@ -23,21 +23,22 @@ from ..db import item
 from ..db import live
 from ..db import unit
 
-from typing import Annotated, Callable, TypeVar, Generic
+from typing import Annotated, Any, Callable, Coroutine, TypeVar, Generic
 
 
 class Database:
     def __init__(self) -> None:
-        self._mainsession: sqlalchemy.orm.Session | None = None
-        self._gmsession: sqlalchemy.orm.Session | None = None
-        self._itemsession: sqlalchemy.orm.Session | None = None
-        self._livesession: sqlalchemy.orm.Session | None = None
-        self._unitsession: sqlalchemy.orm.Session | None = None
+        self._mainsession: sqlalchemy.ext.asyncio.AsyncSession | None = None
+        self._gmsession: sqlalchemy.ext.asyncio.AsyncSession | None = None
+        self._itemsession: sqlalchemy.ext.asyncio.AsyncSession | None = None
+        self._livesession: sqlalchemy.ext.asyncio.AsyncSession | None = None
+        self._unitsession: sqlalchemy.ext.asyncio.AsyncSession | None = None
 
     @property
     def main(self):
         if self._mainsession is None:
-            self._mainsession = main.get_session()
+            sessionmaker = main.get_sessionmaker()
+            self._mainsession = sessionmaker()
         return self._mainsession
 
     @property
@@ -64,25 +65,17 @@ class Database:
             self._unitsession = unit.get_session()
         return self._unitsession
 
-    def cleanup(self):
+    async def cleanup(self):
         if self._mainsession is not None:
-            self._mainsession.close()
-        if self._gmsession is not None:
-            self._gmsession.close()
-        if self._itemsession is not None:
-            self._itemsession.close()
-        if self._livesession is not None:
-            self._livesession.close()
-        if self._unitsession is not None:
-            self._unitsession.close()
+            await self._mainsession.close()
 
-    def commit(self):
+    async def commit(self):
         if self._mainsession is not None:
-            self._mainsession.commit()
+            await self._mainsession.commit()
 
-    def rollback(self):
+    async def rollback(self):
         if self._mainsession is not None:
-            self._mainsession.rollback()
+            await self._mainsession.rollback()
 
 
 class SchoolIdolParams:
@@ -95,7 +88,6 @@ class SchoolIdolParams:
         client_version: Annotated[str, fastapi.Header(alias="Client-Version")],
         lang: Annotated[idoltype.Language, fastapi.Header(alias="LANG")],
         platform_type: Annotated[idoltype.PlatformType, fastapi.Header(alias="Platform-Type")],
-        request_data: Annotated[bytes | None, fastapi.Form(exclude=True, include=False)] = None,
     ):
         authorize_parsed = dict(urllib.parse.parse_qsl(authorize))
         if authorize_parsed.get("consumerKey") != "lovelive_test":
@@ -114,17 +106,19 @@ class SchoolIdolParams:
             self.timestamp = int(authorize_parsed.get("timeStamp", ts))
         except ValueError:
             self.timestamp = ts
-
-        # Note: Due to how FastAPI works, the `request_data` form is retrieved TWICE!
-        # One in here, retrieved as raw bytes, and the other one is in _get_request_data
-        # as Pydantic model.
-        # This is necessary for proper X-Message-Code verification!
-        self.raw_request_data = request_data or b""
         self.lang = lang
         self.platform = platform_type
         self.x_message_code = request.headers.get("X-Message-Code")
         self.request = request
         self.db = Database()
+        self.raw_request_data = b""
+
+    async def populate_request_data(self):
+        # Note: Due to how FastAPI works, the `request_data` form is retrieved TWICE!
+        # One in here, retrieved as raw bytes, and the other one is in _get_request_data
+        # as Pydantic model.
+        # This is necessary for proper X-Message-Code verification!
+        self.raw_request_data = await self.request.body()
 
 
 class SchoolIdolAuthParams(SchoolIdolParams):
@@ -140,9 +134,8 @@ class SchoolIdolAuthParams(SchoolIdolParams):
         client_version: Annotated[str, fastapi.Header(alias="Client-Version")],
         lang: Annotated[idoltype.Language, fastapi.Header(alias="LANG")],
         platform_type: Annotated[idoltype.PlatformType, fastapi.Header(alias="Platform-Type")],
-        request_data: Annotated[bytes | None, fastapi.Form(exclude=True, include=False)] = None,
     ):
-        super().__init__(request, authorize, client_version, lang, platform_type, request_data)
+        super().__init__(request, authorize, client_version, lang, platform_type)
         token = None
         if self.token_text is not None:
             token = util.decapsulate_token(self.token_text)
@@ -166,9 +159,8 @@ class SchoolIdolUserParams(SchoolIdolAuthParams):
         client_version: Annotated[str, fastapi.Header(alias="Client-Version")],
         lang: Annotated[idoltype.Language, fastapi.Header(alias="LANG")],
         platform_type: Annotated[idoltype.PlatformType, fastapi.Header(alias="Platform-Type")],
-        request_data: Annotated[bytes | None, fastapi.Form(exclude=True, include=False)] = None,
     ):
-        super().__init__(request, authorize, client_version, lang, platform_type, request_data)
+        super().__init__(request, authorize, client_version, lang, platform_type)
         if self.token.user_id == 0:
             raise fastapi.HTTPException(403, detail="Not logged in!")
 
@@ -178,21 +170,24 @@ _U = TypeVar("_U", bound=pydantic.BaseModel)
 _V = TypeVar("_V", bound=pydantic.BaseModel, covariant=True)
 
 
+_PossibleEndpointFunction = (
+    Callable[[_T, _U], Coroutine[Any, Any, _V]]  # Request is pydantic, response is pydantic
+    | Callable[[_T, list[_U]], Coroutine[Any, Any, _V]]  # Request is list of pydantics, response is pydantic
+    | Callable[[_T, _U], Coroutine[Any, Any, list[_V]]]  # Request is pydantic, response is list of pydantics
+    | Callable[
+        [_T, list[_U]], Coroutine[Any, Any, list[_V]]
+    ]  # Request is list of pydantics, response is list of pydantics
+    | Callable[[_T], Coroutine[Any, Any, _V]]  # Request is none, response is pydantic
+    | Callable[[_T], Coroutine[Any, Any, list[_V]]]  # Request is none, response is list of pydantics
+)
+
+
 @dataclasses.dataclass
 class Endpoint(Generic[_T, _U, _V]):
     context_class: type[SchoolIdolParams | SchoolIdolAuthParams | SchoolIdolUserParams]
     request_class: type[pydantic.BaseModel] | None
     is_request_list: bool
-    function: Callable[
-        [
-            SchoolIdolParams | SchoolIdolAuthParams | SchoolIdolUserParams,
-            pydantic.BaseModel | list[pydantic.BaseModel],
-        ],
-        pydantic.BaseModel | list[pydantic.BaseModel],
-    ] | Callable[
-        [SchoolIdolParams | SchoolIdolAuthParams | SchoolIdolUserParams],
-        pydantic.BaseModel | list[pydantic.BaseModel],
-    ]
+    function: _PossibleEndpointFunction[_T, _U, _V]
 
 
 def _get_request_data(model: type[_U]):
@@ -205,7 +200,7 @@ def _get_request_data(model: type[_U]):
     return actual_getter
 
 
-def client_check(context: SchoolIdolParams, check_version: bool, xmc_verify: idoltype.XMCVerifyMode):
+async def client_check(context: SchoolIdolParams, check_version: bool, xmc_verify: idoltype.XMCVerifyMode):
     # Maintenance check
     if config.is_maintenance():
         return fastapi.responses.JSONResponse(
@@ -215,6 +210,8 @@ def client_check(context: SchoolIdolParams, check_version: bool, xmc_verify: ido
                 "Maintenance": "1",
             },
         )
+
+    await context.populate_request_data()
 
     # XMC check
     if config.need_xmc_verify() and context.raw_request_data is not None and xmc_verify != idoltype.XMCVerifyMode.NONE:
@@ -239,11 +236,11 @@ def client_check(context: SchoolIdolParams, check_version: bool, xmc_verify: ido
     # Client-Version check
     if check_version:
         if config.get_latest_version() != context.client_version:
-            return build_response(context, None)
+            return await build_response(context, None)
     return None
 
 
-_PossibleResponse = pydantic.BaseModel | list[pydantic.BaseModel] | error.IdolError | Exception | None
+_PossibleResponse = _V | list[_V] | error.IdolError | Exception | None
 
 
 def assemble_response_data(response: _PossibleResponse):
@@ -261,15 +258,15 @@ def assemble_response_data(response: _PossibleResponse):
         response_data = []
         status_code = http_code = 200
     elif isinstance(response, list):
-        response_data = [r.dict() for r in response]
+        response_data = [r.model_dump() for r in response]
         status_code = http_code = 200
     else:
-        response_data = response.dict()
+        response_data = response.model_dump()
         status_code = http_code = 200
     return response_data, status_code, http_code
 
 
-def build_response(context: SchoolIdolParams, response: _PossibleResponse):
+async def build_response(context: SchoolIdolParams, response: _PossibleResponse[_V]):
     response_data_dict, status_code, http_code = assemble_response_data(response)
     response_data = {
         "response_data": response_data_dict,
@@ -277,7 +274,7 @@ def build_response(context: SchoolIdolParams, response: _PossibleResponse):
         "status_code": status_code,
     }
     jsondata = json.dumps(response_data).encode("UTF-8")
-    context.db.cleanup()
+    await context.db.cleanup()
     return fastapi.responses.Response(
         jsondata,
         http_code,
@@ -291,7 +288,9 @@ def build_response(context: SchoolIdolParams, response: _PossibleResponse):
 
 
 def _get_real_param(param: type[idoltype._S]):
-    if isinstance(param, types.GenericAlias) and param.__origin__ is list:
+    origin = typing.get_origin(param)
+
+    if origin is list:
         return typing.get_args(param)[0], True
     else:
         return param, False
@@ -303,16 +302,6 @@ RESPONSE_HEADERS = {
     "X-Message-Sign": {"type": "string"},
     "status_code": {"type": "string"},
 }
-
-
-_PossibleEndpointFunction = (
-    Callable[[_T, _U], _V]  # Request is pydantic, response is pydantic
-    | Callable[[_T, list[_U]], _V]  # Request is list of pydantics, response is pydantic
-    | Callable[[_T, _U], list[_V]]  # Request is pydantic, response is list of pydantics
-    | Callable[[_T, list[_U]], list[_V]]  # Request is list of pydantics, response is list of pydantics
-    | Callable[[_T], _V]  # Request is none, response is pydantic
-    | Callable[[_T], list[_V]]  # Request is none, response is list of pydantics
-)
 
 
 def register(
@@ -332,7 +321,7 @@ def register(
         module_name = module_action.split("/")[0]
 
         signature = typing.get_type_hints(f)
-        params: list[type] = list(map(lambda x: x[1], filter(lambda x: x[0] != "return", signature.items())))
+        params = list(map(lambda x: x[1], filter(lambda x: x[0] != "return", signature.items())))
         ret: type[_V | pydantic.BaseModel] = signature.get("return", pydantic.BaseModel)
         tags: list[str | enum.Enum] = [module_name]
 
@@ -357,19 +346,19 @@ def register(
                 responses={200: {"headers": RESPONSE_HEADERS}},
                 tags=tags,
             )
-            def wrap1(context: Annotated[_T, fastapi.Depends(params[0])]):
+            async def wrap1(context: Annotated[_T, fastapi.Depends(params[0])]):
                 nonlocal ret, check_version, xmc_verify
-                response = client_check(context, check_version, xmc_verify)
+                response = await client_check(context, check_version, xmc_verify)
                 if response is None:
                     try:
                         result: _V = f(context)  # type: ignore
-                        context.db.commit()
+                        await context.db.commit()
                         response = build_response(context, result)
                     except error.IdolError as e:
-                        context.db.rollback()
+                        await context.db.rollback()
                         response = build_response(context, e)
                     except Exception:
-                        context.db.rollback()
+                        await context.db.rollback()
                         raise
                 return response
 
@@ -383,35 +372,37 @@ def register(
                 responses={200: {"headers": RESPONSE_HEADERS}},
                 tags=tags,
             )
-            def wrap2(
+            async def wrap2(
                 context: Annotated[_T, fastapi.Depends(params[0])],
                 request: Annotated[_U, fastapi.Depends(_get_request_data(params[1]))],
             ):
                 nonlocal ret, check_version, xmc_verify
-                response = client_check(context, check_version, xmc_verify)
+                response = await client_check(context, check_version, xmc_verify)
                 if response is None:
                     try:
                         result: _V = f(context, request)  # type: ignore
-                        context.db.commit()
-                        response = build_response(context, result)
+                        await context.db.commit()
+                        response = await build_response(context, result)
                     except error.IdolError as e:
-                        context.db.rollback()
-                        response = build_response(context, e)
+                        await context.db.rollback()
+                        response = await build_response(context, e)
                     except Exception:
-                        context.db.rollback()
+                        await context.db.rollback()
                         raise
                 return response
 
         if batchable:
+            real_request: type[_V] | None = None
+            is_request_list = False
+
             if len(params) > 1:
                 real_request, is_request_list = _get_real_param(params[1])
-            else:
-                real_request, is_request_list = None, False
+
             API_ROUTER_MAP[module_action] = Endpoint(
                 context_class=params[0],
-                request_class=real_request,  # type: ignore
+                request_class=real_request,
                 is_request_list=is_request_list,
-                function=f,  # type: ignore
+                function=f,
             )
         return f
 
@@ -423,8 +414,14 @@ class BatchRequest(pydantic.BaseModel):
     action: str
 
 
-class BatchRequestRoot(pydantic.BaseModel):
-    __root__: list[BatchRequest]
+class BatchRequestRoot(pydantic.RootModel):
+    root: list[BatchRequest]
+
+    def __iter__(self):
+        return iter(self.root)
+
+    def __getitem__(self, item):
+        return self.root[item]
 
 
 class BatchResponse(pydantic.BaseModel):
@@ -434,18 +431,23 @@ class BatchResponse(pydantic.BaseModel):
     timeStamp: int
 
 
-class BatchResponseRoot(pydantic.BaseModel):
-    __root__: list[BatchResponse]
+class BatchResponseRoot(pydantic.RootModel):
+    root: list[BatchResponse]
+
+    def __iter__(self):
+        return iter(self.root)
+
+    def __getitem__(self, item):
+        return self.root[item]
 
 
 @app.main.post("/api", response_model=idoltype.ResponseData[BatchResponseRoot])  # type: ignore
-def api_endpoint(
+async def api_endpoint(
     context: Annotated[SchoolIdolUserParams, fastapi.Depends(SchoolIdolUserParams)],
     request: Annotated[list[BatchRequest], fastapi.Depends(_get_request_data(BatchRequestRoot))],
-    raw_req: Annotated[bytes, fastapi.Form(alias="request_data", exclude=True)],
 ):
-    response = client_check(context, True, idoltype.XMCVerifyMode.SHARED)
-    raw_request_data = json.loads(raw_req)
+    response = await client_check(context, True, idoltype.XMCVerifyMode.SHARED)
+    raw_request_data = json.loads(context.raw_request_data)
 
     if response is None:
         response_data: list[BatchResponse] = []
@@ -464,22 +466,24 @@ def api_endpoint(
                 # *Sigh* have to reinvent the wheel.
                 if endpoint.request_class is not None:
                     if endpoint.is_request_list:
-                        pydantic_request = list(map(endpoint.request_class.parse_obj, request_data))
+                        pydantic_request = list(map(endpoint.request_class.model_validate, request_data))
                     else:
-                        pydantic_request = endpoint.request_class.parse_obj(request_data)
-                    result = endpoint.function(context, pydantic_request)  # type: ignore
+                        pydantic_request = endpoint.request_class.model_validate(request_data)
+                    result = await endpoint.function(context, pydantic_request)  # type: ignore
                 else:
-                    result = endpoint.function(context)  # type: ignore
+                    result = await endpoint.function(context)  # type: ignore
 
-                context.db.commit()
+                await context.db.commit()
                 current_response, status_code, http_code = assemble_response_data(result)
             except Exception as e:
-                context.db.rollback()
+                await context.db.rollback()
+
                 if not isinstance(e, error.IdolError):
                     util.log(f'Error processing "{module}/{action}"', severity=util.logging.ERROR, e=e)
+
                 current_response, status_code, http_code = assemble_response_data(e)
 
             response_data.append(BatchResponse(result=current_response, status=status_code, timeStamp=util.time()))
 
-        response = build_response(context, response_data)  # type: ignore
+        response = await build_response(context, response_data)
     return response

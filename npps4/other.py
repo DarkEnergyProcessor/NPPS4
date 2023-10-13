@@ -11,7 +11,7 @@ from . import config
     responses={200: {"content": {"application/zip": {}}}},
     response_class=fastapi.responses.Response,
 )
-def server_info(filehash: str):
+async def server_info(filehash: str):
     """
     Get zip archive containing new server_info.json for this private server.
     """

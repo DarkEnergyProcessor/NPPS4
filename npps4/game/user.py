@@ -67,7 +67,7 @@ class UserGetNaviResponse(pydantic.BaseModel):
 
 
 @idol.register("/user/changeName", batchable=False)
-def user_changename(context: idol.SchoolIdolUserParams, request: ChangeNameRequest) -> ChangeNameResponse:
+async def user_changename(context: idol.SchoolIdolUserParams, request: ChangeNameRequest) -> ChangeNameResponse:
     # TODO
     util.log("STUB /user/changeName", request, severity=util.logging.WARNING)
     if request.name == "Newcomer":
@@ -77,15 +77,15 @@ def user_changename(context: idol.SchoolIdolUserParams, request: ChangeNameReque
 
 
 @idol.register("/user/getNavi")
-def user_getnavi(context: idol.SchoolIdolUserParams) -> UserGetNaviResponse:
+async def user_getnavi(context: idol.SchoolIdolUserParams) -> UserGetNaviResponse:
     # TODO
     util.log("STUB /user/getNavi", severity=util.logging.WARNING)
     return UserGetNaviResponse(user=UserNavi(user_id=context.token.user_id, unit_owning_user_id=0))
 
 
 @idol.register("/user/userInfo")
-def user_userinfo(context: idol.SchoolIdolUserParams) -> UserInfoResponse:
-    u = user.get(context)
+async def user_userinfo(context: idol.SchoolIdolUserParams) -> UserInfoResponse:
+    u = await user.get(context)
     if u is None:
         raise error.IdolError(error.ERROR_CODE_LIB_ERROR, 500, "User is not known", http_code=500)
     return UserInfoResponse(

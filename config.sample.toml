@@ -23,8 +23,14 @@ secret_key = "Hello World"
 
 # Database connection string.
 # If in doubt, SQLite3 is a safe choice if you don't need performance as
-# SQLite3 is provided by standard Python distribution.
-url = "sqlite+pysqlite:///data/main.sqlite3"
+# SQLite3 is available as part of NPPS4 requirements to access game DB files.
+# Note: An async backend must be used:
+# * SQLite3: sqlite+aiosqlite
+# * PostgreSQL: postgresql+asyncpg
+# * MySQL/MariaDB: 
+# For additional database backend please consult SQLAlchemy dialects:
+# https://docs.sqlalchemy.org/en/20/dialects/
+url = "sqlite+aiosqlite:///data/main.sqlite3"
 
 [download]
 # This is in-game-download-related configuration.

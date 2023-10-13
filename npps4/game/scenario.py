@@ -16,7 +16,7 @@ class ScenarioStatusResponse(pydantic.BaseModel):
 
 
 @idol.register("/scenario/scenarioStatus")
-def scenario_scenariostatus(context: idol.SchoolIdolUserParams) -> ScenarioStatusResponse:
+async def scenario_scenariostatus(context: idol.SchoolIdolUserParams) -> ScenarioStatusResponse:
     # TODO
     util.log("STUB /scenario/scenarioStatus", severity=util.logging.WARNING)
     return ScenarioStatusResponse(

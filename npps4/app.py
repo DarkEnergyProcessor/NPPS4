@@ -33,12 +33,12 @@ def get_token_manual(request: fastapi.Request):
 
 
 @core.get("/docs", include_in_schema=False)
-def docs_handler():
+async def docs_handler():
     return fastapi.responses.RedirectResponse("/", 302)
 
 
 @core.exception_handler(404)
-def handler_404(request: fastapi.Request, exc: Exception):
+async def handler_404(request: fastapi.Request, exc: Exception):
     dest = str(request.url)
     token = get_token_manual(request)
     if token and dest.find("main.php") != -1:
@@ -52,7 +52,7 @@ def handler_404(request: fastapi.Request, exc: Exception):
 
 
 @core.exception_handler(500)
-def handler_500(request: fastapi.Request, exc: Exception):
+async def handler_500(request: fastapi.Request, exc: Exception):
     dest = str(request.url)
     token = get_token_manual(request)
     tb = traceback.format_exception(exc)

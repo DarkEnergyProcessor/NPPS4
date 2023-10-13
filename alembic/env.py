@@ -21,7 +21,7 @@ if config.config_file_name is not None:
 from npps4.db import main as npps4_model
 from npps4 import config as npps4_config
 
-target_metadata = npps4_model.Base.metadata
+target_metadata = npps4_model.common.Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

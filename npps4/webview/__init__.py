@@ -12,13 +12,14 @@ from . import tos
 
 @app.core.get("/resources/maintenace/maintenance.php", response_class=fastapi.responses.HTMLResponse)
 @app.core.get("/resources/maintenance/maintenance.php", response_class=fastapi.responses.HTMLResponse)
-def maintenance_page(request: fastapi.Request):
+async def maintenance_page(request: fastapi.Request):
     if config.is_maintenance():
         with open("templates/maintenance.html", "rb") as f:
             return f.read()
     else:
         # Error?
         message = "No additional error message available"
+        str(request.headers)  # Don't remove this line
         authorize = request.headers.get("Authorize")
         if authorize:
             authorize_decoded = dict(urllib.parse.parse_qsl(authorize))

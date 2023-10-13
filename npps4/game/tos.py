@@ -15,10 +15,14 @@ class TOSAgreeRequest(pydantic.BaseModel):
 
 
 @idol.register("/tos/tosCheck")
-def tos_toscheck(context: idol.SchoolIdolUserParams) -> TOSCheckResponse:
+async def tos_toscheck(context: idol.SchoolIdolUserParams) -> TOSCheckResponse:
+    # TODO
+    util.log("STUB /tos/tosCheck", severity=util.logging.WARNING)
     return TOSCheckResponse(tos_id=1, tos_type=1, server_timestamp=util.time())
 
 
 @idol.register("/tos/tosAgree", batchable=False)
-def tos_tosagree(context: idol.SchoolIdolUserParams, request: TOSAgreeRequest) -> pydantic.BaseModel:
+async def tos_tosagree(context: idol.SchoolIdolUserParams, request: TOSAgreeRequest) -> pydantic.BaseModel:
+    # TODO
+    util.log("STUB /tos/tosAgree", severity=util.logging.WARNING)
     return pydantic.BaseModel()

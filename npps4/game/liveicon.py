@@ -9,7 +9,7 @@ class LiveIconInfoResponse(pydantic.BaseModel):
 
 
 @idol.register("/liveicon/liveiconInfo")
-def liveicon_liveiconinfo(context: idol.SchoolIdolUserParams) -> LiveIconInfoResponse:
+async def liveicon_liveiconinfo(context: idol.SchoolIdolUserParams) -> LiveIconInfoResponse:
     # TODO
     util.log("STUB /liveicon/liveiconInfo", severity=util.logging.WARNING)
     return LiveIconInfoResponse(live_notes_icon_list=[1, 2, 3])

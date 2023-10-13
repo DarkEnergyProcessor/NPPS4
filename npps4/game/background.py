@@ -15,7 +15,7 @@ class BackgroundInfoResponse(pydantic.BaseModel):
 
 
 @idol.register("/background/backgroundInfo")
-def background_backgroundinfo(context: idol.SchoolIdolUserParams) -> BackgroundInfoResponse:
+async def background_backgroundinfo(context: idol.SchoolIdolUserParams) -> BackgroundInfoResponse:
     # TODO
     util.log("STUB /background/backgroundInfo", severity=util.logging.WARNING)
     return BackgroundInfoResponse(

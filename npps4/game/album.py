@@ -5,7 +5,7 @@ import pydantic
 
 
 @idol.register("/album/albumAll")
-def album_albumall(context: idol.SchoolIdolUserParams):
+async def album_albumall(context: idol.SchoolIdolUserParams):
     # TODO
     util.log("STUB /album/albumAll", severity=util.logging.WARNING)
     return pydantic.BaseModel()

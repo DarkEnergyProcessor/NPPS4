@@ -75,7 +75,7 @@ class LiveStatusResponse(pydantic.BaseModel):
 
 
 @idol.register("/live/liveStatus")
-def live_livestatus(context: idol.SchoolIdolUserParams) -> LiveStatusResponse:
+async def live_livestatus(context: idol.SchoolIdolUserParams) -> LiveStatusResponse:
     # TODO
     util.log("STUB /live/liveStatus", severity=util.logging.WARNING)
     return LiveStatusResponse(
@@ -94,7 +94,7 @@ def live_livestatus(context: idol.SchoolIdolUserParams) -> LiveStatusResponse:
 
 
 @idol.register("/live/schedule")
-def live_schedule(context: idol.SchoolIdolUserParams) -> LiveScheduleResponse:
+async def live_schedule(context: idol.SchoolIdolUserParams) -> LiveScheduleResponse:
     # TODO
     util.log("STUB /live/schedule", severity=util.logging.WARNING)
     return LiveScheduleResponse(

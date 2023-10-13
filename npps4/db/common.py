@@ -1,3 +1,5 @@
+import re
+
 import sqlalchemy
 import sqlalchemy.orm
 import sqlalchemy.dialects.postgresql
@@ -17,6 +19,27 @@ type_map_override = {
     .with_variant(sqlalchemy.dialects.mysql.DOUBLE(), "mysql", "mariadb")
     .with_variant(sqlalchemy.dialects.postgresql.DOUBLE_PRECISION(), "postgresql"),
 }
+
+
+class GameDBBase(sqlalchemy.orm.DeclarativeBase):
+    type_annotation_map = type_map_override
+
+
+SNAKECASE_RE1 = re.compile("(.)([A-Z][a-z]+)")
+SNAKECASE_RE2 = re.compile("__([A-Z])")
+SNAKECASE_RE3 = re.compile("([a-z0-9])([A-Z])")
+
+
+class Base(sqlalchemy.orm.DeclarativeBase):
+    type_annotation_map = type_map_override
+
+    @sqlalchemy.orm.declared_attr.directive
+    def __tablename__(cls):
+        name = cls.__name__
+        name = re.sub(SNAKECASE_RE1, r"\1_\2", name)
+        name = re.sub(SNAKECASE_RE2, r"_\1", name)
+        name = re.sub(SNAKECASE_RE3, r"\1_\2", name)
+        return name.lower()
 
 
 class MaybeEncrypted:

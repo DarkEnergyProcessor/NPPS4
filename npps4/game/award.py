@@ -15,7 +15,7 @@ class AwardInfoResponse(pydantic.BaseModel):
 
 
 @idol.register("/award/awardInfo")
-def award_awardinfo(context: idol.SchoolIdolUserParams) -> AwardInfoResponse:
+async def award_awardinfo(context: idol.SchoolIdolUserParams) -> AwardInfoResponse:
     # TODO
     util.log("STUB /award/awardInfo", severity=util.logging.WARNING)
     return AwardInfoResponse(

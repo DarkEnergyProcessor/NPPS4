@@ -10,7 +10,7 @@ class ExchangePointResponse(pydantic.BaseModel):
 
 
 @idol.register("/exchange/owningPoint")
-def exchange_owningpoint(context: idol.SchoolIdolUserParams) -> ExchangePointResponse:
+async def exchange_owningpoint(context: idol.SchoolIdolUserParams) -> ExchangePointResponse:
     # TODO
     util.log("STUB /exchange/owningPoint", severity=util.logging.WARNING)
     return ExchangePointResponse(exchange_point_list=[])

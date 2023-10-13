@@ -22,7 +22,7 @@ class BannerListResponse(pydantic.BaseModel):
 
 
 @idol.register("/banner/bannerList")
-def banner_bannerlist(context: idol.SchoolIdolUserParams) -> BannerListResponse:
+async def banner_bannerlist(context: idol.SchoolIdolUserParams) -> BannerListResponse:
     # TODO
     util.log("STUB /banner/bannerList", severity=util.logging.WARNING)
     return BannerListResponse(

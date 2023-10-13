@@ -20,7 +20,7 @@ class MuseumInfoResponse(pydantic.BaseModel):
 
 
 @idol.register("/museum/info")
-def museum_info(context: idol.SchoolIdolUserParams) -> MuseumInfoResponse:
+async def museum_info(context: idol.SchoolIdolUserParams) -> MuseumInfoResponse:
     # TODO
     util.log("STUB /museum/info", severity=util.logging.WARNING)
     return MuseumInfoResponse(

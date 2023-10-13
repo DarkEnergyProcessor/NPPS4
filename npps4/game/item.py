@@ -12,7 +12,7 @@ class ItemListResponse(pydantic.BaseModel):
 
 
 @idol.register("/item/list")
-def item_list(context: idol.SchoolIdolUserParams) -> ItemListResponse:
+async def item_list(context: idol.SchoolIdolUserParams) -> ItemListResponse:
     # TODO
     util.log("STUB /item/list", severity=util.logging.WARNING)
     return ItemListResponse(general_item_list=[], buff_item_list=[], reinforce_item_list=[], reinforce_info=[])

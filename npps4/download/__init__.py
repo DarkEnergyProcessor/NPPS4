@@ -25,25 +25,25 @@ class _DLBackend(Protocol):
         ...
 
     @staticmethod
-    def get_update_files(
+    async def get_update_files(
         request: fastapi.Request, platform: idoltype.PlatformType, from_client_version: tuple[int, int]
     ) -> list[dltype.UpdateInfo]:
         ...
 
     @staticmethod
-    def get_batch_files(
+    async def get_batch_files(
         request: fastapi.Request, platform: idoltype.PlatformType, package_type: int, exclude: list[int]
     ) -> list[dltype.BatchInfo]:
         ...
 
     @staticmethod
-    def get_single_package(
+    async def get_single_package(
         request: fastapi.Request, platform: idoltype.PlatformType, package_type: int, package_id: int
     ) -> list[dltype.BaseInfo] | None:
         ...
 
     @staticmethod
-    def get_raw_files(
+    async def get_raw_files(
         request: fastapi.Request, platform: idoltype.PlatformType, files: list[str]
     ) -> list[dltype.BaseInfo]:
         ...
@@ -67,24 +67,30 @@ def get_db_path(name: str):
     return CURRENT_BACKEND.get_db_path(name)
 
 
-def get_update_files(request: fastapi.Request, platform: idoltype.PlatformType, from_client_version: tuple[int, int]):
+async def get_update_files(
+    request: fastapi.Request, platform: idoltype.PlatformType, from_client_version: tuple[int, int]
+):
     global CURRENT_BACKEND
-    return CURRENT_BACKEND.get_update_files(request, platform, from_client_version)
+    return await CURRENT_BACKEND.get_update_files(request, platform, from_client_version)
 
 
-def get_batch_files(request: fastapi.Request, platform: idoltype.PlatformType, package_type: int, exclude: list[int]):
+async def get_batch_files(
+    request: fastapi.Request, platform: idoltype.PlatformType, package_type: int, exclude: list[int]
+):
     global CURRENT_BACKEND
-    return CURRENT_BACKEND.get_batch_files(request, platform, package_type, exclude)
+    return await CURRENT_BACKEND.get_batch_files(request, platform, package_type, exclude)
 
 
-def get_single_package(request: fastapi.Request, platform: idoltype.PlatformType, package_type: int, package_id: int):
+async def get_single_package(
+    request: fastapi.Request, platform: idoltype.PlatformType, package_type: int, package_id: int
+):
     global CURRENT_BACKEND
-    return CURRENT_BACKEND.get_single_package(request, platform, package_type, package_id)
+    return await CURRENT_BACKEND.get_single_package(request, platform, package_type, package_id)
 
 
-def get_raw_files(request: fastapi.Request, platform: idoltype.PlatformType, files: list[str]):
+async def get_raw_files(request: fastapi.Request, platform: idoltype.PlatformType, files: list[str]):
     global CURRENT_BACKEND
-    return CURRENT_BACKEND.get_raw_files(request, platform, files)
+    return await CURRENT_BACKEND.get_raw_files(request, platform, files)
 
 
 CURRENT_BACKEND.initialize()

@@ -1,15 +1,12 @@
 import sqlalchemy
+import sqlalchemy.ext.asyncio
 import sqlalchemy.orm
 
 from . import common
 from .. import download
 
 
-class Base(sqlalchemy.orm.DeclarativeBase):
-    type_annotation_map = common.type_map_override
-
-
-class KGItem(Base, common.MaybeEncrypted):
+class KGItem(common.GameDBBase, common.MaybeEncrypted):
     """```sql
     CREATE TABLE `kg_item_m` (
         `item_id` INTEGER NOT NULL,
@@ -56,7 +53,7 @@ class KGItem(Base, common.MaybeEncrypted):
     merchandise_flag: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-class Award(Base, common.MaybeEncrypted):
+class Award(common.GameDBBase, common.MaybeEncrypted):
     """```sql
     CREATE TABLE `award_m` (
         `award_id` INTEGER NOT NULL,
@@ -85,7 +82,7 @@ class Award(Base, common.MaybeEncrypted):
     di_asset_display_flag: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-class Background(Base, common.MaybeEncrypted):
+class Background(common.GameDBBase, common.MaybeEncrypted):
     """```sql
     CREATE TABLE `background_m` (
         `background_id` INTEGER NOT NULL,
@@ -120,7 +117,7 @@ class Background(Base, common.MaybeEncrypted):
 # TODO: background_flash_m
 
 
-class LiveSE(Base):
+class LiveSE(common.GameDBBase):
     """```sql
     CREATE TABLE `live_se_m` (
         `live_se_id` INTEGER NOT NULL,
@@ -145,7 +142,7 @@ class LiveSE(Base):
 # TODO: live_se_group_m
 
 
-class LiveNotesIcon(Base, common.MaybeEncrypted):
+class LiveNotesIcon(common.GameDBBase, common.MaybeEncrypted):
     """```sql
     CREATE TABLE `live_notes_icon_m` (
         `live_notes_icon_id` INTEGER NOT NULL,
@@ -167,7 +164,7 @@ class LiveNotesIcon(Base, common.MaybeEncrypted):
 # TODO: live_notes_icon_asset_m
 
 
-class RecoveryItem(Base, common.MaybeEncrypted):
+class RecoveryItem(common.GameDBBase, common.MaybeEncrypted):
     """```sql
     CREATE TABLE `recovery_item_m` (
         `recovery_item_id` INTEGER NOT NULL,
@@ -204,7 +201,7 @@ class RecoveryItem(Base, common.MaybeEncrypted):
     description_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
 
 
-class ChangeDelegateItem(Base):
+class ChangeDelegateItem(common.GameDBBase):
     """```sql
     CREATE TABLE `change_delegate_item_m` (
         `item_id` INTEGER NOT NULL,
@@ -220,7 +217,7 @@ class ChangeDelegateItem(Base):
     rarity: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-class ChangeDelegateItemAmount(Base):
+class ChangeDelegateItemAmount(common.GameDBBase):
     """```sql
     CREATE TABLE `change_delegate_item_amount_m` (
         `unit_rarity` INTEGER NOT NULL,
@@ -238,7 +235,7 @@ class ChangeDelegateItemAmount(Base):
     cost_game_coin_amount: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-class BuffItem(Base):
+class BuffItem(common.GameDBBase):
     """```sql
     CREATE TABLE `buff_item_m` (
         `item_id` INTEGER NOT NULL,
@@ -262,7 +259,7 @@ class BuffItem(Base):
     event_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
 
 
-class UnitEnhanceItem(Base):
+class UnitEnhanceItem(common.GameDBBase):
     """```sql
     CREATE TABLE `unit_enhance_item_m` (
         `item_id` INTEGER NOT NULL,
@@ -282,7 +279,7 @@ class UnitEnhanceItem(Base):
     enhance_amount: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-class LotteryTicket(Base):
+class LotteryTicket(common.GameDBBase):
     """```sql
     CREATE TABLE `lottery_ticket_item_m` (
         `item_id` INTEGER NOT NULL,
@@ -296,7 +293,7 @@ class LotteryTicket(Base):
     lottery_ticket_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-class UnitReinforceItem(Base):
+class UnitReinforceItem(common.GameDBBase):
     """```sql
     CREATE TABLE `unit_reinforce_item_m` (
         `item_id` INTEGER NOT NULL,
@@ -314,7 +311,7 @@ class UnitReinforceItem(Base):
     event_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
 
 
-class UnitReinforceItemTargetUnit(Base):
+class UnitReinforceItemTargetUnit(common.GameDBBase):
     """```sql
     CREATE TABLE `unit_reinforce_item_target_unit_m` (
         `item_id` INTEGER NOT NULL,
@@ -328,7 +325,7 @@ class UnitReinforceItemTargetUnit(Base):
     unit_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
 
 
-class ItemExchange(Base):
+class ItemExchange(common.GameDBBase):
     """```sql
     CREATE TABLE `item_exchange_m` (
         `item_id` INTEGER NOT NULL,
@@ -346,7 +343,7 @@ class ItemExchange(Base):
     game_coin_amount: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-class UserRankUpItem(Base):
+class UserRankUpItem(common.GameDBBase):
     """```sql
     CREATE TABLE `user_rank_up_item_m` (
         `item_id` INTEGER NOT NULL,
@@ -362,7 +359,7 @@ class UserRankUpItem(Base):
     use_limit_rank_min: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
 
 
-class BuffItemUseLimitTime(Base):
+class BuffItemUseLimitTime(common.GameDBBase):
     """```sql
     CREATE TABLE `buff_item_use_limit_time_m` (
         `buff_item_use_limit_time_id` INTEGER NOT NULL,
@@ -378,7 +375,7 @@ class BuffItemUseLimitTime(Base):
     end_time: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
 
 
-class ItemExpire(Base):
+class ItemExpire(common.GameDBBase):
     """```sql
     CREATE TABLE `item_expire_m` (
         `add_type` INTEGER NOT NULL,
@@ -394,7 +391,7 @@ class ItemExpire(Base):
     expire_date: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
 
 
-class Memories(Base, common.MaybeEncrypted):
+class Memories(common.GameDBBase, common.MaybeEncrypted):
     """```sql
     CREATE TABLE `memories_m` (
         `memories_id` INTEGER NOT NULL,
@@ -413,16 +410,13 @@ class Memories(Base, common.MaybeEncrypted):
     background_flash_param_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
 
 
-engine = sqlalchemy.create_engine(
-    f"sqlite+pysqlite:///file:{download.get_db_path('item')}?mode=ro&uri=true",
-    connect_args={"check_same_thread": False},
+engine = sqlalchemy.ext.asyncio.create_async_engine(
+    f"sqlite+aiosqlite:///file:{download.get_db_path('item')}?mode=ro&uri=true",
 )
-sessionmaker = sqlalchemy.orm.sessionmaker()
-sessionmaker.configure(binds={Base: engine})
-scoped_session = sqlalchemy.orm.scoped_session(sessionmaker)
+sessionmaker = sqlalchemy.ext.asyncio.async_sessionmaker(engine)
+session = sessionmaker()
 
 
 def get_session():
-    global scoped_session
-    session = scoped_session()
+    global session
     return session

@@ -14,6 +14,7 @@ for file in os.scandir(ERROR_DIR):
 
 def save_error(token: str, tb: list[str]):
     key = hashlib.sha1(token.encode("UTF-8"), usedforsecurity=False).hexdigest()
+
     with open(os.path.join(ERROR_DIR, key + ".pickle"), "wb") as f:
         pickle.dump(tb, f)
 
@@ -21,6 +22,7 @@ def save_error(token: str, tb: list[str]):
 def load_error(token: str) -> list[str] | None:
     key = hashlib.sha1(token.encode("UTF-8"), usedforsecurity=False).hexdigest()
     path = os.path.join(ERROR_DIR, key + ".pickle")
+
     if os.path.isfile(path):
         with open(path, "rb") as f:
             pickle_data = f.read()

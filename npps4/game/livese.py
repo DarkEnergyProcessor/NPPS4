@@ -9,7 +9,7 @@ class LiveSEInfoResponse(pydantic.BaseModel):
 
 
 @idol.register("/livese/liveseInfo")
-def livese_liveseinfo(context: idol.SchoolIdolUserParams) -> LiveSEInfoResponse:
+async def livese_liveseinfo(context: idol.SchoolIdolUserParams) -> LiveSEInfoResponse:
     # TODO
     util.log("STUB /livese/liveseInfo", severity=util.logging.WARNING)
     return LiveSEInfoResponse(live_se_list=[1, 2, 3])

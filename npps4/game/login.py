@@ -116,7 +116,7 @@ class StarterUnitListResponse(pydantic.BaseModel):
 
 
 @idol.register("/login/login", check_version=False, batchable=False)
-def login_login(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> LoginResponse:
+async def login_login(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> LoginResponse:
     """Login user"""
 
     # Decrypt credentials
@@ -129,7 +129,7 @@ def login_login(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> Lo
     util.log("And my passwd is", passwd)
 
     # Find user
-    u = user.find_by_key(context, str(loginkey, "UTF-8"))
+    u = await user.find_by_key(context, str(loginkey, "UTF-8"))
     if u is None or (not u.check_passwd(str(passwd, "UTF-8"))):
         # This will send "Your data has been transfered succesfully" message to the SIF client.
         raise error.IdolError(error_code=407, status_code=600, detail="Login not found")
@@ -140,7 +140,7 @@ def login_login(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> Lo
 
 
 @idol.register("/login/authkey", check_version=False, batchable=False, xmc_verify=idol.XMCVerifyMode.NONE)
-def login_authkey(context: idol.SchoolIdolParams, request: AuthkeyRequest) -> AuthkeyResponse:
+async def login_authkey(context: idol.SchoolIdolParams, request: AuthkeyRequest) -> AuthkeyResponse:
     """Generate authentication key."""
 
     # Decrypt client key
@@ -165,7 +165,7 @@ def login_authkey(context: idol.SchoolIdolParams, request: AuthkeyRequest) -> Au
 
 
 @idol.register("/login/startUp", check_version=False, batchable=False)
-def login_startup(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> StartupResponse:
+async def login_startup(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> StartupResponse:
     """Register new account."""
     key = util.xorbytes(context.token.client_key[:16], context.token.server_key[:16])
     loginkey = util.decrypt_aes(key, base64.b64decode(request.login_key))
@@ -177,7 +177,7 @@ def login_startup(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> 
 
     # Create user
     try:
-        u = user.create(context, str(loginkey, "UTF-8"), str(passwd, "UTF-8"))
+        u = await user.create(context, str(loginkey, "UTF-8"), str(passwd, "UTF-8"))
     except ValueError:
         raise fastapi.HTTPException(400, "Bad login key or password or client key")
 
@@ -185,7 +185,7 @@ def login_startup(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> 
 
 
 @idol.register("/login/topInfo")
-def login_topinfo(context: idol.SchoolIdolUserParams) -> TopInfoResponse:
+async def login_topinfo(context: idol.SchoolIdolUserParams) -> TopInfoResponse:
     # TODO
     util.log("STUB /login/topInfo", severity=util.logging.WARNING)
     return TopInfoResponse(
@@ -214,7 +214,7 @@ def login_topinfo(context: idol.SchoolIdolUserParams) -> TopInfoResponse:
 
 
 @idol.register("/login/topInfoOnce")
-def login_topinfoonce(context: idol.SchoolIdolUserParams) -> TopInfoOnceResponse:
+async def login_topinfoonce(context: idol.SchoolIdolUserParams) -> TopInfoOnceResponse:
     # TODO
     util.log("STUB /login/topInfoOnce", severity=util.logging.WARNING)
     return TopInfoOnceResponse(
@@ -262,7 +262,7 @@ def _generate_deck_list(unit_id: int):
 
 
 @idol.register("/login/unitList")
-def login_unitlist(context: idol.SchoolIdolUserParams) -> StarterUnitListResponse:
+async def login_unitlist(context: idol.SchoolIdolUserParams) -> StarterUnitListResponse:
     return StarterUnitListResponse(
         member_category_list=[
             StarterMemberCategory(

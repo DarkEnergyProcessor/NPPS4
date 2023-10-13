@@ -1,15 +1,12 @@
 import sqlalchemy
+import sqlalchemy.ext.asyncio
 import sqlalchemy.orm
 
 from . import common
 from .. import download
 
 
-class Base(sqlalchemy.orm.DeclarativeBase):
-    type_annotation_map = common.type_map_override
-
-
-class GameSetting(Base):
+class GameSetting(common.GameDBBase):
     """```sql
     CREATE TABLE `game_setting_m` (
         `game_setting_id` INTEGER NOT NULL,
@@ -115,7 +112,7 @@ class GameSetting(Base):
     exchange_flag: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-class SortCondition(Base):
+class SortCondition(common.GameDBBase):
     """```sql
     CREATE TABLE `sort_condition_m` (
         `sort_condition_id` INTEGER NOT NULL,
@@ -137,7 +134,7 @@ class SortCondition(Base):
     sort_label_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
 
 
-class AddType(Base, common.MaybeEncrypted):
+class AddType(common.GameDBBase, common.MaybeEncrypted):
     """```sql
     CREATE TABLE `add_type_m` (
         `add_type` INTEGER NOT NULL,
@@ -166,16 +163,13 @@ class AddType(Base, common.MaybeEncrypted):
     large_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
 
 
-engine = sqlalchemy.create_engine(
-    f"sqlite+pysqlite:///file:{download.get_db_path('game_mater')}?mode=ro&uri=true",
-    connect_args={"check_same_thread": False},
+engine = sqlalchemy.ext.asyncio.create_async_engine(
+    f"sqlite+aiosqlite:///file:{download.get_db_path('game_mater')}?mode=ro&uri=true",
 )
-sessionmaker = sqlalchemy.orm.sessionmaker()
-sessionmaker.configure(binds={Base: engine})
-scoped_session = sqlalchemy.orm.scoped_session(sessionmaker)
+sessionmaker = sqlalchemy.ext.asyncio.async_sessionmaker(engine)
+session = sessionmaker()
 
 
 def get_session():
-    global scoped_session
-    session = scoped_session()
+    global session
     return session

@@ -20,25 +20,25 @@ def get_db_path(name: str) -> str:
     raise NotImplementedError(f"'none' backend does not automatically load databases! Unable to find '{path}'")
 
 
-def get_update_files(
+async def get_update_files(
     request: fastapi.Request, platform: idoltype.PlatformType, from_client_version: tuple[int, int]
 ) -> list[dltype.UpdateInfo]:
     raise NotImplementedError("not implemented get_update_files")
 
 
-def get_batch_files(
+async def get_batch_files(
     request: fastapi.Request, platform: idoltype.PlatformType, package_type: int, exclude: list[int]
 ) -> list[dltype.BatchInfo]:
     raise NotImplementedError("not implemented get_batch_files")
 
 
-def get_single_package(
+async def get_single_package(
     request: fastapi.Request, platform: idoltype.PlatformType, package_type: int, package_id: int
 ) -> list[dltype.BaseInfo] | None:
     return None
 
 
-def get_raw_files(request: fastapi.Request, platform: idoltype.PlatformType, files: list[str]):
+async def get_raw_files(request: fastapi.Request, platform: idoltype.PlatformType, files: list[str]):
     target = str(request.url)
     target = (target + "missing") if target[-1] == "/" else (target + "/missing")
     return [

@@ -26,7 +26,74 @@ if _base_url[-1] != "/":
     _base_url = _base_url + "/"
 
 
-def _call_api_notry(endpoint: str, request_data: dict[str, Any] | list[Any] | None = None, /, *, raw: bool = False):
+async def _call_api_async_notry(
+    client: httpx.AsyncClient,
+    endpoint: str,
+    request_data: dict[str, Any] | list[Any] | None = None,
+    /,
+    *,
+    raw: bool = False,
+):
+    global _base_url
+    parse_api = urllib.parse.urlparse(_base_url)
+    parse = parse_api._replace(
+        path=(parse_api.path if parse_api.path[-1] == "/" else parse_api.path[:-1])
+        + (endpoint[1:] if endpoint[0] == "/" else endpoint)
+    )
+
+    header: dict[str, str] = {}
+    if _shared_key:
+        header["DLAPI-Shared-Key"] = urllib.parse.quote(_shared_key)
+    if request_data is not None:
+        header["Content-Type"] = "application/json"
+
+    response = await client.request(
+        "GET" if request_data is None else "POST", parse.geturl(), headers=header, json=request_data
+    )
+    response.raise_for_status()
+    if raw:
+        return response.content
+    else:
+        return response.json()
+
+
+@overload
+async def _call_api_async(
+    endpoint: str, request_data: dict[str, Any] | list[Any] | None = None, /, *, raw: Literal[False] = False
+) -> Any:
+    ...
+
+
+@overload
+async def _call_api_async(
+    endpoint: str, request_data: dict[str, Any] | list[Any] | None = None, /, *, raw: Literal[True]
+) -> bytes:
+    ...
+
+
+async def _call_api_async(
+    endpoint: str, request_data: dict[str, Any] | list[Any] | None = None, /, *, raw: bool = False
+):
+    retry = 0
+    async with httpx.AsyncClient() as client:
+        while True:
+            try:
+                return await _call_api_async_notry(client, endpoint, request_data, raw=raw)
+            except (json.JSONDecodeError, httpx.HTTPStatusError) as e:
+                raise e from None
+            except Exception as e:
+                retry = retry + 1
+                if retry >= 25:
+                    raise e from None
+
+
+def _call_api_notry(
+    endpoint: str,
+    request_data: dict[str, Any] | list[Any] | None = None,
+    /,
+    *,
+    raw: bool = False,
+):
     global _base_url
     parse_api = urllib.parse.urlparse(_base_url)
     parse = parse_api._replace(
@@ -110,35 +177,46 @@ def get_db_path(name: str):
     return target_db
 
 
-def get_update_files(request: fastapi.Request, platform: idoltype.PlatformType, from_client_version: tuple[int, int]):
-    result: list[dict[str, Any]] = _call_api(
+UpdateInfoAdapter = pydantic.TypeAdapter(list[dltype.UpdateInfo])
+BatchInfoAdapter = pydantic.TypeAdapter(list[dltype.BatchInfo])
+BaseInfoAdapter = pydantic.TypeAdapter(list[dltype.BaseInfo])
+
+
+async def get_update_files(
+    request: fastapi.Request, platform: idoltype.PlatformType, from_client_version: tuple[int, int]
+):
+    result: list[dict[str, Any]] = await _call_api_async(
         "api/v1/update", {"version": util.sif_version_string(from_client_version), "platform": int(platform)}
     )
-    return _fixup_links(pydantic.parse_obj_as(list[dltype.UpdateInfo], result), int(platform))
+    return _fixup_links(UpdateInfoAdapter.validate_python(result), int(platform))
 
 
-def get_batch_files(request: fastapi.Request, platform: idoltype.PlatformType, package_type: int, exclude: list[int]):
-    result: list[dict[str, Any]] = _call_api(
+async def get_batch_files(
+    request: fastapi.Request, platform: idoltype.PlatformType, package_type: int, exclude: list[int]
+):
+    result: list[dict[str, Any]] = await _call_api_async(
         "api/v1/batch", {"package_type": package_type, "platform": int(platform), "exclude": exclude}
     )
-    return _fixup_links(pydantic.parse_obj_as(list[dltype.BatchInfo], result), int(platform))
+    return _fixup_links(BatchInfoAdapter.validate_python(result), int(platform))
 
 
-def get_single_package(request: fastapi.Request, platform: idoltype.PlatformType, package_type: int, package_id: int):
+async def get_single_package(
+    request: fastapi.Request, platform: idoltype.PlatformType, package_type: int, package_id: int
+):
     try:
-        result: list[dict[str, Any]] = _call_api(
+        result: list[dict[str, Any]] = await _call_api_async(
             "api/v1/download", {"package_type": package_type, "package_id": package_id, "platform": int(platform)}
         )
-        return _fixup_links(pydantic.parse_obj_as(list[dltype.BaseInfo], result), int(platform))
+        return _fixup_links(BaseInfoAdapter.validate_python(result), int(platform))
     except httpx.HTTPStatusError as e:
         if e.response.status_code == 404:
             return None
         raise e from None
 
 
-def get_raw_files(request: fastapi.Request, platform: idoltype.PlatformType, files: list[str]):
-    result: list[dict[str, Any]] = _call_api("api/v1/getfile", {"files": files, "platform": int(platform)})
-    return _fixup_links(pydantic.parse_obj_as(list[dltype.BaseInfo], result), int(platform))
+async def get_raw_files(request: fastapi.Request, platform: idoltype.PlatformType, files: list[str]):
+    result: list[dict[str, Any]] = await _call_api_async("api/v1/getfile", {"files": files, "platform": int(platform)})
+    return _fixup_links(BaseInfoAdapter.validate_python(result), int(platform))
 
 
 def initialize():

@@ -9,7 +9,7 @@ class EventScenarioStatusResponse(pydantic.BaseModel):
 
 
 @idol.register("/eventscenario/status")
-def eventscenario_status(context: idol.SchoolIdolUserParams) -> EventScenarioStatusResponse:
+async def eventscenario_status(context: idol.SchoolIdolUserParams) -> EventScenarioStatusResponse:
     # TODO
     util.log("STUB /eventscenario/status", severity=util.logging.WARNING)
     return EventScenarioStatusResponse(event_scenario_list=[])

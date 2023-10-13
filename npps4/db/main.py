@@ -4,7 +4,7 @@ import hmac
 import re
 
 import sqlalchemy
-import sqlalchemy.ext.declarative
+import sqlalchemy.ext.asyncio
 import sqlalchemy.orm
 
 from . import common
@@ -13,24 +13,9 @@ from .. import util
 from ..idol.system import core
 
 SALT_SIZE = 16
-SNAKECASE_RE1 = re.compile("(.)([A-Z][a-z]+)")
-SNAKECASE_RE2 = re.compile("__([A-Z])")
-SNAKECASE_RE3 = re.compile("([a-z0-9])([A-Z])")
 
 
-class Base(sqlalchemy.orm.DeclarativeBase):
-    type_annotation_map = common.type_map_override
-
-    @sqlalchemy.orm.declared_attr.directive
-    def __tablename__(cls):
-        name = cls.__name__
-        name = re.sub(SNAKECASE_RE1, r"\1_\2", name)
-        name = re.sub(SNAKECASE_RE2, r"_\1", name)
-        name = re.sub(SNAKECASE_RE3, r"\1_\2", name)
-        return name.lower()
-
-
-class User(Base):
+class User(common.Base):
     id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
     key: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(index=True)
     passwd: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
@@ -77,16 +62,10 @@ class User(Base):
         return "%09d" % self.invite_code
 
 
-engine: sqlalchemy.Engine | None = None
-scoped_session: sqlalchemy.orm.scoped_session[sqlalchemy.orm.Session] | None = None
+engine = sqlalchemy.ext.asyncio.create_async_engine(config.get_database_url())
+sessionmaker = sqlalchemy.ext.asyncio.async_sessionmaker(engine)
 
 
-def get_session():
-    global engine, scoped_session
-    if engine is None or scoped_session is None:
-        engine = sqlalchemy.create_engine(config.get_database_url(), connect_args={"check_same_thread": False})
-        sessionmaker = sqlalchemy.orm.sessionmaker()
-        sessionmaker.configure(binds={Base: engine})
-        scoped_session = sqlalchemy.orm.scoped_session(sessionmaker)
-    session = scoped_session()
-    return session
+def get_sessionmaker():
+    global sessionmaker
+    return sessionmaker

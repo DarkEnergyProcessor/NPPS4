@@ -1,15 +1,12 @@
 import sqlalchemy
+import sqlalchemy.ext.asyncio
 import sqlalchemy.orm
 
 from . import common
 from .. import download
 
 
-class Base(sqlalchemy.orm.DeclarativeBase):
-    type_annotation_map = common.type_map_override
-
-
-class LiveTrack(Base, common.MaybeEncrypted):
+class LiveTrack(common.GameDBBase, common.MaybeEncrypted):
     """```sql
     CREATE TABLE `live_track_m` (
         `live_track_id` INTEGER NOT NULL,
@@ -41,7 +38,7 @@ class LiveTrack(Base, common.MaybeEncrypted):
     unit_type_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
 
 
-class LiveSetting(Base, common.MaybeEncrypted):
+class LiveSetting(common.GameDBBase, common.MaybeEncrypted):
     """```sql
     CREATE TABLE `live_setting_m` (
         `live_setting_id` INTEGER NOT NULL,
@@ -113,7 +110,7 @@ class CommonLive:
     s_rank_complete: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-class NormalLive(Base, CommonLive, Live):
+class NormalLive(common.GameDBBase, CommonLive, Live):
     """```sql
     CREATE TABLE `normal_live_m` (
         `live_difficulty_id` INTEGER NOT NULL,
@@ -133,7 +130,7 @@ class NormalLive(Base, CommonLive, Live):
     default_unlocked_flag: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-class SpecialLive(Base, CommonLive, Live):
+class SpecialLive(common.GameDBBase, CommonLive, Live):
     """```sql
     CREATE TABLE `special_live_m` (
         `live_difficulty_id` INTEGER NOT NULL,
@@ -157,7 +154,7 @@ class SpecialLive(Base, CommonLive, Live):
     exclude_live_bonus_flag: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-class FreeLive(Base, Live):
+class FreeLive(common.GameDBBase, Live):
     """```sql
     CREATE TABLE `free_live_m` (
         `live_difficulty_id` INTEGER NOT NULL,
@@ -171,7 +168,7 @@ class FreeLive(Base, Live):
     random_flag: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-class LiveCombo(Base):
+class LiveCombo(common.GameDBBase):
     """```sql
     CREATE TABLE `live_combo_m` (
         `combo_cnt` INTEGER NOT NULL,
@@ -187,7 +184,7 @@ class LiveCombo(Base):
     add_love_cnt: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-class LiveUnitRewardLot(Base):
+class LiveUnitRewardLot(common.GameDBBase):
     """```sql
     CREATE TABLE `live_unit_reward_lot_m` (
         `live_unit_reward_lot_id` INTEGER NOT NULL,
@@ -219,7 +216,7 @@ class CommonGoalReward:
     item_option: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
 
 
-class LiveGoalRewardCommon(Base, CommonGoalReward):
+class LiveGoalRewardCommon(common.GameDBBase, CommonGoalReward):
     """```sql
     CREATE TABLE `live_goal_reward_common_m` (
         `live_goal_reward_common_id` INTEGER NOT NULL,
@@ -242,7 +239,7 @@ class LiveGoalRewardCommon(Base, CommonGoalReward):
     difficulty: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-class LiveGoalReward(Base, CommonGoalReward):
+class LiveGoalReward(common.GameDBBase, CommonGoalReward):
     """```sql
     CREATE TABLE `live_goal_reward_m` (
         `live_goal_reward_id` INTEGER NOT NULL,
@@ -263,7 +260,7 @@ class LiveGoalReward(Base, CommonGoalReward):
     live_difficulty_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
 
 
-class LiveNoteScoreFactor(Base):
+class LiveNoteScoreFactor(common.GameDBBase):
     """```sql
     CREATE TABLE `live_note_score_factor_m` (
         `effect_id` INTEGER NOT NULL,
@@ -279,7 +276,7 @@ class LiveNoteScoreFactor(Base):
     score_factor: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
 
 
-class LiveCutinBrightness(Base):
+class LiveCutinBrightness(common.GameDBBase):
     """```sql
     CREATE TABLE `live_cutin_brightness_m` (
         `live_cutin_brightness_id` INTEGER NOT NULL,
@@ -293,7 +290,7 @@ class LiveCutinBrightness(Base):
     brightness: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-class TrainingMode(Base):
+class TrainingMode(common.GameDBBase):
     """```sql
     CREATE TABLE `training_mode_m` (
         `training_mode_id` INTEGER NOT NULL,
@@ -309,7 +306,7 @@ class TrainingMode(Base):
     start_date: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
 
 
-class LiveTime(Base):
+class LiveTime(common.GameDBBase):
     """```sql
     CREATE TABLE `live_time_m` (
         `live_track_id` INTEGER NOT NULL,
@@ -325,7 +322,7 @@ class LiveTime(Base):
     live_time: sqlalchemy.orm.Mapped[float] = sqlalchemy.orm.mapped_column()
 
 
-class LiveSkillIcon(Base, common.MaybeEncrypted):
+class LiveSkillIcon(common.GameDBBase, common.MaybeEncrypted):
     """```sql
     CREATE TABLE `live_skill_icon_m` (
         `skill_effect_type` INTEGER NOT NULL,
@@ -344,16 +341,14 @@ class LiveSkillIcon(Base, common.MaybeEncrypted):
     icon_order: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-engine = sqlalchemy.create_engine(
-    f"sqlite+pysqlite:///file:{download.get_db_path('live')}?mode=ro&uri=true",
+engine = sqlalchemy.ext.asyncio.create_async_engine(
+    f"sqlite+aiosqlite:///file:{download.get_db_path('live')}?mode=ro&uri=true",
     connect_args={"check_same_thread": False},
 )
-sessionmaker = sqlalchemy.orm.sessionmaker()
-sessionmaker.configure(binds={Base: engine})
-scoped_session = sqlalchemy.orm.scoped_session(sessionmaker)
+sessionmaker = sqlalchemy.ext.asyncio.async_sessionmaker(engine)
+session = sessionmaker()
 
 
 def get_session():
-    global scoped_session
-    session = scoped_session()
+    global session
     return session

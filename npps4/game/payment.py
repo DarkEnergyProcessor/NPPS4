@@ -39,7 +39,7 @@ class ProductListResponse(pydantic.BaseModel):
 
 
 @idol.register("/payment/productList")
-def payment_productlist(context: idol.SchoolIdolUserParams) -> ProductListResponse:
+async def payment_productlist(context: idol.SchoolIdolUserParams) -> ProductListResponse:
     # TODO
     util.log("STUB /payment/productList", severity=util.logging.WARNING)
     return ProductListResponse(

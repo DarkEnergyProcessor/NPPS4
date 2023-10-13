@@ -11,5 +11,7 @@ class GDPRGetResponse(pydantic.BaseModel):
 
 
 @idol.register("/gdpr/get")
-def gdpr_get(context: idol.SchoolIdolUserParams) -> GDPRGetResponse:
+async def gdpr_get(context: idol.SchoolIdolUserParams) -> GDPRGetResponse:
+    # TODO
+    util.log("STUB /gdpr/get", severity=util.logging.WARNING)
     return GDPRGetResponse(enable_gdpr=True, is_eea=False, server_timestamp=util.time())

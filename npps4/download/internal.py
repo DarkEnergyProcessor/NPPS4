@@ -24,7 +24,7 @@ if _archive_root[-1] == "/":
 _T = TypeVar("_T")
 
 
-class MemoizeByModTime(Generic[_T]):
+class _MemoizeByModTime(Generic[_T]):
     def __init__(self, f: Callable[[str], _T]):
         self.f = f
         self.map: dict[str, tuple[int, _T]] = {}
@@ -40,13 +40,13 @@ class MemoizeByModTime(Generic[_T]):
         return result
 
 
-@MemoizeByModTime
+@_MemoizeByModTime
 def _read_json(file: str):
     with open(file, "r", encoding="UTF-8", newline="") as f:
         return json.load(f)
 
 
-@MemoizeByModTime
+@_MemoizeByModTime
 def _get_versions(file: str):
     versions: list[str] = _read_json(file)
     new_ver: list[tuple[int, int]] = []
@@ -79,7 +79,7 @@ def get_db_path(name: str) -> str:
     raise RuntimeError(f"Database '{name}' not found")
 
 
-def get_update_files(
+async def get_update_files(
     request: fastapi.Request, platform: idoltype.PlatformType, from_client_version: tuple[int, int]
 ) -> list[dltype.UpdateInfo]:
     path = f"{_archive_root}/{_PLATFORM_MAP[platform - 1]}/update"
@@ -111,7 +111,7 @@ def get_update_files(
     return download_data
 
 
-def get_batch_files(
+async def get_batch_files(
     request: fastapi.Request, platform: idoltype.PlatformType, package_type: int, exclude: list[int]
 ) -> list[dltype.BatchInfo]:
     latest = get_server_version()
@@ -140,7 +140,7 @@ def get_batch_files(
     return result
 
 
-def get_single_package(
+async def get_single_package(
     request: fastapi.Request, platform: idoltype.PlatformType, package_type: int, package_id: int
 ) -> list[dltype.BaseInfo] | None:
     latest = get_server_version()
@@ -168,7 +168,7 @@ def get_single_package(
     return result
 
 
-def get_raw_files(request: fastapi.Request, platform: idoltype.PlatformType, files: list[str]):
+async def get_raw_files(request: fastapi.Request, platform: idoltype.PlatformType, files: list[str]):
     latest = get_server_version()
     # Normalize path
     commonpath = f"{_PLATFORM_MAP[platform - 1]}/package/{util.sif_version_string(latest)}/microdl"
