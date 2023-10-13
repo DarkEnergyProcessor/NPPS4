@@ -1,7 +1,7 @@
+import asyncio
 import base64
 import hashlib
 import hmac
-import re
 
 import sqlalchemy
 import sqlalchemy.ext.asyncio
@@ -19,6 +19,7 @@ class User(common.Base):
     id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
     key: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(index=True)
     passwd: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+
     name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(default="Kemp")
     level: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=1)
     exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
@@ -60,6 +61,14 @@ class User(common.Base):
     @property
     def friend_id(self):
         return "%09d" % self.invite_code
+
+
+class Background(common.Base):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+    user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(sqlalchemy.ForeignKey(User.id), index=True)
+    background_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    is_set: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column()
+    insert_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=util.time)
 
 
 engine = sqlalchemy.ext.asyncio.create_async_engine(config.get_database_url())

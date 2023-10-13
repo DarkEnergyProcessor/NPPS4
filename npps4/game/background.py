@@ -1,5 +1,7 @@
 from .. import idol
 from .. import util
+from ..idol.system import background
+from ..idol.system import user
 
 import pydantic
 
@@ -16,10 +18,13 @@ class BackgroundInfoResponse(pydantic.BaseModel):
 
 @idol.register("/background/backgroundInfo")
 async def background_backgroundinfo(context: idol.SchoolIdolUserParams) -> BackgroundInfoResponse:
-    # TODO
-    util.log("STUB /background/backgroundInfo", severity=util.logging.WARNING)
-    return BackgroundInfoResponse(
-        background_info=[
-            BackgroundInfo(background_id=1, is_set=True, insert_date=util.timestamp_to_datetime(1365984000))
-        ]
-    )
+    current_user = await user.get_current(context)
+    backgrounds = await background.get_backgrounds(context, current_user)
+    background_info = [
+        BackgroundInfo(
+            background_id=bg.background_id, is_set=bg.is_set, insert_date=util.timestamp_to_datetime(bg.insert_date)
+        )
+        for bg in backgrounds
+    ]
+
+    return BackgroundInfoResponse(background_info=background_info)
