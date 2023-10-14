@@ -19,6 +19,7 @@ async def tutorial_progress(
         raise error.IdolError(detail="Tutorial already finished")
     if current_user.tutorial_state == 0 and request.tutorial_state == 1:
         current_user.tutorial_state = 1
+        return idol.core.DummyModel()
 
     util.log(
         f"STUB /tutorial/progress, user {current_user.tutorial_state} request {request.tutorial_state}",

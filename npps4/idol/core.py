@@ -134,8 +134,9 @@ class SchoolIdolAuthParams(SchoolIdolParams):
         client_version: Annotated[str, fastapi.Header(alias="Client-Version")],
         lang: Annotated[idoltype.Language, fastapi.Header(alias="LANG")],
         platform_type: Annotated[idoltype.PlatformType, fastapi.Header(alias="Platform-Type")],
+        request_data: Annotated[bytes | None, fastapi.Form(exclude=True, include=False)] = None,
     ):
-        super().__init__(request, authorize, client_version, lang, platform_type)
+        super().__init__(request, authorize, client_version, lang, platform_type, request_data)
         token = None
         if self.token_text is not None:
             token = util.decapsulate_token(self.token_text)
@@ -159,8 +160,9 @@ class SchoolIdolUserParams(SchoolIdolAuthParams):
         client_version: Annotated[str, fastapi.Header(alias="Client-Version")],
         lang: Annotated[idoltype.Language, fastapi.Header(alias="LANG")],
         platform_type: Annotated[idoltype.PlatformType, fastapi.Header(alias="Platform-Type")],
+        request_data: Annotated[bytes | None, fastapi.Form(exclude=True, include=False)] = None,
     ):
-        super().__init__(request, authorize, client_version, lang, platform_type)
+        super().__init__(request, authorize, client_version, lang, platform_type, request_data)
         if self.token.user_id == 0:
             raise fastapi.HTTPException(403, detail="Not logged in!")
 
@@ -462,7 +464,25 @@ class BatchResponseRoot(pydantic.RootModel):
         return self.root[item]
 
 
-@app.main.post("/api", response_model=idoltype.ResponseData[BatchResponseRoot])  # type: ignore
+_api_request_data_schema = {
+    "type": "object",
+    "properties": {"request_data": {"type": "array", "items": BatchRequest.model_json_schema()}},
+    "required": ["request_data"],
+}
+
+
+@app.main.post(
+    "/api",
+    response_model=idoltype.ResponseData[BatchResponseRoot],
+    openapi_extra={
+        "requestBody": {
+            "content": {
+                "application/x-www-form-urlencoded": {"schema": _api_request_data_schema},
+                "multipart/form-data": {"schema": _api_request_data_schema},
+            }
+        },
+    },
+)  # type: ignore
 async def api_endpoint(
     context: Annotated[SchoolIdolUserParams, fastapi.Depends(SchoolIdolUserParams)],
     request: Annotated[list[BatchRequest], fastapi.Depends(_get_request_data(BatchRequestRoot))],
