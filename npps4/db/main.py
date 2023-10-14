@@ -64,7 +64,9 @@ class User(common.Base):
 
 class Background(common.Base):
     id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
-    user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(sqlalchemy.ForeignKey(User.id), index=True)
+    user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
+    )
     background_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     is_set: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column()
     insert_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=util.time)
@@ -74,6 +76,50 @@ class TOSAgree(common.Base):
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
         common.IDInteger, sqlalchemy.ForeignKey(User.id), primary_key=True
     )
+
+
+class Unit(common.Base):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+    user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
+    )
+    unit_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    active: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(index=True)
+    favorite_flag: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False)
+    is_signed: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False)
+    insert_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=util.time)
+
+    exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
+    max_level: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    love: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)  # Bond
+    rank: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()  # Non-idolized = 1, idolized = 2
+    display_rank: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()  # Same as rank
+    level_limit_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
+    unit_removable_skill_capacity: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+
+
+class UnitDeck(common.Base):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+    user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
+    )
+    deck_number: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
+    name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+
+    __table_args__ = (sqlalchemy.UniqueConstraint(user_id, deck_number),)
+
+
+class UnitDeckPosition(common.Base):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+    deck_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, sqlalchemy.ForeignKey(UnitDeck.id), index=True
+    )
+    position: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    unit_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, sqlalchemy.ForeignKey(Unit.id), index=True
+    )
+
+    __table_args__ = (sqlalchemy.UniqueConstraint(deck_id, unit_id),)
 
 
 engine = sqlalchemy.ext.asyncio.create_async_engine(config.get_database_url())
