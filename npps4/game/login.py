@@ -301,9 +301,12 @@ async def login_unitselect(
     if request.unit_initial_set_id not in range(1, 19):
         raise error.IdolError(detail="Out of range")
 
+    current_user = await user.get_current(context)
+    if current_user.tutorial_state != 1:
+        raise error.IdolError(detail="Invalid tutorial state")
+
     target = request.unit_initial_set_id - 1
     unit_ids = _generate_deck_list(INITIAL_UNIT_IDS[target // 9][target % 9])
-    current_user = await user.get_current(context)
 
     units: list[main.Unit] = []
     for uid in unit_ids:
