@@ -69,7 +69,7 @@ async def run_async_migrations() -> None:
 
     """
 
-    connectable = create_async_engine(npps4_config.get_database_url(), poolclass=pool.NullPool)
+    connectable = create_async_engine(npps4_config.get_database_url(), poolclass=pool.NullPool, echo=True)
 
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)
