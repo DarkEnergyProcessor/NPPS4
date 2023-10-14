@@ -2,6 +2,8 @@ import base64
 
 from .. import idol
 from .. import util
+from ..db import main
+from ..idol.system import unit
 from ..idol.system import user
 from ..idol import error
 
@@ -113,6 +115,14 @@ class StarterMemberCategory(pydantic.BaseModel):
 
 class StarterUnitListResponse(pydantic.BaseModel):
     member_category_list: list[StarterMemberCategory]
+
+
+class StarterUnitSelectRequest(pydantic.BaseModel):
+    unit_initial_set_id: int
+
+
+class StarterUnitSelectResponse(pydantic.BaseModel):
+    unit_id: list[int]
 
 
 @idol.register("/login/login", check_version=False, batchable=False)
@@ -282,3 +292,27 @@ async def login_unitlist(context: idol.SchoolIdolUserParams) -> StarterUnitListR
             for catid, unit_list in enumerate(INITIAL_UNIT_IDS, 1)
         ]
     )
+
+
+@idol.register("/login/unitSelect")
+async def login_unitselect(
+    context: idol.SchoolIdolUserParams, request: StarterUnitSelectRequest
+) -> StarterUnitSelectResponse:
+    if request.unit_initial_set_id not in range(1, 19):
+        raise error.IdolError(detail="Out of range")
+
+    target = request.unit_initial_set_id - 1
+    unit_ids = _generate_deck_list(INITIAL_UNIT_IDS[target // 9][target % 9])
+    current_user = await user.get_current(context)
+
+    units: list[main.Unit] = []
+    for uid in unit_ids:
+        unit_object = await unit.add_unit(context, current_user, uid, True)
+        if unit_object is None:
+            raise RuntimeError("unable to add units")
+
+        units.append(unit_object)
+
+    deck, _ = await unit.load_unit_deck(context, current_user, 1, True)
+    await unit.save_unit_deck(context, current_user, deck, [u.id for u in units])
+    return StarterUnitSelectResponse(unit_id=unit_ids)
