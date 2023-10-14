@@ -24,6 +24,10 @@ from ..db import unit
 from typing import Annotated, Any, Callable, Coroutine, TypeVar, Generic
 
 
+class DummyModel(pydantic.BaseModel):
+    pass
+
+
 class Database:
     def __init__(self) -> None:
         self._mainsession: sqlalchemy.ext.asyncio.AsyncSession | None = None
@@ -86,6 +90,7 @@ class SchoolIdolParams:
         client_version: Annotated[str, fastapi.Header(alias="Client-Version")],
         lang: Annotated[idoltype.Language, fastapi.Header(alias="LANG")],
         platform_type: Annotated[idoltype.PlatformType, fastapi.Header(alias="Platform-Type")],
+        request_data: Annotated[bytes | None, fastapi.Form(exclude=True, include=False)] = None,
     ):
         authorize_parsed = dict(urllib.parse.parse_qsl(authorize))
         if authorize_parsed.get("consumerKey") != "lovelive_test":
@@ -109,14 +114,11 @@ class SchoolIdolParams:
         self.x_message_code = request.headers.get("X-Message-Code")
         self.request = request
         self.db = Database()
-        self.raw_request_data = b""
-
-    async def populate_request_data(self):
         # Note: Due to how FastAPI works, the `request_data` form is retrieved TWICE!
         # One in here, retrieved as raw bytes, and the other one is in _get_request_data
         # as Pydantic model.
         # This is necessary for proper X-Message-Code verification!
-        self.raw_request_data = await self.request.body()
+        self.raw_request_data = request_data or b""
 
 
 class SchoolIdolAuthParams(SchoolIdolParams):
@@ -190,8 +192,8 @@ class Endpoint(Generic[_T, _U, _V]):
 
 def _get_request_data(model: type[_U]):
     def actual_getter(
-        request_data: Annotated[model, fastapi.Form()],
-        xmc: Annotated[str, fastapi.Header(alias="X-Message-Code")],
+        request_data: Annotated[pydantic.Json[model], fastapi.Form()],
+        xmc: Annotated[str | None, fastapi.Header(alias="X-Message-Code")],
     ):
         return request_data
 
@@ -208,8 +210,6 @@ async def client_check(context: SchoolIdolParams, check_version: bool, xmc_verif
                 "Maintenance": "1",
             },
         )
-
-    await context.populate_request_data()
 
     # XMC check
     if config.need_xmc_verify() and context.raw_request_data is not None and xmc_verify != idoltype.XMCVerifyMode.NONE:
@@ -325,6 +325,7 @@ def register(
 
         if ret is pydantic.BaseModel:
             util.log("Possible undefined return type for endpoint:", endpoint, severity=util.logging.WARNING)
+            ret = DummyModel
 
         if len(params) == 1:
 
@@ -349,18 +350,20 @@ def register(
                 response = await client_check(context, check_version, xmc_verify)
                 if response is None:
                     try:
-                        result: _V = f(context)  # type: ignore
+                        result: _V | list[_V] = await f(context)
                         await context.db.commit()
-                        response = build_response(context, result)
+                        response = await build_response(context, result)
                     except error.IdolError as e:
                         await context.db.rollback()
-                        response = build_response(context, e)
+                        response = await build_response(context, e)
                     except Exception:
                         await context.db.rollback()
                         raise
                 return response
 
         else:
+            model = typing.cast(pydantic.BaseModel, params[1])
+            schema = model.model_json_schema()
 
             @app.main.post(
                 endpoint,
@@ -369,6 +372,26 @@ def register(
                 response_model=idoltype.ResponseData[ret],
                 responses={200: {"headers": RESPONSE_HEADERS}},
                 tags=tags,
+                openapi_extra={
+                    "requestBody": {
+                        "content": {
+                            "application/x-www-form-urlencoded": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {"request_data": schema},
+                                    "required": ["request_data"],
+                                }
+                            },
+                            "multipart/form-data": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {"request_data": schema},
+                                    "required": ["request_data"],
+                                }
+                            },
+                        }
+                    },
+                },
             )
             async def wrap2(
                 context: Annotated[_T, fastapi.Depends(params[0])],
@@ -378,7 +401,7 @@ def register(
                 response = await client_check(context, check_version, xmc_verify)
                 if response is None:
                     try:
-                        result: _V = f(context, request)  # type: ignore
+                        result: _V | list[_V] = await f(context, request)
                         await context.db.commit()
                         response = await build_response(context, result)
                     except error.IdolError as e:

@@ -26,11 +26,11 @@ async def tos_toscheck(context: idol.SchoolIdolUserParams) -> TOSCheckResponse:
 
 
 @idol.register("/tos/tosAgree", batchable=False)
-async def tos_tosagree(context: idol.SchoolIdolUserParams, request: TOSAgreeRequest) -> pydantic.BaseModel:
+async def tos_tosagree(context: idol.SchoolIdolUserParams, request: TOSAgreeRequest) -> idol.core.DummyModel:
     if request.tos_id == 1:
         current_user = await user.get_current(context)
         if not await tos.is_agreed(context, current_user):
             await tos.agree(context, current_user)
-            return pydantic.BaseModel()
+            return idol.core.DummyModel()
 
     raise error.IdolError(detail="Invalid ToS agreement")

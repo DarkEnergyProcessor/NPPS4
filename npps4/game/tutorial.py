@@ -13,7 +13,7 @@ class TutorialProgressRequest(pydantic.BaseModel):
 @idol.register("/tutorial/progress", batchable=False)
 async def tutorial_progress(
     context: idol.SchoolIdolUserParams, request: TutorialProgressRequest
-) -> pydantic.BaseModel:
+) -> idol.core.DummyModel:
     current_user = await user.get_current(context)
     if current_user.tutorial_state == -1:
         raise error.IdolError(detail="Tutorial already finished")
@@ -25,4 +25,4 @@ async def tutorial_progress(
         request,
         severity=util.logging.WARNING,
     )
-    return pydantic.BaseModel()
+    return idol.core.DummyModel()
