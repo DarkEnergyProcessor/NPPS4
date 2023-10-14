@@ -19,13 +19,12 @@ async def maintenance_page(request: fastapi.Request):
     else:
         # Error?
         message = "No additional error message available"
-        str(request.headers)  # Don't remove this line
-        authorize = request.headers.get("Authorize")
-        if authorize:
+        authorize = request.headers.get("authorize")
+        if authorize is not None:
             authorize_decoded = dict(urllib.parse.parse_qsl(authorize))
             token = authorize_decoded.get("token")
             if token:
-                exc = errhand.load_error(token)
+                exc = errhand.load_error(token.replace(" ", "+"))
                 if exc:
                     message = "\n".join(exc)
 
