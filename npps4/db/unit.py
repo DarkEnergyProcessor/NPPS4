@@ -206,6 +206,33 @@ class MemberTag(common.GameDBBase, common.MaybeEncrypted):
     num_of_members: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
 
 
+class Rarity(common.GameDBBase):
+    """```sql
+    CREATE TABLE `unit_rarity_m` (
+        `rarity` INTEGER NOT NULL,
+        `before_love_max` INTEGER NOT NULL,
+        `after_love_max` INTEGER NOT NULL,
+        `before_level_max` INTEGER NOT NULL,
+        `after_level_max` INTEGER NOT NULL,
+        `rank_up_cost` INTEGER NOT NULL,
+        `exchange_point_rank_up_cost` INTEGER NOT NULL,
+        `sort` INTEGER NOT NULL,
+        `costume_level_limit` INTEGER NOT NULL,
+        PRIMARY KEY (`rarity`)
+    )```"""
+
+    __tablename__ = "unit_rarity_m"
+    rarity: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+    before_love_max: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    after_love_max: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    before_level_max: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    after_level_max: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    rank_up_cost: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    exchange_point_rank_up_cost: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    sort: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    costume_level_limit: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+
+
 class UnitTypeMemberTag(common.GameDBBase):
     """```sql
     CREATE TABLE `unit_type_member_tag_m` (
