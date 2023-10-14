@@ -1,3 +1,4 @@
+import dataclasses
 import queue
 
 import sqlalchemy
@@ -21,8 +22,18 @@ async def count_units(context: idol.SchoolIdolParams, user: main.User, active: b
     return result.scalar() or 0
 
 
+async def get_all_units(context: idol.SchoolIdolParams, user: main.User, active: bool | None = None):
+    if active is None:
+        q = sqlalchemy.select(main.Unit).where(main.Unit.user_id == user.id)
+    else:
+        q = sqlalchemy.select(main.Unit).where(main.Unit.user_id == user.id, main.Unit.active == active)
+
+    result = await context.db.main.execute(q)
+    return result.scalars().all()
+
+
 async def add_unit(context: idol.SchoolIdolParams, user: main.User, unit_id: int, active: bool):
-    unit_info = await context.db.unit.get(unit.Unit, unit_id)
+    unit_info = await get_unit_info(context, unit_id)
     if unit_info is None:
         return None
 
@@ -41,9 +52,48 @@ async def add_unit(context: idol.SchoolIdolParams, user: main.User, unit_id: int
         display_rank=unit_info.rank_min,
         unit_removable_skill_capacity=unit_info.default_removable_skill_capacity,
     )
+
+    if unit_info.rarity == 4:
+        # FIXME: Determine if it's promo card and set to 2 in that case
+        user_unit.level_limit_id = 1
+
     context.db.main.add(user_unit)
     await context.db.main.flush()
     return user_unit
+
+
+def get_unit_info(context: idol.SchoolIdolParams, unit_id: int):
+    return context.db.unit.get(unit.Unit, unit_id)
+
+
+def get_unit_rarity(context: idol.SchoolIdolParams, unit_data: unit.Unit):
+    return context.db.unit.get(unit.Rarity, unit_data.rarity)
+
+
+async def get_unit_level_up_pattern(context: idol.SchoolIdolParams, unit_data: unit.Unit):
+    q = sqlalchemy.select(unit.UnitLevelUpPattern).where(
+        unit.UnitLevelUpPattern.unit_level_up_pattern_id == unit_data.unit_level_up_pattern_id
+    )
+    result = await context.db.unit.execute(q)
+    return list(result.scalars())
+
+
+async def get_unit_skill(context: idol.SchoolIdolParams, unit_data: unit.Unit):
+    if unit_data.default_unit_skill_id is None:
+        return None
+
+    return await context.db.unit.get(unit.UnitSkill, unit_data.default_unit_skill_id)
+
+
+async def get_unit_skill_level_up_pattern(context: idol.SchoolIdolParams, unit_skill: unit.UnitSkill | None):
+    if unit_skill is None:
+        return None
+
+    q = sqlalchemy.select(unit.UnitSkillLevelUpPattern).where(
+        unit.UnitSkillLevelUpPattern.unit_skill_level_up_pattern_id == unit_skill.unit_skill_level_up_pattern_id
+    )
+    result = await context.db.unit.execute(q)
+    return list(result.scalars())
 
 
 async def remove_unit(context: idol.SchoolIdolParams, user: main.User, user_unit: main.Unit):
@@ -59,12 +109,13 @@ async def remove_unit(context: idol.SchoolIdolParams, user: main.User, user_unit
     await context.db.main.flush()
 
 
+# TODO: Move to consts
 TEAM_NAMING = {idoltype.Language.en: "Team %s", idoltype.Language.jp: "ユニット%s"}
 
 
 @overload
 async def load_unit_deck(
-    context: idol.SchoolIdolParams, user: main.User, index: int, ensure: Literal[False]
+    context: idol.SchoolIdolParams, user: main.User, index: int, ensure: Literal[False] = False
 ) -> tuple[main.UnitDeck, list[int]] | None:
     ...
 
@@ -127,3 +178,51 @@ async def save_unit_deck(context: idol.SchoolIdolParams, user: main.User, deck: 
         await context.db.main.delete(deckposlist.get())
 
     await context.db.main.flush()
+
+
+@dataclasses.dataclass
+class UnitStatsResult:
+    level: int
+    smile: int
+    pure: int
+    cool: int
+    hp: int
+    next_exp: int
+
+
+def calculate_unit_stats(unit_data: unit.Unit, pattern: list[unit.UnitLevelUpPattern], exp: int):
+    last = pattern[-1]
+    result = UnitStatsResult(
+        level=last.unit_level,
+        smile=unit_data.smile_max,
+        pure=unit_data.pure_max,
+        cool=unit_data.cool_max,
+        hp=unit_data.hp_max,
+        next_exp=0,
+    )
+
+    for diff in pattern:
+        if diff.next_exp > exp:
+            result.level = diff.unit_level
+            result.smile = result.smile - diff.smile_diff
+            result.pure = result.pure - diff.pure_diff
+            result.cool = result.cool - diff.cool_diff
+            result.hp = result.hp - diff.hp_diff
+            result.next_exp = diff.next_exp
+            break
+
+    return result
+
+
+def calculate_unit_skill_stats(
+    unit_skill: unit.UnitSkill | None, pattern: list[unit.UnitSkillLevelUpPattern] | None, exp: int
+):
+    if unit_skill is None or pattern is None:
+        return (1, 0)
+
+    last = pattern[-1]
+    for stat in pattern:
+        if stat.next_exp > exp:
+            return (stat.skill_level, stat.next_exp)
+
+    return (last.skill_level, 0)

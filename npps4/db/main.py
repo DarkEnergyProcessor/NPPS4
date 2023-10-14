@@ -91,6 +91,7 @@ class Unit(common.Base):
     insert_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=util.time)
 
     exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
+    skill_exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
     max_level: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     love: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)  # Bond
     rank: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()  # Non-idolized = 1, idolized = 2

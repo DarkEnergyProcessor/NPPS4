@@ -466,6 +466,22 @@ class UnitSkill(common.GameDBBase, common.MaybeEncrypted):
     string_key_long_description: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
 
 
+class UnitSkillLevelUpPattern(common.GameDBBase):
+    """```sql
+    CREATE TABLE `unit_skill_level_up_pattern_m` (
+        `unit_skill_level_up_pattern_id` INTEGER NOT NULL,
+        `skill_level` INTEGER NOT NULL,
+        `next_exp` INTEGER NOT NULL,
+        PRIMARY KEY (`unit_skill_level_up_pattern_id`,`skill_level`)
+    )
+    ```"""
+
+    __tablename__ = "unit_skill_level_up_pattern_m"
+    unit_skill_level_up_pattern_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    skill_level: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    next_exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+
+
 engine = sqlalchemy.ext.asyncio.create_async_engine(
     f"sqlite+aiosqlite:///file:{download.get_db_path('unit')}?mode=ro&uri=true",
 )
