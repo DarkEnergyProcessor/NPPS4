@@ -3,6 +3,13 @@ Null-Pointer Private Server: Revisited
 
 WIP SIF 9.11 private server written using FastAPI.
 
+Notes
+-----
+
+* This project is currently in need of funding.
+
+* Database schema changes constantly. Expect frequent database wipes.
+
 Requirements
 -----
 
