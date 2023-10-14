@@ -139,18 +139,23 @@ async def unit_unitall(context: idol.SchoolIdolUserParams) -> UnitAllInfoRespons
         idolized = unit_data.rank == unit_info.rank_max
         skill_max = skill is None or skill_stats[0] == skill.max_level
 
+        max_level = unit_rarity.after_level_max if idolized else unit_rarity.before_level_max
+        max_love = unit_rarity.after_love_max if idolized else unit_rarity.before_love_max
+        real_max_exp = 0 if stats.level == unit_rarity.before_level_max and not idolized else stats.next_exp
+        removable_skill_max = unit_data.unit_removable_skill_capacity == unit_info.max_removable_skill_capacity
+
         unit_serialized_data = UnitInfoResponse(
             unit_owning_user_id=unit_data.id,
             unit_id=unit_data.unit_id,
             exp=unit_data.exp,
-            next_exp=stats.next_exp,  # TODO: Rectify
+            next_exp=real_max_exp,
             level=stats.level,
-            max_level=unit_data.max_level,
+            max_level=max_level,
             level_limit_id=unit_data.level_limit_id,
             rank=unit_data.rank,
             max_rank=unit_info.rank_max,
             love=unit_data.love,
-            max_love=unit_rarity.after_love_max if idolized else unit_rarity.before_love_max,
+            max_love=max_love,
             unit_skill_exp=unit_data.skill_exp,
             unit_skill_level=skill_stats[0],
             max_hp=stats.hp,
@@ -158,12 +163,11 @@ async def unit_unitall(context: idol.SchoolIdolUserParams) -> UnitAllInfoRespons
             favorite_flag=unit_data.favorite_flag,
             display_rank=unit_data.display_rank,
             is_rank_max=idolized,
-            is_love_max=unit_data.love == unit_rarity.after_love_max,
-            is_level_max=stats.level == unit_rarity.after_level_max,
+            is_love_max=unit_data.love >= unit_rarity.after_love_max,
+            is_level_max=stats.level >= unit_rarity.after_level_max,
             is_signed=unit_data.is_signed,
             is_skill_level_max=skill_max,
-            is_removable_skill_capacity_max=unit_data.unit_removable_skill_capacity
-            == unit_info.max_removable_skill_capacity,
+            is_removable_skill_capacity_max=removable_skill_max,
             insert_date=util.timestamp_to_datetime(unit_data.insert_date),
         )
         unit_result[unit_data.active].append(unit_serialized_data)
