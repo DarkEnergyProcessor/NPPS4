@@ -282,7 +282,6 @@ async def build_response(context: SchoolIdolParams, response: _PossibleResponse[
         "status_code": status_code,
     }
     jsondata = json.dumps(response_data).encode("UTF-8")
-    await context.db.cleanup()
     return fastapi.responses.Response(
         jsondata,
         http_code,
@@ -369,6 +368,8 @@ def register(
                     except Exception:
                         await context.db.rollback()
                         raise
+                    finally:
+                        await context.db.cleanup()
                 return response
 
         else:
