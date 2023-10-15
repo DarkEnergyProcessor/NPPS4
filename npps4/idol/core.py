@@ -274,7 +274,7 @@ def assemble_response_data(response: _PossibleResponse):
     return response_data, status_code, http_code
 
 
-async def build_response(context: SchoolIdolParams, response: _PossibleResponse[_V]):
+async def build_response(context: SchoolIdolParams, response: _PossibleResponse[_V], log: bool = True):
     response_data_dict, status_code, http_code = assemble_response_data(response)
     response_data = {
         "response_data": response_data_dict,
@@ -284,8 +284,8 @@ async def build_response(context: SchoolIdolParams, response: _PossibleResponse[
     jsondatastr = json.dumps(response_data)
     jsondata = jsondatastr.encode("UTF-8")
 
-    if config.log_request_response():
-        util.log("DEBUG RESPONSE", str(context.request.url), jsondata)
+    if config.log_request_response() and log:
+        util.log("DEBUG RESPONSE", str(context.request.url), jsondatastr)
 
     return fastapi.responses.Response(
         jsondata,
@@ -415,6 +415,8 @@ def register(
             ):
                 nonlocal ret, check_version, xmc_verify
                 response = await client_check(context, check_version, xmc_verify)
+                if config.log_request_response():
+                    util.log("DEBUG REQUEST", endpoint, str(context.raw_request_data, "UTF-8"))
                 if response is None:
                     try:
                         result: _V | list[_V] = await f(context, request)
@@ -543,5 +545,9 @@ async def api_endpoint(
 
             response_data.append(BatchResponse(result=current_response, status=status_code, timeStamp=util.time()))
 
-        response = await build_response(context, response_data)
+            if config.log_request_response():
+                util.log("DEBUG REQUEST /api - ", module, action, ":::", json.dumps(request_data))
+                util.log("DEBUG RESPONSE /api - ", module, action, ":::", json.dumps(current_response))
+
+        response = await build_response(context, response_data, False)
     return response
