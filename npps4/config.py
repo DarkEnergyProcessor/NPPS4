@@ -120,3 +120,15 @@ def contains_badwords(string: str):
                 return True
 
     return False
+
+
+_log_request_response_flag = False
+
+
+def log_request_response(set: bool | None = None):
+    global _log_request_response_flag
+    old = _log_request_response_flag
+    if set is not None:
+        _log_request_response_flag = set
+
+    return old

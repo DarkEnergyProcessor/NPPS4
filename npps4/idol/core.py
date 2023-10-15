@@ -281,7 +281,12 @@ async def build_response(context: SchoolIdolParams, response: _PossibleResponse[
         "release_info": release_key.formatted(),
         "status_code": status_code,
     }
-    jsondata = json.dumps(response_data).encode("UTF-8")
+    jsondatastr = json.dumps(response_data)
+    jsondata = jsondatastr.encode("UTF-8")
+
+    if config.log_request_response():
+        util.log("DEBUG RESPONSE", str(context.request.url), jsondata)
+
     return fastapi.responses.Response(
         jsondata,
         http_code,
@@ -498,6 +503,9 @@ async def api_endpoint(
 ):
     response = await client_check(context, True, idoltype.XMCVerifyMode.SHARED)
     raw_request_data = json.loads(context.raw_request_data)
+
+    if config.log_request_response():
+        util.log("DEBUG REQUEST /api:", str(context.raw_request_data, "UTF-8"))
 
     if response is None:
         response_data: list[BatchResponse] = []
