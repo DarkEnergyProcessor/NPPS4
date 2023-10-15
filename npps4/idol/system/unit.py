@@ -3,6 +3,7 @@ import queue
 
 import sqlalchemy
 
+from . import album
 from . import core
 from ... import idol
 from ... import idoltype
@@ -58,6 +59,7 @@ async def add_unit(context: idol.SchoolIdolParams, user: main.User, unit_id: int
         user_unit.level_limit_id = 1
 
     context.db.main.add(user_unit)
+    await album.update(context, user, unit_id, flush=False)
     await context.db.main.flush()
     return user_unit
 
@@ -92,6 +94,7 @@ async def add_supporter_unit(context: idol.SchoolIdolParams, user: main.User, un
         return False
 
     unitsupp.amount = unitsupp.amount + quantity
+    await album.update(context, user, unit_id, True, True, True, flush=False)
     await context.db.main.flush()
     return True
 
@@ -241,6 +244,18 @@ async def save_unit_deck(context: idol.SchoolIdolParams, user: main.User, deck: 
         await context.db.main.delete(deckposlist.get())
 
     await context.db.main.flush()
+
+
+async def set_unit_center(
+    context: idol.BasicSchoolIdolContext, user: main.User, unit_data: main.Unit, flush: bool = True
+):
+    center = await context.db.main.get(main.UnitCenter, user.id)
+    if center is None:
+        center = main.UnitCenter(user_id=user.id)
+
+    center.unit_id = unit_data.id
+    if flush:
+        await context.db.main.flush()
 
 
 @dataclasses.dataclass

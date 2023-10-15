@@ -3,6 +3,7 @@ import base64
 from .. import idol
 from .. import util
 from ..db import main
+from ..idol.system import album
 from ..idol.system import unit
 from ..idol.system import user
 from ..idol import error
@@ -315,6 +316,14 @@ async def login_unitselect(
             raise RuntimeError("unable to add units")
 
         units.append(unit_object)
+
+    # Idolize center
+    center = units[4]
+    center.rank = 2
+    center.unit_removable_skill_capacity = center.unit_removable_skill_capacity + 1
+    await album.update(context, current_user, center.unit_id, True, flush=False)
+    await unit.set_unit_center(context, current_user, center, flush=False)
+    await context.db.main.flush()
 
     deck, _ = await unit.load_unit_deck(context, current_user, 1, True)
     await unit.save_unit_deck(context, current_user, deck, [u.id for u in units])
