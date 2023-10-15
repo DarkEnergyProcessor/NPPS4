@@ -198,6 +198,7 @@ class Endpoint(Generic[_T, _U, _V]):
     request_class: type[pydantic.BaseModel] | None
     is_request_list: bool
     function: _PossibleEndpointFunction[_T, _U, _V]
+    exclude_none: bool
 
 
 def _get_request_data(model: type[_U]):
@@ -251,7 +252,7 @@ async def client_check(context: SchoolIdolParams, check_version: bool, xmc_verif
 _PossibleResponse = _V | list[_V] | error.IdolError | Exception | None
 
 
-def assemble_response_data(response: _PossibleResponse):
+def assemble_response_data(response: _PossibleResponse[_V], exclude_none: bool = False):
     if isinstance(response, error.IdolError):
         response_data = {"error_code": response.error_code, "detail": response.detail}
         status_code = response.status_code
@@ -266,16 +267,18 @@ def assemble_response_data(response: _PossibleResponse):
         response_data = []
         status_code = http_code = 200
     elif isinstance(response, list):
-        response_data = [r.model_dump() for r in response]
+        response_data = [r.model_dump(exclude_none=exclude_none) for r in response]
         status_code = http_code = 200
     else:
-        response_data = response.model_dump()
+        response_data = response.model_dump(exclude_none=exclude_none)
         status_code = http_code = 200
     return response_data, status_code, http_code
 
 
-async def build_response(context: SchoolIdolParams, response: _PossibleResponse[_V], log: bool = True):
-    response_data_dict, status_code, http_code = assemble_response_data(response)
+async def build_response(
+    context: SchoolIdolParams, response: _PossibleResponse[_V], log: bool = True, exclude_none: bool = False
+):
+    response_data_dict, status_code, http_code = assemble_response_data(response, exclude_none)
     response_data = {
         "response_data": response_data_dict,
         "release_info": release_key.formatted(),
@@ -322,6 +325,7 @@ def register(
     check_version: bool = True,
     batchable: bool = True,
     xmc_verify: idoltype.XMCVerifyMode = idoltype.XMCVerifyMode.SHARED,
+    exclude_none: bool = False,
 ):
     def wrap0(f: _PossibleEndpointFunction[_T, _U, _V]):
         nonlocal endpoint, check_version, batchable
@@ -360,13 +364,13 @@ def register(
                 tags=tags,
             )
             async def wrap1(context: Annotated[_T, fastapi.Depends(params[0])]):
-                nonlocal ret, check_version, xmc_verify
+                nonlocal ret, check_version, xmc_verify, exclude_none
                 response = await client_check(context, check_version, xmc_verify)
                 if response is None:
                     try:
                         result: _V | list[_V] = await f(context)
                         await context.db.commit()
-                        response = await build_response(context, result)
+                        response = await build_response(context, result, exclude_none=exclude_none)
                     except error.IdolError as e:
                         await context.db.rollback()
                         response = await build_response(context, e)
@@ -388,6 +392,7 @@ def register(
                 response_model=idoltype.ResponseData[ret],
                 responses={200: {"headers": RESPONSE_HEADERS}},
                 tags=tags,
+                response_model_exclude_none=exclude_none,
                 openapi_extra={
                     "requestBody": {
                         "content": {
@@ -421,7 +426,7 @@ def register(
                     try:
                         result: _V | list[_V] = await f(context, request)
                         await context.db.commit()
-                        response = await build_response(context, result)
+                        response = await build_response(context, result, exclude_none=exclude_none)
                     except error.IdolError as e:
                         await context.db.rollback()
                         response = await build_response(context, e)
@@ -442,6 +447,7 @@ def register(
                 request_class=real_request,
                 is_request_list=is_request_list,
                 function=f,
+                exclude_none=exclude_none,
             )
         return f
 
@@ -534,7 +540,7 @@ async def api_endpoint(
                     result = await endpoint.function(context)  # type: ignore
 
                 await context.db.commit()
-                current_response, status_code, http_code = assemble_response_data(result)
+                current_response, status_code, http_code = assemble_response_data(result, endpoint.exclude_none)
             except Exception as e:
                 await context.db.rollback()
 

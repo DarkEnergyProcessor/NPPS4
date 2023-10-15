@@ -20,10 +20,10 @@ async def tutorial_progress(
     if current_user.tutorial_state == 0 and request.tutorial_state == 1:
         current_user.tutorial_state = 1
         return idol.core.DummyModel()
+    elif current_user.tutorial_state == 1 and request.tutorial_state == 2:
+        current_user.tutorial_state = 2
+        return idol.core.DummyModel()
 
-    util.log(
-        f"STUB /tutorial/progress, user {current_user.tutorial_state} request {request.tutorial_state}",
-        request,
-        severity=util.logging.WARNING,
-    )
-    return idol.core.DummyModel()
+    msg = f"STUB /tutorial/progress, user {current_user.tutorial_state} request {request.tutorial_state}"
+    util.log(msg, request, severity=util.logging.WARNING)
+    raise error.IdolError(detail=msg)

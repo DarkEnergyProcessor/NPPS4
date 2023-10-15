@@ -66,6 +66,7 @@ class UserNavi(pydantic.BaseModel):
 
 class UserGetNaviResponse(pydantic.BaseModel):
     user: UserNavi
+    server_timestamp: int
 
 
 @idol.register("/user/changeName", batchable=False)
@@ -84,11 +85,12 @@ async def user_getnavi(context: idol.SchoolIdolUserParams) -> UserGetNaviRespons
     current_user = await user.get_current(context)
     center = await unit.get_unit_center(context, current_user)
     return UserGetNaviResponse(
-        user=UserNavi(user_id=context.token.user_id, unit_owning_user_id=center.unit_id if center is not None else 0)
+        user=UserNavi(user_id=context.token.user_id, unit_owning_user_id=center.unit_id if center is not None else 0),
+        server_timestamp=util.time(),
     )
 
 
-@idol.register("/user/userInfo")
+@idol.register("/user/userInfo", exclude_none=True)
 async def user_userinfo(context: idol.SchoolIdolUserParams) -> UserInfoResponse:
     u = await user.get_current(context)
     if u is None:
@@ -121,5 +123,6 @@ async def user_userinfo(context: idol.SchoolIdolUserParams) -> UserInfoResponse:
             update_date=util.timestamp_to_datetime(u.update_date),
             tutorial_state=u.tutorial_state,
         ),
+        ad_status=False,
         server_timestamp=util.time(),
     )
