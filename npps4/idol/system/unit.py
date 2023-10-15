@@ -34,7 +34,7 @@ async def get_all_units(context: idol.SchoolIdolParams, user: main.User, active:
 
 async def add_unit(context: idol.SchoolIdolParams, user: main.User, unit_id: int, active: bool):
     unit_info = await get_unit_info(context, unit_id)
-    if unit_info is None:
+    if unit_info is None or unit_info.disable_rank_up:
         return None
 
     rarity = await context.db.unit.get(unit.Rarity, unit_info.rarity)
@@ -60,6 +60,69 @@ async def add_unit(context: idol.SchoolIdolParams, user: main.User, unit_id: int
     context.db.main.add(user_unit)
     await context.db.main.flush()
     return user_unit
+
+
+async def get_supporter_unit(context: idol.SchoolIdolParams, user: main.User, unit_id: int, ensure: bool = False):
+    unit_info = await get_unit_info(context, unit_id)
+    if unit_info is None or unit_info.disable_rank_up == 0:
+        return None
+
+    q = (
+        sqlalchemy.select(main.UnitSupporter)
+        .where(main.UnitSupporter.user_id == user.id, main.UnitSupporter.unit_id == unit_id)
+        .limit(1)
+    )
+    result = await context.db.main.execute(q)
+    unitsupp = result.scalar()
+
+    if unitsupp is None and ensure:
+        unitsupp = main.UnitSupporter(user_id=user.id, unit_id=unit_id, amount=0)
+        context.db.main.add(unitsupp)
+
+    return unitsupp
+
+
+async def add_supporter_unit(context: idol.SchoolIdolParams, user: main.User, unit_id: int, quantity: int = 1):
+    if quantity < 1:
+        raise ValueError("invalid amount")
+
+    unitsupp = await get_supporter_unit(context, user, unit_id, True)
+
+    if unitsupp is None:
+        return False
+
+    unitsupp.amount = unitsupp.amount + quantity
+    await context.db.main.flush()
+    return True
+
+
+async def sub_supporter_unit(context: idol.SchoolIdolParams, user: main.User, unit_id: int, quantity: int = 1):
+    if quantity < 1:
+        raise ValueError("invalid amount")
+
+    unitsupp = await get_supporter_unit(context, user, unit_id)
+
+    if unitsupp is not None and unitsupp.amount >= quantity:
+        unitsupp.amount = unitsupp.amount - quantity
+        await context.db.main.flush()
+        return True
+
+    return False
+
+
+async def get_all_supporter_unit(context: idol.SchoolIdolParams, user: main.User):
+    q = (
+        sqlalchemy.select(main.UnitSupporter)
+        .where(main.UnitSupporter.user_id == user.id)
+        .order_by(main.UnitSupporter.unit_id)
+    )
+    result = await context.db.main.execute(q)
+    supporters: list[tuple[int, int]] = []
+
+    for row in result.scalars():
+        supporters.append((row.unit_id, row.amount))
+
+    return supporters
 
 
 def get_unit_info(context: idol.SchoolIdolParams, unit_id: int):

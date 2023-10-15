@@ -12,7 +12,12 @@ class RemovableSkillInfoResponse(pydantic.BaseModel):
 
 
 class SupporterInfoResponse(pydantic.BaseModel):
-    unit_support_list: list
+    unit_id: int
+    amount: int
+
+
+class SupporterListInfoResponse(pydantic.BaseModel):
+    unit_support_list: list[SupporterInfoResponse]
 
 
 class UnitAccessoryInfoResponse(pydantic.BaseModel):
@@ -105,10 +110,13 @@ async def unit_removableskillinfo(context: idol.SchoolIdolUserParams) -> Removab
 
 
 @idol.register("/unit/supporterAll")
-async def unit_supporterall(context: idol.SchoolIdolUserParams) -> SupporterInfoResponse:
-    # TODO
-    util.log("STUB /unit/supporterAll", severity=util.logging.WARNING)
-    return SupporterInfoResponse(unit_support_list=[])
+async def unit_supporterall(context: idol.SchoolIdolUserParams) -> SupporterListInfoResponse:
+    current_user = await user.get_current(context)
+    units = await unit.get_all_supporter_unit(context, current_user)
+
+    return SupporterListInfoResponse(
+        unit_support_list=[SupporterInfoResponse(unit_id=supp[0], amount=supp[1]) for supp in units]
+    )
 
 
 @idol.register("/unit/unitAll")
