@@ -24,7 +24,16 @@ async def update(
     album = result.scalar()
 
     if album is None:
-        album = main.Album(user_id=user.id, unit_id=unit_id)
+        album = main.Album(
+            user_id=user.id,
+            unit_id=unit_id,
+            rank_max_flag=False,
+            love_max_flag=False,
+            rank_level_max_flag=False,
+            highest_love_per_unit=0,
+            favorite_point=0,
+            sign_flag=False,
+        )
         context.db.main.add(album)
 
     album.rank_max_flag = rank_max or album.rank_max_flag
@@ -35,3 +44,9 @@ async def update(
     album.sign_flag = sign_flag or album.sign_flag
     if flush:
         await context.db.main.flush()
+
+
+async def all(context: idol.BasicSchoolIdolContext, user: main.User):
+    q = sqlalchemy.select(main.Album).where(main.Album.user_id == user.id)
+    result = await context.db.main.execute(q)
+    return list(result.scalars())
