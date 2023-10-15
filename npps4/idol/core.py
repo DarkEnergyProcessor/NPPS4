@@ -80,7 +80,15 @@ class Database:
             await self._mainsession.rollback()
 
 
-class SchoolIdolParams:
+class BasicSchoolIdolContext:
+    """Context object used only to access the database function."""
+
+    def __init__(self, lang: idoltype.Language):
+        self.lang = lang
+        self.db = Database()
+
+
+class SchoolIdolParams(BasicSchoolIdolContext):
     """Context object used for unauthenticated request."""
 
     def __init__(
@@ -109,16 +117,16 @@ class SchoolIdolParams:
             self.timestamp = int(authorize_parsed.get("timeStamp", ts))
         except ValueError:
             self.timestamp = ts
-        self.lang = lang
         self.platform = platform_type
         self.x_message_code = request.headers.get("X-Message-Code")
         self.request = request
-        self.db = Database()
         # Note: Due to how FastAPI works, the `request_data` form is retrieved TWICE!
         # One in here, retrieved as raw bytes, and the other one is in _get_request_data
         # as Pydantic model.
         # This is necessary for proper X-Message-Code verification!
         self.raw_request_data = request_data or b""
+
+        super().__init__(lang)
 
 
 class SchoolIdolAuthParams(SchoolIdolParams):
