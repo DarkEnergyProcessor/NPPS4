@@ -258,6 +258,11 @@ async def set_unit_center(
         await context.db.main.flush()
 
 
+async def get_unit_center(context: idol.BasicSchoolIdolContext, user: main.User):
+    center = await context.db.main.get(main.UnitCenter, user.id)
+    return center
+
+
 @dataclasses.dataclass
 class UnitStatsResult:
     level: int

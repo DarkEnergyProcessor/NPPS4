@@ -1,8 +1,9 @@
 from .. import config
 from .. import idol
 from .. import util
-from ..idol.system import user
 from ..idol import error
+from ..idol.system import unit
+from ..idol.system import user
 
 import pydantic
 
@@ -80,9 +81,11 @@ async def user_changename(context: idol.SchoolIdolUserParams, request: ChangeNam
 
 @idol.register("/user/getNavi")
 async def user_getnavi(context: idol.SchoolIdolUserParams) -> UserGetNaviResponse:
-    # TODO
-    util.log("STUB /user/getNavi", severity=util.logging.WARNING)
-    return UserGetNaviResponse(user=UserNavi(user_id=context.token.user_id, unit_owning_user_id=0))
+    current_user = await user.get_current(context)
+    center = await unit.get_unit_center(context, current_user)
+    return UserGetNaviResponse(
+        user=UserNavi(user_id=context.token.user_id, unit_owning_user_id=center.unit_id if center is not None else 0)
+    )
 
 
 @idol.register("/user/userInfo")
