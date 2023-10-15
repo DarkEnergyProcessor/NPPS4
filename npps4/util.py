@@ -65,7 +65,6 @@ def encapsulate_token(server_key: bytes, client_key: bytes, user_id: int):
 def decapsulate_token(token_data: str):
     global TOKEN_SERIALIZER, SALT_SIZE
 
-    print("decapsulating token", token_data)
     token = base64.b64decode(token_data.replace(" ", "+"))
     salt, result = token[:SALT_SIZE], token[SALT_SIZE:]
     try:
