@@ -54,7 +54,7 @@ class TopInfoResponse(pydantic.BaseModel):
     friend_variety_cnt: int
     friend_new_cnt: int
     present_cnt: int
-    secret_box_badge_flag: int
+    secret_box_badge_flag: bool
     server_datetime: str
     server_timestamp: int
     notice_friend_datetime: str
@@ -87,7 +87,7 @@ class NotificationStatus(pydantic.BaseModel):
 class TopInfoOnceResponse(pydantic.BaseModel):
     new_achievement_cnt: int
     unaccomplished_achievement_cnt: int
-    live_daily_reward_exist: int
+    live_daily_reward_exist: bool
     training_energy: int
     training_energy_max: int
     notification: NotificationStatus
@@ -208,8 +208,8 @@ async def login_topinfo(context: idol.SchoolIdolUserParams) -> TopInfoResponse:
         secret_box_badge_flag=False,
         server_datetime=util.timestamp_to_datetime(),
         server_timestamp=util.time(),
-        notice_friend_datetime=util.timestamp_to_datetime(0),
-        notice_mail_datetime=util.timestamp_to_datetime(0),
+        notice_friend_datetime=util.timestamp_to_datetime(86400),
+        notice_mail_datetime=util.timestamp_to_datetime(86400),
         friends_approval_wait_cnt=0,
         friends_request_cnt=0,
         is_today_birthday=False,
@@ -226,14 +226,15 @@ async def login_topinfo(context: idol.SchoolIdolUserParams) -> TopInfoResponse:
 
 @idol.register("/login/topInfoOnce")
 async def login_topinfoonce(context: idol.SchoolIdolUserParams) -> TopInfoOnceResponse:
+    current_user = await user.get_current(context)
     # TODO
     util.log("STUB /login/topInfoOnce", severity=util.logging.WARNING)
     return TopInfoOnceResponse(
         new_achievement_cnt=0,
         unaccomplished_achievement_cnt=0,
         live_daily_reward_exist=False,
-        training_energy=3,
-        training_energy_max=3,
+        training_energy=current_user.training_energy,
+        training_energy_max=current_user.training_energy_max,
         notification=NotificationStatus(
             push=True,
             lp=False,
