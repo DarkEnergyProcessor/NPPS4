@@ -319,9 +319,7 @@ async def login_unitselect(
 
     # Idolize center
     center = units[4]
-    center.rank = 2
-    center.unit_removable_skill_capacity = center.unit_removable_skill_capacity + 1
-    await album.update(context, current_user, center.unit_id, True, flush=False)
+    await unit.idolize(context, current_user, center)
     await unit.set_unit_center(context, current_user, center, flush=False)
     await context.db.main.flush()
 
