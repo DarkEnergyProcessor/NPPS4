@@ -176,7 +176,7 @@ async def remove_unit(context: idol.SchoolIdolParams, user: main.User, user_unit
 
 
 # TODO: Move to consts
-TEAM_NAMING = {idoltype.Language.en: "Team %s", idoltype.Language.jp: "ユニット%s"}
+TEAM_NAMING = {idoltype.Language.en: "Team {0}", idoltype.Language.jp: "ユニット{0}"}
 
 
 @overload
