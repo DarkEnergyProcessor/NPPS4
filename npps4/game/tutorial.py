@@ -25,8 +25,8 @@ async def tutorial_progress(
         current_user.tutorial_state = 2
         return idol.core.DummyModel()
     elif current_user.tutorial_state == 2 and request.tutorial_state == 3:
-        # G +600
-        current_user.game_coin = current_user.game_coin + 600
+        # G +37000, not sure why
+        current_user.game_coin = current_user.game_coin + 37000
         # Friend Points +5
         current_user.social_point = current_user.social_point + 5
         # Add EXP
