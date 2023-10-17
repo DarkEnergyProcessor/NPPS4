@@ -1,5 +1,6 @@
 from . import ad
 from . import album
+from . import announce
 from . import award
 from . import background
 from . import banner
@@ -21,6 +22,7 @@ from . import museum
 from . import navigation
 from . import notice
 from . import payment
+from . import personalnotice
 from . import scenario
 from . import stamp
 from . import subscenario
