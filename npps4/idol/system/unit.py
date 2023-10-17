@@ -59,7 +59,7 @@ async def add_unit(context: idol.SchoolIdolParams, user: main.User, unit_id: int
         user_unit.level_limit_id = 1
 
     context.db.main.add(user_unit)
-    await album.update(context, user, unit_id, flush=False)
+    await album.update(context, user, unit_id)
     await context.db.main.flush()
     return user_unit
 
@@ -94,7 +94,7 @@ async def add_supporter_unit(context: idol.SchoolIdolParams, user: main.User, un
         return False
 
     unitsupp.amount = unitsupp.amount + quantity
-    await album.update(context, user, unit_id, True, True, True, flush=False)
+    await album.update(context, user, unit_id, True, True, True)
     await context.db.main.flush()
     return True
 
@@ -247,17 +247,14 @@ async def save_unit_deck(context: idol.SchoolIdolParams, user: main.User, deck: 
     await context.db.main.flush()
 
 
-async def set_unit_center(
-    context: idol.BasicSchoolIdolContext, user: main.User, unit_data: main.Unit, flush: bool = True
-):
+async def set_unit_center(context: idol.BasicSchoolIdolContext, user: main.User, unit_data: main.Unit):
     center = await context.db.main.get(main.UnitCenter, user.id)
     if center is None:
         center = main.UnitCenter(user_id=user.id)
         context.db.main.add(center)
 
     center.unit_id = unit_data.id
-    if flush:
-        await context.db.main.flush()
+    await context.db.main.flush()
 
 
 async def get_unit_center(context: idol.BasicSchoolIdolContext, user: main.User):
@@ -265,7 +262,7 @@ async def get_unit_center(context: idol.BasicSchoolIdolContext, user: main.User)
     return center
 
 
-async def idolize(context: idol.BasicSchoolIdolContext, user: main.User, unit_data: main.Unit, flush: bool = True):
+async def idolize(context: idol.BasicSchoolIdolContext, user: main.User, unit_data: main.Unit):
     if unit_data.user_id != user.id:
         raise ValueError("invalid unit_id")
 
@@ -285,10 +282,8 @@ async def idolize(context: idol.BasicSchoolIdolContext, user: main.User, unit_da
     unit_data.display_rank = unit_info.rank_max
     unit_data.max_level = rarity.after_level_max
 
-    await album.update(context, user, unit_data.unit_id, rank_max=True, flush=False)
-
-    if flush:
-        await context.db.main.flush()
+    await album.update(context, user, unit_data.unit_id, rank_max=True)
+    await context.db.main.flush()
 
     return True
 

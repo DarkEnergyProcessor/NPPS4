@@ -321,7 +321,7 @@ async def login_unitselect(
     # Idolize center
     center = units[4]
     await unit.idolize(context, current_user, center)
-    await unit.set_unit_center(context, current_user, center, flush=False)
+    await unit.set_unit_center(context, current_user, center)
     await context.db.main.flush()
 
     deck, _ = await unit.load_unit_deck(context, current_user, 1, True)

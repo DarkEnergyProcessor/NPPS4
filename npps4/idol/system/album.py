@@ -17,7 +17,6 @@ async def update(
     highest_love: int = 0,
     favorite_point: int = 0,
     sign_flag: bool = False,
-    flush: bool = True,
 ):
     q = sqlalchemy.select(main.Album).where(main.Album.user_id == user.id, main.Album.unit_id == unit_id)
     result = await context.db.main.execute(q)
@@ -42,8 +41,7 @@ async def update(
     album.highest_love_per_unit = max(album.highest_love_per_unit, highest_love)
     album.favorite_point = max(album.favorite_point, favorite_point)
     album.sign_flag = sign_flag or album.sign_flag
-    if flush:
-        await context.db.main.flush()
+    await context.db.main.flush()
 
 
 async def all(context: idol.BasicSchoolIdolContext, user: main.User):
