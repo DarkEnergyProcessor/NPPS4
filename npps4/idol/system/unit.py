@@ -1,12 +1,15 @@
 import dataclasses
 import queue
+import typing
 
 import sqlalchemy
+
 
 from . import album
 from . import core
 from ... import idol
 from ... import idoltype
+from ... import util
 from ...db import main
 from ...db import unit
 
@@ -181,19 +184,19 @@ TEAM_NAMING = {idoltype.Language.en: "Team {0}", idoltype.Language.jp: "ユニ�
 
 @overload
 async def load_unit_deck(
-    context: idol.SchoolIdolParams, user: main.User, index: int, ensure: Literal[False] = False
+    context: idol.BasicSchoolIdolContext, user: main.User, index: int, ensure: Literal[False] = False
 ) -> tuple[main.UnitDeck, list[int]] | None:
     ...
 
 
 @overload
 async def load_unit_deck(
-    context: idol.SchoolIdolParams, user: main.User, index: int, ensure: Literal[True]
+    context: idol.BasicSchoolIdolContext, user: main.User, index: int, ensure: Literal[True]
 ) -> tuple[main.UnitDeck, list[int]]:
     ...
 
 
-async def load_unit_deck(context: idol.SchoolIdolParams, user: main.User, index: int, ensure: bool = False):
+async def load_unit_deck(context: idol.BasicSchoolIdolContext, user: main.User, index: int, ensure: bool = False):
     if index not in range(1, 19):
         raise ValueError("deck index out of range")
 
@@ -286,6 +289,59 @@ async def idolize(context: idol.BasicSchoolIdolContext, user: main.User, unit_da
     await context.db.main.flush()
 
     return True
+
+
+LOVE_POS_CALC_ORDER = (4, 0, 1, 2, 3, 5, 6, 7, 8)
+LOVE_POS_CALC_WEIGHT = (5, 1, 1, 1, 1, 1, 1, 1, 1)
+
+
+async def add_love_by_deck(context: idol.BasicSchoolIdolContext, user: main.User, deck_index: int, love: int):
+    deck_data = await load_unit_deck(context, user, deck_index, False)
+    if deck_data is None:
+        raise ValueError("invalid deck")
+
+    units = util.ensure_no_none(
+        [await context.db.main.get(main.Unit, unit_id) for unit_id in deck_data[1]], ValueError, "incomplete deck"
+    )
+    unit_infos = util.ensure_no_none(
+        [await get_unit_info(context, u.unit_id) for u in units], ValueError, "unit info retrieval error"
+    )
+    unit_rarities = util.ensure_no_none(
+        [await get_unit_rarity(context, u) for u in unit_infos], ValueError, "unit rarity retrieval error"
+    )
+    max_loves = [
+        ur.after_love_max if ud.rank == ui.rank_max else ur.before_love_max
+        for ur, ui, ud in zip(unit_rarities, unit_infos, units)
+    ]
+
+    loves = [u.love for u in units]
+    # https://github.com/DarkEnergyProcessor/NPPS/blob/v3.1.x/modules/live/reward.php#L337-L369
+    while love > 0:
+        subtracted = 0
+
+        for order, weight in zip(LOVE_POS_CALC_ORDER, LOVE_POS_CALC_WEIGHT):
+            new_love = min(loves[order] + min(weight, love), max_loves[order])
+            loves[order] = new_love
+            subtracted = subtracted + new_love
+            love = love - new_love
+
+            if love <= 0:
+                break
+
+        if subtracted == 0:
+            break
+
+    achievements = []
+
+    for ur, ud, new_love in zip(unit_rarities, units, loves):
+        ud.love = new_love
+
+        if ud.love >= ur.after_love_max:
+            achievements.extend(await album.update(context, user, ud.unit_id, rank_max=True))
+
+    await context.db.main.flush()
+    # TODO: Achievements
+    return achievements
 
 
 @dataclasses.dataclass

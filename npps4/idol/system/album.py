@@ -42,6 +42,8 @@ async def update(
     album.favorite_point = max(album.favorite_point, favorite_point)
     album.sign_flag = sign_flag or album.sign_flag
     await context.db.main.flush()
+    # TODO: Achievements
+    return []
 
 
 async def all(context: idol.BasicSchoolIdolContext, user: main.User):

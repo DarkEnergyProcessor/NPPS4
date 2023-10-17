@@ -17,6 +17,8 @@ import itsdangerous.serializer
 
 from . import config
 
+from typing import TypeVar, cast
+
 SYSRAND = random.SystemRandom()
 
 
@@ -122,3 +124,14 @@ def datetime_to_timestamp(dt: str):
     # The +09:00:00 is required so Python treat it as JST!
     dtobj = datetime.datetime.strptime(dt.strip() + " +09:00:00", "%Y-%m-%d %H:%M:%S %z")
     return int(dtobj.timestamp())
+
+
+_T = TypeVar("_T")
+_E = TypeVar("_E", bound=Exception)
+
+
+def ensure_no_none(list_to: list[_T | None], exc: type[_E] = Exception, *args) -> list[_T]:
+    if None in list_to:
+        raise exc(*args)
+
+    return cast(list[_T], list_to)
