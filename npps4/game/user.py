@@ -2,6 +2,7 @@ from .. import config
 from .. import idol
 from .. import util
 from ..idol import error
+from ..idol.system import core
 from ..idol.system import unit
 from ..idol.system import user
 
@@ -101,8 +102,8 @@ async def user_userinfo(context: idol.SchoolIdolUserParams) -> UserInfoResponse:
             name=u.name,
             level=u.level,
             exp=u.exp,
-            previous_exp=u.previous_exp,
-            next_exp=u.next_exp,
+            previous_exp=core.get_next_exp_cumulative(u.level - 1),
+            next_exp=core.get_next_exp_cumulative(u.level),
             game_coin=u.game_coin,
             sns_coin=u.free_sns_coin + u.paid_sns_coin,
             free_sns_coin=u.free_sns_coin,
