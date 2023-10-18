@@ -15,6 +15,11 @@ class KIDInfoResponse(pydantic.BaseModel):
     server_timestamp: int
 
 
+class KIDStatusResponse(pydantic.BaseModel):
+    has_klab_id: bool
+    server_timestamp: int
+
+
 @idol.register("/handover/exec", batchable=False)
 async def handover_exec(context: idol.SchoolIdolUserParams, request: HandoverExecRequest) -> pydantic.BaseModel:
     # TODO
@@ -28,3 +33,9 @@ async def handover_kidinfo(context: idol.SchoolIdolUserParams) -> KIDInfoRespons
     util.log("STUB /handover/kidInfo", severity=util.logging.WARNING)
     raise error.IdolError(error.ERROR_KLAB_ID_SERVICE_MAINTENANCE, 600)
     # return KIDInfoResponse(auth_url=str(context.request.url), server_timestamp=util.time())
+
+
+async def handover_kidstatus(context: idol.SchoolIdolUserParams) -> KIDStatusResponse:
+    # TODO
+    util.log("STUB /handover/kidInfo", severity=util.logging.WARNING)
+    return KIDStatusResponse(has_klab_id=False, server_timestamp=util.time())
