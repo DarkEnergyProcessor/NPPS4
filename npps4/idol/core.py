@@ -311,6 +311,41 @@ def _get_real_param(param: type[idoltype._S]):
         return param, False
 
 
+def _fix_schema(absdest: str, schema: dict[str, Any]):
+    defs: dict[str, Any] | None = None
+
+    if "$defs" in schema:
+        if defs is None:
+            defs = {}
+
+        for k, v in schema["$defs"].items():
+            defs[k] = v
+
+    def replace(data: dict[str, Any] | list[Any]):
+        nonlocal absdest
+
+        i = None
+
+        if isinstance(data, dict):
+            if "$ref" in data:
+                ref: str = data["$ref"]
+                target = ref.split("/")[-1]
+                data[
+                    "$ref"
+                ] = f"#/paths/{absdest.replace('~', '~0').replace('/', '~1')}/post/requestBody/$defs/{target}"
+
+            i = data.values()
+        elif isinstance(data, list):
+            i = data
+
+        for v in i:
+            if isinstance(v, (dict, list)):
+                replace(v)
+
+    replace(schema)
+    return defs, schema
+
+
 API_ROUTER_MAP: dict[str, Endpoint] = {}
 RESPONSE_HEADERS = {
     "Server-Version": {"type": "string"},
@@ -384,6 +419,10 @@ def register(
         else:
             model = typing.cast(pydantic.BaseModel, params[1])
             schema = model.model_json_schema()
+            print(endpoint, schema)
+
+            # Fix schema
+            defs, schema = _fix_schema("/main.php/" + module_action, schema)
 
             @app.main.post(
                 endpoint,
@@ -395,6 +434,7 @@ def register(
                 response_model_exclude_none=exclude_none,
                 openapi_extra={
                     "requestBody": {
+                        "$defs": defs,
                         "content": {
                             "application/x-www-form-urlencoded": {
                                 "schema": {
@@ -410,7 +450,7 @@ def register(
                                     "required": ["request_data"],
                                 }
                             },
-                        }
+                        },
                     },
                 },
             )
