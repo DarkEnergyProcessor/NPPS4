@@ -35,7 +35,8 @@ async def handover_kidinfo(context: idol.SchoolIdolUserParams) -> KIDInfoRespons
     # return KIDInfoResponse(auth_url=str(context.request.url), server_timestamp=util.time())
 
 
+@idol.register("/handover/kidStatus")
 async def handover_kidstatus(context: idol.SchoolIdolUserParams) -> KIDStatusResponse:
     # TODO
-    util.log("STUB /handover/kidInfo", severity=util.logging.WARNING)
+    util.log("STUB /handover/kidStatus", severity=util.logging.WARNING)
     return KIDStatusResponse(has_klab_id=False, server_timestamp=util.time())
