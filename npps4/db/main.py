@@ -158,6 +158,20 @@ class UnitCenter(common.Base):
     )
 
 
+class Achievement(common.Base):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+    achievement_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger)
+    user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, sqlalchemy.ForeignKey(User.id)
+    )
+    count: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    is_accomplished: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(index=True)
+    insert_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger)
+    end_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
+
+    __table_args__ = (sqlalchemy.UniqueConstraint(achievement_id, user_id),)
+
+
 engine = sqlalchemy.ext.asyncio.create_async_engine(config.get_database_url())
 sessionmaker = sqlalchemy.ext.asyncio.async_sessionmaker(engine)
 

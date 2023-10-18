@@ -419,7 +419,6 @@ def register(
         else:
             model = typing.cast(pydantic.BaseModel, params[1])
             schema = model.model_json_schema()
-            print(endpoint, schema)
 
             # Fix schema
             defs, schema = _fix_schema("/main.php/" + module_action, schema)
