@@ -37,8 +37,9 @@ async def tutorial_progress(
         await unit.add_unit(context, current_user, 9, True)
         # Bond calculation
         await unit.add_love_by_deck(context, current_user, current_user.active_deck_index, 34)
+        current_user.tutorial_state = 3
         return idol.core.DummyModel()
 
     msg = f"STUB /tutorial/progress, user {current_user.tutorial_state} request {request.tutorial_state}"
-    util.log(msg, request, severity=util.logging.WARNING)
+    util.log(msg, request, severity=util.logging.ERROR)
     raise error.IdolError(detail=msg)
