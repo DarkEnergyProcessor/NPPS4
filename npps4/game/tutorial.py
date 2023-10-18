@@ -32,6 +32,22 @@ async def tutorial_progress(
         await tutorial.finalize(context, current_user)
         return idol.core.DummyModel()
 
-    msg = f"STUB /tutorial/progress, user {current_user.tutorial_state} request {request.tutorial_state}"
-    util.log(msg, request, severity=util.logging.ERROR)
-    raise error.IdolError(detail=msg)
+    raise error.IdolError(detail=f"Unknown state, u {current_user.tutorial_state} r {request.tutorial_state}")
+
+
+@idol.register("/tutorial/skip", batchable=False)
+async def tutorial_skip(context: idol.SchoolIdolUserParams) -> idol.core.DummyModel:
+    current_user = await user.get_current(context)
+    if current_user.tutorial_state == -1:
+        raise error.IdolError(detail="Tutorial already finished")
+
+    if current_user.tutorial_state >= 0:
+        await tutorial.phase1(context, current_user)
+    if current_user.tutorial_state >= 1:
+        await tutorial.phase2(context, current_user)
+    if current_user.tutorial_state >= 2:
+        await tutorial.phase3(context, current_user)
+    if current_user.tutorial_state >= 3:
+        await tutorial.finalize(context, current_user)
+
+    return idol.core.DummyModel()
