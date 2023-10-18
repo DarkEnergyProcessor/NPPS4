@@ -6,12 +6,12 @@ from ... import idol
 from ...db import main
 
 
-async def phase1(context: idol.BasicSchoolIdolContext, user: main.User):
-    user.tutorial_state = 1
+async def phase1(context: idol.BasicSchoolIdolContext, u: main.User):
+    u.tutorial_state = 1
 
 
-async def phase2(context: idol.BasicSchoolIdolContext, user: main.User):
-    user.tutorial_state = 2
+async def phase2(context: idol.BasicSchoolIdolContext, u: main.User):
+    u.tutorial_state = 2
 
 
 async def phase3(context: idol.BasicSchoolIdolContext, u: main.User):
@@ -31,4 +31,4 @@ async def phase3(context: idol.BasicSchoolIdolContext, u: main.User):
 
 
 async def finalize(context: idol.BasicSchoolIdolContext, u: main.User):
-    pass
+    u.tutorial_state = -1
