@@ -1,7 +1,7 @@
 from .. import idol
 from .. import util
 from ..idol import error
-from ..idol.system import unit
+from ..idol.system import tutorial
 from ..idol.system import user
 
 import pydantic
@@ -18,26 +18,18 @@ async def tutorial_progress(
     current_user = await user.get_current(context)
     if current_user.tutorial_state == -1:
         raise error.IdolError(detail="Tutorial already finished")
+
     if current_user.tutorial_state == 0 and request.tutorial_state == 1:
-        current_user.tutorial_state = 1
+        await tutorial.phase1(context, current_user)
         return idol.core.DummyModel()
     elif current_user.tutorial_state == 1 and request.tutorial_state == 2:
-        current_user.tutorial_state = 2
+        await tutorial.phase2(context, current_user)
         return idol.core.DummyModel()
     elif current_user.tutorial_state == 2 and request.tutorial_state == 3:
-        # G +37000, not sure why
-        current_user.game_coin = current_user.game_coin + 37000
-        # Friend Points +5
-        current_user.social_point = current_user.social_point + 5
-        # Add EXP
-        await user.add_exp(context, current_user, 11)
-        # Reine Saeki
-        await unit.add_unit(context, current_user, 13, True)
-        # Akemi Kikuchi
-        await unit.add_unit(context, current_user, 9, True)
-        # Bond calculation
-        await unit.add_love_by_deck(context, current_user, current_user.active_deck_index, 34)
-        current_user.tutorial_state = 3
+        await tutorial.phase3(context, current_user)
+        return idol.core.DummyModel()
+    elif current_user.tutorial_state == 3 and request.tutorial_state == -1:
+        await tutorial.finalize(context, current_user)
         return idol.core.DummyModel()
 
     msg = f"STUB /tutorial/progress, user {current_user.tutorial_state} request {request.tutorial_state}"

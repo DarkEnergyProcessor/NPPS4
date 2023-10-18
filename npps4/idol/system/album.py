@@ -1,8 +1,6 @@
 import sqlalchemy
 
-from . import core
 from ... import idol
-from ... import idoltype
 from ...db import main
 
 

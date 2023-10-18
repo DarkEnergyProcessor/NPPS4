@@ -6,7 +6,6 @@ import sqlalchemy
 
 
 from . import album
-from . import core
 from ... import idol
 from ... import idoltype
 from ... import util
@@ -36,7 +35,7 @@ async def get_all_units(context: idol.SchoolIdolParams, user: main.User, active:
     return result.scalars().all()
 
 
-async def add_unit(context: idol.SchoolIdolParams, user: main.User, unit_id: int, active: bool):
+async def add_unit(context: idol.BasicSchoolIdolContext, user: main.User, unit_id: int, active: bool):
     unit_info = await get_unit_info(context, unit_id)
     if unit_info is None or unit_info.disable_rank_up:
         return None
