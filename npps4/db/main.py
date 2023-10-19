@@ -141,9 +141,9 @@ class Album(common.Base):
         common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
     )
     unit_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, index=True)
-    rank_max_flag: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False)
-    love_max_flag: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False)
-    rank_level_max_flag: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False)
+    rank_max_flag: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False, index=True)
+    love_max_flag: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False, index=True)
+    rank_level_max_flag: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False, index=True)
     highest_love_per_unit: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
     favorite_point: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
     sign_flag: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False)
@@ -160,16 +160,28 @@ class UnitCenter(common.Base):
 
 class Achievement(common.Base):
     id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
-    achievement_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger)
+    achievement_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, index=True)
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
-        common.IDInteger, sqlalchemy.ForeignKey(User.id)
+        common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
     )
-    count: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
-    is_accomplished: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(index=True)
-    insert_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger)
-    end_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
+    achievement_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
+    count: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
+    is_accomplished: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False, index=True)
+    insert_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, default=util.time, index=True
+    )
+    end_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0, index=True)
+    is_new: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=True, index=True)
 
     __table_args__ = (sqlalchemy.UniqueConstraint(achievement_id, user_id),)
+
+
+class LiveEffort(common.Base):
+    user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, sqlalchemy.ForeignKey(User.id), primary_key=True
+    )
+    live_effort_point_box_spec_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=1)
+    current_point: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
 
 
 engine = sqlalchemy.ext.asyncio.create_async_engine(config.get_database_url())

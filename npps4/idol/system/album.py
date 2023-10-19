@@ -1,5 +1,6 @@
 import sqlalchemy
 
+from . import achievement
 from ... import idol
 from ...db import main
 
@@ -40,11 +41,53 @@ async def update(
     album.favorite_point = max(album.favorite_point, favorite_point)
     album.sign_flag = sign_flag or album.sign_flag
     await context.db.main.flush()
-    # TODO: Achievements
-    return []
 
 
 async def all(context: idol.BasicSchoolIdolContext, user: main.User):
     q = sqlalchemy.select(main.Album).where(main.Album.user_id == user.id)
     result = await context.db.main.execute(q)
     return list(result.scalars())
+
+
+async def count_album_with(context: idol.BasicSchoolIdolContext, user: main.User, *criteria):
+    q = (
+        sqlalchemy.select(sqlalchemy.func.count())
+        .select_from(main.Album)
+        .where(main.Album.user_id == user.id, *criteria)
+    )
+    qc = await context.db.main.execute(q)
+    return qc.scalar() or 0
+
+
+async def trigger_achievement(
+    context: idol.BasicSchoolIdolContext,
+    user: main.User,
+    *,
+    obtained: bool = False,
+    idolized: bool = False,
+    max_love: bool = False,
+    max_level: bool = False,
+):
+    ach_ctx = achievement.AchievementContext()
+
+    if obtained:
+        count = await count_album_with(context, user)
+        result = await achievement.check_type_18(context, user, count)
+        ach_ctx.extend(result)
+
+    if idolized:
+        count = await count_album_with(context, user, main.Album.rank_max_flag == True)
+        result = await achievement.check_type_19(context, user, count)
+        ach_ctx.extend(result)
+
+    if max_love:
+        count = await count_album_with(context, user, main.Album.love_max_flag == True)
+        result = await achievement.check_type_20(context, user, count)
+        ach_ctx.extend(result)
+
+    if max_level:
+        count = await count_album_with(context, user, main.Album.rank_level_max_flag == True)
+        result = await achievement.check_type_20(context, user, count)
+        ach_ctx.extend(result)
+
+    return ach_ctx

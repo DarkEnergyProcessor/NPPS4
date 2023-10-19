@@ -5,6 +5,7 @@ import sqlalchemy
 from . import core
 from ... import idol
 from ... import util
+from ...idol.system import achievement
 from ...idol.system import background
 from ...db import main
 
@@ -30,6 +31,7 @@ async def create(context: idol.SchoolIdolParams, key: str, passwd: str):
     context.db.main.add(user)
     await context.db.main.flush()
     user.invite_code = core.get_invite_code(user.id)
+    await achievement.init(context, user)
     await background.unlock_background(context, user, 1, True)
     await context.db.main.flush()
     return user

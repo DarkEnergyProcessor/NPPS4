@@ -5,6 +5,7 @@ import typing
 import sqlalchemy
 
 
+from . import achievement
 from . import album
 from ... import idol
 from ... import idoltype
@@ -330,16 +331,17 @@ async def add_love_by_deck(context: idol.BasicSchoolIdolContext, user: main.User
         if subtracted == 0:
             break
 
-    achievements = []
+    achievements = achievement.AchievementContext()
 
     for ur, ud, new_love in zip(unit_rarities, units, loves):
         ud.love = new_love
 
         if ud.love >= ur.after_love_max:
-            achievements.extend(await album.update(context, user, ud.unit_id, rank_max=True))
+            await album.update(context, user, ud.unit_id, rank_max=True)
+            achievements.extend(await album.trigger_achievement(context, user, max_love=True))
 
     await context.db.main.flush()
-    # TODO: Achievements
+    # TODO: Live achievement.
     return achievements
 
 
