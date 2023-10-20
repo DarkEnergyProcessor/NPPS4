@@ -13,7 +13,7 @@ class PersonalNoticeGetResponse(pydantic.BaseModel):
 
 
 @idol.register("/personalnotice/get")
-async def personalnotice_get(context: idol.SchoolIdolUserParams):
+async def personalnotice_get(context: idol.SchoolIdolUserParams) -> PersonalNoticeGetResponse:
     # https://github.com/DarkEnergyProcessor/NPPS/blob/v3.1.x/modules/personalnotice/get.php
     # TODO
     util.log("STUB /personalnotice/get", severity=util.logging.WARNING)

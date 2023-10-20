@@ -31,6 +31,7 @@ async def get_effort_data(context: idol.BasicSchoolIdolContext, user: main.User)
     if live_effort is None:
         live_effort = main.LiveEffort(user_id=user.id)
         context.db.main.add(live_effort)
+        await context.db.main.flush()
 
     return live_effort
 

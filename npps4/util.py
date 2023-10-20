@@ -127,7 +127,11 @@ def timestamp_to_datetime(ts: int | None = None):
 
 def datetime_to_timestamp(dt: str):
     # The +09:00:00 is required so Python treat it as JST!
-    dtobj = datetimelib.datetime.strptime(dt.strip() + " +09:00:00", "%Y-%m-%d %H:%M:%S %z")
+    timestr = dt.strip() + " +09:00:00"
+    try:
+        dtobj = datetimelib.datetime.strptime(timestr, "%Y-%m-%d %H:%M:%S %z")
+    except ValueError:
+        dtobj = datetimelib.datetime.strptime(timestr, "%Y/%m/%d %H:%M:%S %z")
     return int(dtobj.timestamp())
 
 

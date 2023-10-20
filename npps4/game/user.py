@@ -40,6 +40,10 @@ class UserGetNaviResponse(pydantic.BaseModel):
     server_timestamp: int
 
 
+class UserNotificationTokenRequest(pydantic.BaseModel):
+    notification_token: str
+
+
 @idol.register("/user/changeName", batchable=False)
 async def user_changename(context: idol.SchoolIdolUserParams, request: ChangeNameRequest) -> ChangeNameResponse:
     if config.contains_badwords(request.name):
@@ -71,3 +75,10 @@ async def user_userinfo(context: idol.SchoolIdolUserParams) -> UserInfoResponse:
         ad_status=False,
         server_timestamp=util.time(),
     )
+
+
+@idol.register("/user/setNotificationToken", batchable=False)
+async def user_setnotificationtoken(context: idol.SchoolIdolUserParams, request: UserNotificationTokenRequest):
+    # TODO
+    util.log("STUB /user/setNotificationToken, token " + request.notification_token, severity=util.logging.WARNING)
+    return idol.core.DummyModel()

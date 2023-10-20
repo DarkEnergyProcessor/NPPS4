@@ -44,7 +44,6 @@ class DownloadBatchRequest(pydantic.BaseModel):
 
 class DownloadAdditionalRequest(pydantic.BaseModel):
     target_os: DownloadTargetOS
-    client_version: str
     package_type: DownloadPackageType
     package_id: int
 
@@ -125,6 +124,8 @@ async def download_additional(
 
 
 @idol.register("/download/getUrl", check_version=False, batchable=False)
-async def download_geturl(context: idol.SchoolIdolAuthParams, request: DownloadGetUrlRequest) -> DownloadGetUrlResponse:
+async def download_geturl(
+    context: idol.SchoolIdolAuthParams, request: DownloadGetUrlRequest
+) -> DownloadGetUrlResponse:
     links = await download.get_raw_files(context.request, _TARGET_OS_REMAP[request.os.value], request.path_list)
     return DownloadGetUrlResponse(url_list=[link.url for link in links])

@@ -187,10 +187,7 @@ async def login_startup(context: idol.SchoolIdolAuthParams, request: LoginReques
     util.log("And my passwd is", passwd)
 
     # Create user
-    try:
-        u = await user.create(context, str(loginkey, "UTF-8"), str(passwd, "UTF-8"))
-    except ValueError:
-        raise fastapi.HTTPException(400, "Bad login key or password or client key")
+    u = await user.create(context, str(loginkey, "UTF-8"), str(passwd, "UTF-8"))
 
     return StartupResponse(user_id=str(u.id))
 

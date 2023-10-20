@@ -82,7 +82,7 @@ class LoginBonusResponse(pydantic.BaseModel):
 
 
 @idol.register("/lbonus/execute", batchable=False, xmc_verify=idol.XMCVerifyMode.CROSS, exclude_none=True)
-async def lbonus_execute(context: idol.SchoolIdolUserParams):
+async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusResponse:
     server_timestamp = util.time()
     current_datetime = util.datetime(server_timestamp)
 
