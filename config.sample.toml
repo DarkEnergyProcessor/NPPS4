@@ -93,6 +93,10 @@ archive_root = "archive-root"
 # List of badwords. Bad words are words that can't be used in team formation, names, etc.
 badwords = []
 
+# Specify login bonus reward generator.
+# Path is relative to the project root directory.
+login_bonus = "login_bonus.py"
+
 [advanced]
 # This is advanced configuration.
 # In most cases, you don't have to change anything.

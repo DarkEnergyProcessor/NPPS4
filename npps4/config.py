@@ -1,3 +1,6 @@
+import importlib
+import importlib.machinery
+import importlib.util
 import os
 import sys
 
@@ -8,6 +11,8 @@ else:
 
 import Cryptodome.PublicKey.RSA
 import pydantic
+
+from typing import Protocol, cast
 
 ROOT_DIR = os.path.normpath(os.path.dirname(__file__) + "/..")
 os.makedirs(os.path.join(ROOT_DIR, "data"), exist_ok=True)
@@ -132,3 +137,23 @@ def log_request_response(set: bool | None = None):
         _log_request_response_flag = set
 
     return old
+
+
+class LoginBonusProtocol(Protocol):
+    async def get_rewards(
+        self, day: int, month: int, year: int, context
+    ) -> tuple[int, int, int, tuple[str, str | None] | None]:
+        ...
+
+
+LOGIN_BONUS_FILE = os.path.join(ROOT_DIR, CONFIG_DATA["game"]["login_bonus"])
+_login_bonus_loader = importlib.machinery.SourceFileLoader("npps4_login_bonus", LOGIN_BONUS_FILE)
+_login_bonus_spec = importlib.util.spec_from_loader(_login_bonus_loader.name, _login_bonus_loader)
+assert _login_bonus_spec is not None
+_login_bonus_module = importlib.util.module_from_spec(_login_bonus_spec)
+_login_bonus_loader.exec_module(_login_bonus_module)
+
+
+def get_login_bonus_protocol():
+    global _login_bonus_module
+    return cast(LoginBonusProtocol, _login_bonus_module)
