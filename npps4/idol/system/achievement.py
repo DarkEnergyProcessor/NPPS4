@@ -10,13 +10,6 @@ from ...db import achievement
 from ...db import main
 
 
-class AchievementReward(pydantic.BaseModel):
-    add_type: int
-    item_id: int
-    amount: int
-    reward_box_flag: bool
-
-
 class Achievement(pydantic.BaseModel):
     achievement_id: int
     count: int
@@ -29,7 +22,7 @@ class Achievement(pydantic.BaseModel):
     is_locked: bool
     open_condition_string: str = ""
     accomplish_id: str = ""
-    reward_list: list[AchievementReward]
+    reward_list: list[item.Reward]
 
 
 @dataclasses.dataclass
@@ -44,7 +37,7 @@ class AchievementContext:
 
 # TODO: Get achievement present?
 _reward_def = item.add_loveca(1)
-ACHIEVEMENT_REWARD_DEFAULT = AchievementReward(
+ACHIEVEMENT_REWARD_DEFAULT = item.Reward(
     add_type=_reward_def.add_type, item_id=_reward_def.item_id, amount=_reward_def.amount, reward_box_flag=True
 )
 

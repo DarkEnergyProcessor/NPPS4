@@ -1,20 +1,13 @@
 import pydantic
-import sqlalchemy
 
 from . import item
 from ... import idol
-from ... import util
 from ...db import main
 from ...db import effort
 
 
-class EffortReward(pydantic.BaseModel):
-    add_type: int
-    item_id: int
-    amount: int
+class EffortReward(item.RewardWithCategory):
     rarity: int = 6  # TODO
-    item_category_id: int = 0  # TODO
-    reward_box_flag: bool
 
 
 class EffortResult(pydantic.BaseModel):
@@ -44,6 +37,7 @@ async def get_effort_data(context: idol.BasicSchoolIdolContext, user: main.User)
 
 async def add_effort(context: idol.BasicSchoolIdolContext, user: main.User, amount: int):
     result: list[EffortResult] = []
+    rewards: list[EffortReward] = []
     current_effort = await get_effort_data(context, user)
 
     while True:
@@ -56,13 +50,15 @@ async def add_effort(context: idol.BasicSchoolIdolContext, user: main.User, amou
             # Give present
             # FIXME: Proper drops. This is currently loveca + 1 at the moment.
             user.free_sns_coin = user.free_sns_coin + 1
+            reward = EffortReward(add_type=3001, item_id=4, amount=1, reward_box_flag=False)
+            rewards.append(reward)
             result.append(
                 EffortResult(
                     live_effort_point_box_spec_id=current_effort.live_effort_point_box_spec_id,
                     capacity=effort_spec.capacity,
                     before=oldvalue,
                     after=current_effort.current_point,
-                    rewards=[EffortReward(add_type=3001, item_id=4, amount=1, reward_box_flag=False)],
+                    rewards=[reward],
                 )
             )
             # FIXME: Select effort point box spec
@@ -79,4 +75,4 @@ async def add_effort(context: idol.BasicSchoolIdolContext, user: main.User, amou
             )
             break
 
-    return result
+    return result, rewards
