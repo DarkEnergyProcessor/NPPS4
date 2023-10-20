@@ -16,6 +16,7 @@ from .. import idoltype
 from .. import release_key
 from .. import util
 from ..db import achievement
+from ..db import effort
 from ..db import main
 from ..db import game_mater
 from ..db import item
@@ -37,6 +38,7 @@ class Database:
         self._livesession: sqlalchemy.ext.asyncio.AsyncSession | None = None
         self._unitsession: sqlalchemy.ext.asyncio.AsyncSession | None = None
         self._achievementsession: sqlalchemy.ext.asyncio.AsyncSession | None = None
+        self._effortsession: sqlalchemy.ext.asyncio.AsyncSession | None = None
 
     @property
     def main(self):
@@ -74,6 +76,12 @@ class Database:
         if self._achievementsession is None:
             self._achievementsession = achievement.get_session()
         return self._achievementsession
+
+    @property
+    def effort(self):
+        if self._effortsession is None:
+            self._effortsession = effort.get_session()
+        return self._effortsession
 
     async def cleanup(self):
         if self._mainsession is not None:
