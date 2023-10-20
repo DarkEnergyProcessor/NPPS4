@@ -1,5 +1,6 @@
 import math
 
+import pydantic
 import sqlalchemy
 
 from . import core
@@ -8,6 +9,37 @@ from ... import util
 from ...idol.system import achievement
 from ...idol.system import background
 from ...db import main
+
+
+class UserInfoData(pydantic.BaseModel):
+    user_id: int
+    name: str
+    level: int
+    exp: int
+    previous_exp: int
+    next_exp: int
+    game_coin: int
+    sns_coin: int
+    free_sns_coin: int
+    paid_sns_coin: int
+    social_point: int
+    unit_max: int
+    waiting_unit_max: int
+    energy_max: int
+    energy_full_time: str
+    license_live_energy_recoverly_time: int
+    energy_full_need_time: int
+    over_max_energy: int
+    training_energy: int
+    training_energy_max: int
+    friend_max: int
+    invite_code: str
+    insert_date: str
+    update_date: str
+    tutorial_state: int
+    lp_recovery_item: list = []  # TODO
+    unlock_random_live_muse: int = 0
+    unlock_random_live_aqours: int = 0
 
 
 async def get(context: idol.SchoolIdolParams, id: int):
@@ -23,6 +55,36 @@ async def get_current(context: idol.SchoolIdolUserParams):
     if result is None:
         raise ValueError("logic error, user is None")
     return result
+
+
+async def get_user_info(context: idol.BasicSchoolIdolContext, user: main.User):
+    return UserInfoData(
+        user_id=user.id,
+        name=user.name,
+        level=user.level,
+        exp=user.exp,
+        previous_exp=core.get_next_exp_cumulative(user.level - 1),
+        next_exp=core.get_next_exp_cumulative(user.level),
+        game_coin=user.game_coin,
+        sns_coin=user.free_sns_coin + user.paid_sns_coin,
+        free_sns_coin=user.free_sns_coin,
+        paid_sns_coin=user.paid_sns_coin,
+        social_point=user.social_point,
+        unit_max=user.unit_max,
+        waiting_unit_max=user.waiting_unit_max,
+        energy_max=user.energy_max,
+        energy_full_time=util.timestamp_to_datetime(user.energy_full_time),
+        license_live_energy_recoverly_time=user.license_live_energy_recoverly_time,
+        energy_full_need_time=user.energy_full_need_time,
+        over_max_energy=user.over_max_energy,
+        training_energy=user.training_energy,
+        training_energy_max=user.training_energy_max,
+        friend_max=user.friend_max,
+        invite_code=user.friend_id,
+        insert_date=util.timestamp_to_datetime(user.insert_date),
+        update_date=util.timestamp_to_datetime(user.update_date),
+        tutorial_state=user.tutorial_state,
+    )
 
 
 async def create(context: idol.SchoolIdolParams, key: str, passwd: str):
