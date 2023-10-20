@@ -34,6 +34,16 @@ async def has_login_bonus(context: idol.BasicSchoolIdolContext, user: main.User,
     return result.scalar() is not None
 
 
+async def days_login_bonus(context: idol.BasicSchoolIdolContext, user: main.User, year: int, month: int):
+    q = sqlalchemy.select(main.LoginBonus).where(
+        main.LoginBonus.user_id == user.id,
+        main.LoginBonus.year == year,
+        main.LoginBonus.month == month,
+    )
+    result = await context.db.main.execute(q)
+    return set(lb.day for lb in result.scalars())
+
+
 async def mark_login_bonus(context: idol.BasicSchoolIdolContext, user: main.User, year: int, month: int, day: int):
     lbonus_data = main.LoginBonus(user_id=user.id, year=year, month=month, day=day)
     context.db.main.add(lbonus_data)

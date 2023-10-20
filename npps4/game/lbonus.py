@@ -22,7 +22,7 @@ class LoginBonusCalendarInfo(pydantic.BaseModel):
     current_date: str
     current_month: LoginBonusCalendarMonthInfo
     next_month: LoginBonusCalendarMonthInfo
-    get_item: item.Reward | None = None
+    get_item: item.RewardWithCategory | None = None
 
 
 class LoginBonusAdInfo(pydantic.BaseModel):
@@ -34,7 +34,7 @@ class LoginBonusAdInfo(pydantic.BaseModel):
 class LoginBonusTotalLogin(pydantic.BaseModel):
     login_count: int
     remaining_count: int = 2147483647  # TODO
-    reward: list[item.Reward]
+    reward: list[item.Reward] | None = None
 
 
 class LoginBonusClassRankInfo(pydantic.BaseModel):  # TODO
@@ -64,7 +64,7 @@ class LoginBonusMuseumInfo(pydantic.BaseModel):
 class LoginBonusResponse(pydantic.BaseModel):
     sheets: list = pydantic.Field(default_factory=list)
     calendar_info: LoginBonusCalendarInfo
-    ad_info: LoginBonusAdInfo | None = None
+    ad_info: LoginBonusAdInfo
     total_login_info: LoginBonusTotalLogin
     license_lbonus_list: list  # TODO
     class_system: LoginBonusClassSystem
@@ -96,13 +96,12 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
         lbonus.get_calendar(context, current_datetime.year, current_datetime.month),
         lbonus.get_calendar(context, next_year, next_month_num),
     )
-    login_count, has_lbonus = await asyncio.gather(
+    login_count, lbonuses_day = await asyncio.gather(
         lbonus.get_login_count(context, current_user),
-        lbonus.has_login_bonus(
-            context, current_user, current_datetime.year, current_datetime.month, current_datetime.day
-        ),
+        lbonus.days_login_bonus(context, current_user, current_datetime.year, current_datetime.month),
     )
 
+    has_lbonus = current_datetime.day in lbonuses_day
     get_item = None
     add_effort_amount = 0
     if not has_lbonus:
@@ -113,9 +112,20 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
         await lbonus.mark_login_bonus(
             context, current_user, current_datetime.year, current_datetime.month, current_datetime.day
         )
+        get_item = item.RewardWithCategory(
+            add_type=reward.add_type, item_id=reward.item_id, amount=reward.amount, reward_box_flag=False
+        )
+        lbonuses_day.add(current_datetime.day)
+
+    # Modify current_month
+    for day in lbonuses_day:
+        current_month[day - 1].received = True
 
     effort_result, effort_reward = await effort.add_effort(context, current_user, add_effort_amount)
-    # TODO: Give effort reward
+    if effort_reward:
+        # TODO: Give effort reward to present box
+        await asyncio.gather(*[other.add_item(context, current_user, r) for r in effort_reward])
+
     current_date = f"{current_datetime.year}-{current_datetime.month}-{current_datetime.day}"
 
     return LoginBonusResponse(
@@ -127,7 +137,8 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
             next_month=LoginBonusCalendarMonthInfo(year=next_year, month=next_month_num, days=next_month),
             get_item=get_item,
         ),
-        total_login_info=LoginBonusTotalLogin(login_count=login_count, reward=[]),
+        ad_info=LoginBonusAdInfo(ad_id=0, term_id=0, reward_list=[]),
+        total_login_info=LoginBonusTotalLogin(login_count=login_count),
         license_lbonus_list=[],  # TODO
         class_system=LoginBonusClassSystem(rank_info=LoginBonusClassRankInfo()),
         start_dash_sheets=[],  # TODO
