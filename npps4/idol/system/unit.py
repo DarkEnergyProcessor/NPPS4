@@ -16,7 +16,7 @@ from ...db import unit
 from typing import Literal, overload
 
 
-async def count_units(context: idol.SchoolIdolParams, user: main.User, active: bool):
+async def count_units(context: idol.BasicSchoolIdolContext, user: main.User, active: bool):
     q = (
         sqlalchemy.select(sqlalchemy.func.count())
         .select_from(main.Unit)

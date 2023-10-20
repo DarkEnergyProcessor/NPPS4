@@ -1,7 +1,9 @@
-.vscode
-data
-download-temp
-venv
+.vscode/
+data/
+download-temp/
+util/sampledata/
+venv/
+
 *.pyc
 config.toml
 maintenance.txt

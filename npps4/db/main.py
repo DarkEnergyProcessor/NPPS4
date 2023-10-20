@@ -184,6 +184,18 @@ class LiveEffort(common.Base):
     current_point: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
 
 
+class LoginBonus(common.Base):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+    user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, sqlalchemy.ForeignKey(User.id)
+    )
+    year: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
+    month: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
+    day: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
+
+    __table_args__ = (sqlalchemy.UniqueConstraint(user_id, year, month, day),)
+
+
 engine = sqlalchemy.ext.asyncio.create_async_engine(config.get_database_url())
 sessionmaker = sqlalchemy.ext.asyncio.async_sessionmaker(engine)
 

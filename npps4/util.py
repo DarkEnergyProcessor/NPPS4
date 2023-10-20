@@ -1,6 +1,6 @@
 import base64
 import dataclasses
-import datetime
+import datetime as datetimelib
 import hashlib
 import hmac
 import logging
@@ -111,18 +111,23 @@ def log(*args: object, severity: int = logging.DEBUG, e: Exception | None = None
     NPPS4_LOGGER.log(severity, " ".join(map(str, args)), exc_info=e)
 
 
-TIMEZONE_JST = datetime.timezone(datetime.timedelta(hours=9))
+TIMEZONE_JST = datetimelib.timezone(datetimelib.timedelta(hours=9))
 
 
-def timestamp_to_datetime(time: int | None = None):
-    time = int(timelib.time()) if time is None else time
-    dtobj = datetime.datetime.fromtimestamp(time, TIMEZONE_JST)
+def datetime(ts: int | None = None):
+    ts = time() if ts is None else ts
+    return datetimelib.datetime.fromtimestamp(ts, TIMEZONE_JST)
+
+
+def timestamp_to_datetime(ts: int | None = None):
+    ts = time() if ts is None else ts
+    dtobj = datetime(ts)
     return dtobj.strftime("%Y-%m-%d %H:%M:%S")
 
 
 def datetime_to_timestamp(dt: str):
     # The +09:00:00 is required so Python treat it as JST!
-    dtobj = datetime.datetime.strptime(dt.strip() + " +09:00:00", "%Y-%m-%d %H:%M:%S %z")
+    dtobj = datetimelib.datetime.strptime(dt.strip() + " +09:00:00", "%Y-%m-%d %H:%M:%S %z")
     return int(dtobj.timestamp())
 
 
