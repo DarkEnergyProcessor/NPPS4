@@ -1,6 +1,9 @@
 Null-Pointer Private Server: Revisited
 =====
 
+[![Python: 3.12](https://img.shields.io/badge/Python-3.12-blue)](https://www.python.org/)
+[![Code style: black](https://img.shields.io/badge/Code%20style-black-000000.svg)](https://github.com/psf/black)
+
 WIP SIF 9.11 private server written using FastAPI.
 
 Notes
@@ -13,14 +16,16 @@ Notes
 Requirements
 -----
 
-Codes are tested on Python 3.10, but should work on any later Python versions.
+Codes are tested on Python 3.12. Older Python version may work but no guarantees. To contribute, Python 3.12 is
+required.
 
 Install
 ----
 
-1. Create virtual environment.
-2. Activate it.
-3. `pip install -r requirements.txt`
+1. Install Python 3.12 or later.
+2. Create virtual environment.
+3. Activate it.
+4. `pip install -r requirements.txt`
 
 Starting Up
 -----
