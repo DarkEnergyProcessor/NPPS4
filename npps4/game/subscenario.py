@@ -1,5 +1,3 @@
-# /subscenario/subscenarioStatus
-
 from .. import idol
 from .. import util
 

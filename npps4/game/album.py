@@ -1,7 +1,6 @@
 import pydantic
 
 from .. import idol
-from .. import util
 
 from ..idol.system import album
 from ..idol.system import user

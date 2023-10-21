@@ -3,7 +3,6 @@ import base64
 from .. import idol
 from .. import util
 from ..db import main
-from ..idol.system import album
 from ..idol.system import unit
 from ..idol.system import user
 from ..idol import error

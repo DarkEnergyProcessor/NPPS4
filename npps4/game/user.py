@@ -2,7 +2,6 @@ from .. import config
 from .. import idol
 from .. import util
 from ..idol import error
-from ..idol.system import core
 from ..idol.system import unit
 from ..idol.system import user
 

@@ -170,7 +170,7 @@ ERROR_HANDOVER_LOCKED_TARGET = 4406
 # Invaid Transfer ID or Transfer Passcode.
 # Please try again.
 ERROR_HANDOVER_INVALID_ID_OR_CODE = 4407
-# You can't  transfer your game data to a different OS as you still have Love Gems and/or purchased Scouting Tickets.
+# You can't transfer your game data to a different OS as you still have Love Gems and/or purchased Scouting Tickets.
 ERROR_HANDOVER_PAYMENT_ITEM_POSSESSION = 4408
 
 # SIF ID cannot be accessed at this time.

@@ -8,8 +8,6 @@ import fastapi.templating
 
 from . import errhand
 
-from typing import Annotated
-
 NPPS4_VERSION = (0, 0, 1)
 
 core = fastapi.FastAPI(title="NPPS4", version="%d.%d.%d" % NPPS4_VERSION, docs_url="/")

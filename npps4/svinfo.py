@@ -99,7 +99,6 @@ def generate_server_info(request: fastapi.Request, platform: int, version: tuple
         end_point = end_point[end_point.index("/", 8) :]
         server_info = copy.deepcopy(SERVERINFO_TEMPLATE)
         server_info["domain"] = f"{scheme}://{request.url.netloc}"
-        # TODO: Use request.url_for for these
         server_info["maintenance_uri"] = make_endpoint("/resources/maintenance", scheme, request, "maintenance.php")
         server_info["update_uri"] = make_endpoint("/resources/maintenance", scheme, request, "update.php")
         server_info["login_news_uri"] = make_endpoint(app.webview.prefix, scheme, request, "/announce/index")

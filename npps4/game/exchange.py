@@ -1,4 +1,3 @@
-# /exchange/owningPoint
 from .. import idol
 from .. import util
 

@@ -1,5 +1,4 @@
 from .. import idol
-from .. import util
 from ..idol import error
 from ..idol.system import tutorial
 from ..idol.system import user

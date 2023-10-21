@@ -1,5 +1,4 @@
 import calendar
-import functools
 
 import pydantic
 import sqlalchemy
@@ -7,10 +6,7 @@ import sqlalchemy
 from . import item
 from ... import config
 from ... import idol
-from ... import util
 from ...db import main
-
-from typing import TYPE_CHECKING
 
 
 class LoginBonusCalendar(pydantic.BaseModel):
