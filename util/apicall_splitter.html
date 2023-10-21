@@ -3,15 +3,53 @@
 	<head>
 		<meta charset="UTF-8">
 		<script>
-			function ready(fn) {
-				if (document.readyState !== "loading") {
-					fn()
-				} else {
-					document.addEventListener("DOMContentLoaded", fn)
-				}
+			function noprop(e) {
+				e.stopPropagation()
+				e.preventDefault()
 			}
 
-			ready(() => {
+			/**
+			 * @param {HTMLTextAreaElement} elem
+			 * @param {function(): void} afterwards
+			 */
+			function registerDragDrop(elem, afterwards) {
+				/**
+				 * @param {File} file
+				 */
+				function processFile(file) {
+					const textDec = new TextDecoder()
+					file.arrayBuffer().then((value) => {
+						elem.value = textDec.decode(value)
+						afterwards()
+					})
+				}
+
+				elem.addEventListener("dragenter", noprop)
+				elem.addEventListener("dragleave", noprop)
+				elem.addEventListener("dragover", noprop)
+				elem.addEventListener("drop", (e) => {
+					noprop(e)
+					
+					if (e.dataTransfer.items) {
+						for (const item of e.dataTransfer.items) {
+							if (item.kind == "file") {
+								const file = item.getAsFile()
+								if (file) {
+									processFile(file)
+									break
+								}
+							}
+						}
+					} else {
+						for (const file of e.dataTransfer.files) {
+							processFile(file)
+							break
+						}
+					}
+				})
+			}
+
+			function main() {
 				const inputElem = document.getElementById("api_input")
 				const outputElem = document.getElementById("api_output")
 				const resultElemRoot = document.getElementById("result")
@@ -87,7 +125,15 @@
 					apiOutputJSON = JSON.parse(ev.target.value)
 					rebuildFromJSON()
 				}))
-			})
+				registerDragDrop(inputElem, rebuildFromJSON)
+				registerDragDrop(outputElem, rebuildFromJSON)
+			}
+			
+			if (document.readyState !== "loading") {
+				main()
+			} else {
+				document.addEventListener("DOMContentLoaded", main)
+			}
 		</script>
 		<style>
 			textarea {
