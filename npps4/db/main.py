@@ -196,6 +196,38 @@ class LoginBonus(common.Base):
     __table_args__ = (sqlalchemy.UniqueConstraint(user_id, year, month, day),)
 
 
+class Incentive(common.Base):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+    user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, sqlalchemy.ForeignKey(User.id)
+    )
+    add_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    item_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    amount: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=1)
+    message: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(default="")
+    insert_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, default=util.time, index=True
+    )
+    expire_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
+
+
+class IncentiveUnitOption(common.Base):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, sqlalchemy.ForeignKey(Incentive.id), primary_key=True
+    )
+    unit_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+
+    is_signed: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False)
+    exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
+    skill_exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
+    max_level: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    love: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)  # Bond
+    rank: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()  # Non-idolized = 1, idolized = 2
+    display_rank: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()  # Same as rank
+    level_limit_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
+    unit_removable_skill_capacity: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+
+
 engine = sqlalchemy.ext.asyncio.create_async_engine(config.get_database_url())
 sessionmaker = sqlalchemy.ext.asyncio.async_sessionmaker(engine)
 
