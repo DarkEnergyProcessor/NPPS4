@@ -26,6 +26,9 @@ class BannerListResponse(pydantic.BaseModel):
 async def banner_bannerlist(context: idol.SchoolIdolUserParams) -> BannerListResponse:
     # TODO
     util.log("STUB /banner/bannerList", severity=util.logging.WARNING)
+    url = context.request.url
+    hostname = url.hostname or ""
+    port = url.port or (443 if url.scheme.lower() == "https" else 80)
     return BannerListResponse(
         time_limit=util.timestamp_to_datetime(2147483647),
         banner_list=[
@@ -50,7 +53,7 @@ async def banner_bannerlist(context: idol.SchoolIdolUserParams) -> BannerListRes
                 asset_path="en/assets/image/webview/wv_ba_01.png"
                 if context.lang == idol.Language.en
                 else "assets/image/webview/wv_ba_01.png",
-                webview_url=str(context.request.url),
+                webview_url=f"{url.scheme}://{hostname}:{port}",
                 fixed_flag=False,
                 back_side=True,
                 banner_id=200001,
