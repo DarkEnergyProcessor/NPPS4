@@ -11,3 +11,4 @@ if "%VIRTUAL_ENV%"=="" (
 )
 
 "%UVICORN%" npps4:uvicorn_main --port 51376 %*
+endlocal
