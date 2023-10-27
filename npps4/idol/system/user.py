@@ -9,6 +9,7 @@ from ... import util
 from ...idol.system import achievement
 from ...idol.system import background
 from ...db import main
+from ...db import game_mater
 
 
 class UserInfoData(pydantic.BaseModel):
@@ -109,8 +110,7 @@ def get_current_energy(user: main.User, t: int | None = None):
     if t is None:
         t = util.time()
     difftime = max(user.energy_full_time - t, 0)
-    # 1 LP = 6 minutes = 360 seconds
-    used_lp = math.ceil(difftime / 360)
+    used_lp = math.ceil(difftime / game_mater.GAME_SETTING.live_energy_recoverly_time)
     return max(user.energy_max - used_lp, 0)
 
 

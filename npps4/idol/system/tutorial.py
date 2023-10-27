@@ -1,9 +1,8 @@
-import sqlalchemy
-
 from . import unit
 from . import user
 from ... import idol
 from ...db import main
+from ...db import game_mater
 
 
 async def phase1(context: idol.BasicSchoolIdolContext, u: main.User):
@@ -15,10 +14,10 @@ async def phase2(context: idol.BasicSchoolIdolContext, u: main.User):
 
 
 async def phase3(context: idol.BasicSchoolIdolContext, u: main.User):
-    # G +37000, not sure why
-    u.game_coin = u.game_coin + 37000
+    # G +36400 + 600
+    u.game_coin = u.game_coin + game_mater.GAME_SETTING.initial_game_coin + 600
     # Friend Points +5
-    u.social_point = u.social_point + 5
+    u.social_point = u.social_point + game_mater.GAME_SETTING.live_social_point_for_others
     # Add EXP
     await user.add_exp(context, u, 11)
     # Reine Saeki

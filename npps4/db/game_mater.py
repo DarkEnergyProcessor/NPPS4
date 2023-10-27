@@ -163,8 +163,27 @@ class AddType(common.GameDBBase, common.MaybeEncrypted):
     large_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
 
 
+game_mater = download.get_db_path("game_mater")
+
+
+def load_client_setting():
+    sync_engine = sqlalchemy.create_engine(f"sqlite+pysqlite:///file:{game_mater}?mode=ro&uri=true")
+    sync_sessionmaker = sqlalchemy.orm.sessionmaker(sync_engine)
+    with sync_sessionmaker() as session:
+        q = sqlalchemy.select(GameSetting).limit(1)
+        result = session.execute(q)
+        setting = result.scalar()
+        if setting is None:
+            raise RuntimeError("unable to load client setting")
+
+        session.expunge(setting)
+        return setting
+
+
+GAME_SETTING = load_client_setting()
+
 engine = sqlalchemy.ext.asyncio.create_async_engine(
-    f"sqlite+aiosqlite:///file:{download.get_db_path('game_mater')}?mode=ro&uri=true",
+    f"sqlite+aiosqlite:///file:{game_mater}?mode=ro&uri=true",
 )
 sessionmaker = sqlalchemy.ext.asyncio.async_sessionmaker(engine)
 session = sessionmaker()
