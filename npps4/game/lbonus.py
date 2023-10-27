@@ -5,9 +5,12 @@ import pydantic
 from .. import idol
 from .. import util
 from ..idol.system import achievement
+from ..idol.system import ad
+from ..idol.system import class_system
 from ..idol.system import effort
 from ..idol.system import item
 from ..idol.system import lbonus
+from ..idol.system import museum
 from ..idol.system import other
 from ..idol.system import user
 
@@ -25,49 +28,19 @@ class LoginBonusCalendarInfo(pydantic.BaseModel):
     get_item: item.RewardWithCategory | None = None
 
 
-class LoginBonusAdInfo(pydantic.BaseModel):
-    ad_id: int
-    term_id: int
-    reward_list: list[item.Reward]
-
-
 class LoginBonusTotalLogin(pydantic.BaseModel):
     login_count: int
     remaining_count: int = 2147483647  # TODO
     reward: list[item.Reward] | None = None
 
 
-class LoginBonusClassRankInfo(pydantic.BaseModel):  # TODO
-    before_class_rank_id: int = 1
-    after_class_rank_id: int = 1
-    rank_up_date: str = util.timestamp_to_datetime(86400)
-
-
-class LoginBonusClassSystem(pydantic.BaseModel):  # TODO
-    rank_info: LoginBonusClassRankInfo
-    complete_flag: bool = False
-    is_opened: bool = False
-    is_visible: bool = False
-
-
-class LoginBonusMuseumParameter(pydantic.BaseModel):
-    smile: int = 0  # TODO
-    pure: int = 0  # TODO
-    cool: int = 0  # TODO
-
-
-class LoginBonusMuseumInfo(pydantic.BaseModel):
-    parameter: LoginBonusMuseumParameter
-    contents_id_list: list[int]
-
-
 class LoginBonusResponse(pydantic.BaseModel):
     sheets: list = pydantic.Field(default_factory=list)
     calendar_info: LoginBonusCalendarInfo
-    ad_info: LoginBonusAdInfo
+    ad_info: ad.AdInfo
     total_login_info: LoginBonusTotalLogin
     license_lbonus_list: list  # TODO
-    class_system: LoginBonusClassSystem
+    class_system: class_system.ClassSystemData
     start_dash_sheets: list  # TODO
     effort_point: list[effort.EffortResult]
     limited_effort_box: list  # TODO
@@ -76,7 +49,7 @@ class LoginBonusResponse(pydantic.BaseModel):
     after_user_info: user.UserInfoData
     added_achievement_list: list[achievement.Achievement]
     new_achievement_cnt: int
-    museum_info: LoginBonusMuseumInfo
+    museum_info: museum.MuseumInfoData
     server_timestamp: int
     present_cnt: int
 
@@ -137,10 +110,10 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
             next_month=LoginBonusCalendarMonthInfo(year=next_year, month=next_month_num, days=next_month),
             get_item=get_item,
         ),
-        ad_info=LoginBonusAdInfo(ad_id=0, term_id=0, reward_list=[]),
+        ad_info=ad.AdInfo(),
         total_login_info=LoginBonusTotalLogin(login_count=login_count),
         license_lbonus_list=[],  # TODO
-        class_system=LoginBonusClassSystem(rank_info=LoginBonusClassRankInfo()),
+        class_system=class_system.ClassSystemData(rank_info=class_system.ClassRankInfoData()),
         start_dash_sheets=[],  # TODO
         effort_point=effort_result,
         limited_effort_box=[],  # TODO
@@ -149,7 +122,7 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
         after_user_info=await user.get_user_info(context, current_user),
         added_achievement_list=[],  # TODO
         new_achievement_cnt=0,  # TODO
-        museum_info=LoginBonusMuseumInfo(parameter=LoginBonusMuseumParameter(), contents_id_list=[]),  # TODO
+        museum_info=museum.MuseumInfoData(parameter=museum.MuseumParameterData(), contents_id_list=[]),  # TODO
         server_timestamp=server_timestamp,
         present_cnt=0,  # TODO
     )
