@@ -24,6 +24,7 @@ from . import navigation
 from . import notice
 from . import payment
 from . import personalnotice
+from . import reward
 from . import scenario
 from . import stamp
 from . import subscenario
