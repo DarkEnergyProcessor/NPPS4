@@ -10,10 +10,15 @@ from . import errhand
 
 NPPS4_VERSION = (0, 0, 1)
 
-core = fastapi.FastAPI(title="NPPS4", version="%d.%d.%d" % NPPS4_VERSION, docs_url="/")
+core = fastapi.FastAPI(title="NPPS4", version="%d.%d.%d" % NPPS4_VERSION, docs_url="/main.php/api")
 main = fastapi.APIRouter(prefix="/main.php")
 webview = fastapi.APIRouter(prefix="/webview.php", default_response_class=fastapi.responses.HTMLResponse)
 templates = fastapi.templating.Jinja2Templates("templates")
+
+
+@core.get("/")
+def todo_main_page():
+    return fastapi.responses.RedirectResponse("/main.php/api")
 
 
 class _EndpointNotFound(Exception):
