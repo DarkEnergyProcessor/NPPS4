@@ -163,6 +163,24 @@ class AddType(common.GameDBBase, common.MaybeEncrypted):
     large_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
 
 
+class Strings(common.GameDBBase):
+    """```sql
+    CREATE TABLE `strings_m` (
+        `string_key` TEXT NOT NULL,
+        `string_value` TEXT NOT NULL,
+        `string_label` TEXT NOT NULL,
+        `string_label_en` TEXT,
+        PRIMARY KEY (`string_key`,`string_value`)
+    )
+    ```"""
+
+    __tablename__ = "strings_m"
+    string_key: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(primary_key=True)
+    string_value: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(primary_key=True)
+    string_label: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    string_label_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+
+
 game_mater = download.get_db_path("game_mater")
 
 
@@ -170,6 +188,7 @@ def load_client_setting():
     sync_engine = sqlalchemy.create_engine(f"sqlite+pysqlite:///file:{game_mater}?mode=ro&uri=true")
     sync_sessionmaker = sqlalchemy.orm.sessionmaker(sync_engine)
     with sync_sessionmaker() as session:
+        # Preload game_setting_m
         q = sqlalchemy.select(GameSetting).limit(1)
         result = session.execute(q)
         setting = result.scalar()
@@ -177,10 +196,17 @@ def load_client_setting():
             raise RuntimeError("unable to load client setting")
 
         session.expunge(setting)
-        return setting
+
+        # Preload strings_m
+        q = sqlalchemy.select(Strings)
+        result = list(session.execute(q).scalars())
+        for r in result:
+            session.expunge(r)
+
+        return setting, dict(((r.string_key, r.string_value), (r.string_label, r.string_label_en)) for r in result)
 
 
-GAME_SETTING = load_client_setting()
+GAME_SETTING, STRINGS = load_client_setting()
 
 engine = sqlalchemy.ext.asyncio.create_async_engine(
     f"sqlite+aiosqlite:///file:{game_mater}?mode=ro&uri=true",
