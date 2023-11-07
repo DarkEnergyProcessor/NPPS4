@@ -65,7 +65,7 @@ class RewardOpenAllResponse(pydantic.BaseModel):
 @idol.register("/reward/rewardList")
 async def reward_rewardlist(context: idol.SchoolIdolUserParams, request: RewardListRequest) -> RewardListResponse:
     # TODO
-    util.log("STUB /reward/rewardList", severity=util.logging.WARNING)
+    util.log(f"STUB /reward/rewardList {repr(request)}", severity=util.logging.WARNING)
     return RewardListResponse(item_count=0, order=request.order, items=[], ad_info=ad.AdInfo())
 
 
