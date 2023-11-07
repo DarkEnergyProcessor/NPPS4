@@ -1,13 +1,17 @@
 import base64
 import hashlib
 import hmac
+import json
+from typing import Literal
 
 import sqlalchemy
 import sqlalchemy.ext.asyncio
 import sqlalchemy.orm
 
 from . import common
+from .. import const
 from .. import config
+from .. import idoltype
 from .. import util
 from ..idol.system import core
 
@@ -204,11 +208,29 @@ class Incentive(common.Base):
     add_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     item_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     amount: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=1)
-    message: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(default="")
+    message: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()  # JSON-data
     insert_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
         common.IDInteger, default=util.time, index=True
     )
     expire_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
+
+    def set_message(self, message_jp: str | tuple[str, str | None], message_en: str | None):
+        if isinstance(message_jp, tuple):
+            message_jp, message_en = message_jp
+
+        result = {const.INCENTIVE_MESSAGE_NAME: message_jp}
+        if message_en is not None:
+            result[const.INCENTIVE_MESSAGE_NAME_EN] = message_en
+
+        self.message = json.dumps(result, separators=(",", ":"))
+
+    def get_message(self, language: idoltype.Language):
+        message: dict[str, str] = json.loads(self.message)
+
+        if language == idoltype.Language.en:
+            return message.get(const.INCENTIVE_MESSAGE_NAME_EN, message[const.INCENTIVE_MESSAGE_NAME])
+        else:
+            return message[const.INCENTIVE_MESSAGE_NAME]
 
 
 class IncentiveUnitOption(common.Base):

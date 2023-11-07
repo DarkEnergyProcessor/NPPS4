@@ -1,1 +1,4 @@
 from . import ADD_TYPE
+
+INCENTIVE_MESSAGE_NAME = "text"
+INCENTIVE_MESSAGE_NAME_EN = "text_en"
