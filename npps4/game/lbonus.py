@@ -4,6 +4,7 @@ import pydantic
 
 from .. import idol
 from .. import util
+from .. import strings
 from ..idol.system import achievement
 from ..idol.system import ad
 from ..idol.system import advanced
@@ -12,6 +13,7 @@ from ..idol.system import effort
 from ..idol.system import item
 from ..idol.system import lbonus
 from ..idol.system import museum
+from ..idol.system import reward
 from ..idol.system import user
 
 
@@ -78,15 +80,19 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
     get_item = None
     add_effort_amount = 0
     if not has_lbonus:
-        reward = current_month[current_datetime.day - 1].item
+        reward_item = current_month[current_datetime.day - 1].item
         add_effort_amount = 100000
         login_count = login_count + 1
-        await advanced.add_item(context, current_user, reward)
+        # TODO: Add unit support
+        await reward.add_item(context, current_user, reward_item, *strings.CLIENT_STRINGS["reward", "12"])
         await lbonus.mark_login_bonus(
             context, current_user, current_datetime.year, current_datetime.month, current_datetime.day
         )
         get_item = item.RewardWithCategory(
-            add_type=reward.add_type, item_id=reward.item_id, amount=reward.amount, reward_box_flag=False
+            add_type=reward_item.add_type,
+            item_id=reward_item.item_id,
+            amount=reward_item.amount,
+            reward_box_flag=False,
         )
         lbonuses_day.add(current_datetime.day)
 

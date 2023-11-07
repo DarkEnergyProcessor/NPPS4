@@ -13,6 +13,7 @@ _SERVER_STINGS: list[tuple[int, str, str | None]] = [
 ]
 _ss = dict((k[0], (k[1], k[2])) for k in _SERVER_STINGS)
 SERVER_STRINGS = [_ss.get(k, ("", None)) for k in range(max(_ss.keys()) + 1)]
+CLIENT_STRINGS = game_mater.STRINGS
 
 
 @overload
@@ -50,7 +51,20 @@ MAPPED_MATCH = re.compile(r"\{\{([a-zA-Z0-9_])\}\}")
 POSITIONAL_MATCH = re.compile(r"%[[\d]+\$]*[a-z]")
 
 
-def format_mapped(string: str, /, **kwargs: int | str):
+@overload
+def format_mapped(string: str, /, **kwargs: int | str) -> str:
+    ...
+
+
+@overload
+def format_mapped(string: tuple[str, str | None], /, **kwargs: int | str) -> tuple[str, str | None]:
+    ...
+
+
+def format_mapped(string: str | tuple[str, str | None], /, **kwargs: int | str):
+    if isinstance(string, tuple):
+        return format_mapped(string[0], **kwargs), None if string[1] is None else format_mapped(string[1], **kwargs)
+
     def repl(m: re.Match[str]):
         nonlocal kwargs
         value = kwargs.get(m.group(1), "{{" + m.group() + "}}")
@@ -66,7 +80,20 @@ _FMT_SPECIFIER: dict[str, tuple[type, Callable[[Any], str]]] = {
 }
 
 
-def format_positional(string: str, /, *args: int | str):
+@overload
+def format_positional(string: str, /, *args: int | str) -> str:
+    ...
+
+
+@overload
+def format_positional(string: tuple[str, str | None], /, *args: int | str) -> tuple[str, str | None]:
+    ...
+
+
+def format_positional(string: str | tuple[str, str | None], /, *args: int | str):
+    if isinstance(string, tuple):
+        return format_positional(string[0], *args), None if string[1] is None else format_positional(string[1], *args)
+
     index_counter = 1
 
     def repl(m: re.Match[str]):
