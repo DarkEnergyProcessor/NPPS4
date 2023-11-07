@@ -6,12 +6,12 @@ from .. import idol
 from .. import util
 from ..idol.system import achievement
 from ..idol.system import ad
+from ..idol.system import advanced
 from ..idol.system import class_system
 from ..idol.system import effort
 from ..idol.system import item
 from ..idol.system import lbonus
 from ..idol.system import museum
-from ..idol.system import other
 from ..idol.system import user
 
 
@@ -81,7 +81,7 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
         reward = current_month[current_datetime.day - 1].item
         add_effort_amount = 100000
         login_count = login_count + 1
-        await other.add_item(context, current_user, reward)
+        await advanced.add_item(context, current_user, reward)
         await lbonus.mark_login_bonus(
             context, current_user, current_datetime.year, current_datetime.month, current_datetime.day
         )
@@ -97,7 +97,7 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
     effort_result, effort_reward = await effort.add_effort(context, current_user, add_effort_amount)
     if effort_reward:
         # TODO: Give effort reward to present box
-        await asyncio.gather(*[other.add_item(context, current_user, r) for r in effort_reward])
+        await asyncio.gather(*[advanced.add_item(context, current_user, r) for r in effort_reward])
 
     current_date = f"{current_datetime.year}-{current_datetime.month}-{current_datetime.day}"
 
