@@ -203,16 +203,16 @@ class LoginBonus(common.Base):
 class Incentive(common.Base):
     id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
-        common.IDInteger, sqlalchemy.ForeignKey(User.id)
+        common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
     )
-    add_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    add_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
     item_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     amount: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=1)
     message: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()  # JSON-data
     insert_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
         common.IDInteger, default=util.time, index=True
     )
-    expire_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
+    expire_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0, index=True)
 
     def set_message(self, message_jp: str | tuple[str, str | None], message_en: str | None):
         if isinstance(message_jp, tuple):
