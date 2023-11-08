@@ -48,7 +48,7 @@ def select(string: tuple[str, str | None], context: idol.Language | idol.BasicSc
 
 
 MAPPED_MATCH = re.compile(r"\{\{([a-zA-Z0-9_])\}\}")
-POSITIONAL_MATCH = re.compile(r"%[[\d]+\$]*[a-z]")
+POSITIONAL_MATCH = re.compile(r"%\d+\$[a-z]")
 
 
 @overload
@@ -94,17 +94,14 @@ def format_positional(string: str | tuple[str, str | None], /, *args: int | str)
     if isinstance(string, tuple):
         return format_positional(string[0], *args), None if string[1] is None else format_positional(string[1], *args)
 
-    index_counter = 1
-
     def repl(m: re.Match[str]):
-        nonlocal index_counter, args
+        nonlocal args
         fmt = m.group()
         dollar = fmt.find("$")
         if dollar > 0:
             pos = int(fmt[1:dollar])
         else:
-            pos = index_counter
-            index_counter = index_counter + 1
+            raise ValueError("invalid format specifier")
 
         value = args[pos - 1]
 
@@ -118,3 +115,20 @@ def format_positional(string: str | tuple[str, str | None], /, *args: int | str)
         return fmt_specifier[1](value)
 
     return re.sub(POSITIONAL_MATCH, repl, string)
+
+
+@overload
+def format_simple(string: str, /, *args: int | str) -> str:
+    ...
+
+
+@overload
+def format_simple(string: tuple[str, str | None], /, *args: int | str) -> tuple[str, str | None]:
+    ...
+
+
+def format_simple(string: str | tuple[str, str | None], /, *args: int | str):
+    if isinstance(string, tuple):
+        return format_simple(string[0], *args), None if string[1] is None else format_simple(string[1], *args)
+
+    return string % args

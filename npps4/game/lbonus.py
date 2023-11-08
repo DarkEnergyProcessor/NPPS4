@@ -71,9 +71,10 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
         lbonus.get_calendar(context, current_datetime.year, current_datetime.month),
         lbonus.get_calendar(context, next_year, next_month_num),
     )
-    login_count, lbonuses_day = await asyncio.gather(
+    login_count, lbonuses_day, present_count = await asyncio.gather(
         lbonus.get_login_count(context, current_user),
         lbonus.days_login_bonus(context, current_user, current_datetime.year, current_datetime.month),
+        reward.count_presentbox(context, current_user),
     )
 
     has_lbonus = current_datetime.day in lbonuses_day
@@ -83,8 +84,10 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
         reward_item = current_month[current_datetime.day - 1].item
         add_effort_amount = 100000
         login_count = login_count + 1
+        present_count = present_count + 1
+        reward_message = strings.format_simple(strings.get("lbonus", 12), current_datetime.month, current_datetime.day)
         # TODO: Add unit support
-        await reward.add_item(context, current_user, reward_item, *strings.CLIENT_STRINGS["reward", "12"])
+        await reward.add_item(context, current_user, reward_item, *reward_message)
         await lbonus.mark_login_bonus(
             context, current_user, current_datetime.year, current_datetime.month, current_datetime.day
         )
@@ -130,5 +133,5 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
         new_achievement_cnt=0,  # TODO
         museum_info=museum.MuseumInfoData(parameter=museum.MuseumParameterData(), contents_id_list=[]),  # TODO
         server_timestamp=server_timestamp,
-        present_cnt=0,  # TODO
+        present_cnt=present_count,
     )
