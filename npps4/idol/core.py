@@ -86,6 +86,7 @@ class Database:
     async def cleanup(self):
         if self._mainsession is not None:
             await self._mainsession.close()
+            self._mainsession = None
 
     async def commit(self):
         if self._mainsession is not None:
@@ -102,6 +103,16 @@ class BasicSchoolIdolContext:
     def __init__(self, lang: idoltype.Language):
         self.lang = lang
         self.db = Database()
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb):
+        if exc_type is None:
+            await self.db.commit()
+        else:
+            await self.db.rollback()
+        await self.db.cleanup()
 
 
 class SchoolIdolParams(BasicSchoolIdolContext):
