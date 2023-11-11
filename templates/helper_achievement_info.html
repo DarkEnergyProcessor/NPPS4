@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+</head>
+
+<body>
+	<h1>Achievement #{{ achievement.id }}</h1>
+	<section>
+		<h2>Needs</h2>
+		<ul>
+			{% for i in achievement.needs %}
+			<li><a href="?id={{ i[0] }}">{{ i[1]|e }}</a></li>
+			{% endfor %}
+		</ul>
+	</section>
+	<section>
+		<h2>Achievement Info</h2>
+		<table>
+			<tr>
+				<th>Parameter</th>
+				<th>Value</th>
+			</tr>
+			{% for i in achievement.params %}
+			<tr>
+				<td>{{ i[0] }}</td>
+				<td>{{ i[1] | safe }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+	</section>
+	<section>
+		<h2>Opens</h2>
+		<ul>
+			{% for i in achievement.opens %}
+			<li><a href="?id={{ i[0] }}">{{ i[1]|e }}</a></li>
+			{% endfor %}
+		</ul>
+	</section>
+</body>
+
+</html>

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+</head>
+
+<body>
+	<h1>Achievement Explorer</h1>
+	<section>
+		<ol>
+			{% for i in items %}
+			<li><a href="?id={{ i[0] }}">{{ i[1]|e }}</a></li>
+			{% endfor %}
+		</ol>
+	</section>
+</body>
+
+</html>

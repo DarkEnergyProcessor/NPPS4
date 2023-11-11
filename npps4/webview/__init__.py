@@ -1,13 +1,13 @@
-import traceback
 import urllib.parse
 
 import fastapi.responses
 import fastapi.templating
 
+from . import helper
+from . import tos
 from .. import app
 from .. import config
 from .. import errhand
-from . import tos
 
 
 @app.core.get("/resources/maintenace/maintenance.php", response_class=fastapi.responses.HTMLResponse)
