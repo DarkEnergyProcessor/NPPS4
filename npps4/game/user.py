@@ -45,7 +45,7 @@ class UserNotificationTokenRequest(pydantic.BaseModel):
 
 @idol.register("/user/changeName", batchable=False)
 async def user_changename(context: idol.SchoolIdolUserParams, request: ChangeNameRequest) -> ChangeNameResponse:
-    if config.contains_badwords(request.name):
+    if await config.contains_badwords(request.name, context):
         raise error.IdolError(error.ERROR_CODE_NG_WORDS)
 
     current_user = await user.get_current(context)

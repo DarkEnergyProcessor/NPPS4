@@ -90,12 +90,13 @@ archive_root = "archive-root"
 [game]
 # Game-specific configuration
 
-# List of badwords. Bad words are words that can't be used in team formation, names, etc.
-badwords = []
+# Specify badwords checker file.
+# Path is relative to the project root directory.
+badwords = "external/badwords.py"
 
 # Specify login bonus reward generator.
 # Path is relative to the project root directory.
-login_bonus = "login_bonus.py"
+login_bonus = "external/login_bonus.py"
 
 [advanced]
 # This is advanced configuration.

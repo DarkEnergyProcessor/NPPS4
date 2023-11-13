@@ -114,19 +114,6 @@ def inject_server_info():
     return INJECT_SVINFO
 
 
-BADWORDS: list[str] | None = CONFIG_DATA["game"]["badwords"]
-
-
-def contains_badwords(string: str):
-    if BADWORDS:
-        string = string.replace(" ", "")
-        for w in BADWORDS:
-            if w in string:
-                return True
-
-    return False
-
-
 _log_request_response_flag = False
 
 
@@ -146,14 +133,35 @@ class LoginBonusProtocol(Protocol):
         ...
 
 
+def _load_module_from_file(file: str, modulename: str):
+    loader = importlib.machinery.SourceFileLoader(modulename, file)
+    spec = importlib.util.spec_from_loader(loader.name, loader)
+    assert spec is not None
+    module = importlib.util.module_from_spec(spec)
+    loader.exec_module(module)
+    return module
+
+
 LOGIN_BONUS_FILE = os.path.join(ROOT_DIR, CONFIG_DATA["game"]["login_bonus"])
-_login_bonus_loader = importlib.machinery.SourceFileLoader("npps4_login_bonus", LOGIN_BONUS_FILE)
-_login_bonus_spec = importlib.util.spec_from_loader(_login_bonus_loader.name, _login_bonus_loader)
-assert _login_bonus_spec is not None
-_login_bonus_module = importlib.util.module_from_spec(_login_bonus_spec)
-_login_bonus_loader.exec_module(_login_bonus_module)
+_login_bonus_module = cast(LoginBonusProtocol, _load_module_from_file(LOGIN_BONUS_FILE, "npps4_login_bonus"))
 
 
 def get_login_bonus_protocol():
     global _login_bonus_module
-    return cast(LoginBonusProtocol, _login_bonus_module)
+    return _login_bonus_module
+
+
+class BadwordsCheckProtocol(Protocol):
+    async def has_badwords(self, text: str, context) -> bool:
+        ...
+
+
+BADWORDS_CHECK_FILE = os.path.join(ROOT_DIR, CONFIG_DATA["game"]["badwords"])
+_badwords_check_module = cast(
+    BadwordsCheckProtocol, _load_module_from_file(BADWORDS_CHECK_FILE, "npps4_badwords_check")
+)
+
+
+async def contains_badwords(string: str, context):
+    global _badwords_check_module
+    return await _badwords_check_module.has_badwords(string, context)
