@@ -90,13 +90,17 @@ archive_root = "archive-root"
 [game]
 # Game-specific configuration
 
-# Specify badwords checker file.
+# Specify badwords checker script.
 # Path is relative to the project root directory.
 badwords = "external/badwords.py"
 
-# Specify login bonus reward generator.
+# Specify login bonus reward generator script.
 # Path is relative to the project root directory.
 login_bonus = "external/login_bonus.py"
+
+# Specify beatmap provider script.
+# Path is relative to the project root directory.
+beatmaps = "external/beatmap.py"
 
 [advanced]
 # This is advanced configuration.

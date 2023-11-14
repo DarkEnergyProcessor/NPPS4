@@ -12,7 +12,7 @@ else:
 import Cryptodome.PublicKey.RSA
 import pydantic
 
-from typing import Protocol, cast
+from typing import Iterable, Protocol, Literal, cast
 
 ROOT_DIR = os.path.normpath(os.path.dirname(__file__) + "/..")
 os.makedirs(os.path.join(ROOT_DIR, "data"), exist_ok=True)
@@ -165,3 +165,37 @@ _badwords_check_module = cast(
 async def contains_badwords(string: str, context):
     global _badwords_check_module
     return await _badwords_check_module.has_badwords(string, context)
+
+
+class BeatmapData(Protocol):
+    timing_sec: float
+    notes_attribute: int
+    notes_level: int
+    effect: int
+    effect_value: float
+    position: int
+    speed: float  # Beatmap speed multipler
+    vanish: Literal[0, 1, 2]  # 0 = Normal; 1 = Note hidden as it approaches; 2 = Note shows just before its timing.
+
+
+class BeatmapProviderProtocol(Protocol):
+    async def get_beatmap_data(self, livejson: str, context) -> Iterable[BeatmapData] | None:
+        ...
+
+    async def randomize_beatmaps(self, beatmap: Iterable[BeatmapData], seed: bytes, context) -> Iterable[BeatmapData]:
+        ...
+
+
+BEATMAP_PROVIDER_FILE = os.path.join(ROOT_DIR, CONFIG_DATA["game"]["beatmaps"])
+_beatmap_provider_module = None
+
+
+def get_beatmap_provider_protocol():
+    global _beatmap_provider_module
+
+    if _beatmap_provider_module is None:
+        _beatmap_provider_module = cast(
+            BeatmapProviderProtocol, _load_module_from_file(BEATMAP_PROVIDER_FILE, "npps4_beatmap_provider")
+        )
+
+    return _beatmap_provider_module
