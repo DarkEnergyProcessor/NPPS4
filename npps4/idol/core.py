@@ -430,17 +430,11 @@ def register(
                 response = await client_check(context, check_version, xmc_verify)
                 if response is None:
                     try:
-                        result: _V | list[_V] = await f(context)
-                        await context.db.commit()
-                        response = await build_response(context, result, exclude_none=exclude_none)
+                        async with context:
+                            result: _V | list[_V] = await f(context)
+                            response = await build_response(context, result, exclude_none=exclude_none)
                     except error.IdolError as e:
-                        await context.db.rollback()
                         response = await build_response(context, e)
-                    except Exception:
-                        await context.db.rollback()
-                        raise
-                    finally:
-                        await context.db.cleanup()
                 return response
 
         else:
@@ -490,15 +484,11 @@ def register(
                     util.log("DEBUG REQUEST", endpoint, str(context.raw_request_data, "UTF-8"))
                 if response is None:
                     try:
-                        result: _V | list[_V] = await f(context, request)
-                        await context.db.commit()
-                        response = await build_response(context, result, exclude_none=exclude_none)
+                        async with context:
+                            result: _V | list[_V] = await f(context, request)
+                            response = await build_response(context, result, exclude_none=exclude_none)
                     except error.IdolError as e:
-                        await context.db.rollback()
                         response = await build_response(context, e)
-                    except Exception:
-                        await context.db.rollback()
-                        raise
                 return response
 
         if batchable:
