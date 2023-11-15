@@ -1,5 +1,6 @@
 import pydantic
 
+from ...const import ADD_TYPE
 from ...db import unit
 
 
@@ -8,7 +9,7 @@ class Item(pydantic.BaseModel):
 
     add_type: int
     item_id: int
-    amount: int
+    amount: int = 1
 
 
 class RewardWithCategory(Item):
@@ -17,15 +18,15 @@ class RewardWithCategory(Item):
 
 
 class Reward(Item):
-    reward_box_flag: bool
+    reward_box_flag: bool = False
 
 
 def add_loveca(amount: int):
-    return Item(add_type=3001, item_id=4, amount=amount)
+    return Item(add_type=ADD_TYPE.LOVECA, item_id=4, amount=amount)
 
 
 def add_g(amount: int):
-    return Item(add_type=3000, item_id=3, amount=amount)
+    return Item(add_type=ADD_TYPE.GAME_COIN, item_id=3, amount=amount)
 
 
 def add_unit(
@@ -40,7 +41,7 @@ def add_unit(
     idolized: bool = False
 ):
     idolized = unit_info.rank_max == unit_info.rank_min or idolized
-    t = Item(add_type=1001, item_id=unit_info.unit_id, amount=1)
+    t = Item(add_type=ADD_TYPE.UNIT, item_id=unit_info.unit_id, amount=1)
     t.level = level
     t.exp = exp
     t.max_level = unit_rarity.after_level_max if idolized else unit_rarity.before_level_max
