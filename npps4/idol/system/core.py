@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 
 def _get_next_exp_base(rank: int) -> int:
     if rank <= 1:
-        return 34
+        return 11
     elif rank < 34:
         # Rank < 34 is exactly this formula
         return round(_get_next_exp_base(rank - 1) + 34.45 / 33)
