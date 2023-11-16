@@ -6,7 +6,7 @@ from ... import idol
 from ...db import main
 
 
-async def has_background(context: idol.SchoolIdolParams, user: main.User, background_id: int):
+async def has_background(context: idol.BasicSchoolIdolContext, user: main.User, background_id: int):
     q = (
         sqlalchemy.select(main.Background)
         .where(main.Background.user_id == user.id, main.Background.background_id == background_id)
@@ -17,7 +17,7 @@ async def has_background(context: idol.SchoolIdolParams, user: main.User, backgr
 
 
 async def unlock_background(
-    context: idol.SchoolIdolParams, user: main.User, background_id: int, set_active: bool = False
+    context: idol.BasicSchoolIdolContext, user: main.User, background_id: int, set_active: bool = False
 ):
     has_bg = await has_background(context, user, background_id)
     if has_bg:
