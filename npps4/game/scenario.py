@@ -1,7 +1,7 @@
-import itertools
-
 from .. import idol
 from .. import util
+from ..idol.system import scenario
+from ..idol.system import user
 
 import pydantic
 
@@ -26,12 +26,10 @@ class ScenarioStartupResponse(pydantic.BaseModel):
 
 @idol.register("/scenario/scenarioStatus")
 async def scenario_scenariostatus(context: idol.SchoolIdolUserParams) -> ScenarioStatusResponse:
-    # TODO
-    util.log("STUB /scenario/scenarioStatus", severity=util.logging.WARNING)
+    current_user = await user.get_current(context)
+    scenarios = await scenario.get_all(context, current_user)
     return ScenarioStatusResponse(
-        scenario_status_list=[
-            ScenarioStatus(scenario_id=i, status=2) for i in itertools.chain(range(1, 4), range(184, 189))
-        ]
+        scenario_status_list=[ScenarioStatus(scenario_id=sc.scenario_id, status=1 + sc.completed) for sc in scenarios]
     )
 
 

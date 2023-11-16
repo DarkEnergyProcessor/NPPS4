@@ -8,6 +8,7 @@ from ... import idol
 from ... import util
 from ...idol.system import achievement
 from ...idol.system import background
+from ...idol.system import scenario
 from ...db import main
 from ...db import game_mater
 
@@ -96,6 +97,7 @@ async def create(context: idol.SchoolIdolParams, key: str, passwd: str):
     user.invite_code = core.get_invite_code(user.id)
     await achievement.init(context, user)
     await background.unlock_background(context, user, 1, True)
+    await scenario.init(context, user)
     await context.db.main.flush()
     return user
 
