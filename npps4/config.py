@@ -133,7 +133,7 @@ class LoginBonusProtocol(Protocol):
         ...
 
 
-def _load_module_from_file(file: str, modulename: str):
+def load_module_from_file(file: str, modulename: str):
     loader = importlib.machinery.SourceFileLoader(modulename, file)
     spec = importlib.util.spec_from_loader(loader.name, loader)
     assert spec is not None
@@ -143,7 +143,7 @@ def _load_module_from_file(file: str, modulename: str):
 
 
 LOGIN_BONUS_FILE = os.path.join(ROOT_DIR, CONFIG_DATA["game"]["login_bonus"])
-_login_bonus_module = cast(LoginBonusProtocol, _load_module_from_file(LOGIN_BONUS_FILE, "npps4_login_bonus"))
+_login_bonus_module = cast(LoginBonusProtocol, load_module_from_file(LOGIN_BONUS_FILE, "npps4_login_bonus"))
 
 
 def get_login_bonus_protocol():
@@ -158,7 +158,7 @@ class BadwordsCheckProtocol(Protocol):
 
 BADWORDS_CHECK_FILE = os.path.join(ROOT_DIR, CONFIG_DATA["game"]["badwords"])
 _badwords_check_module = cast(
-    BadwordsCheckProtocol, _load_module_from_file(BADWORDS_CHECK_FILE, "npps4_badwords_check")
+    BadwordsCheckProtocol, load_module_from_file(BADWORDS_CHECK_FILE, "npps4_badwords_check")
 )
 
 
@@ -195,7 +195,7 @@ def get_beatmap_provider_protocol():
 
     if _beatmap_provider_module is None:
         _beatmap_provider_module = cast(
-            BeatmapProviderProtocol, _load_module_from_file(BEATMAP_PROVIDER_FILE, "npps4_beatmap_provider")
+            BeatmapProviderProtocol, load_module_from_file(BEATMAP_PROVIDER_FILE, "npps4_beatmap_provider")
         )
 
     return _beatmap_provider_module
