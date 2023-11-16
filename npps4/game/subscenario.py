@@ -1,4 +1,5 @@
 from .. import idol
+from .. import util
 from ..idol.system import subscenario
 from ..idol.system import user
 
@@ -15,6 +16,15 @@ class SubScenarioStatusResponse(pydantic.BaseModel):
     unlocked_subscenario_ids: list[int]
 
 
+class SubScenarioStartupRequest(pydantic.BaseModel):
+    subscenario_id: int
+
+
+class SubScenarioStartupResponse(pydantic.BaseModel):
+    subscenario_id: int
+    scenario_adjustment: int = 50  # TODO where to get this value
+
+
 @idol.register("/subscenario/subscenarioStatus")
 async def subscenario_status(context: idol.SchoolIdolUserParams) -> SubScenarioStatusResponse:
     current_user = await user.get_current(context)
@@ -25,3 +35,12 @@ async def subscenario_status(context: idol.SchoolIdolUserParams) -> SubScenarioS
         ],
         unlocked_subscenario_ids=[],
     )
+
+
+@idol.register("/subscenario/startup")
+async def scenario_startup(
+    context: idol.SchoolIdolUserParams, request: SubScenarioStartupRequest
+) -> SubScenarioStartupResponse:
+    # TODO
+    util.log("STUB /subscenario/startup", severity=util.logging.WARNING)
+    return SubScenarioStartupResponse(subscenario_id=request.subscenario_id)

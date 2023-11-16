@@ -21,6 +21,7 @@ from ..db import main
 from ..db import game_mater
 from ..db import item
 from ..db import live
+from ..db import subscenario
 from ..db import unit
 
 from typing import Annotated, Any, Callable, Coroutine, TypeVar, Generic
@@ -39,6 +40,7 @@ class Database:
         self._unitsession: sqlalchemy.ext.asyncio.AsyncSession | None = None
         self._achievementsession: sqlalchemy.ext.asyncio.AsyncSession | None = None
         self._effortsession: sqlalchemy.ext.asyncio.AsyncSession | None = None
+        self._subscenariosession: sqlalchemy.ext.asyncio.AsyncSession | None = None
 
     @property
     def main(self):
@@ -82,6 +84,12 @@ class Database:
         if self._effortsession is None:
             self._effortsession = effort.get_session()
         return self._effortsession
+
+    @property
+    def subscenario(self):
+        if self._subscenariosession is None:
+            self._subscenariosession = subscenario.get_session()
+        return self._subscenariosession
 
     async def cleanup(self):
         if self._mainsession is not None:
