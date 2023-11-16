@@ -7,13 +7,20 @@ from typing import TYPE_CHECKING
 ##########################################################################################################
 
 
+def _get_next_exp_base(rank: int) -> int:
+    if rank <= 1:
+        return 34
+    elif rank < 34:
+        # Rank < 34 is exactly this formula
+        return round(_get_next_exp_base(rank - 1) + 34.45 / 33)
+    else:
+        return round(34.45 * rank - 551)
+
+
 def get_next_exp(rank: int):
     result: int = 0
     if rank > 0:
-        if rank < 34:
-            result = round(11 + (rank - 1) ** 1.8375)
-        else:
-            result = round(34.45 * rank - 511)
+        result = _get_next_exp_base(rank)
         if rank < 100:
             result = round(result / 2)
     return result
