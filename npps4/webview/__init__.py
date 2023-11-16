@@ -3,6 +3,7 @@ import urllib.parse
 import fastapi.responses
 import fastapi.templating
 
+from . import announce
 from . import helper
 from . import tos
 from .. import app
