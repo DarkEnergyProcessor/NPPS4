@@ -111,8 +111,11 @@ def log(*args: object, severity: int = logging.DEBUG, e: Exception | None = None
     NPPS4_LOGGER.log(severity, " ".join(map(str, args)), exc_info=e)
 
 
-def stub(module: str, action: str, request, /):
-    log(f"STUB /{module}/{action} {repr(request)}", severity=logging.WARNING)
+def stub(module: str, action: str, request=None, /):
+    if request:
+        log(f"STUB /{module}/{action} {repr(request)}", severity=logging.WARNING)
+    else:
+        log(f"STUB /{module}/{action}", severity=logging.WARNING)
 
 
 TIMEZONE_JST = datetimelib.timezone(datetimelib.timedelta(hours=9))
