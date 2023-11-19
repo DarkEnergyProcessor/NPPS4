@@ -22,7 +22,9 @@ async def background_backgroundinfo(context: idol.SchoolIdolUserParams) -> Backg
     backgrounds = await background.get_backgrounds(context, current_user)
     background_info = [
         BackgroundInfo(
-            background_id=bg.background_id, is_set=bg.is_set, insert_date=util.timestamp_to_datetime(bg.insert_date)
+            background_id=bg.background_id,
+            is_set=current_user.active_background == bg.background_id,
+            insert_date=util.timestamp_to_datetime(bg.insert_date),
         )
         for bg in backgrounds
     ]

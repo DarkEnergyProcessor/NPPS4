@@ -48,6 +48,9 @@ class User(common.Base):
     tutorial_state: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
     active_deck_index: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=1)
 
+    active_background: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=1)
+    active_award: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=1)
+
     def set_passwd(self, passwd: str):
         salt = util.randbytes(SALT_SIZE)
         hmac_hash = hmac.new(salt, passwd.encode("UTF-8"), digestmod=hashlib.sha512).digest()
@@ -72,8 +75,7 @@ class Background(common.Base):
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
         common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
     )
-    background_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
-    is_set: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column()
+    background_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
     insert_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=util.time)
 
 

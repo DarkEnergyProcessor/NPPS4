@@ -40,9 +40,6 @@ async def set_background_active(context: idol.SchoolIdolParams, user: main.User,
     if not has_bg:
         return False
 
-    bgs = await get_backgrounds(context, user)
-    for bg in bgs:
-        bg.is_set = bg.background_id == background_id
-
+    user.active_background = background_id
     await context.db.main.flush()
     return True
