@@ -9,6 +9,7 @@ from . import costume
 from . import download
 from . import eventscenario
 from . import exchange
+from . import friend
 from . import gdpr
 from . import handover
 from . import item
