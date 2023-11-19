@@ -482,6 +482,31 @@ class UnitSkillLevelUpPattern(common.GameDBBase):
     next_exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
+class AlbumSeries(common.GameDBBase, common.MaybeEncrypted):
+    """```sql
+    CREATE TABLE `album_series_m` (
+        `album_series_id` INTEGER NOT NULL,
+        `album_group_id` INTEGER NOT NULL,
+        `album_tab_id` INTEGER NOT NULL,
+        `order_num` INTEGER NOT NULL,
+        `name` TEXT,
+        `name_en` TEXT,
+        `layout_type` INTEGER NOT NULL,
+        `release_tag` TEXT, `_encryption_release_id` INTEGER NULL,
+        PRIMARY KEY (`album_series_id`)
+    )
+    ```"""
+
+    __tablename__ = "album_series_m"
+    album_series_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    album_group_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    album_tab_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    order_num: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    name: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    layout_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+
+
 engine = sqlalchemy.ext.asyncio.create_async_engine(
     f"sqlite+aiosqlite:///file:{download.get_db_path('unit')}?mode=ro&uri=true",
 )

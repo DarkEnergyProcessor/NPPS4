@@ -3,6 +3,7 @@ import sqlalchemy
 from . import achievement
 from ... import idol
 from ...db import main
+from ...db import unit
 
 
 async def update(
@@ -47,6 +48,12 @@ async def all(context: idol.BasicSchoolIdolContext, user: main.User):
     q = sqlalchemy.select(main.Album).where(main.Album.user_id == user.id)
     result = await context.db.main.execute(q)
     return list(result.scalars())
+
+
+async def all_series(context: idol.BasicSchoolIdolContext):
+    q = sqlalchemy.select(unit.AlbumSeries)
+    result = await context.db.unit.execute(q)
+    return {i.album_series_id: list() for i in result.scalars()}
 
 
 async def count_album_with(context: idol.BasicSchoolIdolContext, user: main.User, *criteria):
