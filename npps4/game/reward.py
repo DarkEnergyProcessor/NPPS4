@@ -9,6 +9,8 @@ from ..idol.system import item
 from ..idol.system import museum
 from ..idol.system import user
 
+from typing import Any
+
 
 class IncentiveItem(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="allow")
@@ -33,9 +35,17 @@ class RewardListResponse(pydantic.BaseModel):
 
 
 class RewardListRequest(pydantic.BaseModel):
+    # order values bitwise:
+    # bit 0 - Set = ascending; Unset = descending.
+    # bit 1 - Set = Display order by expiry. Unset = Display order by received.
     order: int
+    # filter depends on the category:
+    # 0. [unused]
+    # 1. [rarity, attribute, show not in album?]
+    # 2. [list of add types]
     filter: list[int]
-    category: int
+    category: int  # 0 = All, 1 = Members, 2 = Items
+    offset: int = 0
 
 
 class RewardIncentiveItem(item.RewardWithCategory):
@@ -60,6 +70,19 @@ class RewardOpenAllResponse(pydantic.BaseModel):
     museum_info: museum.MuseumInfoData
     server_timestamp: int
     present_cnt: int
+
+
+class RewardHistoryRequest(pydantic.BaseModel):
+    incentive_history_id: Any | None = None
+    filter: list[int]
+    category: int
+
+
+class RewardHistoryResponse(pydantic.BaseModel):
+    item_count: int
+    limit: int = 20
+    history: list[IncentiveItem]
+    ad_info: ad.AdInfo
 
 
 @idol.register("/reward/rewardList")
@@ -97,3 +120,12 @@ async def reward_openall(context: idol.SchoolIdolUserParams, request: RewardList
         server_timestamp=util.time(),
         present_cnt=0,
     )
+
+
+@idol.register("/reward/rewardHistory")
+async def reward_rewardhistory(
+    context: idol.SchoolIdolUserParams, request: RewardHistoryRequest
+) -> RewardHistoryResponse:
+    # TODO
+    util.stub("reward", "rewardHistory", request)
+    return RewardHistoryResponse(item_count=0, history=[], ad_info=ad.AdInfo())
