@@ -1,10 +1,10 @@
+import pydantic
+
 from .. import idol
 from .. import util
 from ..idol import error
 from ..idol.system import background
 from ..idol.system import user
-
-import pydantic
 
 
 class BackgroundInfo(pydantic.BaseModel):

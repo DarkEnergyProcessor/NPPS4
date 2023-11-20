@@ -1,5 +1,3 @@
-import dataclasses
-
 import sqlalchemy
 
 from ... import idol
