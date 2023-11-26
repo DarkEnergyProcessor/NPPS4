@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<script>
+		const ADD_TYPE = {
+			0: "NONE",
+			1000: "ITEM",
+			1001: "UNIT",
+			1002: "ACCESSORY",
+			3000: "GAME_COIN",
+			3001: "LOVECA",
+			3002: "SOCIAL_POINT",
+			3003: "INVITE_POINT",
+			3004: "PLAYER_EXP",
+			3005: "UNIT_MAX",
+			3006: "EXCHANGE_POINT",
+			3007: "FRIEND_MAX",
+			3008: "WAITING_UNIT_MAX",
+			3009: "TRAINING_MAX",
+			5000: "LIVE",
+			5100: "AWARD",
+			5200: "BACKGROUND",
+			5300: "SCENARIO",
+			5330: "EVENT_SCENARIO",
+			5340: "MULTI_UNIT_SCENARIO",
+			5400: "LIVE_SE",
+			5410: "LIVE_ICON",
+			5500: "SCHOOL_IDOL_SKILL",
+			5600: "STAMP",
+			6100: "EVENT_POINT",
+			6200: "EVENT_ICON",
+			6300: "QUEST_EXCHANGE_POINT",
+			7000: "SELECTABLE_REWARD",
+			7500: "LOTTERY_TICKET",
+			8000: "RECOVER_LP_ITEM",
+			10000: "TRADE_CAPITAL",
+			11000: "FEVER_SKILL",
+			12000: "PASSIVE_EFFECT",
+			14000: "MUSEUM",
+			50000: "AD_REWARD",
+		}
+
+		function main() {
+			/** @type {HTMLDivElement} */
+			const inputList = document.getElementById("input_list")
+			/** @type {HTMLButtonElement} */
+			const addInputButton = document.getElementById("add_input")
+			/** @type {HTMLButtonElement} */
+			const delInputButton = document.getElementById("del_input")
+			/** @type {HTMLTextAreaElement} */
+			const textAreaOutput = document.getElementById("output")
+			/** @type {HTMLTextAreaElement[]} */
+			const textareas = []
+
+			function hitit() {
+				const result = []
+
+				for (const ta of textareas) {
+					if (ta.value.length > 0) {
+						try {
+							const jsondata = JSON.parse(ta.value)
+
+							for (const ach of jsondata) {
+								const rewardList = []
+
+								for (const reward of ach.reward_list) {
+									const addType = reward.add_type in ADD_TYPE ? `ADD_TYPE.${ADD_TYPE[reward.add_type]}` : reward.add_type.toString()
+									const rewardArgs = [
+										`add_type=${addType}`,
+										`item_id=${reward.item_id}`
+									]
+									if (reward.amount > 1) {
+										rewardArgs.push(`amount=${reward.amount}`)
+									}
+
+									const rewardArgsCombined = rewardArgs.join(", ")
+									rewardList.push(`item.Reward(${rewardArgsCombined})`)
+								}
+
+								if (rewardList.length > 0) {
+									const itemList = rewardList.join(", ")
+									result.push(`${ach.achievement_id}: [${itemList}],`)
+								}
+							}
+						} catch (e) {
+							console.log(e)
+						}
+					}
+				}
+
+				if (result.length > 0) {
+					textAreaOutput.value = result.join("\n")
+				}
+			}
+
+			addInputButton.addEventListener("click", () => {
+				const ta = document.createElement("textarea")
+				ta.addEventListener("input", hitit)
+				textareas.push(ta)
+				inputList.replaceChildren(...textareas)
+			})
+			delInputButton.addEventListener("click", () => {
+				if (textareas.length > 0) {
+					textareas.pop()
+					inputList.replaceChildren(...textareas)
+					hitit()
+				}
+			})
+		}
+			
+		if (document.readyState !== "loading") {
+			main()
+		} else {
+			document.addEventListener("DOMContentLoaded", main)
+		}
+	</script>
+	<style>
+		textarea {
+			width: 100%;
+			min-height: 100px;
+			resize: vertical
+		}
+	</style>
+</head>
+
+<body style="padding:10px">
+	<h1>Achievement Reward Translator</h1>
+	<section>
+		<div id="input_list"></div>
+		<button id="add_input">Add Input</button>
+		<button id="del_input">Remove Input</button>
+	</section>
+	<hr>
+	<section>
+		<textarea id="output" readonly></textarea>
+	</section>
+</body>
+
+</html>

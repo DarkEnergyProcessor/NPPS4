@@ -59,8 +59,7 @@ class AchievementData:
 
 @app.webview.get("/helper/apisplitter")
 async def helper_apisplitter():
-    with open("util/apicall_splitter.html", "rb") as f:
-        return f.read()
+    return fastapi.responses.FileResponse("util/apicall_splitter.html", media_type="text/html")
 
 
 @app.webview.get("/helper/achievement")
@@ -120,3 +119,8 @@ async def helper_achievement(request: fastapi.Request, achievement_id: Annotated
                 "helper_achievement_info.html",
                 {"request": request, "achievement": AchievementData(achievement_id, params, needs, opens)},
             )
+
+
+@app.webview.get("/helper/achtranslate")
+async def helper_achtranslate():
+    return fastapi.responses.FileResponse("util/achtranslator.html", media_type="text/html")
