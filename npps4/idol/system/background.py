@@ -41,3 +41,7 @@ async def set_background_active(context: idol.SchoolIdolParams, user: main.User,
     user.active_background = background_id
     await context.db.main.flush()
     return True
+
+
+async def init(context: idol.SchoolIdolParams, user: main.User):
+    await unlock_background(context, user, 1, True)

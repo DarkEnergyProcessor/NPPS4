@@ -1,3 +1,4 @@
+import asyncio
 import math
 
 import pydantic
@@ -7,6 +8,7 @@ from . import core
 from ... import idol
 from ... import util
 from ...idol.system import achievement
+from ...idol.system import award
 from ...idol.system import background
 from ...idol.system import scenario
 from ...db import main
@@ -95,9 +97,12 @@ async def create(context: idol.SchoolIdolParams, key: str, passwd: str):
     context.db.main.add(user)
     await context.db.main.flush()
     user.invite_code = core.get_invite_code(user.id)
-    await achievement.init(context, user)
-    await background.unlock_background(context, user, 1, True)
-    await scenario.init(context, user)
+    await asyncio.gather(
+        achievement.init(context, user),
+        background.init(context, user),
+        award.init(context, user),
+        scenario.init(context, user),
+    )
     await context.db.main.flush()
     return user
 
