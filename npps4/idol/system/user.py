@@ -9,6 +9,7 @@ from ... import util
 from ...idol.system import achievement
 from ...idol.system import award
 from ...idol.system import background
+from ...idol.system import live
 from ...idol.system import scenario
 from ...db import main
 from ...db import game_mater
@@ -99,6 +100,7 @@ async def create(context: idol.SchoolIdolParams, key: str, passwd: str):
     await achievement.init(context, user)
     await background.init(context, user)
     await award.init(context, user)
+    await live.init(context, user)
     await scenario.init(context, user)
     await context.db.main.flush()
     return user
