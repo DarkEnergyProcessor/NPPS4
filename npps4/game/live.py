@@ -1,9 +1,11 @@
 import itertools
 
+import pydantic
+
 from .. import idol
 from .. import util
-
-import pydantic
+from ..idol.system import advanced
+from ..idol.system import user
 
 
 class EventInfo(pydantic.BaseModel):
@@ -74,6 +76,18 @@ class LiveStatusResponse(pydantic.BaseModel):
     can_resume_live: bool
 
 
+class LivePartyListRequest(pydantic.BaseModel):
+    is_training: bool
+    lp_factor: int
+
+
+class LivePartyListResponse(pydantic.BaseModel):
+    party_list: list[advanced.PartyInfo]
+    training_energy: int
+    training_energy_max: int
+    server_timestamp: int = pydantic.Field(default_factory=util.time)
+
+
 @idol.register("/live/liveStatus")
 async def live_livestatus(context: idol.SchoolIdolUserParams) -> LiveStatusResponse:
     # TODO
@@ -113,3 +127,22 @@ async def live_schedule(context: idol.SchoolIdolUserParams) -> LiveScheduleRespo
         free_live_list=[],
         training_live_list=[],
     )
+
+
+@idol.register("/live/partyList")
+async def live_partylist(context: idol.SchoolIdolUserParams, request: LivePartyListRequest):
+    current_user = await user.get_current(context)
+    util.stub("live", "partyList", request)
+    # TODO: Check LP
+    return LivePartyListResponse(
+        # TODO
+        party_list=[await advanced.get_user_guest_party_info(context, current_user)],
+        training_energy=current_user.training_energy,
+        training_energy_max=current_user.training_energy_max,
+    )
+
+
+@idol.register("/live/preciseScore")
+async def live_precisescore(context: idol.SchoolIdolUserParams) -> idol.core.DummyModel:
+    util.stub("live", "preciseScore", context.raw_request_data)
+    raise idol.error.IdolError(idol.error.ERROR_CODE_LIVE_PRECISE_LIST_NOT_FOUND, 600)
