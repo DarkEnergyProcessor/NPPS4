@@ -1,5 +1,3 @@
-import asyncio
-
 import pydantic
 
 from .. import idol
@@ -66,16 +64,12 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
         next_year = next_year + 1
         next_month_num = next_month_num + 1
 
-    current_user, current_month, next_month = await asyncio.gather(
-        user.get_current(context),
-        lbonus.get_calendar(context, current_datetime.year, current_datetime.month),
-        lbonus.get_calendar(context, next_year, next_month_num),
-    )
-    login_count, lbonuses_day, present_count = await asyncio.gather(
-        lbonus.get_login_count(context, current_user),
-        lbonus.days_login_bonus(context, current_user, current_datetime.year, current_datetime.month),
-        reward.count_presentbox(context, current_user),
-    )
+    current_user = await user.get_current(context)
+    current_month = await lbonus.get_calendar(context, current_datetime.year, current_datetime.month)
+    next_month = await lbonus.get_calendar(context, next_year, next_month_num)
+    login_count = await lbonus.get_login_count(context, current_user)
+    lbonuses_day = await lbonus.days_login_bonus(context, current_user, current_datetime.year, current_datetime.month)
+    present_count = await reward.count_presentbox(context, current_user)
 
     has_lbonus = current_datetime.day in lbonuses_day
     get_item = None
@@ -105,8 +99,9 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
 
     effort_result, effort_reward = await effort.add_effort(context, current_user, add_effort_amount)
     if effort_reward:
-        # TODO: Give effort reward to present box
-        await asyncio.gather(*[advanced.add_item(context, current_user, r) for r in effort_reward])
+        for r in effort_reward:
+            # TODO: Give effort reward to present box
+            await advanced.add_item(context, current_user, r)
 
     current_date = f"{current_datetime.year}-{current_datetime.month}-{current_datetime.day}"
 

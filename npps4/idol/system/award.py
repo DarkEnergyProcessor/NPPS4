@@ -1,5 +1,3 @@
-import asyncio
-
 import sqlalchemy
 
 from ... import idol
@@ -40,4 +38,5 @@ async def set_award_active(context: idol.SchoolIdolParams, user: main.User, awar
 
 
 async def init(context: idol.SchoolIdolParams, user: main.User):
-    await asyncio.gather(unlock_award(context, user, 1, True), unlock_award(context, user, 23))
+    await unlock_award(context, user, 1, True)
+    await unlock_award(context, user, 23)
