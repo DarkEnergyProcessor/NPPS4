@@ -62,7 +62,7 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
     next_year, next_month_num = current_datetime.year, current_datetime.month + 1
     if next_month_num > 12:
         next_year = next_year + 1
-        next_month_num = next_month_num + 1
+        next_month_num = 1
 
     current_user = await user.get_current(context)
     current_month = await lbonus.get_calendar(context, current_datetime.year, current_datetime.month)
