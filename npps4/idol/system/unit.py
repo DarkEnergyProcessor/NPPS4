@@ -1,9 +1,8 @@
 import dataclasses
 import queue
-import typing
 
+import pydantic
 import sqlalchemy
-
 
 from . import achievement
 from . import album
@@ -14,6 +13,33 @@ from ...db import main
 from ...db import unit
 
 from typing import Literal, overload
+
+
+class UnitInfoData(pydantic.BaseModel):
+    unit_owning_user_id: int
+    unit_id: int
+    exp: int
+    next_exp: int
+    level: int
+    max_level: int
+    level_limit_id: int
+    rank: int
+    max_rank: int
+    love: int
+    max_love: int
+    unit_skill_exp: int
+    unit_skill_level: int
+    max_hp: int
+    unit_removable_skill_capacity: int
+    favorite_flag: bool
+    display_rank: int
+    is_rank_max: bool
+    is_love_max: bool
+    is_level_max: bool
+    is_signed: bool
+    is_skill_level_max: bool
+    is_removable_skill_capacity_max: bool
+    insert_date: str
 
 
 async def count_units(context: idol.BasicSchoolIdolContext, user: main.User, active: bool):
@@ -65,6 +91,10 @@ async def add_unit(context: idol.BasicSchoolIdolContext, user: main.User, unit_i
     await album.update(context, user, unit_id)
     await context.db.main.flush()
     return user_unit
+
+
+async def get_unit(context: idol.BasicSchoolIdolContext, unit_owning_user_id: int):
+    return await context.db.main.get(main.Unit, unit_owning_user_id)
 
 
 async def get_supporter_unit(context: idol.SchoolIdolParams, user: main.User, unit_id: int, ensure: bool = False):
@@ -139,7 +169,7 @@ def get_unit_rarity(context: idol.BasicSchoolIdolContext, unit_data: unit.Unit):
     return context.db.unit.get(unit.Rarity, unit_data.rarity)
 
 
-async def get_unit_level_up_pattern(context: idol.SchoolIdolParams, unit_data: unit.Unit):
+async def get_unit_level_up_pattern(context: idol.BasicSchoolIdolContext, unit_data: unit.Unit):
     q = sqlalchemy.select(unit.UnitLevelUpPattern).where(
         unit.UnitLevelUpPattern.unit_level_up_pattern_id == unit_data.unit_level_up_pattern_id
     )
@@ -147,14 +177,14 @@ async def get_unit_level_up_pattern(context: idol.SchoolIdolParams, unit_data: u
     return list(result.scalars())
 
 
-async def get_unit_skill(context: idol.SchoolIdolParams, unit_data: unit.Unit):
+async def get_unit_skill(context: idol.BasicSchoolIdolContext, unit_data: unit.Unit):
     if unit_data.default_unit_skill_id is None:
         return None
 
     return await context.db.unit.get(unit.UnitSkill, unit_data.default_unit_skill_id)
 
 
-async def get_unit_skill_level_up_pattern(context: idol.SchoolIdolParams, unit_skill: unit.UnitSkill | None):
+async def get_unit_skill_level_up_pattern(context: idol.BasicSchoolIdolContext, unit_skill: unit.UnitSkill | None):
     if unit_skill is None:
         return None
 
@@ -391,3 +421,60 @@ def calculate_unit_skill_stats(
             return (stat.skill_level, stat.next_exp)
 
     return (last.skill_level, 0)
+
+
+async def get_unit_data_full_info(context: idol.BasicSchoolIdolContext, unit_data: main.Unit):
+    unit_info = await get_unit_info(context, unit_data.unit_id)
+    if unit_info is None:
+        raise ValueError("unit_info is none")
+
+    # Calculate unit level
+    unit_rarity = await get_unit_rarity(context, unit_info)
+    if unit_rarity is None:
+        raise RuntimeError("unit_rarity is none")
+
+    levelup_pattern = await get_unit_level_up_pattern(context, unit_info)
+    stats = calculate_unit_stats(unit_info, levelup_pattern, unit_data.exp)
+
+    # Calculate unit skill level
+    skill = await get_unit_skill(context, unit_info)
+    skill_levels = await get_unit_skill_level_up_pattern(context, skill)
+    skill_stats = calculate_unit_skill_stats(skill, skill_levels, unit_data.skill_exp)
+
+    idolized = unit_data.rank == unit_info.rank_max
+    skill_max = skill is None or skill_stats[0] == skill.max_level
+
+    max_level = unit_rarity.after_level_max if idolized else unit_rarity.before_level_max
+    max_love = unit_rarity.after_love_max if idolized else unit_rarity.before_love_max
+    real_max_exp = 0 if stats.level == unit_rarity.before_level_max and not idolized else stats.next_exp
+    removable_skill_max = unit_data.unit_removable_skill_capacity == unit_info.max_removable_skill_capacity
+
+    return (
+        UnitInfoData(
+            unit_owning_user_id=unit_data.id,
+            unit_id=unit_data.unit_id,
+            exp=unit_data.exp,
+            next_exp=real_max_exp,
+            level=stats.level,
+            max_level=max_level,
+            level_limit_id=unit_data.level_limit_id,
+            rank=unit_data.rank,
+            max_rank=unit_info.rank_max,
+            love=unit_data.love,
+            max_love=max_love,
+            unit_skill_exp=unit_data.skill_exp,
+            unit_skill_level=skill_stats[0],
+            max_hp=stats.hp,
+            unit_removable_skill_capacity=unit_data.unit_removable_skill_capacity,
+            favorite_flag=unit_data.favorite_flag,
+            display_rank=unit_data.display_rank,
+            is_rank_max=idolized,
+            is_love_max=unit_data.love >= unit_rarity.after_love_max,
+            is_level_max=stats.level >= unit_rarity.after_level_max,
+            is_signed=unit_data.is_signed,
+            is_skill_level_max=skill_max,
+            is_removable_skill_capacity_max=removable_skill_max,
+            insert_date=util.timestamp_to_datetime(unit_data.insert_date),
+        ),
+        stats,
+    )
