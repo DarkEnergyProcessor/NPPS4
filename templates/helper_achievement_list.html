@@ -8,9 +8,9 @@
 <body>
 	<h1>Achievement Explorer</h1>
 	<section>
-		<ol>
+		<ol style="padding-left:5em">
 			{% for i in items %}
-			<li><a href="?id={{ i[0] }}">{{ i[1]|e }}</a></li>
+			<li value="{{ i[0] }}"><a href="?id={{ i[0] }}">{{ i[1]|e }}</a></li>
 			{% endfor %}
 		</ol>
 	</section>

@@ -49,6 +49,18 @@ def autoescape_null(s: int | str | None):
         return html.escape(str(s))
 
 
+def get_achievement_name(ach: achievement.Achievement):
+    # ach.achievement_id, ach.title_en or ach.title or f"Achievement #{ach.achievement_id}"
+    if ach.title_en and ach.title:
+        return f"{ach.title_en}/{ach.title}"
+    elif ach.title_en:
+        return ach.title_en
+    elif ach.title:
+        return ach.title
+    else:
+        return f"Achievement #{ach.achievement_id}"
+
+
 @dataclasses.dataclass
 class AchievementData:
     id: int
@@ -68,10 +80,7 @@ async def helper_achievement(request: fastapi.Request, achievement_id: Annotated
         if achievement_id == 0:
             q = sqlalchemy.select(achievement.Achievement)
             result = await context.db.achievement.execute(q)
-            achievements = [
-                (ach.achievement_id, ach.title_en or ach.title or f"Achievement #{ach.achievement_id}")
-                for ach in result.scalars()
-            ]
+            achievements = [(ach.achievement_id, get_achievement_name(ach)) for ach in result.scalars()]
             return app.templates.TemplateResponse(
                 "helper_achievement_list.html", {"request": request, "items": achievements}
             )
@@ -95,7 +104,7 @@ async def helper_achievement(request: fastapi.Request, achievement_id: Annotated
                 needs.append(
                     (
                         target_ach.achievement_id,
-                        target_ach.title_en or target_ach.title or f"Achievement #{target_ach.achievement_id}",
+                        get_achievement_name(target_ach),
                     )
                 )
 
@@ -111,7 +120,7 @@ async def helper_achievement(request: fastapi.Request, achievement_id: Annotated
                 opens.append(
                     (
                         target_ach.achievement_id,
-                        target_ach.title_en or target_ach.title or f"Achievement #{target_ach.achievement_id}",
+                        get_achievement_name(target_ach),
                     )
                 )
 
