@@ -38,5 +38,5 @@ async def scenario_startup(
     context: idol.SchoolIdolUserParams, request: ScenarioStartupRequest
 ) -> ScenarioStartupResponse:
     # TODO
-    util.log("STUB /scenario/startup", severity=util.logging.WARNING)
+    util.stub("scenario", "startup", request)
     return ScenarioStartupResponse(scenario_id=request.scenario_id)
