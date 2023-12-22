@@ -5,6 +5,7 @@ import pydantic
 from .. import idol
 from .. import util
 from ..idol.system import advanced
+from ..idol.system import live
 from ..idol.system import user
 
 
@@ -88,6 +89,32 @@ class LivePartyListResponse(pydantic.BaseModel):
     server_timestamp: int = pydantic.Field(default_factory=util.time)
 
 
+class LivePlayRequest(pydantic.BaseModel):
+    party_user_id: int
+    is_training: bool
+    unit_deck_id: int
+    live_difficulty_id: int
+    lp_factor: int
+
+
+class LivePlayList(pydantic.BaseModel):
+    live_info: live.LiveInfo
+    deck_info: advanced.LiveDeckInfo
+
+
+class LivePlayResponse(pydantic.BaseModel):
+    rank_info: None
+    energy_full_time: str
+    over_max_energy: int
+    available_live_resume: bool = False
+    live_list: list[LivePlayList]
+    is_marathon_event: bool = False
+    marathon_event_id: int | None = None
+    no_skill: bool = False
+    can_activate_effect: bool = True
+    server_timestamp: int = pydantic.Field(default_factory=util.time)
+
+
 @idol.register("/live/liveStatus")
 async def live_livestatus(context: idol.SchoolIdolUserParams) -> LiveStatusResponse:
     # TODO
@@ -146,3 +173,9 @@ async def live_partylist(context: idol.SchoolIdolUserParams, request: LivePartyL
 async def live_precisescore(context: idol.SchoolIdolUserParams) -> idol.core.DummyModel:
     util.stub("live", "preciseScore", context.raw_request_data)
     raise idol.error.IdolError(idol.error.ERROR_CODE_LIVE_PRECISE_LIST_NOT_FOUND, 600)
+
+
+@idol.register("/live/play", xmc_verify=idol.XMCVerifyMode.CROSS)
+async def live_play(context: idol.SchoolIdolUserParams, request: LivePlayRequest) -> idol.core.DummyModel:
+    util.stub("live", "play", request)
+    raise idol.error.IdolError(idol.error.ERROR_CODE_LIVE_NOT_FOUND, 600)

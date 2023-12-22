@@ -68,6 +68,22 @@ class PartyInfo(pydantic.BaseModel):
     friend_status: int
 
 
+class LiveDeckUnitAttribute(pydantic.BaseModel):
+    smile: int
+    cute: int
+    cool: int
+
+
+class LiveDeckInfo(pydantic.BaseModel):
+    unit_deck_id: int
+    total_smile: int
+    total_cute: int
+    total_cool: int
+    total_hp: int
+    prepared_hp_damage: int
+    unit_list: list[LiveDeckUnitAttribute]
+
+
 async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, item: item.Item):
     match item.add_type:
         case ADD_TYPE.ITEM:

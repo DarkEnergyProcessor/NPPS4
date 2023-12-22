@@ -2,9 +2,10 @@
 # This sensible default load beatmaps from `beatmaps` folder.
 # Please read the comments on how to implement your own beatmap provider.
 
-import pydantic
 import json
 import os
+
+import pydantic
 
 import npps4.config
 
@@ -13,18 +14,6 @@ from typing import Iterable, Literal
 
 # Implementation must return an object that has these attributes in their classes.
 class BeatmapData(pydantic.BaseModel):
-    """
-    (parameter) definition: {
-        effect: unknown,
-        notes_attribute: unknown,
-        notes_level: unknown,
-        position: unknown,
-        speed: unknown,
-        timing_sec: unknown,
-        vanish: unknown,
-    }
-    """
-
     timing_sec: float
     notes_attribute: int
     notes_level: int
@@ -44,19 +33,23 @@ class BeatmapData(pydantic.BaseModel):
 # It then returns an iterable of BeatmapData above or None if the beatmap is not found:
 async def get_beatmap_data(livejson: str, context) -> Iterable[BeatmapData] | None:
     try:
-        f = open(os.path.join(npps4.config.ROOT_DIR, "beatmaps", livejson), "r", encoding="UTF-8")
+        with open(os.path.join(npps4.config.ROOT_DIR, "beatmaps", livejson), "r", encoding="UTF-8") as f:
+            jsondata = f.read()
     except IOError:
         return None
 
     try:
-        jsondata = json.load(f)
+        jsondata = json.loads(jsondata)
     except json.JSONDecodeError:
         return None
 
     result: list[BeatmapData] = []
-    for jdata in jsondata:
-        beatmap = BeatmapData.model_validate(jdata)
-        result.append(beatmap)
+    try:
+        for jdata in jsondata:
+            beatmap = BeatmapData.model_validate(jdata)
+            result.append(beatmap)
+    except pydantic.ValidationError:
+        return None
 
     return result
 
