@@ -102,6 +102,10 @@ login_bonus = "external/login_bonus.py"
 # Path is relative to the project root directory.
 beatmaps = "external/beatmap.py"
 
+# Specify Live Show! unit drop script.
+# Path is relative to the project root directory.
+live_unit_drop = "external/live_unit_drop.py"
+
 [advanced]
 # This is advanced configuration.
 # In most cases, you don't have to change anything.

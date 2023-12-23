@@ -199,3 +199,23 @@ def get_beatmap_provider_protocol():
         )
 
     return _beatmap_provider_module
+
+
+class LiveUnitDropProtocol(Protocol):
+    async def get_live_drop_unit(self, live_setting_id: int, context):
+        ...
+
+
+LIVE_UNIT_DROP_FILE = os.path.join(ROOT_DIR, CONFIG_DATA["game"]["beatmaps"])
+_live_unit_drop_module = None
+
+
+def get_live_unit_drop_protocol():
+    global _live_unit_drop_module
+
+    if _live_unit_drop_module is None:
+        _live_unit_drop_module = cast(
+            LiveUnitDropProtocol, load_module_from_file(LIVE_UNIT_DROP_FILE, "npps4_live_unit_drop")
+        )
+
+    return _live_unit_drop_module
