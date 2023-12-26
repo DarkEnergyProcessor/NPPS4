@@ -17,10 +17,11 @@ from .. import release_key
 from .. import util
 from ..db import achievement
 from ..db import effort
-from ..db import main
 from ..db import game_mater
 from ..db import item
 from ..db import live
+from ..db import main
+from ..db import museum
 from ..db import subscenario
 from ..db import unit
 
@@ -41,6 +42,7 @@ class Database:
         self._achievementsession: sqlalchemy.ext.asyncio.AsyncSession | None = None
         self._effortsession: sqlalchemy.ext.asyncio.AsyncSession | None = None
         self._subscenariosession: sqlalchemy.ext.asyncio.AsyncSession | None = None
+        self._museumsession: sqlalchemy.ext.asyncio.AsyncSession | None = None
 
     @property
     def main(self):
@@ -90,6 +92,12 @@ class Database:
         if self._subscenariosession is None:
             self._subscenariosession = subscenario.get_session()
         return self._subscenariosession
+
+    @property
+    def museum(self):
+        if self._museumsession is None:
+            self._museumsession = museum.get_session()
+        return self._museumsession
 
     async def cleanup(self):
         if self._mainsession is not None:

@@ -126,7 +126,7 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
         after_user_info=await user.get_user_info(context, current_user),
         added_achievement_list=[],  # TODO
         new_achievement_cnt=0,  # TODO
-        museum_info=museum.MuseumInfoData(parameter=museum.MuseumParameterData(), contents_id_list=[]),  # TODO
+        museum_info=await museum.get_museum_info_data(context, current_user),
         server_timestamp=server_timestamp,
         present_cnt=present_count,
     )

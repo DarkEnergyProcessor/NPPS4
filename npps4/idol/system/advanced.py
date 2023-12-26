@@ -9,6 +9,7 @@ from ... import util
 from ...const import ADD_TYPE
 from ...idol.system import achievement
 from ...idol.system import background
+from ...idol.system import museum
 from ...idol.system import scenario
 from ...idol.system import unit
 from ...db import main
@@ -115,11 +116,15 @@ async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, item: 
         case ADD_TYPE.SOCIAL_POINT:
             user.social_point = user.social_point + item.amount
             return AddResult(True)
+        # FIXME: Actually check for their return values of these unlocks.
         case ADD_TYPE.BACKGROUND:
             await background.unlock_background(context, user, item.item_id)
             return AddResult(True)
         case ADD_TYPE.SCENARIO:
             await scenario.unlock(context, user, item.item_id)
+            return AddResult(True)
+        case ADD_TYPE.MUSEUM:
+            await museum.unlock(context, user, item.item_id)
             return AddResult(True)
         case _:
             return AddResult(True)  # TODO

@@ -116,7 +116,7 @@ async def reward_openall(context: idol.SchoolIdolUserParams, request: RewardList
         after_user_info=user_info,
         class_system=class_system.ClassSystemData(rank_info=class_system.ClassRankInfoData()),  # TODO
         new_achievement_cnt=0,
-        museum_info=museum.MuseumInfoData(parameter=museum.MuseumParameterData(), contents_id_list=[]),  # TODO
+        museum_info=await museum.get_museum_info_data(context, current_user),
         server_timestamp=util.time(),
         present_cnt=0,
     )

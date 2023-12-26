@@ -292,6 +292,16 @@ class LiveClear(common.Base):
     __table_args__ = (sqlalchemy.UniqueConstraint(user_id, live_difficulty_id),)
 
 
+class MuseumUnlock(common.Base):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+    user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
+    )
+    museum_contents_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, index=True)
+
+    __table_args__ = (sqlalchemy.UniqueConstraint(user_id, museum_contents_id),)
+
+
 engine = sqlalchemy.ext.asyncio.create_async_engine(config.get_database_url())
 sessionmaker = sqlalchemy.ext.asyncio.async_sessionmaker(engine)
 

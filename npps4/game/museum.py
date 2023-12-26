@@ -1,28 +1,15 @@
-from .. import idol
-from .. import util
-
 import pydantic
 
-
-class MuseumParameter(pydantic.BaseModel):
-    smile: int
-    pure: int
-    cool: int
-
-
-class MuseumInfo(pydantic.BaseModel):
-    parameter: MuseumParameter
-    contents_id_list: list[int]
+from .. import idol
+from ..idol.system import museum
+from ..idol.system import user
 
 
 class MuseumInfoResponse(pydantic.BaseModel):
-    museum_info: MuseumInfo
+    museum_info: museum.MuseumInfoData
 
 
 @idol.register("/museum/info")
 async def museum_info(context: idol.SchoolIdolUserParams) -> MuseumInfoResponse:
-    # TODO
-    util.log("STUB /museum/info", severity=util.logging.WARNING)
-    return MuseumInfoResponse(
-        museum_info=MuseumInfo(parameter=MuseumParameter(smile=0, pure=0, cool=0), contents_id_list=[])
-    )
+    current_user = await user.get_current(context)
+    return MuseumInfoResponse(museum_info=await museum.get_museum_info_data(context, current_user))
