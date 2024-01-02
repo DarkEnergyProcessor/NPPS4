@@ -507,6 +507,71 @@ class AlbumSeries(common.GameDBBase, common.MaybeEncrypted):
     layout_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
+class RemovableSkill(common.GameDBBase, common.MaybeEncrypted):
+    """```sql
+    CREATE TABLE `unit_removable_skill_m` (
+        `unit_removable_skill_id` INTEGER NOT NULL,
+        `name` TEXT NOT NULL,
+        `name_en` TEXT,
+        `skill_type` INTEGER NOT NULL,
+        `unit_rarity` INTEGER,
+        `level` INTEGER NOT NULL,
+        `icon_asset` TEXT NOT NULL,
+        `icon_asset_en` TEXT,
+        `small_icon_asset` TEXT,
+        `small_icon_asset_en` TEXT,
+        `middle_icon_asset` TEXT,
+        `middle_icon_asset_en` TEXT,
+        `bond_asset` TEXT NOT NULL,
+        `bond_asset_en` TEXT,
+        `size` INTEGER NOT NULL,
+        `description` TEXT,
+        `description_en` TEXT,
+        `effect_range` INTEGER NOT NULL,
+        `effect_type` INTEGER NOT NULL,
+        `effect_value` REAL NOT NULL,
+        `fixed_value_flag` INTEGER NOT NULL,
+        `target_reference_type` INTEGER NOT NULL,
+        `target_type` INTEGER NOT NULL,
+        `trigger_reference_type` INTEGER NOT NULL,
+        `trigger_type` INTEGER NOT NULL,
+        `sub_skill_id` INTEGER,
+        `selling_price` INTEGER NOT NULL,
+        `release_tag` TEXT, `_encryption_release_id` INTEGER NULL,
+        PRIMARY KEY (`unit_removable_skill_id`)
+    )
+    ```"""
+
+    __tablename__ = "unit_removable_skill_m"
+    unit_removable_skill_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    name: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    skill_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    unit_rarity: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
+    level: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    icon_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    icon_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    small_icon_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    small_icon_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    middle_icon_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    middle_icon_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    bond_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    bond_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    size: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    description: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    description_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    effect_range: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    effect_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    effect_value: sqlalchemy.orm.Mapped[float] = sqlalchemy.orm.mapped_column()
+    fixed_value_flag: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    target_reference_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    target_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    trigger_reference_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    trigger_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    sub_skill_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    selling_price: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+
+
 engine = sqlalchemy.ext.asyncio.create_async_engine(
     f"sqlite+aiosqlite:///file:{download.get_db_path('unit')}?mode=ro&uri=true",
 )
