@@ -107,3 +107,11 @@ Contribute
 -----
 
 See [CONTRIBUTE.md](CONTRIBUTE.md)
+
+
+License
+-----
+
+zLib license, excluding any files in `external/`.
+
+Public domain/unlicense, any files in `external/`.
