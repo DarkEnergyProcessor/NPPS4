@@ -41,7 +41,7 @@ async def get_museum_info_data(context: idol.BasicSchoolIdolContext, user: main.
 
     parameter = MuseumParameterData()
     q = sqlalchemy.select(museum.MuseumContents).where(museum.MuseumContents.museum_contents_id.in_(contents_id_list))
-    result = await context.db.main.execute(q)
+    result = await context.db.museum.execute(q)
 
     for mu in result.scalars():
         parameter.smile = parameter.smile + mu.smile_buff
