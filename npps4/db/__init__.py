@@ -12,13 +12,15 @@ from typing import TypeVar, Any
 _T = TypeVar("_T", bound=common.GameDBBase)
 
 
-async def get_decrypted(session: sqlalchemy.ext.asyncio.AsyncSession, cls: type[_T], id: int) -> _T | None:
+async def decrypt_row(session: sqlalchemy.ext.asyncio.AsyncSession, cls: type[_T], id: int) -> _T | None:
     obj = await session.get(cls, id)
 
     if isinstance(obj, common.MaybeEncrypted) and obj._encryption_release_id is not None:
         key = release_key.get(obj._encryption_release_id)
 
-        if key is not None:
+        if key is None:
+            return None
+        else:
             session.expunge(obj)
 
             # Decrypt row
