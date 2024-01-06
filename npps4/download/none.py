@@ -3,9 +3,9 @@ import os
 import fastapi
 
 from . import dltype
-from .. import config
 from .. import util
 from .. import idoltype
+from ..config import config
 
 
 def get_server_version():

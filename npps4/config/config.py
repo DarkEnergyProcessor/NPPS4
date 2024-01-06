@@ -9,12 +9,16 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib
 
+import fastapi
 import Cryptodome.PublicKey.RSA
-import pydantic
+
+from . import cfgtype
+from .. import idoltype
+from ..download import dltype
 
 from typing import Iterable, Protocol, Literal, cast
 
-ROOT_DIR = os.path.normpath(os.path.dirname(__file__) + "/..")
+ROOT_DIR = os.path.normpath(os.path.dirname(__file__) + "/../..")
 os.makedirs(os.path.join(ROOT_DIR, "data"), exist_ok=True)
 
 
@@ -75,11 +79,6 @@ assert len(APPLICATION_KEY) == 32
 def get_application_key():
     global APPLICATION_KEY
     return APPLICATION_KEY
-
-
-class ReleaseInfoData(pydantic.BaseModel):
-    id: int
-    key: str
 
 
 PERFORM_XMC_VERIFY: bool = CONFIG_DATA["main"]["verify_xmc"]
@@ -219,3 +218,19 @@ def get_live_unit_drop_protocol():
         )
 
     return _live_unit_drop_module
+
+
+CUSTOM_DOWNLOAD_FILE = os.path.join(ROOT_DIR, CONFIG_DATA["download"]["custom"]["file"])
+_custom_download_backend_module = None
+
+
+def get_custom_download_protocol():
+    global _custom_download_backend_module
+
+    if _custom_download_backend_module is None:
+        _custom_download_backend_module = cast(
+            cfgtype.DownloadBackendProtocol,
+            load_module_from_file(CUSTOM_DOWNLOAD_FILE, "npps4_custom_download_backend"),
+        )
+
+    return _custom_download_backend_module

@@ -2,7 +2,7 @@ import hashlib
 import os
 import pickle
 
-from . import config
+from .config import config
 
 ERROR_DIR = os.path.join(config.get_data_directory(), "errors")
 os.makedirs(ERROR_DIR, exist_ok=True)

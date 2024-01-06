@@ -3,7 +3,7 @@ import sqlalchemy.ext.asyncio
 import sqlalchemy.orm
 
 from . import common
-from .. import download
+from ..download import download
 
 
 class Achievement(common.GameDBBase, common.MaybeEncrypted):

@@ -4,8 +4,8 @@ import pydantic
 import sqlalchemy
 
 from . import item
-from ... import config
 from ... import idol
+from ...config import config
 from ...db import main
 
 

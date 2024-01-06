@@ -3,7 +3,7 @@ import os
 import fastapi
 
 from . import app
-from . import config
+from .config import config
 
 
 @app.core.get(

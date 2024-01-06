@@ -20,8 +20,8 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from npps4.db import main as npps4_model
-from npps4 import config as npps4_config
+import npps4.db.main as npps4_model
+import npps4.config.config as npps4_config
 
 target_metadata = npps4_model.common.Base.metadata
 

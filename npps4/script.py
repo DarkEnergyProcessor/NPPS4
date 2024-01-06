@@ -1,7 +1,7 @@
 import argparse
 import asyncio
 
-from . import config
+from .config import config
 
 from typing import Protocol
 

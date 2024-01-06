@@ -10,9 +10,9 @@ import sqlalchemy.orm
 
 from . import common
 from .. import const
-from .. import config
 from .. import idoltype
 from .. import util
+from ..config import config
 from ..idol.system import core
 
 SALT_SIZE = 16

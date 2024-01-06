@@ -9,8 +9,8 @@ import fastapi
 import honkypy
 
 from . import app
-from . import config
 from . import util
+from .config import config
 
 SERVERINFO_TEMPLATE = {
     "name": "server_information",

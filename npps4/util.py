@@ -15,7 +15,7 @@ import Cryptodome.Util.Padding
 import Cryptodome.Signature.pkcs1_15
 import itsdangerous.serializer
 
-from . import config
+from .config import config
 
 from typing import TypeVar, cast
 

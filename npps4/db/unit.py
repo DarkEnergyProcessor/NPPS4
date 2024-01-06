@@ -3,7 +3,7 @@ import sqlalchemy.ext.asyncio
 import sqlalchemy.orm
 
 from . import common
-from .. import download
+from ..download import download
 
 
 class UnitAttribute(common.GameDBBase):
@@ -570,6 +570,25 @@ class RemovableSkill(common.GameDBBase, common.MaybeEncrypted):
     trigger_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     sub_skill_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     selling_price: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+
+
+class LeaderSkill(common.GameDBBase, common.MaybeEncrypted):
+    """```sql
+    CREATE TABLE `unit_leader_skill_m` (
+        `unit_leader_skill_id` INTEGER NOT NULL,
+        `leader_skill_effect_type` INTEGER NOT NULL,
+        `effect_value` INTEGER NOT NULL,
+        `name_string_key` TEXT,
+        `release_tag` TEXT, `_encryption_release_id` INTEGER NULL,
+        PRIMARY KEY (`unit_leader_skill_id`)
+    )
+    ```"""
+
+    __tablename__ = "unit_leader_skill_m"
+    unit_leader_skill_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    leader_skill_effect_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    effect_value: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    name_string_key: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
 
 
 engine = sqlalchemy.ext.asyncio.create_async_engine(

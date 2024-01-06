@@ -1,6 +1,6 @@
 import multiprocessing
 
-from . import config
+from .config import config
 
 lock = multiprocessing.Lock()
 

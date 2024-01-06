@@ -1,11 +1,11 @@
 import enum
 
-from .. import config
-from .. import download
 from .. import idol
 from .. import idoltype
 from .. import svinfo
 from .. import util
+from ..config import config
+from ..download import download
 from ..idol import error
 
 import pydantic

@@ -7,10 +7,10 @@ import httpx
 import pydantic
 
 from . import dltype
-from .. import config
 from .. import idoltype
 from .. import release_key
 from .. import util
+from ..config import config
 
 from typing import Any, Literal, TypeVar, overload
 
@@ -125,7 +125,9 @@ def _call_api(
 
 
 @overload
-def _call_api(endpoint: str, request_data: dict[str, Any] | list[Any] | None = None, /, *, raw: Literal[True]) -> bytes:
+def _call_api(
+    endpoint: str, request_data: dict[str, Any] | list[Any] | None = None, /, *, raw: Literal[True]
+) -> bytes:
     ...
 
 

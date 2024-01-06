@@ -7,8 +7,8 @@ from . import announce
 from . import helper
 from . import tos
 from .. import app
-from .. import config
 from .. import errhand
+from ..config import config
 
 
 @app.core.get("/resources/maintenace/maintenance.php", response_class=fastapi.responses.HTMLResponse)

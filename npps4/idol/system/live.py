@@ -1,7 +1,6 @@
 import pydantic
 import sqlalchemy
 
-from ... import config
 from ... import idol
 from ...db import main
 from ...db import live

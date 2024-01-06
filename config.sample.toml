@@ -49,14 +49,16 @@ url = "sqlite+aiosqlite:///data/main.sqlite3"
 #             Currently, NPPS4 requires NPPS4 Download API server that
 #             implements version 1 of the protocol.
 # "internal" - Locally mirrored game data according to folder structure
-#              specified at https://github.com/DarkEnergyProcessor/NPPS4-DLAPI
-#              with generation 1.1 structure.
+#              written in https://github.com/DarkEnergyProcessor/NPPS4-DLAPI.
+# "custom" - Use custom Python script to provide downloader.
+#            Please see "external/custom_downloader.py" on how to implement
+#            your own download backend provider.
 backend = "none"
 
 # Send patched server_info.json automatically?
-# This requires honky-py (installed as part of NPPS4 requirements) or
-# libhonoka. There's no reason to turn this off unless your download API
-# or archive already provides patched server_info.json.
+# This requires honky-py (installed as part of NPPS4 requirements). There's no
+# reason to turn this off unless your download API or archive already provides
+# patched server_info.json.
 send_patched_server_info = true
 
 [download.none]
@@ -86,6 +88,11 @@ shared_key = ""
 # Where's the "archive-root" directory is stored?
 # Path is relative to the project root directory.
 archive_root = "archive-root"
+
+[download.custom]
+# Specify custom download provider script.
+# Path is relative to the project root directory.
+file = "external/custom_downloader.py"
 
 [game]
 # Game-specific configuration

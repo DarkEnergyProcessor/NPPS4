@@ -10,11 +10,11 @@ import sqlalchemy.ext.asyncio
 
 from . import error
 from .. import app
-from .. import config
 from .. import db
 from .. import idoltype
 from .. import release_key
 from .. import util
+from ..config import config
 from ..db import achievement
 from ..db import effort
 from ..db import game_mater
