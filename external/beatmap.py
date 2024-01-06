@@ -29,7 +29,7 @@ import os
 
 import pydantic
 
-import npps4.config
+import npps4.config.config
 
 from typing import Iterable, Literal
 
@@ -55,7 +55,7 @@ class BeatmapData(pydantic.BaseModel):
 # It then returns an iterable of BeatmapData above or None if the beatmap is not found:
 async def get_beatmap_data(livejson: str, context) -> Iterable[BeatmapData] | None:
     try:
-        with open(os.path.join(npps4.config.ROOT_DIR, "beatmaps", livejson), "r", encoding="UTF-8") as f:
+        with open(os.path.join(npps4.config.config.ROOT_DIR, "beatmaps", livejson), "r", encoding="UTF-8") as f:
             jsondata = f.read()
     except IOError:
         return None

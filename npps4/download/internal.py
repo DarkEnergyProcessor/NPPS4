@@ -16,7 +16,7 @@ from typing import TypeVar, Generic, Callable, Any
 _NEED_GENERATION = (1, 1)
 _PLATFORM_MAP = ["iOS", "Android"]
 
-_archive_root: str = config.CONFIG_DATA["download"]["internal"]["archive_root"].replace("\\", "/")
+_archive_root: str = config.CONFIG_DATA.download.internal.archive_root.replace("\\", "/")
 if _archive_root[-1] == "/":
     _archive_root = _archive_root[:-1]
 

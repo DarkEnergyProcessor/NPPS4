@@ -14,10 +14,10 @@ BACKENDS: dict[str, cfgtype.DownloadBackendProtocol] = {
     "custom": config.get_custom_download_protocol(),
 }
 
-if config.CONFIG_DATA["download"]["backend"] not in BACKENDS:
-    raise RuntimeError(f"Missing or unknown backend '{config.CONFIG_DATA['download']['backend']}'")
+if config.CONFIG_DATA.download.backend not in BACKENDS:
+    raise RuntimeError(f"Missing or unknown backend '{config.CONFIG_DATA.download.backend}'")
 
-CURRENT_BACKEND = BACKENDS[config.CONFIG_DATA["download"]["backend"]]
+CURRENT_BACKEND = BACKENDS[config.CONFIG_DATA.download.backend]
 
 
 def get_server_version():

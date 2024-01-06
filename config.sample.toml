@@ -3,9 +3,6 @@
 [main]
 # This is main configuration.
 
-# Should be the X-Message-Code sent by client be verified?
-verify_xmc = true
-
 # Where's the data directory?
 # Path is relative to the project root directory.
 data_directory = "data"
@@ -14,6 +11,18 @@ data_directory = "data"
 # If this secret key is compromised, please change it!
 # Also you definitely must change this!
 secret_key = "Hello World"
+
+# Server private key.
+# You must have server private key setup alongside with your client
+# patched to use the server public key.
+server_private_key = "default_server_key.pem"
+
+# Server private key password.
+# If your server private key password is encrypted, specify it here.
+# Alternatively, the environment variable "NPPS_KEY_PASSWORD" takes precedence
+# over this value.
+# IF your private key is not encrypted, specify empty string.
+server_private_key_password = ""
 
 [database]
 # This is database-related configuration.
@@ -27,7 +36,7 @@ secret_key = "Hello World"
 # Note: An async backend must be used:
 # * SQLite3: sqlite+aiosqlite
 # * PostgreSQL: postgresql+asyncpg
-# * MySQL/MariaDB: 
+# * MySQL/MariaDB: mysql+asyncmy, mysql+aiomysql
 # For additional database backend please consult SQLAlchemy dialects:
 # https://docs.sqlalchemy.org/en/20/dialects/
 url = "sqlite+aiosqlite:///data/main.sqlite3"
@@ -123,3 +132,5 @@ base_xorpad = "eit4Ahph4aiX4ohmephuobei6SooX9xo"
 application_key = "b6e6c940a93af2357ea3e0ace0b98afc"
 # Consumer key.
 consumer_key = "lovelive_test"
+# Should be the X-Message-Code sent by client be verified?
+verify_xmc = true

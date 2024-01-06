@@ -9,7 +9,7 @@ from ..config import config
 
 
 def get_server_version():
-    return util.parse_sif_version(config.CONFIG_DATA["download"]["none"]["client_version"])
+    return util.parse_sif_version(config.CONFIG_DATA.download.none.client_version)
 
 
 def get_db_path(name: str) -> str:

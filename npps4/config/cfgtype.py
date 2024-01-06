@@ -3,7 +3,43 @@ import fastapi
 from .. import idoltype
 from ..download import dltype
 
-from typing import Protocol
+from typing import Iterable, Literal, Protocol
+
+
+class LoginBonusProtocol(Protocol):
+    async def get_rewards(
+        self, day: int, month: int, year: int, context
+    ) -> tuple[int, int, int, tuple[str, str | None] | None]:
+        ...
+
+
+class BadwordsCheckProtocol(Protocol):
+    async def has_badwords(self, text: str, context) -> bool:
+        ...
+
+
+class BeatmapData(Protocol):
+    timing_sec: float
+    notes_attribute: int
+    notes_level: int
+    effect: int
+    effect_value: float
+    position: int
+    speed: float  # Beatmap speed multipler
+    vanish: Literal[0, 1, 2]  # 0 = Normal; 1 = Note hidden as it approaches; 2 = Note shows just before its timing.
+
+
+class BeatmapProviderProtocol(Protocol):
+    async def get_beatmap_data(self, livejson: str, context) -> Iterable[BeatmapData] | None:
+        ...
+
+    async def randomize_beatmaps(self, beatmap: Iterable[BeatmapData], seed: bytes, context) -> Iterable[BeatmapData]:
+        ...
+
+
+class LiveUnitDropProtocol(Protocol):
+    async def get_live_drop_unit(self, live_setting_id: int, context):
+        ...
 
 
 class DownloadBackendProtocol(Protocol):

@@ -19,8 +19,8 @@ NEED_PROTOCOL_VERSION = (1, 1)
 
 
 _public_info: dict[str, Any] = {}
-_base_url: str = config.CONFIG_DATA["download"]["n4dlapi"]["server"]
-_shared_key: str = config.CONFIG_DATA["download"]["n4dlapi"]["shared_key"]
+_base_url: str = config.CONFIG_DATA.download.n4dlapi.server
+_shared_key: str = config.CONFIG_DATA.download.n4dlapi.shared_key
 
 if _base_url[-1] != "/":
     _base_url = _base_url + "/"

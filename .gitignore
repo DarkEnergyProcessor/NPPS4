@@ -7,4 +7,3 @@ venv/
 *.pyc
 config.toml
 maintenance.txt
-server_key.pem
