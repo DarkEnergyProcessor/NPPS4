@@ -30,33 +30,50 @@ Install
 Starting Up
 -----
 
-Before starting the server, you need 2 things:
-1. Get private key.
-2. Get client game database.
+Before starting the server, you need 3 things:
+1. Create configuration file.
+2. Get private key.
+3. Get client game database.
+
+### Create configuration file.
+
+Copy out `config.sample.toml` to `config.toml` and adjust as needed. The file has extensive comments on each
+configuration values.
 
 ### Get private key.
 
-> **Warning**: A private key is required due to internal request-response verification done in the game. You must
-have private key set-up!
+> [!WARNING] A private key is required due to internal request-response verification done in the game.
 
 #### Using provided private key
 
 NPPS4 provides default private key which is used to develop other private servers by the community
 and compatible with community-patched APK.
 
-To use this private key, simply copy `default_server_key.pem` to `server_key.pem`.
+There's nothing to do to use this private key. This private key is used by default as per the sample configuration
+file `main.server_private_key`.
+
+The public key of the default server key is:
+```
+-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDE0RNd6047aeBirzVb61DolatY
+YWpaEUIPugOIkobHDc9qVR5iliMLyC0ErXO1siLBwN+U3zaDVOa5uhXbiS7uYq5c
+cpxComxTnZtcn/b+mKDpYWLaC0Gv7UoiT8rpNqN3Vko645usz9OFc4VciijsHGRP
+XmmmoP6qykfI/vba8wIDAQAB
+-----END PUBLIC KEY-----
+```
+
+#### Using your own private key
+
+> [!IMPORTANT]
+> The private key **must** be 1024-bit RSA stored in PEM format!
+
+If you already have your existing private key, simply put them as `server_key.pem`.
 
 To get the public key, run:
 
 ```
 python make_server_key.py -p
 ```
-
-#### Using your own private key
-
-> **Warning**: The private key **must** be 1024-bit RSA stored in PEM format!
-
-If you already have your existing private key, simply put them as `server_key.pem`.
 
 #### Generating your own private key
 
@@ -71,7 +88,21 @@ newly-provided public key.
 
 ### Get client game database.
 
-Please look here for instruction on making your own archive-root directory: https://gist.github.com/MikuAuahDark/ece4eb73b3396403c6a2f11610a783b8
+There's 2 simple methods: Having local copy of SIF client files or loading it directly through internet.
+
+#### Create local copy
+
+First, follow the instruction at https://gist.github.com/MikuAuahDark/ece4eb73b3396403c6a2f11610a783b8.
+
+Then set the `download.backend` to `internal` and configure the `download.internal.archive_root` directory in the
+configuration file to your local copy of SIF client files.
+
+#### Loading directly from internet
+
+Look at the URL in https://gist.github.com/MikuAuahDark/ece4eb73b3396403c6a2f11610a783b8.
+
+Set the `download.backend` to `n4dlapi` and configure `download.n4dlapi.server` to the URL writen in above gist (not
+the gist itself).
 
 Database
 -----
@@ -82,11 +113,6 @@ required dependencies.
 
 Otherwise, install the additional dependencies depending on which backend you want to use. Ensure to install the 
 "async" version of the database packages!
-
-Configuration
------
-
-Copy out `config.sample.toml` to `config.toml` and modify as needed.
 
 Running
 -----
