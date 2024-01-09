@@ -1,0 +1,22 @@
+SELECT * FROM 'unit_leader_skill_m'
+SELECT * FROM 'unit_leader_skill_extra_m'
+
+Note: Leader skill affects all teams!
+
+Leader skill calc:
+
+* leader_skill_effect_type
+  1 = +Smile
+  2 = +Pure
+  3 = +Cool
+  112 = +Pure by Smile
+  113 = +Cool by Smile
+  121 = +Smile by Pure
+  123 = +Cool by Pure
+  131 = +Smile by Cool
+  132 = +Pure by Cool
+
+Extra leader skill calc:
+
+* member_tag_id = member_tag_id in member_tag_m
+* leader_skill_effect_type = same as above

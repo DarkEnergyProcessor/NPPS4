@@ -42,7 +42,8 @@ configuration values.
 
 ### Get private key.
 
-> [!WARNING] A private key is required due to internal request-response verification done in the game.
+> [!WARNING]
+> A private key is required due to internal request-response verification done in the game.
 
 #### Using provided private key
 

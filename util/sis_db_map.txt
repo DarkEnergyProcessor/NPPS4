@@ -1,0 +1,54 @@
+SELECT
+  unit_removable_skill_id as id,
+  coalesce(name_en, name) as name,
+  skill_type, level, size,
+  coalesce(description_en, description) as description,
+  effect_range, effect_type, effect_value,
+  fixed_value_flag as flat,
+  target_reference_type as tgt_ref,
+  target_type as tgt,
+  trigger_reference_type as tgr_ref,
+  trigger_type as tgr,
+  selling_price
+FROM 'unit_removable_skill_m'
+
+SIS calc:
+
+* fixed_value_flag
+  0 = Multiply
+  1 = Add
+
+* effect_type
+  1 = Smile
+  2 = Pure
+  3 = Cool
+  11 = Scorer boost
+  12 = Healer score boost
+  13 = Perfect timing score boost (Smile)
+  14 = Perfect timing score boost (Pure)
+  15 = Perfect timing score boost (Cool)
+
+* effect_range
+  1 = Current unit
+  2 = All units
+
+* target_reference_type
+  0 = None (any member)
+  1 = Member year
+  * target_type
+    1 = 1st Year
+    2 = 2nd Year
+    3 = 3rd Year
+  2 = Single member (target_type = unit_type_id in unit_type_m)
+  3 = Member skill
+  * target_type
+    1 = Smile
+    2 = Pure
+    3 = Cool
+
+* trigger_reference_type
+  0 = None (any?)
+  4 = Require full idol in team
+  * trigger_type
+    4 = Myus
+    5 = Aqua
