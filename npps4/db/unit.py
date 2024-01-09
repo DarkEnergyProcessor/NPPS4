@@ -591,6 +591,54 @@ class LeaderSkill(common.GameDBBase, common.MaybeEncrypted):
     name_string_key: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
 
 
+class ExtraLeaderSkill(common.GameDBBase):
+    """```sql
+    CREATE TABLE `unit_leader_skill_extra_m` (
+        `unit_leader_skill_id` INTEGER NOT NULL,
+        `member_tag_id` INTEGER NOT NULL,
+        `leader_skill_effect_type` INTEGER NOT NULL,
+        `effect_value` INTEGER NOT NULL,
+        PRIMARY KEY (`unit_leader_skill_id`)
+    )
+    ```"""
+
+    __tablename__ = "unit_leader_skill_extra_m"
+    unit_leader_skill_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    member_tag_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    leader_skill_effect_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    effect_value: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+
+
+class LevelLimitPattern(common.GameDBBase):
+    """```sql
+    CREATE TABLE `unit_level_limit_pattern_m` (
+        `unit_level_limit_id` INTEGER NOT NULL,
+        `unit_level` INTEGER NOT NULL,
+        `next_exp` INTEGER NOT NULL,
+        `hp_diff` INTEGER NOT NULL,
+        `smile_diff` INTEGER NOT NULL,
+        `pure_diff` INTEGER NOT NULL,
+        `cool_diff` INTEGER NOT NULL,
+        `merge_exp` INTEGER NOT NULL,
+        `merge_cost` INTEGER NOT NULL,
+        `sale_price` INTEGER NOT NULL,
+        PRIMARY KEY (`unit_level_limit_id`,`unit_level`)
+    )
+    ```"""
+
+    __tablename__ = "unit_level_limit_m"
+    unit_level_limit_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    unit_level: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    next_exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    hp_diff: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    smile_diff: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    pure_diff: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    cool_diff: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    merge_exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    merge_cost: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    sale_price: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+
+
 engine = sqlalchemy.ext.asyncio.create_async_engine(
     f"sqlite+aiosqlite:///file:{download.get_db_path('unit')}?mode=ro&uri=true",
 )

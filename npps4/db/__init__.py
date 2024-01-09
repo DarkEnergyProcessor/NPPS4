@@ -9,10 +9,10 @@ import sqlalchemy.ext.asyncio
 
 from typing import TypeVar, Any
 
-_T = TypeVar("_T", bound=common.GameDBBase)
+_T = TypeVar("_T", bound=common.MaybeEncrypted)
 
 
-async def decrypt_row(session: sqlalchemy.ext.asyncio.AsyncSession, cls: type[_T], id: int) -> _T | None:
+async def get_decrypted_row(session: sqlalchemy.ext.asyncio.AsyncSession, cls: type[_T], id: int) -> _T | None:
     obj = await session.get(cls, id)
 
     if isinstance(obj, common.MaybeEncrypted) and obj._encryption_release_id is not None:

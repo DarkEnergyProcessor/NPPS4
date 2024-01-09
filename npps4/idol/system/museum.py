@@ -34,10 +34,18 @@ async def unlock(context: idol.BasicSchoolIdolContext, user: main.User, museum_c
     return True
 
 
+TEST_MUSEUM_UNLOCK_ALL = False
+
+
 async def get_museum_info_data(context: idol.BasicSchoolIdolContext, user: main.User):
-    q = sqlalchemy.select(main.MuseumUnlock).where(main.MuseumUnlock.user_id == user.id)
-    result = await context.db.main.execute(q)
-    contents_id_list = [mu.museum_contents_id for mu in result.scalars()]
+    if TEST_MUSEUM_UNLOCK_ALL:
+        q = sqlalchemy.select(museum.MuseumContents)
+        result = await context.db.museum.execute(q)
+        contents_id_list = [mu.museum_contents_id for mu in result.scalars()]
+    else:
+        q = sqlalchemy.select(main.MuseumUnlock).where(main.MuseumUnlock.user_id == user.id)
+        result = await context.db.main.execute(q)
+        contents_id_list = [mu.museum_contents_id for mu in result.scalars()]
 
     parameter = MuseumParameterData()
     q = sqlalchemy.select(museum.MuseumContents).where(museum.MuseumContents.museum_contents_id.in_(contents_id_list))

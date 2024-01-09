@@ -1,4 +1,6 @@
 import dataclasses
+import math
+import operator
 import queue
 
 import pydantic
@@ -6,8 +8,10 @@ import sqlalchemy
 
 from . import achievement
 from . import album
+from ... import db
 from ... import idol
 from ... import idoltype
+from ... import leader_skill
 from ... import util
 from ...db import main
 from ...db import unit
@@ -94,7 +98,10 @@ async def add_unit(context: idol.BasicSchoolIdolContext, user: main.User, unit_i
 
 
 async def get_unit(context: idol.BasicSchoolIdolContext, unit_owning_user_id: int):
-    return await context.db.main.get(main.Unit, unit_owning_user_id)
+    result = await context.db.main.get(main.Unit, unit_owning_user_id)
+    if result is None:
+        raise ValueError("invalid unit_owning_user_id")
+    return result
 
 
 async def get_supporter_unit(context: idol.SchoolIdolParams, user: main.User, unit_id: int, ensure: bool = False):
@@ -162,11 +169,11 @@ async def get_all_supporter_unit(context: idol.SchoolIdolParams, user: main.User
 
 
 def get_unit_info(context: idol.BasicSchoolIdolContext, unit_id: int):
-    return context.db.unit.get(unit.Unit, unit_id)
+    return db.get_decrypted_row(context.db.unit, unit.Unit, unit_id)
 
 
-def get_unit_rarity(context: idol.BasicSchoolIdolContext, unit_data: unit.Unit):
-    return context.db.unit.get(unit.Rarity, unit_data.rarity)
+def get_unit_rarity(context: idol.BasicSchoolIdolContext, rarity: int):
+    return context.db.unit.get(unit.Rarity, rarity)
 
 
 async def get_unit_level_up_pattern(context: idol.BasicSchoolIdolContext, unit_data: unit.Unit):
@@ -177,11 +184,17 @@ async def get_unit_level_up_pattern(context: idol.BasicSchoolIdolContext, unit_d
     return list(result.scalars())
 
 
+async def get_unit_level_limit_pattern(context: idol.BasicSchoolIdolContext, level_limit_id: int):
+    q = sqlalchemy.select(unit.LevelLimitPattern).where(unit.LevelLimitPattern.unit_level_limit_id == level_limit_id)
+    result = await context.db.unit.execute(q)
+    return list(result.scalars())
+
+
 async def get_unit_skill(context: idol.BasicSchoolIdolContext, unit_data: unit.Unit):
     if unit_data.default_unit_skill_id is None:
         return None
 
-    return await context.db.unit.get(unit.UnitSkill, unit_data.default_unit_skill_id)
+    return await db.get_decrypted_row(context.db.unit, unit.UnitSkill, unit_data.default_unit_skill_id)
 
 
 async def get_unit_skill_level_up_pattern(context: idol.BasicSchoolIdolContext, unit_skill: unit.UnitSkill | None):
@@ -303,7 +316,7 @@ async def idolize(context: idol.BasicSchoolIdolContext, user: main.User, unit_da
     if unit_info is None:
         raise ValueError("unit info not found")
 
-    rarity = await get_unit_rarity(context, unit_info)
+    rarity = await get_unit_rarity(context, unit_info.rarity)
     if rarity is None:
         raise ValueError("unit rarity not found")
 
@@ -337,7 +350,7 @@ async def add_love_by_deck(context: idol.BasicSchoolIdolContext, user: main.User
         [await get_unit_info(context, u.unit_id) for u in units], ValueError, "unit info retrieval error"
     )
     unit_rarities = util.ensure_no_none(
-        [await get_unit_rarity(context, u) for u in unit_infos], ValueError, "unit rarity retrieval error"
+        [await get_unit_rarity(context, u.rarity) for u in unit_infos], ValueError, "unit rarity retrieval error"
     )
     max_loves = [
         ur.after_love_max if ud.rank == ui.rank_max else ur.before_love_max
@@ -385,7 +398,9 @@ class UnitStatsResult:
     next_exp: int
 
 
-def calculate_unit_stats(unit_data: unit.Unit, pattern: list[unit.UnitLevelUpPattern], exp: int):
+def calculate_unit_stats(
+    unit_data: unit.Unit, pattern: list[unit.UnitLevelUpPattern] | list[unit.LevelLimitPattern], exp: int
+):
     last = pattern[-1]
     result = UnitStatsResult(
         level=last.unit_level,
@@ -423,18 +438,35 @@ def calculate_unit_skill_stats(
     return (last.skill_level, 0)
 
 
+async def get_unit_stats_from_unit_data(
+    context: idol.BasicSchoolIdolContext, unit_data: main.Unit, unit_info: unit.Unit, unit_rarity: unit.Rarity
+):
+    levelup_pattern = await get_unit_level_up_pattern(context, unit_info)
+    stats = calculate_unit_stats(unit_info, levelup_pattern, unit_data.exp)
+
+    if (
+        unit_data.level_limit_id > 0
+        and stats.level >= unit_rarity.after_level_max
+        and unit_data.max_level > unit_rarity.after_level_max
+    ):
+        # Use level_limit pattern
+        levelup_pattern = await get_unit_level_limit_pattern(context, unit_data.level_limit_id)
+        stats = calculate_unit_stats(unit_info, levelup_pattern, unit_data.exp)
+
+    return stats
+
+
 async def get_unit_data_full_info(context: idol.BasicSchoolIdolContext, unit_data: main.Unit):
     unit_info = await get_unit_info(context, unit_data.unit_id)
     if unit_info is None:
         raise ValueError("unit_info is none")
 
     # Calculate unit level
-    unit_rarity = await get_unit_rarity(context, unit_info)
+    unit_rarity = await get_unit_rarity(context, unit_info.rarity)
     if unit_rarity is None:
         raise RuntimeError("unit_rarity is none")
 
-    levelup_pattern = await get_unit_level_up_pattern(context, unit_info)
-    stats = calculate_unit_stats(unit_info, levelup_pattern, unit_data.exp)
+    stats = await get_unit_stats_from_unit_data(context, unit_data, unit_info, unit_rarity)
 
     # Calculate unit skill level
     skill = await get_unit_skill(context, unit_info)
@@ -478,3 +510,33 @@ async def get_unit_data_full_info(context: idol.BasicSchoolIdolContext, unit_dat
         ),
         stats,
     )
+
+
+def calculate_bonus_stat_of_removable_skill(removable_skill: unit.RemovableSkill, stats: tuple[int, int, int]):
+    result: list[int] = [0, 0, 0]
+
+    if removable_skill.effect_type in range(1, 4):
+        # We only care about smile/pure/cool for now
+        i = removable_skill.effect_type - 1
+        if removable_skill.fixed_value_flag:
+            result[i] = math.ceil(removable_skill.effect_value)
+        else:
+            result[i] = math.ceil(stats[i] * removable_skill.effect_value / 100.0)
+
+    return result[0], result[1], result[2]
+
+
+async def unit_type_has_tag(context: idol.BasicSchoolIdolContext, unit_type_id: int, member_tag_id: int):
+    q = sqlalchemy.select(unit.UnitTypeMemberTag).where(
+        unit.UnitTypeMemberTag.unit_type_id == unit_type_id, unit.UnitTypeMemberTag.member_tag_id == member_tag_id
+    )
+    result = await context.db.unit.execute(q)
+    return result.scalar() is not None
+
+
+def get_leader_skill(context: idol.BasicSchoolIdolContext, leader_skill: int):
+    return db.get_decrypted_row(context.db.unit, unit.LeaderSkill, leader_skill)
+
+
+def get_extra_leader_skill(context: idol.BasicSchoolIdolContext, leader_skill: int):
+    return context.db.unit.get(unit.ExtraLeaderSkill, leader_skill)

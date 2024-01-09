@@ -5,9 +5,8 @@ import pydantic
 from . import item
 from . import unit
 from ... import idol
-from ... import util
+from ... import leader_skill
 from ...const import ADD_TYPE
-from ...idol.system import achievement
 from ...idol.system import background
 from ...idol.system import museum
 from ...idol.system import scenario
@@ -183,3 +182,156 @@ async def get_user_guest_party_info(context: idol.BasicSchoolIdolContext, user: 
         available_social_point=5,
         friend_status=0,
     )
+
+
+class TeamStatCalculator:
+    def __init__(self, context: idol.BasicSchoolIdolContext):
+        self.context = context
+        self.cached_unit_info: dict[int, unit.unit.Unit] = {}
+        self.cached_unit_rarity: dict[int, unit.unit.Rarity] = {}
+        self.cached_unit_leader_skill: dict[int, unit.unit.LeaderSkill] = {}
+        self.cached_extra_unit_leader_skill: dict[int, unit.unit.ExtraLeaderSkill | None] = {}
+        self.cached_unit_tags: dict[tuple[int, int], bool] = {}
+
+    async def get_live_stats(
+        self, player_units: list[main.Unit], guest: main.Unit, museum_param: museum.MuseumParameterData
+    ):
+        # A few references:
+        # https://github.com/NonSpicyBurrito/sif-team-simulator/blob/2b018170b509f93c0bff4f8f56e6cebd07c7f7fc/src/core/stats.ts
+        # https://web.archive.org/web/20181212085822/http://decaf.kouhi.me/lovelive/index.php?title=Scoring
+        # Note that the rest are trial-and-error, but it's assured that this method is exactly same as in calculated
+        # score by the client.
+        unit_infos: list[unit.unit.Unit] = []
+        base_stats: list[unit.UnitStatsResult] = []
+        love_stats: list[tuple[int, int, int]] = []
+        sis_stats: list[tuple[int, int, int]] = []
+        unit_types: list[int] = []
+        max_hp = 0
+
+        # Retrieve base stats
+        for unit_data in player_units:
+            unit_info = await self.get_unit_info(unit_data.unit_id)
+            unit_infos.append(unit_info)
+            unit_types.append(unit_info.unit_type_id)
+
+            unit_rarity = await self.get_unit_rarity(unit_info.rarity)
+            stats = await unit.get_unit_stats_from_unit_data(self.context, unit_data, unit_info, unit_rarity)
+            base_stats.append(stats)
+            max_hp = max_hp + stats.hp
+
+        # Apply bond stat
+        for i in range(9):
+            unit_info = unit_infos[i]
+            stats_info = base_stats[i]
+            smile = stats_info.smile + museum_param.smile
+            pure = stats_info.pure + museum_param.pure
+            cool = stats_info.cool + museum_param.cool
+            love = player_units[i].love
+            match unit_info.attribute_id:
+                case 1:
+                    smile = smile + love
+                case 2:
+                    pure = pure + love
+                case 3:
+                    cool = cool + love
+
+            love_stats.append((smile, pure, cool))
+
+        # TODO: Apply SIS stats
+        # TODO: Re-evaluate bond-SIS order with museum
+        for stats in love_stats:
+            sis_stats.append(stats)
+
+        # Calculate leader bonus
+        leader_stats = await self.calculate_leader_bonus(sis_stats, unit_types, player_units[4])
+        guest_stats = await self.calculate_leader_bonus(sis_stats, unit_types, guest)
+
+        smile = 0
+        pure = 0
+        cool = 0
+
+        for i in range(9):
+            smile = smile + sis_stats[i][0] + leader_stats[i][0] + guest_stats[i][0]
+            pure = pure + sis_stats[i][1] + leader_stats[i][1] + guest_stats[i][1]
+            cool = cool + sis_stats[i][2] + leader_stats[i][2] + guest_stats[i][2]
+
+        return smile, pure, cool, max_hp
+
+    async def calculate_leader_bonus(
+        self, stats: list[tuple[int, int, int]], unit_type_ids: list[int], leader_unit: main.Unit
+    ):
+        if len(stats) != len(unit_type_ids):
+            raise ValueError("stats and unit_type_ids are different")
+        result: list[tuple[int, int, int]] = [(0, 0, 0)] * len(stats)
+        center = await self.get_unit_info(leader_unit.unit_id)
+
+        if center.default_leader_skill_id:
+            leader_skill_data = await self.get_unit_leader_skill(center.default_leader_skill_id)
+
+            # Apply leader skill
+            for i in range(len(stats)):
+                result[i] = leader_skill.calculate_bonus(
+                    leader_skill_data.leader_skill_effect_type, leader_skill_data.effect_value, *stats[i]
+                )
+
+            extra_leader_skill = await self.get_unit_extra_leader_skill(center.default_leader_skill_id)
+            if extra_leader_skill is not None:
+                # Apply extra leader skill
+                for i in range(len(stats)):
+                    if await self.has_member_tag(unit_type_ids[i], extra_leader_skill.member_tag_id):
+                        bonus_stats = leader_skill.calculate_bonus(
+                            extra_leader_skill.leader_skill_effect_type, extra_leader_skill.effect_value, *stats[i]
+                        )
+                    else:
+                        bonus_stats = (0, 0, 0)
+
+                    old_stats = result[i]
+                    result[i] = (
+                        old_stats[0] + bonus_stats[0],
+                        old_stats[1] + bonus_stats[1],
+                        old_stats[2] + bonus_stats[2],
+                    )
+
+        return result
+
+    async def get_unit_info(self, unit_id: int):
+        unit_info = self.cached_unit_info.get(unit_id)
+        if unit_info is None:
+            unit_info = await unit.get_unit_info(self.context, unit_id)
+            if unit_info is None:
+                raise ValueError("invalid unit_id (info is None)")
+            self.cached_unit_info[unit_id] = unit_info
+        return unit_info
+
+    async def get_unit_rarity(self, rarity: int):
+        unit_rarity = self.cached_unit_rarity.get(rarity)
+        if unit_rarity is None:
+            unit_rarity = await unit.get_unit_rarity(self.context, rarity)
+            if unit_rarity is None:
+                raise ValueError("invalid rarity (unit_rarity is None)")
+            self.cached_unit_rarity[rarity] = unit_rarity
+        return unit_rarity
+
+    async def get_unit_leader_skill(self, leader_skill: int):
+        unit_leader_skill = self.cached_unit_leader_skill.get(leader_skill)
+        if unit_leader_skill is None:
+            unit_leader_skill = await unit.get_leader_skill(self.context, leader_skill)
+            if unit_leader_skill is None:
+                raise ValueError("invalid leader_skill (unit_leader_skill is None)")
+            self.cached_unit_leader_skill[leader_skill] = unit_leader_skill
+        return unit_leader_skill
+
+    async def get_unit_extra_leader_skill(self, leader_skill: int):
+        if leader_skill not in self.cached_extra_unit_leader_skill:
+            self.cached_extra_unit_leader_skill[leader_skill] = await unit.get_extra_leader_skill(
+                self.context, leader_skill
+            )
+        return self.cached_extra_unit_leader_skill[leader_skill]
+
+    async def has_member_tag(self, unit_type_id: int, member_tag_id: int):
+        result = self.cached_unit_tags.get((unit_type_id, member_tag_id))
+        if result is None:
+            result = await unit.unit_type_has_tag(self.context, unit_type_id, member_tag_id)
+            self.cached_unit_tags[(unit_type_id, member_tag_id)] = result
+
+        return result

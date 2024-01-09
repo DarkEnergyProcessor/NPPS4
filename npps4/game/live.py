@@ -6,6 +6,8 @@ from .. import idol
 from .. import util
 from ..idol.system import advanced
 from ..idol.system import live
+from ..idol.system import museum
+from ..idol.system import unit
 from ..idol.system import user
 
 
@@ -161,9 +163,29 @@ async def live_partylist(context: idol.SchoolIdolUserParams, request: LivePartyL
     current_user = await user.get_current(context)
     util.stub("live", "partyList", request)
     # TODO: Check LP
+    # DEBUG: Dump stats calculation
+
+    party_list = [await advanced.get_user_guest_party_info(context, current_user)]
+    _, current_deck = await unit.load_unit_deck(context, current_user, current_user.active_deck_index, True)
+    deck_units = [await unit.get_unit(context, i) for i in current_deck]
+
+    calculator = advanced.TeamStatCalculator(context)
+    museum_data = await museum.get_museum_info_data(context, current_user)
+    for party in party_list:
+        guest = await unit.get_unit(context, party.center_unit_info.unit_owning_user_id)
+        stats = await calculator.get_live_stats(deck_units, guest, museum_data.parameter)
+        util.log(
+            "stats calculator of",
+            current_deck,
+            "with guest",
+            party.center_unit_info.unit_owning_user_id,
+            "is",
+            stats,
+        )
+
     return LivePartyListResponse(
         # TODO
-        party_list=[await advanced.get_user_guest_party_info(context, current_user)],
+        party_list=party_list,
         training_energy=current_user.training_energy,
         training_energy_max=current_user.training_energy_max,
     )
