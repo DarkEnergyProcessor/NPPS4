@@ -1,5 +1,6 @@
 from .. import idol
 from .. import util
+from ..config import config
 from ..idol.system import unit
 from ..idol.system import user
 
@@ -41,6 +42,16 @@ class UnitDeckInfoResponse(pydantic.BaseModel):
 class UnitAllInfoResponse(pydantic.BaseModel):
     active: list[unit.UnitInfoData]
     waiting: list[unit.UnitInfoData]
+
+
+class UnitSetDisplayRankRequest(pydantic.BaseModel):
+    unit_owning_user_id: int
+    display_rank: int
+
+
+class UnitDeckNameRequest(pydantic.BaseModel):
+    unit_deck_id: int
+    deck_name: str
 
 
 @idol.register("unit", "accessoryAll")
@@ -104,3 +115,32 @@ async def unit_unitall(context: idol.SchoolIdolUserParams) -> UnitAllInfoRespons
         unit_result[unit_data.active].append(unit_serialized_data)
 
     return UnitAllInfoResponse(active=unit_result[True], waiting=unit_result[False])
+
+
+@idol.register("unit", "setDisplayRank")
+async def unit_setdisplayrank(
+    context: idol.SchoolIdolUserParams, request: UnitSetDisplayRankRequest
+) -> idol.core.DummyModel:
+    current_user = await user.get_current(context)
+    target_unit = await unit.get_unit(context, request.unit_owning_user_id)
+    if target_unit is None or target_unit.user_id != current_user.id:
+        raise idol.error.IdolError(detail="Invalid target unit")
+
+    target_unit.display_rank = request.display_rank
+    return idol.core.DummyModel()
+
+
+@idol.register("unit", "deckName")
+async def unit_deckname(context: idol.SchoolIdolUserParams, request: UnitDeckNameRequest) -> idol.core.DummyModel:
+    current_user = await user.get_current(context)
+    deck_data = await unit.load_unit_deck(context, current_user, request.unit_deck_id)
+    if deck_data is None:
+        raise idol.error.IdolError(detail="Invalid target deck")
+
+    if request.deck_name.isspace():
+        raise idol.error.IdolError(idol.error.ERROR_CODE_ONLY_WHITESPACE_CHARACTERS, 600)
+    if await config.contains_badwords(request.deck_name, context):
+        raise idol.error.IdolError(idol.error.ERROR_CODE_NG_WORDS, 600)
+
+    deck_data[0].name = request.deck_name
+    return idol.core.DummyModel()
