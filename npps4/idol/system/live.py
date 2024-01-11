@@ -111,8 +111,8 @@ async def get_live_info(context: idol.BasicSchoolIdolContext, live_difficulty_id
                 effect=l.effect,
                 effect_value=l.effect_value,
                 position=l.position,
-                # speed=l.speed,
-                # vanish=l.vanish,
+                speed=l.speed,
+                vanish=l.vanish,
             )
             for l in beatmap_data
         ],

@@ -219,7 +219,7 @@ async def live_play(context: idol.SchoolIdolUserParams, request: LivePlayRequest
         request.unit_deck_id, deck_units, await unit.get_unit(context, guest_center.unit_id), museum_data.parameter
     )
 
-    result = LivePlayResponse(
+    return LivePlayResponse(
         rank_info=[
             LivePlayRankInfo(rank=5, rank_min=0, rank_max=live_setting.c_rank_score - 1),
             LivePlayRankInfo(rank=4, rank_min=live_setting.c_rank_score, rank_max=live_setting.b_rank_score - 1),
@@ -232,11 +232,6 @@ async def live_play(context: idol.SchoolIdolUserParams, request: LivePlayRequest
         # TODO: Medley Festival
         live_list=[LivePlayList(live_info=beatmap_data, deck_info=stats)],
     )
-    temp = result.live_list[0].live_info.notes_list
-    result.live_list[0].live_info.notes_list = []
-    util.log("dump live/play", result.model_dump_json())
-    result.live_list[0].live_info.notes_list = temp
-    return result
 
 
 @idol.register("/live/gameover")
