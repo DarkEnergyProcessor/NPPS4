@@ -22,14 +22,14 @@ class FriendSearchRequest(pydantic.BaseModel):
     invite_code: str
 
 
-@idol.register("/friend/list")
+@idol.register("friend", "list")
 async def friend_list(context: idol.SchoolIdolUserParams, request: FriendListRequest) -> FriendListResponse:
     # TODO
     util.stub("friend", "list", request)
     return FriendListResponse(item_count=0, friend_list=[], new_friend_list=[])
 
 
-@idol.register("/friend/search")
+@idol.register("friend", "search")
 async def friend_search(context: idol.SchoolIdolUserParams, request: FriendSearchRequest) -> idol.core.DummyModel:
     # TODO
     util.stub("friend", "search", request)

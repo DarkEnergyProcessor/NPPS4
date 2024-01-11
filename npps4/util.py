@@ -17,7 +17,7 @@ import itsdangerous.serializer
 
 from .config import config
 
-from typing import TypeVar, cast
+from typing import Any, TypeVar, cast
 
 SYSRAND = random.SystemRandom()
 
@@ -111,7 +111,7 @@ def log(*args: object, severity: int = logging.DEBUG, e: Exception | None = None
     NPPS4_LOGGER.log(severity, " ".join(map(str, args)), exc_info=e)
 
 
-def stub(module: str, action: str, request=None, /):
+def stub(module: str, action: str, request: Any = None, /):
     if request:
         log(f"STUB /{module}/{action} {repr(request)}", severity=logging.WARNING)
     else:

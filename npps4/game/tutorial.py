@@ -10,7 +10,7 @@ class TutorialProgressRequest(pydantic.BaseModel):
     tutorial_state: int
 
 
-@idol.register("/tutorial/progress", batchable=False)
+@idol.register("tutorial", "progress", batchable=False)
 async def tutorial_progress(
     context: idol.SchoolIdolUserParams, request: TutorialProgressRequest
 ) -> idol.core.DummyModel:
@@ -34,7 +34,7 @@ async def tutorial_progress(
     raise error.IdolError(detail=f"Unknown state, u {current_user.tutorial_state} r {request.tutorial_state}")
 
 
-@idol.register("/tutorial/skip", batchable=False)
+@idol.register("tutorial", "skip", batchable=False)
 async def tutorial_skip(context: idol.SchoolIdolUserParams) -> idol.core.DummyModel:
     current_user = await user.get_current(context)
     if current_user.tutorial_state == -1:

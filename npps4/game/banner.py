@@ -22,10 +22,10 @@ class BannerListResponse(pydantic.BaseModel):
     banner_list: list[BannerInfo]
 
 
-@idol.register("/banner/bannerList", exclude_none=True)
+@idol.register("banner", "bannerList", exclude_none=True)
 async def banner_bannerlist(context: idol.SchoolIdolUserParams) -> BannerListResponse:
     # TODO
-    util.log("STUB /banner/bannerList", severity=util.logging.WARNING)
+    util.stub("banner", "bannerList", context.raw_request_data)
     url = context.request.url
     hostname = url.hostname or ""
     port = url.port or (443 if url.scheme.lower() == "https" else 80)

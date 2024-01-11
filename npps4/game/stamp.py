@@ -303,8 +303,8 @@ STUB_DATA = {
 }
 
 
-@idol.register("/stamp/stampInfo")
+@idol.register("stamp", "stampInfo")
 async def stamp_stampinfo(context: idol.SchoolIdolUserParams) -> StampInfoResponse:
     # TODO
-    util.log("STUB /stamp/stampInfo", severity=util.logging.WARNING)
+    util.stub("stamp", "stampInfo", context.raw_request_data)
     return StampInfoResponse.model_validate(STUB_DATA)

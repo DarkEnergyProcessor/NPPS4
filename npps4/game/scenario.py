@@ -24,7 +24,7 @@ class ScenarioStartupResponse(pydantic.BaseModel):
     scenario_adjustment: int = 50  # TODO where to get this value
 
 
-@idol.register("/scenario/scenarioStatus")
+@idol.register("scenario", "scenarioStatus")
 async def scenario_scenariostatus(context: idol.SchoolIdolUserParams) -> ScenarioStatusResponse:
     current_user = await user.get_current(context)
     scenarios = await scenario.get_all(context, current_user)
@@ -33,7 +33,7 @@ async def scenario_scenariostatus(context: idol.SchoolIdolUserParams) -> Scenari
     )
 
 
-@idol.register("/scenario/startup")
+@idol.register("scenario", "startup")
 async def scenario_startup(
     context: idol.SchoolIdolUserParams, request: ScenarioStartupRequest
 ) -> ScenarioStartupResponse:

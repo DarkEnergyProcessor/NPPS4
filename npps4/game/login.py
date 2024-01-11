@@ -125,7 +125,7 @@ class StarterUnitSelectResponse(pydantic.BaseModel):
     unit_id: list[int]
 
 
-@idol.register("/login/login", check_version=False, batchable=False)
+@idol.register("login", "login", check_version=False, batchable=False)
 async def login_login(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> LoginResponse:
     """Login user"""
 
@@ -149,7 +149,7 @@ async def login_login(context: idol.SchoolIdolAuthParams, request: LoginRequest)
     return LoginResponse(authorize_token=token, user_id=u.id, server_timestamp=util.time())
 
 
-@idol.register("/login/authkey", check_version=False, batchable=False, xmc_verify=idol.XMCVerifyMode.NONE)
+@idol.register("login", "authkey", check_version=False, batchable=False, xmc_verify=idol.XMCVerifyMode.NONE)
 async def login_authkey(context: idol.SchoolIdolParams, request: AuthkeyRequest) -> AuthkeyResponse:
     """Generate authentication key."""
 
@@ -174,7 +174,7 @@ async def login_authkey(context: idol.SchoolIdolParams, request: AuthkeyRequest)
     )
 
 
-@idol.register("/login/startUp", check_version=False, batchable=False)
+@idol.register("login", "startUp", check_version=False, batchable=False)
 async def login_startup(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> StartupResponse:
     """Register new account."""
     key = util.xorbytes(context.token.client_key[:16], context.token.server_key[:16])
@@ -191,10 +191,10 @@ async def login_startup(context: idol.SchoolIdolAuthParams, request: LoginReques
     return StartupResponse(user_id=str(u.id))
 
 
-@idol.register("/login/topInfo")
+@idol.register("login", "topInfo")
 async def login_topinfo(context: idol.SchoolIdolUserParams) -> TopInfoResponse:
     # TODO
-    util.log("STUB /login/topInfo", severity=util.logging.WARNING)
+    util.stub("login", "topInfo", context.raw_request_data)
     return TopInfoResponse(
         friend_action_cnt=0,
         friend_greet_cnt=0,
@@ -220,11 +220,11 @@ async def login_topinfo(context: idol.SchoolIdolUserParams) -> TopInfoResponse:
     )
 
 
-@idol.register("/login/topInfoOnce")
+@idol.register("login", "topInfoOnce")
 async def login_topinfoonce(context: idol.SchoolIdolUserParams) -> TopInfoOnceResponse:
     current_user = await user.get_current(context)
     # TODO
-    util.log("STUB /login/topInfoOnce", severity=util.logging.WARNING)
+    util.stub("login", "topInfoOnce", context.raw_request_data)
     return TopInfoOnceResponse(
         new_achievement_cnt=0,
         unaccomplished_achievement_cnt=0,
@@ -269,7 +269,7 @@ def _generate_deck_list(unit_id: int):
     return template_copy
 
 
-@idol.register("/login/unitList")
+@idol.register("login", "unitList")
 async def login_unitlist(context: idol.SchoolIdolUserParams) -> StarterUnitListResponse:
     return StarterUnitListResponse(
         member_category_list=[
@@ -292,7 +292,7 @@ async def login_unitlist(context: idol.SchoolIdolUserParams) -> StarterUnitListR
     )
 
 
-@idol.register("/login/unitSelect")
+@idol.register("login", "unitSelect")
 async def login_unitselect(
     context: idol.SchoolIdolUserParams, request: StarterUnitSelectRequest
 ) -> StarterUnitSelectResponse:

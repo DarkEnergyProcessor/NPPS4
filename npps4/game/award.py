@@ -21,7 +21,7 @@ class AwardSetRequest(pydantic.BaseModel):
     award_id: int
 
 
-@idol.register("/award/awardInfo")
+@idol.register("award", "awardInfo")
 async def award_awardinfo(context: idol.SchoolIdolUserParams) -> AwardInfoResponse:
     current_user = await user.get_current(context)
     awards = await award.get_awards(context, current_user)
@@ -37,7 +37,7 @@ async def award_awardinfo(context: idol.SchoolIdolUserParams) -> AwardInfoRespon
     return AwardInfoResponse(award_info=award_info)
 
 
-@idol.register("/award/set")
+@idol.register("award", "set")
 async def award_set(context: idol.SchoolIdolUserParams, request: AwardSetRequest) -> idol.core.DummyModel:
     current_user = await user.get_current(context)
     if await award.has_award(context, current_user, request.award_id):

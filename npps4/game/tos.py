@@ -18,14 +18,14 @@ class TOSAgreeRequest(pydantic.BaseModel):
     tos_id: int
 
 
-@idol.register("/tos/tosCheck")
+@idol.register("tos", "tosCheck")
 async def tos_toscheck(context: idol.SchoolIdolUserParams) -> TOSCheckResponse:
     current_user = await user.get_current(context)
     agree = await tos.is_agreed(context, current_user)
     return TOSCheckResponse(tos_id=1, tos_type=1, is_agreed=agree, server_timestamp=util.time())
 
 
-@idol.register("/tos/tosAgree", batchable=False)
+@idol.register("tos", "tosAgree", batchable=False)
 async def tos_tosagree(context: idol.SchoolIdolUserParams, request: TOSAgreeRequest) -> idol.core.DummyModel:
     if request.tos_id == 1:
         current_user = await user.get_current(context)

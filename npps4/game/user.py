@@ -43,7 +43,7 @@ class UserNotificationTokenRequest(pydantic.BaseModel):
     notification_token: str
 
 
-@idol.register("/user/changeName", batchable=False)
+@idol.register("user", "changeName", batchable=False)
 async def user_changename(context: idol.SchoolIdolUserParams, request: ChangeNameRequest) -> ChangeNameResponse:
     if request.name.isspace():
         raise error.IdolError(error.ERROR_CODE_ONLY_WHITESPACE_CHARACTERS, 600)
@@ -56,7 +56,7 @@ async def user_changename(context: idol.SchoolIdolUserParams, request: ChangeNam
     return ChangeNameResponse(before_name=oldname, after_name=request.name)
 
 
-@idol.register("/user/getNavi")
+@idol.register("user", "getNavi")
 async def user_getnavi(context: idol.SchoolIdolUserParams) -> UserGetNaviResponse:
     current_user = await user.get_current(context)
     center = await unit.get_unit_center(context, current_user)
@@ -66,7 +66,7 @@ async def user_getnavi(context: idol.SchoolIdolUserParams) -> UserGetNaviRespons
     )
 
 
-@idol.register("/user/userInfo", exclude_none=True)
+@idol.register("user", "userInfo", exclude_none=True)
 async def user_userinfo(context: idol.SchoolIdolUserParams) -> UserInfoResponse:
     u = await user.get_current(context)
     if u is None:
@@ -78,8 +78,8 @@ async def user_userinfo(context: idol.SchoolIdolUserParams) -> UserInfoResponse:
     )
 
 
-@idol.register("/user/setNotificationToken", batchable=False)
+@idol.register("user", "setNotificationToken", batchable=False)
 async def user_setnotificationtoken(context: idol.SchoolIdolUserParams, request: UserNotificationTokenRequest):
     # TODO
-    util.log("STUB /user/setNotificationToken, token " + request.notification_token, severity=util.logging.WARNING)
+    util.stub("user", "setNotificationToken", request)
     return idol.core.DummyModel()

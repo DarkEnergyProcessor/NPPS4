@@ -9,8 +9,8 @@ class AnnounceStateResponse(pydantic.BaseModel):
     server_timestamp: int
 
 
-@idol.register("/announce/checkState")
+@idol.register("announce", "checkState")
 async def announce_checkstate(context: idol.SchoolIdolUserParams):
     # TODO
-    util.log("STUB /announce/checkState", severity=util.logging.WARNING)
+    util.stub("announce", "checkState", context.raw_request_data)
     return AnnounceStateResponse(has_unread_announce=False, server_timestamp=util.time())

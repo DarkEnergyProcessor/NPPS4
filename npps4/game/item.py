@@ -11,8 +11,8 @@ class ItemListResponse(pydantic.BaseModel):
     reinforce_info: list
 
 
-@idol.register("/item/list")
+@idol.register("item", "list")
 async def item_list(context: idol.SchoolIdolUserParams) -> ItemListResponse:
     # TODO
-    util.log("STUB /item/list", severity=util.logging.WARNING)
+    util.stub("item", "list", context.raw_request_data)
     return ItemListResponse(general_item_list=[], buff_item_list=[], reinforce_item_list=[], reinforce_info=[])

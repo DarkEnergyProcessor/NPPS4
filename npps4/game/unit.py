@@ -43,14 +43,14 @@ class UnitAllInfoResponse(pydantic.BaseModel):
     waiting: list[unit.UnitInfoData]
 
 
-@idol.register("/unit/accessoryAll")
+@idol.register("unit", "accessoryAll")
 async def unit_accessoryall(context: idol.SchoolIdolUserParams) -> UnitAccessoryInfoResponse:
     # TODO
-    util.log("STUB /unit/accessoryAll", severity=util.logging.WARNING)
+    util.stub("unit", "accessoryAll", context.raw_request_data)
     return UnitAccessoryInfoResponse(accessory_list=[], wearing_info=[], especial_create_flag=False)
 
 
-@idol.register("/unit/deckInfo")
+@idol.register("unit", "deckInfo")
 async def unit_deckinfo(context: idol.SchoolIdolUserParams) -> list[UnitDeckInfoResponse]:
     current_user = await user.get_current(context)
     result: list[UnitDeckInfoResponse] = []
@@ -75,14 +75,14 @@ async def unit_deckinfo(context: idol.SchoolIdolUserParams) -> list[UnitDeckInfo
     return result
 
 
-@idol.register("/unit/removableSkillInfo")
+@idol.register("unit", "removableSkillInfo")
 async def unit_removableskillinfo(context: idol.SchoolIdolUserParams) -> RemovableSkillInfoResponse:
     # TODO
-    util.log("STUB /unit/removableSkillInfo", severity=util.logging.WARNING)
+    util.stub("unit", "removableSkillInfo", context.raw_request_data)
     return RemovableSkillInfoResponse(owning_info=[], equipment_info=[])
 
 
-@idol.register("/unit/supporterAll")
+@idol.register("unit", "supporterAll")
 async def unit_supporterall(context: idol.SchoolIdolUserParams) -> SupporterListInfoResponse:
     current_user = await user.get_current(context)
     units = await unit.get_all_supporter_unit(context, current_user)
@@ -92,7 +92,7 @@ async def unit_supporterall(context: idol.SchoolIdolUserParams) -> SupporterList
     )
 
 
-@idol.register("/unit/unitAll")
+@idol.register("unit", "unitAll")
 async def unit_unitall(context: idol.SchoolIdolUserParams) -> UnitAllInfoResponse:
     current_user = await user.get_current(context)
     units = await unit.get_all_units(context, current_user)

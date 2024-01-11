@@ -398,7 +398,8 @@ RESPONSE_HEADERS = {
 
 
 def register(
-    endpoint: str,
+    module: str,
+    action: str,
     *,
     check_version: bool = True,
     batchable: bool = True,
@@ -406,27 +407,22 @@ def register(
     exclude_none: bool = False,
 ):
     def wrap0(f: _PossibleEndpointFunction[_T, _U, _V]):
-        nonlocal endpoint, check_version, batchable
+        nonlocal check_version, batchable
 
-        if endpoint[0] == "/":
-            module_action = endpoint[1:]
-        else:
-            module_action = endpoint
-        module_name = module_action.split("/")[0]
-
+        module_action = f"/{module}/{action}"
         signature = typing.get_type_hints(f)
         params = list(map(lambda x: x[1], filter(lambda x: x[0] != "return", signature.items())))
         ret: type[_V | pydantic.BaseModel] = signature.get("return", pydantic.BaseModel)
-        tags: list[str | enum.Enum] = [module_name]
+        tags: list[str | enum.Enum] = [module]
 
         if ret is pydantic.BaseModel:
-            util.log("Possible undefined return type for endpoint:", endpoint, severity=util.logging.WARNING)
+            util.log("Possible undefined return type for endpoint:", module_action, severity=util.logging.WARNING)
             ret = DummyModel
 
         if len(params) == 1:
 
             @app.main.post(
-                endpoint,
+                module_action,
                 name=f.__name__,
                 description=f.__doc__,
                 response_model=idoltype.ResponseData[ret],
@@ -434,7 +430,7 @@ def register(
                 tags=tags,
             )
             @app.main.get(
-                endpoint,
+                module_action,
                 name=f.__name__,
                 description=f.__doc__,
                 response_model=idoltype.ResponseData[ret],
@@ -458,10 +454,10 @@ def register(
             schema = model.model_json_schema()
 
             # Fix schema
-            defs, schema = _fix_schema("/main.php/" + module_action, schema)
+            defs, schema = _fix_schema("/main.php" + module_action, schema)
 
             @app.main.post(
-                endpoint,
+                module_action,
                 name=f.__name__,
                 description=f.__doc__,
                 response_model=idoltype.ResponseData[ret],
@@ -497,7 +493,7 @@ def register(
                 nonlocal ret, check_version, xmc_verify
                 response = await client_check(context, check_version, xmc_verify)
                 if config.log_request_response():
-                    util.log("DEBUG REQUEST", endpoint, str(context.raw_request_data, "UTF-8"))
+                    util.log("DEBUG REQUEST", module_action, str(context.raw_request_data, "UTF-8"))
                 if response is None:
                     try:
                         async with context:

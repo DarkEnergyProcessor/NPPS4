@@ -38,10 +38,10 @@ class ProductListResponse(pydantic.BaseModel):
     show_point_shop: bool
 
 
-@idol.register("/payment/productList")
+@idol.register("payment", "productList")
 async def payment_productlist(context: idol.SchoolIdolUserParams) -> ProductListResponse:
     # TODO
-    util.log("STUB /payment/productList", severity=util.logging.WARNING)
+    util.stub("payment", "productList", context.raw_request_data)
     return ProductListResponse(
         restriction_info=PaymentRestrictionInfo(restricted=False),
         under_age_info=PaymentUnderAgeInfo(birth_set=False, has_limit=False, limit_amount=None, month_used=0),

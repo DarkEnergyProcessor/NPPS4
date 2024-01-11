@@ -21,7 +21,7 @@ class BackgroundSetRequest(pydantic.BaseModel):
     background_id: int
 
 
-@idol.register("/background/backgroundInfo")
+@idol.register("background", "backgroundInfo")
 async def background_backgroundinfo(context: idol.SchoolIdolUserParams) -> BackgroundInfoResponse:
     current_user = await user.get_current(context)
     backgrounds = await background.get_backgrounds(context, current_user)
@@ -37,7 +37,7 @@ async def background_backgroundinfo(context: idol.SchoolIdolUserParams) -> Backg
     return BackgroundInfoResponse(background_info=background_info)
 
 
-@idol.register("/background/set")
+@idol.register("background", "set")
 async def background_set(context: idol.SchoolIdolUserParams, request: BackgroundSetRequest) -> idol.core.DummyModel:
     current_user = await user.get_current(context)
     if await background.has_background(context, current_user, request.background_id):

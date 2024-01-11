@@ -19,8 +19,8 @@ class NoticeMarqueeResponse(pydantic.BaseModel):
     marquee_list: list[NoticeMarquee]
 
 
-@idol.register("/notice/noticeMarquee")
+@idol.register("notice", "noticeMarquee")
 async def notice_noticemarquee(context: idol.SchoolIdolUserParams) -> NoticeMarqueeResponse:
     # TODO
-    util.log("STUB /notice/noticeMarquee", severity=util.logging.WARNING)
+    util.stub("notice", "noticeMarquee", context.raw_request_data)
     return NoticeMarqueeResponse(item_count=0, marquee_list=[])

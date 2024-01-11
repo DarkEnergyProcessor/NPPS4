@@ -66,7 +66,7 @@ class DownloadGetUrlResponse(pydantic.BaseModel):
     url_list: list[str]
 
 
-@idol.register("/download/update", check_version=False, batchable=False)
+@idol.register("download", "update", check_version=False, batchable=False)
 async def download_update(
     context: idol.SchoolIdolAuthParams, request: DownloadUpdateRequest
 ) -> list[DownloadUpdateResponse]:
@@ -97,7 +97,7 @@ async def download_update(
     return result
 
 
-@idol.register("/download/batch", check_version=False, batchable=False)
+@idol.register("download", "batch", check_version=False, batchable=False)
 async def download_batch(context: idol.SchoolIdolAuthParams, request: DownloadBatchRequest) -> list[DownloadResponse]:
     links = await download.get_batch_files(
         context.request, _TARGET_OS_REMAP[request.os.value], int(request.package_type), request.excluded_package_ids
@@ -105,13 +105,13 @@ async def download_batch(context: idol.SchoolIdolAuthParams, request: DownloadBa
     return [DownloadResponse(url=link.url, size=str(link.size)) for link in links]
 
 
-@idol.register("/download/event", check_version=False, batchable=False)
+@idol.register("download", "event", check_version=False, batchable=False)
 async def download_event(context: idol.SchoolIdolAuthParams, request: DownloadBatchRequest) -> list[DownloadResponse]:
     # TODO
     return []
 
 
-@idol.register("/download/additional", check_version=False, batchable=False)
+@idol.register("download", "additional", check_version=False, batchable=False)
 async def download_additional(
     context: idol.SchoolIdolAuthParams, request: DownloadAdditionalRequest
 ) -> list[DownloadResponse]:
@@ -123,7 +123,7 @@ async def download_additional(
     return [DownloadResponse(url=link.url, size=str(link.size)) for link in links]
 
 
-@idol.register("/download/getUrl", check_version=False, batchable=False)
+@idol.register("download", "getUrl", check_version=False, batchable=False)
 async def download_geturl(
     context: idol.SchoolIdolAuthParams, request: DownloadGetUrlRequest
 ) -> DownloadGetUrlResponse:

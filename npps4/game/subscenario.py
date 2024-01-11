@@ -25,7 +25,7 @@ class SubScenarioStartupResponse(pydantic.BaseModel):
     scenario_adjustment: int = 50  # TODO where to get this value
 
 
-@idol.register("/subscenario/subscenarioStatus")
+@idol.register("subscenario", "subscenarioStatus")
 async def subscenario_status(context: idol.SchoolIdolUserParams) -> SubScenarioStatusResponse:
     current_user = await user.get_current(context)
     subscenarios = await subscenario.get_all(context, current_user)
@@ -37,7 +37,7 @@ async def subscenario_status(context: idol.SchoolIdolUserParams) -> SubScenarioS
     )
 
 
-@idol.register("/subscenario/startup")
+@idol.register("subscenario", "startup")
 async def scenario_startup(
     context: idol.SchoolIdolUserParams, request: SubScenarioStartupRequest
 ) -> SubScenarioStartupResponse:

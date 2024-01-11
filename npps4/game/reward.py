@@ -85,24 +85,24 @@ class RewardHistoryResponse(pydantic.BaseModel):
     ad_info: ad.AdInfo
 
 
-@idol.register("/reward/rewardList")
+@idol.register("reward", "rewardList")
 async def reward_rewardlist(context: idol.SchoolIdolUserParams, request: RewardListRequest) -> RewardListResponse:
     # TODO
-    util.log(f"STUB /reward/rewardList {repr(request)}", severity=util.logging.WARNING)
+    util.stub("reward", "rewardList", request)
     return RewardListResponse(item_count=0, order=request.order, items=[], ad_info=ad.AdInfo())
 
 
-@idol.register("/reward/open")
+@idol.register("reward", "open")
 async def reward_open(context: idol.SchoolIdolUserParams, request: RewardOpenRequest):
     # TODO
-    util.log("STUB /reward/open", severity=util.logging.WARNING)
+    util.stub("reward", "open", context.raw_request_data)
     return idol.core.DummyModel()
 
 
-@idol.register("/reward/openAll")
+@idol.register("reward", "openAll")
 async def reward_openall(context: idol.SchoolIdolUserParams, request: RewardListRequest) -> RewardOpenAllResponse:
     # TODO
-    util.log("STUB /reward/openAll", severity=util.logging.WARNING)
+    util.stub("reward", "openAll", context.raw_request_data)
     current_user = await user.get_current(context)
     user_info = await user.get_user_info(context, current_user)
     return RewardOpenAllResponse(
@@ -122,7 +122,7 @@ async def reward_openall(context: idol.SchoolIdolUserParams, request: RewardList
     )
 
 
-@idol.register("/reward/rewardHistory")
+@idol.register("reward", "rewardHistory")
 async def reward_rewardhistory(
     context: idol.SchoolIdolUserParams, request: RewardHistoryRequest
 ) -> RewardHistoryResponse:

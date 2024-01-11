@@ -123,10 +123,10 @@ class LivePlayResponse(pydantic.BaseModel):
     server_timestamp: int = pydantic.Field(default_factory=util.time)
 
 
-@idol.register("/live/liveStatus")
+@idol.register("live", "liveStatus")
 async def live_livestatus(context: idol.SchoolIdolUserParams) -> LiveStatusResponse:
     # TODO
-    util.log("STUB /live/liveStatus", severity=util.logging.WARNING)
+    util.stub("live", "liveStatus", context.raw_request_data)
     return LiveStatusResponse(
         normal_live_status_list=[
             LiveStatus(
@@ -142,10 +142,10 @@ async def live_livestatus(context: idol.SchoolIdolUserParams) -> LiveStatusRespo
     )
 
 
-@idol.register("/live/schedule")
+@idol.register("live", "schedule")
 async def live_schedule(context: idol.SchoolIdolUserParams) -> LiveScheduleResponse:
     # TODO
-    util.log("STUB /live/schedule", severity=util.logging.WARNING)
+    util.stub("live", "schedule", context.raw_request_data)
     return LiveScheduleResponse(
         event_list=[],
         live_list=[],
@@ -164,7 +164,7 @@ async def live_schedule(context: idol.SchoolIdolUserParams) -> LiveScheduleRespo
     )
 
 
-@idol.register("/live/partyList")
+@idol.register("live", "partyList")
 async def live_partylist(context: idol.SchoolIdolUserParams, request: LivePartyListRequest):
     current_user = await user.get_current(context)
     util.stub("live", "partyList", request)
@@ -181,13 +181,13 @@ async def live_partylist(context: idol.SchoolIdolUserParams, request: LivePartyL
     )
 
 
-@idol.register("/live/preciseScore")
+@idol.register("live", "preciseScore")
 async def live_precisescore(context: idol.SchoolIdolUserParams) -> idol.core.DummyModel:
     util.stub("live", "preciseScore", context.raw_request_data)
     raise idol.error.IdolError(idol.error.ERROR_CODE_LIVE_PRECISE_LIST_NOT_FOUND, 600)
 
 
-@idol.register("/live/play", xmc_verify=idol.XMCVerifyMode.CROSS)
+@idol.register("live", "play", xmc_verify=idol.XMCVerifyMode.CROSS)
 async def live_play(context: idol.SchoolIdolUserParams, request: LivePlayRequest) -> LivePlayResponse:
     current_user = await user.get_current(context)
     live_setting = await live.get_live_setting_from_difficulty_id(context, request.live_difficulty_id)
@@ -234,7 +234,7 @@ async def live_play(context: idol.SchoolIdolUserParams, request: LivePlayRequest
     )
 
 
-@idol.register("/live/gameover")
+@idol.register("live", "gameover")
 async def live_gameover(context: idol.SchoolIdolUserParams):
     util.stub("live", "gameover", context.raw_request_data)
     return idol.core.DummyModel()

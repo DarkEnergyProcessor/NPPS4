@@ -47,14 +47,14 @@ def sort_by_unit_id(data: AlbumResponse):
     return data.unit_id
 
 
-@idol.register("/album/albumAll")
+@idol.register("album", "albumAll")
 async def album_albumall(context: idol.SchoolIdolUserParams) -> list[AlbumResponse]:
     current_user = await user.get_current(context)
     all_album = await album.all(context, current_user)
     return [album_to_response(a) for a in all_album]
 
 
-@idol.register("/album/seriesAll")
+@idol.register("album", "seriesAll")
 async def album_seriesall(context: idol.SchoolIdolUserParams) -> list[AlbumSeriesResponse]:
     current_user = await user.get_current(context)
     all_album = await album.all(context, current_user)
