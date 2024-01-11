@@ -7,6 +7,7 @@ from . import banner
 from . import challenge
 from . import costume
 from . import download
+from . import event
 from . import eventscenario
 from . import exchange
 from . import friend
