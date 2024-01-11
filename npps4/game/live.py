@@ -104,8 +104,14 @@ class LivePlayList(pydantic.BaseModel):
     deck_info: advanced.LiveDeckInfo
 
 
+class LivePlayRankInfo(pydantic.BaseModel):
+    rank: int
+    rank_min: int
+    rank_max: int
+
+
 class LivePlayResponse(pydantic.BaseModel):
-    rank_info: None
+    rank_info: list[LivePlayRankInfo]
     energy_full_time: str
     over_max_energy: int
     available_live_resume: bool = False
@@ -162,26 +168,10 @@ async def live_schedule(context: idol.SchoolIdolUserParams) -> LiveScheduleRespo
 async def live_partylist(context: idol.SchoolIdolUserParams, request: LivePartyListRequest):
     current_user = await user.get_current(context)
     util.stub("live", "partyList", request)
-    # TODO: Check LP
-    # DEBUG: Dump stats calculation
+
+    # TODO: Check LP/token
 
     party_list = [await advanced.get_user_guest_party_info(context, current_user)]
-    _, current_deck = await unit.load_unit_deck(context, current_user, current_user.active_deck_index, True)
-    deck_units = [await unit.get_unit(context, i) for i in current_deck]
-
-    calculator = advanced.TeamStatCalculator(context)
-    museum_data = await museum.get_museum_info_data(context, current_user)
-    for party in party_list:
-        guest = await unit.get_unit(context, party.center_unit_info.unit_owning_user_id)
-        stats = await calculator.get_live_stats(deck_units, guest, museum_data.parameter)
-        util.log(
-            "stats calculator of",
-            current_deck,
-            "with guest",
-            party.center_unit_info.unit_owning_user_id,
-            "is",
-            stats,
-        )
 
     return LivePartyListResponse(
         # TODO
@@ -198,6 +188,58 @@ async def live_precisescore(context: idol.SchoolIdolUserParams) -> idol.core.Dum
 
 
 @idol.register("/live/play", xmc_verify=idol.XMCVerifyMode.CROSS)
-async def live_play(context: idol.SchoolIdolUserParams, request: LivePlayRequest) -> idol.core.DummyModel:
-    util.stub("live", "play", request)
-    raise idol.error.IdolError(idol.error.ERROR_CODE_LIVE_NOT_FOUND, 600)
+async def live_play(context: idol.SchoolIdolUserParams, request: LivePlayRequest) -> LivePlayResponse:
+    current_user = await user.get_current(context)
+    live_setting = await live.get_live_setting_from_difficulty_id(context, request.live_difficulty_id)
+    if live_setting is None:
+        raise idol.error.IdolError(idol.error.ERROR_CODE_LIVE_NOT_FOUND, 600)
+
+    # TODO: Check and consume LP/token
+
+    beatmap_data = await live.get_live_info(context, request.live_difficulty_id, live_setting)
+    if beatmap_data is None:
+        raise idol.error.IdolError(idol.error.ERROR_CODE_LIVE_NOTES_LIST_NOT_FOUND, 600)
+
+    deck_data = await unit.load_unit_deck(context, current_user, request.unit_deck_id)
+    if deck_data is None or 0 in deck_data[1]:
+        raise idol.error.IdolError(idol.error.ERROR_CODE_LIVE_INVALID_UNIT_DECK)
+
+    guest = await user.get(context, request.party_user_id)
+    if guest is None:
+        raise idol.error.IdolError(idol.error.ERROR_CODE_LIVE_INVALID_PARTY_USER)
+
+    guest_center = await unit.get_unit_center(context, guest)
+    if guest_center is None or guest_center.unit_id == 0:
+        raise idol.error.IdolError(idol.error.ERROR_CODE_LIVE_INVALID_PARTY_USER)
+
+    calculator = advanced.TeamStatCalculator(context)
+    museum_data = await museum.get_museum_info_data(context, current_user)
+    deck_units = [await unit.get_unit(context, i) for i in deck_data[1]]
+    stats = await calculator.get_live_stats(
+        request.unit_deck_id, deck_units, await unit.get_unit(context, guest_center.unit_id), museum_data.parameter
+    )
+
+    result = LivePlayResponse(
+        rank_info=[
+            LivePlayRankInfo(rank=5, rank_min=0, rank_max=live_setting.c_rank_score - 1),
+            LivePlayRankInfo(rank=4, rank_min=live_setting.c_rank_score, rank_max=live_setting.b_rank_score - 1),
+            LivePlayRankInfo(rank=3, rank_min=live_setting.b_rank_score, rank_max=live_setting.a_rank_score - 1),
+            LivePlayRankInfo(rank=2, rank_min=live_setting.a_rank_score, rank_max=live_setting.s_rank_score - 1),
+            LivePlayRankInfo(rank=1, rank_min=live_setting.s_rank_score, rank_max=0),
+        ],
+        energy_full_time=util.timestamp_to_datetime(current_user.energy_full_time),
+        over_max_energy=current_user.over_max_energy,
+        # TODO: Medley Festival
+        live_list=[LivePlayList(live_info=beatmap_data, deck_info=stats)],
+    )
+    temp = result.live_list[0].live_info.notes_list
+    result.live_list[0].live_info.notes_list = []
+    util.log("dump live/play", result.model_dump_json())
+    result.live_list[0].live_info.notes_list = temp
+    return result
+
+
+@idol.register("/live/gameover")
+async def live_gameover(context: idol.SchoolIdolUserParams):
+    util.stub("live", "gameover", context.raw_request_data)
+    return idol.core.DummyModel()

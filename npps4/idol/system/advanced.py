@@ -80,7 +80,7 @@ class LiveDeckInfo(pydantic.BaseModel):
     total_cute: int
     total_cool: int
     total_hp: int
-    prepared_hp_damage: int
+    prepared_hp_damage: int = 0
     unit_list: list[LiveDeckUnitAttribute]
 
 
@@ -194,7 +194,11 @@ class TeamStatCalculator:
         self.cached_unit_tags: dict[tuple[int, int], bool] = {}
 
     async def get_live_stats(
-        self, player_units: list[main.Unit], guest: main.Unit, museum_param: museum.MuseumParameterData
+        self,
+        unit_deck_id: int,
+        player_units: list[main.Unit],
+        guest: main.Unit,
+        museum_param: museum.MuseumParameterData,
     ):
         # A few references:
         # https://github.com/NonSpicyBurrito/sif-team-simulator/blob/2b018170b509f93c0bff4f8f56e6cebd07c7f7fc/src/core/stats.ts
@@ -250,12 +254,25 @@ class TeamStatCalculator:
         pure = 0
         cool = 0
 
-        for i in range(9):
-            smile = smile + sis_stats[i][0] + leader_stats[i][0] + guest_stats[i][0]
-            pure = pure + sis_stats[i][1] + leader_stats[i][1] + guest_stats[i][1]
-            cool = cool + sis_stats[i][2] + leader_stats[i][2] + guest_stats[i][2]
+        final_stats: list[LiveDeckUnitAttribute] = []
 
-        return smile, pure, cool, max_hp
+        for i in range(9):
+            current_smile = sis_stats[i][0] + leader_stats[i][0] + guest_stats[i][0]
+            current_pure = sis_stats[i][1] + leader_stats[i][1] + guest_stats[i][1]
+            current_cool = sis_stats[i][2] + leader_stats[i][2] + guest_stats[i][2]
+            smile = smile + current_smile
+            pure = pure + current_pure
+            cool = cool + current_cool
+            final_stats.append(LiveDeckUnitAttribute(smile=current_smile, cute=current_pure, cool=current_cool))
+
+        return LiveDeckInfo(
+            unit_deck_id=unit_deck_id,
+            total_smile=smile,
+            total_cute=pure,
+            total_cool=cool,
+            total_hp=max_hp,
+            unit_list=final_stats,
+        )
 
     async def calculate_leader_bonus(
         self, stats: list[tuple[int, int, int]], unit_type_ids: list[int], leader_unit: main.Unit

@@ -1,7 +1,9 @@
 import pydantic
 import sqlalchemy
 
+from ... import db
 from ... import idol
+from ...config import config
 from ...db import main
 from ...db import live
 
@@ -22,8 +24,8 @@ class LiveNote(pydantic.BaseModel):
 class LiveInfo(pydantic.BaseModel):
     live_difficulty_id: int
     is_random: bool = False
-    ac_flag: bool = False
-    swing_flag: bool = False
+    ac_flag: int = 0
+    swing_flag: int = 0
     notes_list: list[LiveNote]
 
 
@@ -62,33 +64,56 @@ async def init(context: idol.BasicSchoolIdolContext, user: main.User):
     await context.db.main.flush()
 
 
-async def _get_live_info_table(context: idol.BasicSchoolIdolContext, live_difficulty_id: int):
+async def get_live_info_table(context: idol.BasicSchoolIdolContext, live_difficulty_id: int):
     live_info = await context.db.live.get(live.SpecialLive, live_difficulty_id)
     if live_info is None:
         live_info = await context.db.live.get(live.NormalLive, live_difficulty_id)
     return live_info
 
 
-async def _get_live_setting(context: idol.BasicSchoolIdolContext, live_info: live.Live):
-    return await context.db.live.get(live.LiveSetting, live_info.live_setting_id)
+async def get_live_setting(context: idol.BasicSchoolIdolContext, live_info: live.Live):
+    return await db.get_decrypted_row(context.db.live, live.LiveSetting, live_info.live_setting_id)
 
 
 async def get_live_lp(context: idol.BasicSchoolIdolContext, live_difficulty_id: int):
-    live_info = await _get_live_info_table(context, live_difficulty_id)
+    live_info = await get_live_info_table(context, live_difficulty_id)
     if live_info is None:
         return None
 
     return live_info.capital_value
 
 
-async def load_live(context: idol.BasicSchoolIdolContext, live_difficulty_id: int):
-    live_info = await _get_live_info_table(context, live_difficulty_id)
+async def get_live_setting_from_difficulty_id(context: idol.BasicSchoolIdolContext, live_difficulty_id: int):
+    live_info = await get_live_info_table(context, live_difficulty_id)
     if live_info is None:
         return None
 
-    live_setting = await _get_live_setting(context, live_info)
-    if live_setting is None:
+    live_setting = await get_live_setting(context, live_info)
+    return live_setting
+
+
+async def get_live_info(context: idol.BasicSchoolIdolContext, live_difficulty_id: int, live_setting: live.LiveSetting):
+    beatmap_protocol = config.get_beatmap_provider_protocol()
+    beatmap_data = await beatmap_protocol.get_beatmap_data(live_setting.notes_setting_asset, context)
+    if beatmap_data is None:
         return None
 
-    # TODO
-    return None
+    # TODO: Randomize
+    return LiveInfo(
+        live_difficulty_id=live_difficulty_id,
+        ac_flag=live_setting.ac_flag,
+        swing_flag=live_setting.swing_flag,
+        notes_list=[
+            LiveNote(
+                timing_sec=l.timing_sec,
+                notes_attribute=l.notes_attribute,
+                notes_level=l.notes_level,
+                effect=l.effect,
+                effect_value=l.effect_value,
+                position=l.position,
+                # speed=l.speed,
+                # vanish=l.vanish,
+            )
+            for l in beatmap_data
+        ],
+    )
