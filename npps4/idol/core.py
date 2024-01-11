@@ -389,7 +389,7 @@ def _fix_schema(absdest: str, schema: dict[str, Any]):
     return defs, schema
 
 
-API_ROUTER_MAP: dict[str, Endpoint] = {}
+API_ROUTER_MAP: dict[tuple[str, str], Endpoint] = {}
 RESPONSE_HEADERS = {
     "Server-Version": {"type": "string"},
     "X-Message-Sign": {"type": "string"},
@@ -409,20 +409,20 @@ def register(
     def wrap0(f: _PossibleEndpointFunction[_T, _U, _V]):
         nonlocal check_version, batchable
 
-        module_action = f"/{module}/{action}"
+        endpoint = f"/{module}/{action}"
         signature = typing.get_type_hints(f)
         params = list(map(lambda x: x[1], filter(lambda x: x[0] != "return", signature.items())))
         ret: type[_V | pydantic.BaseModel] = signature.get("return", pydantic.BaseModel)
         tags: list[str | enum.Enum] = [module]
 
         if ret is pydantic.BaseModel:
-            util.log("Possible undefined return type for endpoint:", module_action, severity=util.logging.WARNING)
+            util.log("Possible undefined return type for endpoint:", endpoint, severity=util.logging.WARNING)
             ret = DummyModel
 
         if len(params) == 1:
 
             @app.main.post(
-                module_action,
+                endpoint,
                 name=f.__name__,
                 description=f.__doc__,
                 response_model=idoltype.ResponseData[ret],
@@ -430,7 +430,7 @@ def register(
                 tags=tags,
             )
             @app.main.get(
-                module_action,
+                endpoint,
                 name=f.__name__,
                 description=f.__doc__,
                 response_model=idoltype.ResponseData[ret],
@@ -454,10 +454,10 @@ def register(
             schema = model.model_json_schema()
 
             # Fix schema
-            defs, schema = _fix_schema("/main.php" + module_action, schema)
+            defs, schema = _fix_schema("/main.php" + endpoint, schema)
 
             @app.main.post(
-                module_action,
+                endpoint,
                 name=f.__name__,
                 description=f.__doc__,
                 response_model=idoltype.ResponseData[ret],
@@ -493,7 +493,7 @@ def register(
                 nonlocal ret, check_version, xmc_verify
                 response = await client_check(context, check_version, xmc_verify)
                 if config.log_request_response():
-                    util.log("DEBUG REQUEST", module_action, str(context.raw_request_data, "UTF-8"))
+                    util.log("DEBUG REQUEST", endpoint, str(context.raw_request_data, "UTF-8"))
                 if response is None:
                     try:
                         async with context:
@@ -510,7 +510,7 @@ def register(
             if len(params) > 1:
                 real_request, is_request_list = _get_real_param(params[1])
 
-            API_ROUTER_MAP[module_action] = Endpoint(
+            API_ROUTER_MAP[(module, action)] = Endpoint(
                 context_class=params[0],
                 request_class=real_request,
                 is_request_list=is_request_list,
@@ -591,7 +591,7 @@ async def api_endpoint(
 
             try:
                 # Find endpoint
-                endpoint = API_ROUTER_MAP.get(f"{module}/{action}")
+                endpoint = API_ROUTER_MAP.get((module, action))
                 if endpoint is None:
                     msg = f"Endpoint not found: {module}/{action}"
                     util.log(msg, json.dumps(request_data), severity=util.logging.ERROR)

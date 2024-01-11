@@ -21,11 +21,6 @@ def todo_main_page():
     return fastapi.responses.RedirectResponse("/main.php/api")
 
 
-class _EndpointNotFound(Exception):
-    def __init__(self, endpoint) -> None:
-        super().__init__(endpoint)
-
-
 def get_token_manual(request: fastapi.Request):
     str(request.headers)  # Don't remove this line!
     authorize = request.headers.get("Authorize")
