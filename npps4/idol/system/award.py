@@ -32,7 +32,7 @@ async def set_award_active(context: idol.SchoolIdolParams, user: main.User, awar
     if not has_bg:
         return False
 
-    user.active_background = award_id
+    user.active_award = award_id
     await context.db.main.flush()
     return True
 
