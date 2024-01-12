@@ -11,7 +11,6 @@ from . import album
 from ... import db
 from ... import idol
 from ... import idoltype
-from ... import leader_skill
 from ... import util
 from ...db import main
 from ...db import unit
