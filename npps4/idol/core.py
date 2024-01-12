@@ -22,6 +22,7 @@ from ..db import item
 from ..db import live
 from ..db import main
 from ..db import museum
+from ..db import scenario
 from ..db import subscenario
 from ..db import unit
 
@@ -43,6 +44,7 @@ class Database:
         self._effortsession: sqlalchemy.ext.asyncio.AsyncSession | None = None
         self._subscenariosession: sqlalchemy.ext.asyncio.AsyncSession | None = None
         self._museumsession: sqlalchemy.ext.asyncio.AsyncSession | None = None
+        self._scenariosession: sqlalchemy.ext.asyncio.AsyncSession | None = None
 
     @property
     def main(self):
@@ -98,6 +100,12 @@ class Database:
         if self._museumsession is None:
             self._museumsession = museum.get_session()
         return self._museumsession
+
+    @property
+    def scenario(self):
+        if self._scenariosession is None:
+            self._scenariosession = scenario.get_session()
+        return self._scenariosession
 
     async def cleanup(self):
         if self._mainsession is not None:

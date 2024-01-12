@@ -31,7 +31,7 @@ from . import other
 from . import app
 from . import util
 
-from typing import Annotated, Any
+from typing import Annotated
 
 
 # 404 handler

@@ -13,8 +13,8 @@ ACHIEVEMENT_REWARDS: dict[int, list[item.Reward]] = {
     103: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=4)],  # Reward: 1 - We are μ's (1st Years) - Story 1
     104: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=5)],  # Reward: 1 - We are μ's (1st Years) - Story 2
     106: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=6)],  # Reward: 1 - We are μ's (1st Years) - Story 3
-    108: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=7)],  # 2 - We are μ's (3rd Years) - Story 1
-    109: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=8)],  # 2 - We are μ's (3rd Years) - Story 2
+    108: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=7)],  # Reward: 2 - We are μ's (3rd Years) - Story 1
+    109: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=8)],  # Reward: 2 - We are μ's (3rd Years) - Story 2
     110: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=3)],  # Reward: Snow Halation
     111: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=9)],  # Reward: 2 - We are μ's (3rd Years) - Story 3
     113: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=10)],  # Reward: 3 - A Bigger Rehearsal Space! - Story 1
@@ -25,8 +25,496 @@ ACHIEVEMENT_REWARDS: dict[int, list[item.Reward]] = {
     121: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=14)],  # Reward: 4 - μ's Gets Interviewed?! - Story 2
     122: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=7)],  # Reward: Mogyutto "Love" de Sekkinchu!
     123: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=15)],  # Reward: 4 - μ's Gets Interviewed?! - Story 3
-    423: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=165)],
-    483: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=202)],
+    125: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=16)],  # Reward: 5 - Student Council Helpers - Story 1
+    127: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=17)],  # Reward: 5 - Student Council Helpers - Story 2
+    128: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=9)],  # Reward: Wonderful Rush
+    129: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=18)],  # Reward: 5 - Student Council Helpers - Story 3
+    131: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=19)],  # Reward: 6 - Hanayo's Grand Diet Plan! - Story 1
+    133: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=20)],  # Reward: 6 - Hanayo's Grand Diet Plan! - Story 2
+    134: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=14)],  # Reward: WILD STARS
+    135: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=21)],  # Reward: 6 - Hanayo's Grand Diet Plan! - Story 3
+    137: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=22)],  # Reward: 7 - μ's Without Umi - Story 1
+    139: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=23)],  # Reward: 7 - μ's Without Umi - Story 2
+    140: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=21)],  # Reward: Kaguya no Shiro de Odoritai
+    141: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=24)],  # Reward: 7 - μ's Without Umi - Story 3
+    143: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=25)],  # Reward: 8 - Enter the Festival! - Story 1
+    145: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=26)],  # Reward: 8 - Enter the Festival! - Story 2
+    146: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=26)],  # Reward: No Brand Girls
+    147: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=27)],  # Reward: 8 - Enter the Festival! - Story 3
+    149: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=28)],  # Reward: 9 - We Can't Practice Today - Story 1
+    150: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=32)],  # Reward: Wonder Zone
+    151: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=29)],  # Reward: 9 - We Can't Practice Today - Story 2
+    153: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=30)],  # Reward: 9 - We Can't Practice Today - Story 3
+    154: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=23)],  # Reward: Love Novels
+    155: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=31)],  # Reward: 9 - We Can't Practice Today - Story 4
+    157: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=32)],  # Reward: 10 - Summer Festival Fortunes - Story 1
+    158: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=40)],  # Reward: Korekara no Someday
+    159: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=33)],  # Reward: 10 - Summer Festival Fortunes - Story 2
+    161: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=34)],  # Reward: 10 - Summer Festival Fortunes - Story 3
+    162: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=15)],  # Reward: Shiranai Love * Oshiete Love
+    163: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=35)],  # Reward: 10 - Summer Festival Fortunes - Story 4
+    165: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=36)],  # Reward: 11 - The Tastiest Season - Story 1
+    166: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=55)],  # Reward: START: DASH!!
+    167: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=37)],  # Reward: 11 - The Tastiest Season - Story 2
+    169: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=38)],  # Reward: 11 - The Tastiest Season - Story 3
+    170: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=12)],  # Reward: Sweet & Sweet Holiday
+    171: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=39)],  # Reward: 11 - The Tastiest Season - Story 4
+    173: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=40)],  # Reward: 12 - The Festival Begins! - Story 1
+    174: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=79)],  # Reward: Ai wa Taiyo jyanai?
+    175: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=41)],  # Reward: 12 - The Festival Begins! - Story 2
+    177: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=42)],  # Reward: 12 - The Festival Begins! - Story 3
+    178: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=35)],  # Reward: Diamond Princess no Yuutsu
+    179: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=43)],  # Reward: 12 - The Festival Begins! - Story 4
+    181: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=44)],  # Reward: 13 - School Idol Festival - Story 1
+    182: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=11)],  # Reward: Love Marginal
+    183: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=45)],  # Reward: 13 - School Idol Festival - Story 2
+    185: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=46)],  # Reward: 13 - School Idol Festival - Story 3
+    186: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=141)],  # Reward: Takaramonos
+    187: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=47)],  # Reward: 13 - School Idol Festival - Story 4
+    189: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=48)],  # Reward: 14 - We Love Sweets! - Story 1
+    190: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=146)],  # Reward: Paradise Live
+    191: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=49)],  # Reward: 14 - We Love Sweets! - Story 2
+    193: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=50)],  # Reward: 14 - We Love Sweets! - Story 3
+    194: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=39)],  # Reward: Listen to My Heart!
+    195: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=51)],  # Reward: 14 - We Love Sweets! - Story 4
+    197: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=52)],  # Reward: 15 - Winter Wonderland - Story 1
+    198: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=166)],  # Reward: Music S.T.A.R.T!!
+    199: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=53)],  # Reward: 15 - Winter Wonderland - Story 2
+    201: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=54)],  # Reward: 15 - Winter Wonderland - Story 3
+    202: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=45)],  # Reward: Anone Ganbare!
+    203: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=55)],  # Reward: 15 - Winter Wonderland - Story 4
+    205: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=56)],  # Reward: 16 - Mountain Hike/Scary Test - Story 1
+    206: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=186)],  # Reward: LOVELESS WORLD
+    207: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=57)],  # Reward: 16 - Mountain Hike/Scary Test - Story 2
+    209: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=58)],  # Reward: 16 - Mountain Hike/Scary Test - Story 3
+    210: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=51)],  # Reward: After School NAVIGATORS
+    211: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=59)],  # Reward: 16 - Mountain Hike/Scary Test - Story 4
+    213: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=60)],  # Reward: 17 - This Is Our Home - Story 1
+    214: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=197)],  # Reward: LONELIEST BABY
+    215: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=61)],  # Reward: 17 - This Is Our Home - Story 2
+    217: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=62)],  # Reward: 17 - This Is Our Home - Story 3
+    218: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=67)],  # Reward: Cutie Panther
+    219: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=63)],  # Reward: 17 - This Is Our Home - Story 4
+    221: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=64)],  # Reward: 18 - Alpaca Escape!/Nine Paths - Story 1
+    222: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=214)],  # Reward: It's our miraculous time
+    223: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=65)],  # Reward: 18 - Alpaca Escape!/Nine Paths - Story 2
+    225: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=66)],  # Reward: 18 - Alpaca Escape!/Nine Paths - Story 3
+    226: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=123)],  # Reward: Pure Girls Project
+    227: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=67)],  # Reward: 18 - Alpaca Escape!/Nine Paths - Story 4
+    229: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=68)],  # Reward: 19 - Rain, Rain, Go Away - Story 1
+    230: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=230)],  # Reward: Donna Tokimo Zutto
+    231: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=69)],  # Reward: 19 - Rain, Rain, Go Away - Story 2
+    233: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=70)],  # Reward: 19 - Rain, Rain, Go Away - Story 3
+    234: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=163)],  # Reward: Binetsu kara Mystery
+    235: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=71)],  # Reward: 19 - Rain, Rain, Go Away - Story 4
+    237: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=72)],  # Reward: 20 - Star Festival Fireworks - Story 1
+    238: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=242)],  # Reward: Yume no Tobira
+    239: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=73)],  # Reward: 20 - Star Festival Fireworks - Story 2
+    241: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=74)],  # Reward: 20 - Star Festival Fireworks - Story 3
+    242: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=182)],  # Reward: Natsu Owaranaide.
+    243: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=75)],  # Reward: 20 - Star Festival Fireworks - Story 4
+    245: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=76)],  # Reward: 21 - Fun at the Pool! - Story 1
+    246: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=256)],  # Reward: Love Wing Bell
+    247: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=77)],  # Reward: 21 - Fun at the Pool! - Story 2
+    249: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=78)],  # Reward: 21 - Fun at the Pool! - Story 3
+    250: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=193)],  # Reward: UNBALANCED LOVE
+    251: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=79)],  # Reward: 21 - Fun at the Pool! - Story 4
+    253: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=80)],  # Reward: 22 - Otonokizaka's Open Campus - Story 1
+    254: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=272)],  # Reward: Dancing Stars on Me!
+    255: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=81)],  # Reward: 22 - Otonokizaka's Open Campus - Story 2
+    257: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=82)],  # Reward: 22 - Otonokizaka's Open Campus - Story 3
+    258: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=143)],  # Reward: Kimi no kuse ni!
+    259: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=83)],  # Reward: 22 - Otonokizaka's Open Campus - Story 4
+    261: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=84)],  # Reward: 23 - Shrine Helpers - Story 1
+    262: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=286)],  # Reward: KiRa-KiRa Sensation!
+    263: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=85)],  # Reward: 23 - Shrine Helpers - Story 2
+    265: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=86)],  # Reward: 23 - Shrine Helpers - Story 3
+    266: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=238)],  # Reward: Arifureta Kanashimi no Hate
+    267: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=87)],  # Reward: 23 - Shrine Helpers - Story 4
+    269: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=88)],  # Reward: 24 - Let's Cheer for Umi! - Story 1
+    270: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=299)],  # Reward: Happy Maker!
+    271: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=89)],  # Reward: 24 - Let's Cheer for Umi! - Story 2
+    273: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=90)],  # Reward: 24 - Let's Cheer for Umi! - Story 3
+    274: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=207)],  # Reward: Kodoku na Heaven
+    275: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=91)],  # Reward: 24 - Let's Cheer for Umi! - Story 4
+    277: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=92)],  # Reward: 25 - Merry Christmas - Story 1
+    278: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=313)],  # Reward: Datte Datte Aa Mujo
+    279: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=93)],  # Reward: 25 - Merry Christmas - Story 2
+    281: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=94)],  # Reward: 25 - Merry Christmas - Story 3
+    282: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=226)],  # Reward: Someday of My Life
+    283: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=95)],  # Reward: 25 - Merry Christmas - Story 4
+    285: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=96)],  # Reward: 26 - Trio Trials! - Story 1
+    286: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=327)],  # Reward: COLORFUL VOICE
+    287: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=97)],  # Reward: 26 - Trio Trials! - Story 2
+    289: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=98)],  # Reward: 26 - Trio Trials! - Story 3
+    290: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=251)],  # Reward: Blueberry ♡ Train
+    291: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=99)],  # Reward: 26 - Trio Trials! - Story 4
+    293: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=100)],  # Reward: 27 - Chocolates are Trouble! - Story 1
+    294: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=334)],  # Reward: SENTIMENTAL StepS
+    295: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=101)],  # Reward: 27 - Chocolates are Trouble! - Story 2
+    297: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=102)],  # Reward: 27 - Chocolates are Trouble! - Story 3
+    298: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=268)],  # Reward: Daring!!
+    299: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=103)],  # Reward: 27 - Chocolates are Trouble! - Story 4
+    301: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=104)],  # Reward: 28 - Yazawa Girls' Festival - Story 1
+    302: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=365)],  # Reward: Mo Hitori jyanaiyo
+    303: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=105)],  # Reward: 28 - Yazawa Girls' Festival - Story 2
+    305: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=106)],  # Reward: 28 - Yazawa Girls' Festival - Story 3
+    306: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=281)],  # Reward: Yuki no Reason
+    307: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=107)],  # Reward: 28 - Yazawa Girls' Festival - Story 4
+    309: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=108)],  # Reward: 29 - Songwriting Retreat - Story 1
+    310: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=374)],  # Reward: Watashitachi wa Mirai no Hana
+    311: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=109)],  # Reward: 29 - Songwriting Retreat - Story 2
+    313: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=110)],  # Reward: 29 - Songwriting Retreat - Story 3
+    314: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=294)],  # Reward: Koi no Signal Rin Rin Rin!
+    315: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=111)],  # Reward: 29 - Songwriting Retreat - Story 4
+    317: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=112)],  # Reward: 30 - Worried About Maki?! - Story 1
+    318: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=395)],  # Reward: Spicaterrible
+    319: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=113)],  # Reward: 30 - Worried About Maki?! - Story 2
+    321: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=114)],  # Reward: 30 - Worried About Maki?! - Story 3
+    322: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=322)],  # Reward: Mahotsukai Hajimemashita!
+    323: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=115)],  # Reward: 30 - Worried About Maki?! - Story 4
+    325: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=116)],  # Reward: 31 - Unsung Heroes - Story 1
+    326: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=309)],  # Reward: Junai Lens
+    327: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=117)],  # Reward: 31 - Unsung Heroes - Story 2
+    329: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=118)],  # Reward: 31 - Unsung Heroes - Story 3
+    330: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=419)],  # Reward: Angelic Angel
+    331: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=119)],  # Reward: 31 - Unsung Heroes - Story 4
+    333: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=120)],  # Reward: 32 - μ's Versus A-RISE - Story 1
+    334: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=427)],  # Reward: Private Wars
+    335: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=121)],  # Reward: 32 - μ's Versus A-RISE - Story 2
+    337: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=122)],  # Reward: 32 - μ's Versus A-RISE - Story 3
+    338: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=369)],  # Reward: Futari Happiness
+    339: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=123)],  # Reward: 32 - μ's Versus A-RISE - Story 4
+    341: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=124)],  # Reward: 33 - The Sister Swap - Story 1
+    342: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=442)],  # Reward: SUNNY DAY SONG
+    343: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=125)],  # Reward: 33 - The Sister Swap - Story 2
+    345: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=126)],  # Reward: 33 - The Sister Swap - Story 3
+    346: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=396)],  # Reward: Trouble Busters
+    347: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=127)],  # Reward: 33 - The Sister Swap - Story 4
+    349: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=128)],  # Reward: 34 - Homura Bakery! - Story 1
+    350: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=444)],  # Reward: Bokutachi wa Hitotsu no Hikari
+    351: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=129)],  # Reward: 34 - Homura Bakery! - Story 2
+    353: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=130)],  # Reward: 34 - Homura Bakery! - Story 3
+    354: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=336)],  # Reward: Nightingale Love Song
+    355: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=131)],  # Reward: 34 - Homura Bakery! - Story 4
+    357: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=132)],  # Reward: 35 - Honoka's Love Song - Story 1
+    358: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=421)],  # Reward: Shiawase yuki no SMILING!
+    359: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=133)],  # Reward: 35 - Honoka's Love Song - Story 2
+    361: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=134)],  # Reward: 35 - Honoka's Love Song - Story 3
+    362: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=447)],  # Reward: HEART to HEART!
+    363: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=135)],  # Reward: 35 - Honoka's Love Song - Story 4
+    365: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=136)],  # Reward: 36 - Hanayo's Disciple! - Story 1
+    366: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=448)],  # Reward: Arashi no Naka no Koi dakara
+    367: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=137)],  # Reward: 36 - Hanayo's Disciple! - Story 2
+    369: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=138)],  # Reward: 36 - Hanayo's Disciple! - Story 3
+    370: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=443)],  # Reward: Moshimo Kara Kitto
+    371: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=139)],  # Reward: 36 - Hanayo's Disciple! - Story 4
+    373: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=140)],  # Reward: 37 - Big Cleanup! - Story 1
+    374: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=451)],  # Reward: Shocking Party
+    375: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=141)],  # Reward: 37 - Big Cleanup! - Story 2
+    377: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=142)],  # Reward: 37 - Big Cleanup! - Story 3
+    378: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=445)],  # Reward: Suki desu ga Suki desu ka?
+    379: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=143)],  # Reward: 37 - Big Cleanup! - Story 4
+    381: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=144)],  # Reward: 38 - School Idol Trip 1 - Story 1
+    382: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=455)],  # Reward: Mi wa μ'sic no Mi
+    383: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=145)],  # Reward: 38 - School Idol Trip 1 - Story 2
+    385: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=146)],  # Reward: 38 - School Idol Trip 1 - Story 3
+    386: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=449)],  # Reward: Zurui yo Magnetic Today
+    387: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=147)],  # Reward: 38 - School Idol Trip 1 - Story 4
+    389: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=148)],  # Reward: 39 - School Idol Trip 2 - Story 1
+    390: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=458)],  # Reward: Super LOVE = Super LIVE!
+    391: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=149)],  # Reward: 39 - School Idol Trip 2 - Story 2
+    393: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=150)],  # Reward: 39 - School Idol Trip 2 - Story 3
+    394: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=454)],  # Reward: Kururin MIRACLE
+    395: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=151)],  # Reward: 39 - School Idol Trip 2 - Story 4
+    397: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=152)],  # Reward: 40 - Chouchou the Cat - Story 1
+    398: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=460)],  # Reward: MOMENT RING
+    399: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=153)],  # Reward: 40 - Chouchou the Cat - Story 2
+    401: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=154)],  # Reward: 40 - Chouchou the Cat - Story 3
+    402: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=459)],  # Reward: Storm in Lover
+    403: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=155)],  # Reward: 40 - Chouchou the Cat - Story 4
+    405: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=156)],  # Reward: 41 - Mother's Day - Story 1
+    406: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=461)],  # Reward: Sayounara e Sayounara!
+    407: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=157)],  # Reward: 41 - Mother's Day - Story 2
+    409: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=158)],  # Reward: 41 - Mother's Day - Story 3
+    410: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=464)],  # Reward: NO EXIT ORION
+    411: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=159)],  # Reward: 41 - Mother's Day - Story 4
+    413: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=160)],  # Reward: 42 - Field Day Fury! - Story 1
+    414: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=465)],  # Reward: Shangri-La Shower
+    415: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=161)],  # Reward: 42 - Field Day Fury! - Story 2
+    417: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=162)],  # Reward: 42 - Field Day Fury! - Story 3
+    418: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=466)],  # Reward: Shunjo Romantic
+    419: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=163)],  # Reward: 42 - Field Day Fury! - Story 4
+    421: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=164)],  # Reward: 43 - Shopping on a Rainy Day - Story 1
+    422: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=469)],  # Reward: Ruteshi Kisuki Shiteru
+    423: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=165)],  # Reward: 43 - Shopping on a Rainy Day - Story 2
+    425: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=166)],  # Reward: 43 - Shopping on a Rainy Day - Story 3
+    426: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=472)],  # Reward: PSYCHIC FIRE
+    427: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=167)],  # Reward: 43 - Shopping on a Rainy Day - Story 4
+    429: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=168)],  # Reward: 44 - A Luxurious Trip - Story 1
+    430: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=475)],  # Reward: Soshite Saigo no Page ni wa
+    431: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=169)],  # Reward: 44 - A Luxurious Trip - Story 2
+    433: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=189)],  # Reward: 1 - We are Aqours! - Story 1
+    435: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=190)],  # Reward: 1 - We are Aqours! - Story 2
+    437: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=170)],  # Reward: 44 - A Luxurious Trip - Story 3
+    438: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=462)],  # Reward: Puwa Puwa-O!
+    439: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=171)],  # Reward: 44 - A Luxurious Trip - Story 4
+    441: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=191)],  # Reward: 1 - We are Aqours! - Story 3
+    442: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=477)],  # Reward: Aozora Jumping Heart
+    443: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=192)],  # Reward: 1 - We are Aqours! - Story 4
+    445: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=172)],  # Reward: 45 - Let's Go Farming! - Story 1
+    447: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=173)],  # Reward: 45 - Let's Go Farming! - Story 2
+    449: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=193)],  # Reward: 2 - What's a School Idol? - Story 1
+    450: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=479)],  # Reward: Yume Kataruyori Yume Utaou
+    451: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=194)],  # Reward: 2 - What's a School Idol? - Story 2
+    453: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=174)],  # Reward: 45 - Let's Go Farming! - Story 3
+    454: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=482)],  # Reward: Hello, Hoshiwo Kazoete
+    455: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=175)],  # Reward: 45 - Let's Go Farming! - Story 4
+    457: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=195)],  # Reward: 2 - What's a School Idol? - Story 3
+    459: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=196)],  # Reward: 2 - What's a School Idol? - Story 4
+    461: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=176)],  # Reward: 46 - Nozomi's Secret - Story 1
+    463: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=177)],  # Reward: 46 - Nozomi's Secret - Story 2
+    465: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=197)],  # Reward: 3 - Sparkle by the Pool! - Story 1
+    466: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=476)],  # Reward: Kimetayo Hand in Hand
+    467: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=198)],  # Reward: 3 - Sparkle by the Pool! - Story 2
+    469: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=178)],  # Reward: 46 - Nozomi's Secret - Story 3
+    470: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=484)],  # Reward: ?←HEARTBEAT
+    471: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=179)],  # Reward: 46 - Nozomi's Secret - Story 4
+    473: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=199)],  # Reward: 3 - Sparkle by the Pool! - Story 3
+    475: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=200)],  # Reward: 3 - Sparkle by the Pool! - Story 4
+    477: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=180)],  # Reward: 47 - The Miracle Nine - Story 1
+    479: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=181)],  # Reward: 47 - The Miracle Nine - Story 2
+    481: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=201)],  # Reward: 4 -  A New Kind of Autumn - Story 1
+    482: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=478)],  # Reward: Daisuki Dattara Daijoubu!
+    483: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=202)],  # Reward: 4 -  A New Kind of Autumn - Story 2
+    485: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=182)],  # Reward: 47 - The Miracle Nine - Story 3
+    486: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=489)],  # Reward: Future Style
+    487: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=183)],  # Reward: 47 - The Miracle Nine - Story 4
+    489: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=203)],  # Reward: 4 -  A New Kind of Autumn - Story 3
+    491: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=204)],  # Reward: 4 -  A New Kind of Autumn - Story 4
+    494: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=205)],  # Reward: 5 -  An Aqours Christmas 1 - Story 1
+    495: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=491)],  # Reward: Jingle Bells ga Tomaranai
+    496: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=206)],  # Reward: 5 -  An Aqours Christmas 1 - Story 2
+    499: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=207)],  # Reward: 5 -  An Aqours Christmas 1 - Story 3
+    500: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=493)],  # Reward: Seinaru Hino Inori
+    501: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=208)],  # Reward: 5 -  An Aqours Christmas 1 - Story 4
+    504: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=209)],  # Reward: 6 -  An Aqours Christmas 2 - Story 1
+    506: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=210)],  # Reward: 6 -  An Aqours Christmas 2 - Story 2
+    509: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=211)],  # Reward: 6 -  An Aqours Christmas 2 - Story 3
+    511: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=212)],  # Reward: 6 -  An Aqours Christmas 2 - Story 4
+    514: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=213)],  # Reward: 7 - Welcoming the New Year! - Story 1
+    515: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=481)],  # Reward: Yumede Yozorawo Terashitai
+    516: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=214)],  # Reward: 7 - Welcoming the New Year! - Story 2
+    519: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=215)],  # Reward: 7 - Welcoming the New Year! - Story 3
+    521: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=216)],  # Reward: 7 - Welcoming the New Year! - Story 4
+    524: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=217)],  # Reward: 8 - Setsubun and Valentine's - Story 1
+    525: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=483)],  # Reward: Mijuku DREAMER
+    526: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=218)],  # Reward: 8 - Setsubun and Valentine's - Story 2
+    529: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=219)],  # Reward: 8 - Setsubun and Valentine's - Story 3
+    531: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=220)],  # Reward: 8 - Setsubun and Valentine's - Story 4
+    534: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=221)],  # Reward: 9 - School Idols on Deck! - Story 1
+    535: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=486)],  # Reward: Omoiyo Hitotsuninare
+    536: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=222)],  # Reward: 9 - School Idols on Deck! - Story 2
+    539: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=223)],  # Reward: 9 - School Idols on Deck! - Story 3
+    541: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=224)],  # Reward: 9 - School Idols on Deck! - Story 4
+    544: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=225)],  # Reward: 10 - The Aqours Theater Troupe! - Story 1
+    545: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=487)],  # Reward: MIRAI TICKET
+    546: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=226)],  # Reward: 10 - The Aqours Theater Troupe! - Story 2
+    549: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=227)],  # Reward: 10 - The Aqours Theater Troupe! - Story 3
+    551: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=228)],  # Reward: 10 - The Aqours Theater Troupe! - Story 4
+    554: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=229)],  # Reward: 11 - Spring, the Sea, and Events - Story 1
+    555: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=503)],  # Reward: HAPPY PARTY TRAIN
+    556: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=230)],  # Reward: 11 - Spring, the Sea, and Events - Story 2
+    559: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=231)],  # Reward: 11 - Spring, the Sea, and Events - Story 3
+    561: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=232)],  # Reward: 11 - Spring, the Sea, and Events - Story 4
+    564: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=233)],  # Reward: 12 - Fixing Hanamaru's Weak Spot - Story 1
+    565: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=507)],  # Reward: Humming Friend
+    566: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=234)],  # Reward: 12 - Fixing Hanamaru's Weak Spot - Story 2
+    569: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=235)],  # Reward: 12 - Fixing Hanamaru's Weak Spot - Story 3
+    571: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=236)],  # Reward: 12 - Fixing Hanamaru's Weak Spot - Story 4
+    574: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=237)],  # Reward: 13 - Shiitake's Big Adventure - Story 1
+    575: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=508)],  # Reward: Sunshine Pikkapika Ondo
+    576: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=238)],  # Reward: 13 - Shiitake's Big Adventure - Story 2
+    579: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=239)],  # Reward: 13 - Shiitake's Big Adventure - Story 3
+    581: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=240)],  # Reward: 13 - Shiitake's Big Adventure - Story 4
+    584: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=241)],  # Reward: 14 - Come to Uchiura, Sea Girls! - Story 1
+    585: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=513)],  # Reward: SKY JOURNEY
+    586: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=242)],  # Reward: 14 - Come to Uchiura, Sea Girls! - Story 2
+    589: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=243)],  # Reward: 14 - Come to Uchiura, Sea Girls! - Story 3
+    590: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=514)],  # Reward: Shojo Ijo no Koi ga Shitai
+    591: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=244)],  # Reward: 14 - Come to Uchiura, Sea Girls! - Story 4
+    594: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=245)],  # Reward: 15 - Aqours Housing - Story 1
+    595: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=471)],  # Reward: Yozorawa Nandemo Shitteruno?
+    596: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=246)],  # Reward: 15 - Aqours Housing - Story 2
+    599: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=247)],  # Reward: 15 - Aqours Housing - Story 3
+    600: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=480)],  # Reward: Tokimeki Bunruigaku
+    601: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=248)],  # Reward: 15 - Aqours Housing - Story 4
+    604: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=249)],  # Reward: 16 - Fortuneteller Yohane - Story 1
+    605: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=488)],  # Reward: Guilty Night, Guilty Kiss!
+    606: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=250)],  # Reward: 16 - Fortuneteller Yohane - Story 2
+    609: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=251)],  # Reward: 16 - Fortuneteller Yohane - Story 3
+    610: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=516)],  # Reward: Mirai no Bokura wa Shitteru yo
+    611: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=252)],  # Reward: 16 - Fortuneteller Yohane - Story 4
+    614: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=253)],  # Reward: 17 - Hot Spring Holiday! - Story 1
+    615: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=517)],  # Reward: Yuki wa Doko ni? Kimi no Mune ni!
+    616: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=254)],  # Reward: 17 - Hot Spring Holiday! - Story 2
+    619: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=255)],  # Reward: 17 - Hot Spring Holiday! - Story 3
+    620: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=509)],  # Reward: Landing action Yeah!!
+    621: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=256)],  # Reward: 17 - Hot Spring Holiday! - Story 4
+    624: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=257)],  # Reward: 18 - Survive Flu Season! - Story 1
+    625: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=485)],  # Reward: Pops heart de Odorundamon!
+    626: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=258)],  # Reward: 18 - Survive Flu Season! - Story 2
+    629: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=259)],  # Reward: 18 - Survive Flu Season! - Story 3
+    630: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=490)],  # Reward: Soramo Kokoromo Harerukara
+    631: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=260)],  # Reward: 18 - Survive Flu Season! - Story 4
+    634: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=261)],  # Reward: 19 - Our Countdown Live - Story 1
+    635: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=492)],  # Reward: Waku-Waku-Week!
+    636: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=262)],  # Reward: 19 - Our Countdown Live - Story 2
+    639: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=263)],  # Reward: 19 - Our Countdown Live - Story 3
+    640: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=497)],  # Reward: Daydream Warrior
+    641: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=264)],  # Reward: 19 - Our Countdown Live - Story 4
+    644: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=265)],  # Reward: 20 - The Numazu Snow Festival! - Story 1
+    645: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=499)],  # Reward: G Senjono Cinderella
+    646: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=266)],  # Reward: 20 - The Numazu Snow Festival! - Story 2
+    649: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=267)],  # Reward: 20 - The Numazu Snow Festival! - Story 3
+    650: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=500)],  # Reward: Thrilling One-way
+    651: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=268)],  # Reward: 20 - The Numazu Snow Festival! - Story 4
+    654: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=269)],  # Reward: 21 - Aqours Shiny Live Broadcast - Story 1
+    655: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=504)],  # Reward: Taiyo o Oi kakero!
+    656: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=270)],  # Reward: 21 - Aqours Shiny Live Broadcast - Story 2
+    659: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=271)],  # Reward: 21 - Aqours Shiny Live Broadcast - Story 3
+    660: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=518)],  # Reward: MY Mai☆TONIGHT
+    661: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=272)],  # Reward: 21 - Aqours Shiny Live Broadcast - Story 4
+    664: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=273)],  # Reward: 22 - Indulging Dear Dia - Story 1
+    665: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=524)],  # Reward: MIRACLE WAVE
+    666: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=274)],  # Reward: 22 - Indulging Dear Dia - Story 2
+    669: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=275)],  # Reward: 22 - Indulging Dear Dia - Story 3
+    670: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=525)],  # Reward: Awaken the power
+    671: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=276)],  # Reward: 22 - Indulging Dear Dia - Story 4
+    674: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=277)],  # Reward: 23 - A Day Out on Golden Week - Story 1
+    675: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=527)],  # Reward: WATER BLUE NEW WORLD
+    676: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=278)],  # Reward: 23 - A Day Out on Golden Week - Story 2
+    679: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=279)],  # Reward: 23 - A Day Out on Golden Week - Story 3
+    680: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=528)],  # Reward: WONDERFUL STORIES
+    681: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=280)],  # Reward: 23 - A Day Out on Golden Week - Story 4
+    684: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=281)],  # Reward: 24 - Off to the Beach - Story 1
+    685: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=510)],  # Reward: Kinmirai Happy End
+    686: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=282)],  # Reward: 24 - Off to the Beach - Story 2
+    689: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=283)],  # Reward: 24 - Off to the Beach - Story 3
+    690: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=512)],  # Reward: KOWAREYASUKI
+    691: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=284)],  # Reward: 24 - Off to the Beach - Story 4
+    694: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=285)],  # Reward: 25 - Summer Arrives! - Story 1
+    695: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=515)],  # Reward: GALAXY HidE and SeeK
+    696: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=286)],  # Reward: 25 - Summer Arrives! - Story 2
+    699: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=287)],  # Reward: 25 - Summer Arrives! - Story 3
+    700: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=519)],  # Reward: Shadow gate to love
+    701: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=288)],  # Reward: 25 - Summer Arrives! - Story 4
+    704: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=289)],  # Reward: 26 - Welcome to Numazu & Uchiura! - Story 1
+    705: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=543)],  # Reward: SELF CONTROL!!
+    706: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=290)],  # Reward: 26 - Welcome to Numazu & Uchiura! - Story 2
+    709: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=291)],  # Reward: 26 - Welcome to Numazu & Uchiura! - Story 3
+    710: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=545)],  # Reward: CRASH MIND
+    711: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=292)],  # Reward: 26 - Welcome to Numazu & Uchiura! - Story 4
+    714: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=293)],  # Reward: 27 - Saint Snow Comes to Uchiura - Story 1
+    715: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=546)],  # Reward: DROPOUT!?
+    716: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=294)],  # Reward: 27 - Saint Snow Comes to Uchiura - Story 2
+    719: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=295)],  # Reward: 27 - Saint Snow Comes to Uchiura - Story 3
+    720: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=530)],  # Reward: Kaigandori de Matteru yo
+    721: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=296)],  # Reward: 27 - Saint Snow Comes to Uchiura - Story 4
+    724: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=297)],  # Reward: 28 - A Lunar Observation Party - Story 1
+    725: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=537)],  # Reward: INNOCENT BIRD
+    726: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=298)],  # Reward: 28 - A Lunar Observation Party - Story 2
+    729: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=299)],  # Reward: 28 - A Lunar Observation Party - Story 3
+    730: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=548)],  # Reward: "MY LIST" to you!
+    731: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=300)],  # Reward: 28 - A Lunar Observation Party - Story 4
+    734: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=301)],  # Reward: 29 - Intra-club Field Day - Story 1
+    735: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=526)],  # Reward: One More Sunshine Story
+    736: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=302)],  # Reward: 29 - Intra-club Field Day - Story 2
+    739: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=303)],  # Reward: 29 - Intra-club Field Day - Story 3
+    740: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=529)],  # Reward: Oyasuminasan!
+    741: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=304)],  # Reward: 29 - Intra-club Field Day - Story 4
+    744: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=305)],  # Reward: 30 - Our Light Show - Story 1
+    745: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=532)],  # Reward: in this unstable world
+    746: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=306)],  # Reward: 30 - Our Light Show - Story 2
+    749: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=307)],  # Reward: 30 - Our Light Show - Story 3
+    750: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=531)],  # Reward: Pianoforte Monologue
+    751: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=308)],  # Reward: 30 - Our Light Show - Story 4
+    754: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=309)],  # Reward: 31 - An Aqours New Year - Story 1
+    755: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=534)],  # Reward: Beginner's Sailing
+    756: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=310)],  # Reward: 31 - An Aqours New Year - Story 2
+    759: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=311)],  # Reward: 31 - An Aqours New Year - Story 3
+    760: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=536)],  # Reward: RED GEM WINK
+    761: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=312)],  # Reward: 31 - An Aqours New Year - Story 4
+    764: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=313)],  # Reward: 32 - An Aqours Setsubun! - Story 1
+    765: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=535)],  # Reward: WHITE FIRST LOVE
+    766: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=314)],  # Reward: 32 - An Aqours Setsubun! - Story 2
+    769: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=315)],  # Reward: 32 - An Aqours Setsubun! - Story 3
+    770: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=539)],  # Reward: New winding road
+    771: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=316)],  # Reward: 32 - An Aqours Setsubun! - Story 4
+    774: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=317)],  # Reward: 33 - White Day Secret - Story 1
+    775: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=538)],  # Reward: SAKANAKANANDAKA?
+    776: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=318)],  # Reward: 33 - White Day Secret - Story 2
+    779: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=319)],  # Reward: 33 - White Day Secret - Story 3
+    780: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=540)],  # Reward: KISEKIHIKARU
+    781: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=320)],  # Reward: 33 - White Day Secret - Story 4
+    784: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=321)],  # Reward: 34 - Spring Has Sprung! - Story 1
+    785: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=542)],  # Reward: Guilty Eyes Fever
+    786: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=322)],  # Reward: 34 - Spring Has Sprung! - Story 2
+    789: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=323)],  # Reward: 34 - Spring Has Sprung! - Story 3
+    790: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=547)],  # Reward: P.S. no Mukougawa
+    791: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=324)],  # Reward: 34 - Spring Has Sprung! - Story 4
+    794: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=325)],  # Reward: 35 - Time for Aqours to Advertise - Story 1
+    795: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=558)],  # Reward: LONELY TUNING
+    796: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=326)],  # Reward: 35 - Time for Aqours to Advertise - Story 2
+    799: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=327)],  # Reward: 35 - Time for Aqours to Advertise - Story 3
+    800: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=541)],  # Reward: Hop Step Yippee!
+    801: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=328)],  # Reward: 35 - Time for Aqours to Advertise - Story 4
+    804: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=329)],  # Reward: 36 - School Idol Festival - Story 1
+    805: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=570)],  # Reward: No.10
+    806: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=330)],  # Reward: 36 - School Idol Festival - Story 2
+    810: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=544)],  # Reward: Thank you, FRIENDS!!
+    811: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=332)],  # Reward: 36 - School Idol Festival - Story 4
+    814: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=555)],  # Reward: Hajimari Road
+    817: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=556)],  # Reward: Marine Border Parasol
+    820: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=557)],  # Reward: Yosoku Fukano Driving!
+    823: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=564)],  # Reward: Bokura no Hashittekita Michi wa...
+    826: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=565)],  # Reward: Next SPARKLING!!
+    829: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=563)],  # Reward: Toso Meiso Mobius Loop
+    832: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=562)],  # Reward: Hop? Stop? Nonstop!
+    835: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=567)],  # Reward: Believe again
+    838: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=566)],  # Reward: Brightest Melody
+    841: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=568)],  # Reward: Over The Next Rainbow
+    844: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=569)],  # Reward: Sakura Bye Bye
+    847: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=574)],  # Reward: Sotsugyo desu ne
+    850: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=577)],  # Reward: Guilty!? Farewell party
+    853: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=571)],  # Reward: Jump up HIGH!!
+    856: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=572)],  # Reward: Bouken Type A, B, C!!
+    859: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=573)],  # Reward: Deep Resonance
+    862: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=575)],  # Reward: MITAIKEN HORIZON
+    865: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=581)],  # Reward: New Romantic Sailors
+    868: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=582)],  # Reward: Braveheart Coaster
+    871: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=586)],  # Reward: Amazing Travel DNA
+    874: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=610)],  # Reward: i-n-g, I TRY!!
+    877: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=611)],  # Reward: Love Pulsar
+    880: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=612)],  # Reward: CHANGELESS
+    883: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=613)],  # Reward: Kuchu Renairon
+    886: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=615)],  # Reward: Phantom Rocket Adventure
+    889: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=616)],  # Reward: Kodoku Teleport
+    892: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=618)],  # Reward: Maze Sekai
+    895: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=533)],  # Reward: Kimi no Hitomi o Meguru Boken
+    898: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=609)],  # Reward: Dance with Minotaurus
+    900: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=608)],  # Reward: A song for You! You? You!!
+    904: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=620)],  # Reward: Natte shimatta!
+    908: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=622)],  # Reward: Bokura wa Ima no Naka de (LittleMore-Rock Mix)
+    912: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=623)],  # Reward: No brand girls (GRP-Explosion Mix)
+    916: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=624)],  # Reward: START:DASH!!（Bitter-Sweet Mix）
+    920: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=625)],  # Reward: Wonderful Rush（Heavy-Rush Mix）
+    924: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=626)],  # Reward: Music S.T.A.R.T!!（SKA-Feel Mix）
+    928: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=627)],  # Reward: Pure girls project（Super-Mondo Mix）
+    932: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=628)],  # Reward: Cutie Panther (Metal-Panther Mix)
+    936: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=629)],  # Reward: Binetsu kara Mystery (TeKe-TeKe ELEKI Mix)
+    940: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=617)],  # Reward: Fantastic Departure!
+    944: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=619)],  # Reward: Dazzling White Town
     948: [item.Reward(add_type=ADD_TYPE.RECOVER_LP_ITEM, item_id=3, amount=10)],
     949: [item.Reward(add_type=ADD_TYPE.EXCHANGE_POINT, item_id=2, amount=20)],
     950: [item.Reward(add_type=ADD_TYPE.ITEM, item_id=23, amount=9)],
@@ -78,11 +566,14 @@ ACHIEVEMENT_REWARDS: dict[int, list[item.Reward]] = {
     ],
     10290006: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=533)],
     10290009: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3006)],
-    10290011: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3016)],
+    10290011: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3016)],  # Reward: [Story] - Story 2
+    10290012: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3017)],  # Reward: [Story] - Story 3
     10290014: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3007)],
-    10290016: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3020)],
+    10290016: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3020)],  # Reward: [Story] - Story 2
+    10290017: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3021)],  # Reward: [Story] - Story 3
     10290019: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3008)],
-    10290021: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3024)],
+    10290021: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3024)],  # Reward: [Story] - Story 2
+    10290022: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3025)],  # Reward: [Story] - Story 3
     10290024: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3009)],
     10290025: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3010)],
     10290026: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3011)],
@@ -94,6 +585,22 @@ ACHIEVEMENT_REWARDS: dict[int, list[item.Reward]] = {
     10290032: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3031)],
     10290035: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3034)],
     10290036: [item.Reward(add_type=ADD_TYPE.UNIT_MAX, item_id=0, amount=100)],
+    10290037: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3015)],  # Reward: [Story] - Story 1
+    10290038: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3019)],  # Reward: [Story] - Story 1
+    10290039: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3023)],  # Reward: [Story] - Story 1
+    10290040: [
+        item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3001)
+    ],  # Reward: Real-Life Escape Game - Prologue - Case of the Missing Trunk
+    10290050: [
+        item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3037)
+    ],  # Reward: Enchanting Everyone - Enchanting Everyone
+    10290050: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3040)],  # Reward: Fantastic Stage - Fantastic Stage
+    10290050: [
+        item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3043)
+    ],  # Reward: Nijigasaki★Magical★Story - Nijigasaki★Magical★Story
+    10290051: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3038)],  # Reward: Enchanting Everyone - Story 2
+    10290053: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3041)],  # Reward: Fantastic Stage - Story 2
+    10290055: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3044)],  # Reward: Nijigasaki★Magical★Story - Story 2
     10290058: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3052)],
     10290059: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3051)],
     10290061: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3048)],
@@ -109,6 +616,8 @@ ACHIEVEMENT_REWARDS: dict[int, list[item.Reward]] = {
     10290076: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3059)],
     10290078: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3060)],
     10290080: [item.Reward(add_type=ADD_TYPE.UNIT_MAX, item_id=0, amount=100)],
+    10290081: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3063)],  # Reward: [Story] - μ's Have Come to Town!
+    10290082: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3064)],  # Reward: [Story] - Aqours Have Come to Town!
     10290088: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3062)],
     10290095: [
         item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3043),
@@ -117,6 +626,12 @@ ACHIEVEMENT_REWARDS: dict[int, list[item.Reward]] = {
     ],
     10290096: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=621)],
     10290097: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=632)],
+    10290098: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3070)],  # Reward: [Story] - μ'sの天カス学園体験記 1話
+    10290099: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3071)],  # Reward: [Story] - μ'sの天カス学園体験記 2話
+    10290100: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3072)],  # Reward: [Story] - μ'sの天カス学園体験記 3話
+    10290102: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3074)],  # Reward: [Story] - Aqoursの天カス学園体験記 1話
+    10290103: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3075)],  # Reward: [Story] - Aqoursの天カス学園体験記 2話
+    10290104: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3076)],  # Reward: [Story] - Aqoursの天カス学園体験記 3話
     10290106: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=637)],
     10290107: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3078)],
     10290108: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3079)],
@@ -136,10 +651,24 @@ ACHIEVEMENT_REWARDS: dict[int, list[item.Reward]] = {
     10290122: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=688)],
     10290123: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=698)],
     10290124: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=700)],
-    10290127: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3088)],
-    10290128: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3089)],
-    10290132: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3092)],
-    10290133: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3093)],
+    10290127: [
+        item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3088)
+    ],  # Reward: After School with Liella! - After School with Liella! 1
+    10290128: [
+        item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3089)
+    ],  # Reward: After School with Liella! - After School with Liella! 2
+    10290129: [
+        item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3090)
+    ],  # Reward: After School with Liella! - After School with Liella! 3
+    10290132: [
+        item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3092)
+    ],  # Reward: Liella!'s Hot-Pot Party - Liella!'s Hot-Pot Party 1
+    10290133: [
+        item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3093)
+    ],  # Reward: Liella!'s Hot-Pot Party - Liella!'s Hot-Pot Party 2
+    10290134: [
+        item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3094)
+    ],  # Reward: Liella!'s Hot-Pot Party - Liella!'s Hot-Pot Party 3
     10290136: [
         item.Reward(add_type=ADD_TYPE.LIVE, item_id=631),
         item.Reward(add_type=ADD_TYPE.LIVE, item_id=636),
@@ -157,8 +686,15 @@ ACHIEVEMENT_REWARDS: dict[int, list[item.Reward]] = {
     ],
     10290139: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=663), item.Reward(add_type=ADD_TYPE.LIVE, item_id=687)],
     10290142: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=696)],
-    10290143: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3098)],
-    10290144: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3099)],
+    10290143: [
+        item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3098)
+    ],  # Reward: Retro Pop Liella! - Retro Pop Liella! 1
+    10290144: [
+        item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3099)
+    ],  # Reward: Retro Pop Liella! - Retro Pop Liella! 2
+    10290145: [
+        item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3100)
+    ],  # Reward: Retro Pop Liella! - Retro Pop Liella! 3
     10290147: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=691)],
     10290148: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=726)],
     10290149: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=728)],
@@ -167,8 +703,15 @@ ACHIEVEMENT_REWARDS: dict[int, list[item.Reward]] = {
     10290152: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=745)],
     10290153: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=750)],
     10290154: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=757)],
-    10290165: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3102)],
-    10290166: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3103)],
+    10290165: [
+        item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3102)
+    ],  # Reward: Tail the 2nd Years! - Tail the 2nd Years! 1
+    10290166: [
+        item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3103)
+    ],  # Reward: Tail the 2nd Years! - Tail the 2nd Years! 2
+    10290167: [
+        item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=3104)
+    ],  # Reward: Tail the 2nd Years! - Tail the 2nd Years! 3
     20010007: [
         item.Reward(add_type=ADD_TYPE.LOVECA, item_id=4),
         item.Reward(add_type=ADD_TYPE.GAME_COIN, item_id=3, amount=10000),
@@ -291,4 +834,7 @@ ACHIEVEMENT_REWARDS: dict[int, list[item.Reward]] = {
 
 
 def get(achievement_id: int):
-    return ACHIEVEMENT_REWARDS.get(achievement_id, [ACHIEVEMENT_REWARD_DEFAULT])
+    reward = ACHIEVEMENT_REWARDS.get(achievement_id)
+    if reward is None:
+        reward = [ACHIEVEMENT_REWARD_DEFAULT]
+    return reward
