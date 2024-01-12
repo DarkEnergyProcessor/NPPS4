@@ -46,11 +46,7 @@ class UserInfoData(pydantic.BaseModel):
     unlock_random_live_aqours: int = 0
 
 
-async def get(context: idol.SchoolIdolParams, id: int):
-    if isinstance(context, idol.SchoolIdolUserParams):
-        id = context.token.user_id
-    else:
-        raise ValueError("must specify user id")
+async def get(context: idol.BasicSchoolIdolContext, id: int | None = None):
     return await context.db.main.get(main.User, id)
 
 

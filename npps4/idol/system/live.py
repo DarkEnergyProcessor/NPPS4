@@ -31,6 +31,15 @@ class LiveInfo(pydantic.BaseModel):
     notes_list: list[LiveNote]
 
 
+class LiveStatus(pydantic.BaseModel):
+    live_difficulty_id: int
+    status: int
+    hi_score: int
+    hi_combo_count: int
+    clear_cnt: int
+    achieved_goal_id_list: list[int]
+
+
 async def unlock_live(context: idol.BasicSchoolIdolContext, user: main.User, live_track_id: int):
     q = sqlalchemy.select(live.LiveSetting).where(live.LiveSetting.live_track_id == live_track_id)
     result = await context.db.live.execute(q)
@@ -64,6 +73,22 @@ async def init(context: idol.BasicSchoolIdolContext, user: main.User):
         context.db.main.add(live_clear)
 
     await context.db.main.flush()
+
+
+async def get_normal_live_clear_status(context: idol.BasicSchoolIdolContext, user: main.User):
+    q = sqlalchemy.select(main.LiveClear).where(main.LiveClear.user_id == user.id)
+    result = await context.db.main.execute(q)
+    return [
+        LiveStatus(
+            live_difficulty_id=a.live_difficulty_id,
+            status=2,
+            hi_score=a.hi_score,
+            hi_combo_count=a.hi_combo_cnt,
+            clear_cnt=a.clear_cnt,
+            achieved_goal_id_list=[],
+        )
+        for a in result.scalars()
+    ]
 
 
 async def get_live_info_table(context: idol.BasicSchoolIdolContext, live_difficulty_id: int):

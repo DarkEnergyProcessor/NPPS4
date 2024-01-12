@@ -61,17 +61,8 @@ class LiveScheduleResponse(pydantic.BaseModel):
     training_live_list: list[TrainingLive]
 
 
-class LiveStatus(pydantic.BaseModel):
-    live_difficulty_id: int
-    status: int
-    hi_score: int
-    hi_combo_count: int
-    clear_cnt: int
-    achieved_goal_id_list: list[int]
-
-
 class LiveStatusResponse(pydantic.BaseModel):
-    normal_live_status_list: list
+    normal_live_status_list: list[live.LiveStatus]
     special_live_status_list: list
     training_live_status_list: list
     marathon_live_status_list: list
@@ -147,14 +138,10 @@ class LivePreciseScoreResponse(pydantic.BaseModel):
 @idol.register("live", "liveStatus")
 async def live_livestatus(context: idol.SchoolIdolUserParams) -> LiveStatusResponse:
     # TODO
-    util.stub("live", "liveStatus", context.raw_request_data)
+    util.stub("live", "liveStatus")
+    current_user = await user.get_current(context)
     return LiveStatusResponse(
-        normal_live_status_list=[
-            LiveStatus(
-                live_difficulty_id=i, status=2, hi_score=0, hi_combo_count=0, clear_cnt=0, achieved_goal_id_list=[]
-            )
-            for i in itertools.chain(range(1, 4), (350,), range(1190, 1226))
-        ],
+        normal_live_status_list=await live.get_normal_live_clear_status(context, current_user),
         special_live_status_list=[],
         training_live_status_list=[],
         marathon_live_status_list=[],

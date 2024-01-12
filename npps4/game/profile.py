@@ -67,7 +67,6 @@ async def profile_cardranking(context: idol.SchoolIdolUserParams, request: Profi
 
 @idol.register("profile", "profileInfo")
 async def profile_profileinfo(context: idol.SchoolIdolUserParams, request: ProfileRequest) -> ProfileInfoResponse:
-    current_user = await user.get_current(context)
     target_user = await user.get(context, request.user_id)
     if target_user is None:
         raise idol.error.IdolError(idol.error.ERROR_CODE_USER_NOT_EXIST, 600)
