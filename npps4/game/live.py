@@ -123,6 +123,27 @@ class LivePlayResponse(pydantic.BaseModel):
     server_timestamp: int = pydantic.Field(default_factory=util.time)
 
 
+# https://github.com/YumeMichi/honoka-chan/blob/6778972c1ff54a8a038ea07b676e6acdbb211f96/handler/live.go#L447
+class LivePreciseScoreData(pydantic.BaseModel):
+    has_record: bool
+    live_info: live.LiveInfo
+    can_replay: bool = False
+    random_seed: int | None = None
+    max_combo: int | None = None
+    update_date: str | None = None
+    precise_list: None = None
+    deck_info: advanced.LiveDeckInfo | None = None
+    tap_adjust: None = None
+
+
+class LivePreciseScoreResponse(pydantic.BaseModel):
+    rank_info: list[LivePlayRankInfo]
+    on: LivePreciseScoreData
+    off: LivePreciseScoreData
+    can_activate_Effect: bool = False
+    server_timestamp: int = pydantic.Field(default_factory=util.time)
+
+
 @idol.register("live", "liveStatus")
 async def live_livestatus(context: idol.SchoolIdolUserParams) -> LiveStatusResponse:
     # TODO
@@ -182,7 +203,7 @@ async def live_partylist(context: idol.SchoolIdolUserParams, request: LivePartyL
 
 
 @idol.register("live", "preciseScore")
-async def live_precisescore(context: idol.SchoolIdolUserParams) -> idol.core.DummyModel:
+async def live_precisescore(context: idol.SchoolIdolUserParams) -> LivePreciseScoreResponse:
     util.stub("live", "preciseScore", context.raw_request_data)
     raise idol.error.IdolError(idol.error.ERROR_CODE_LIVE_PRECISE_LIST_NOT_FOUND, 600)
 

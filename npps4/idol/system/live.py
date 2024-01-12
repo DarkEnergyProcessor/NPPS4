@@ -1,3 +1,5 @@
+import random
+
 import pydantic
 import sqlalchemy
 
@@ -17,8 +19,8 @@ class LiveNote(pydantic.BaseModel):
     effect: int
     effect_value: float
     position: int
-    speed: float = 1.0
-    vanish: Literal[0, 1, 2] = 0
+    speed: float = 1.0  # Higher = slower. Lower = faster.
+    vanish: Literal[0, 1, 2] = 0  # 0 = Normal. 1 = Hidden. 2 = Sudden.
 
 
 class LiveInfo(pydantic.BaseModel):
