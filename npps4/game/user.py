@@ -1,7 +1,7 @@
 from .. import idol
 from .. import util
-from ..config import config
 from ..idol import error
+from ..idol.system import advanced
 from ..idol.system import unit
 from ..idol.system import user
 
@@ -45,11 +45,7 @@ class UserNotificationTokenRequest(pydantic.BaseModel):
 
 @idol.register("user", "changeName", batchable=False)
 async def user_changename(context: idol.SchoolIdolUserParams, request: ChangeNameRequest) -> ChangeNameResponse:
-    if request.name.isspace():
-        raise error.IdolError(error.ERROR_CODE_ONLY_WHITESPACE_CHARACTERS, 600)
-    if await config.contains_badwords(request.name, context):
-        raise error.IdolError(error.ERROR_CODE_NG_WORDS, 600)
-
+    await advanced.test_name(context, request.name)
     current_user = await user.get_current(context)
     oldname = current_user.name
     current_user.name = request.name

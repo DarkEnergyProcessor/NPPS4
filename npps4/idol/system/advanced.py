@@ -6,6 +6,7 @@ from . import item
 from . import unit
 from ... import idol
 from ... import leader_skill
+from ...config import config
 from ...const import ADD_TYPE
 from ...idol.system import background
 from ...idol.system import museum
@@ -182,6 +183,15 @@ async def get_user_guest_party_info(context: idol.BasicSchoolIdolContext, user: 
         available_social_point=5,
         friend_status=0,
     )
+
+
+async def test_name(context: idol.BasicSchoolIdolContext, name: str):
+    if name.isspace():
+        raise idol.error.IdolError(idol.error.ERROR_CODE_ONLY_WHITESPACE_CHARACTERS, 600)
+    if any(ord(c) < 32 for c in name):
+        raise idol.error.IdolError(idol.error.ERROR_CODE_UNAVAILABLE_WORDS, 600)
+    if await config.contains_badwords(name, context):
+        raise idol.error.IdolError(idol.error.ERROR_CODE_NG_WORDS, 600)
 
 
 class TeamStatCalculator:

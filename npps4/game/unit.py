@@ -1,6 +1,6 @@
 from .. import idol
 from .. import util
-from ..config import config
+from ..idol.system import advanced
 from ..idol.system import unit
 from ..idol.system import user
 
@@ -137,10 +137,7 @@ async def unit_deckname(context: idol.SchoolIdolUserParams, request: UnitDeckNam
     if deck_data is None:
         raise idol.error.IdolError(detail="Invalid target deck")
 
-    if request.deck_name.isspace():
-        raise idol.error.IdolError(idol.error.ERROR_CODE_ONLY_WHITESPACE_CHARACTERS, 600)
-    if await config.contains_badwords(request.deck_name, context):
-        raise idol.error.IdolError(idol.error.ERROR_CODE_NG_WORDS, 600)
+    await advanced.test_name(context, request.deck_name)
 
     deck_data[0].name = request.deck_name
     return idol.core.DummyModel()
