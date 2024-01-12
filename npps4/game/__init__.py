@@ -28,6 +28,7 @@ from . import payment
 from . import personalnotice
 from . import reward
 from . import scenario
+from . import secretbox
 from . import stamp
 from . import subscenario
 from . import tos
