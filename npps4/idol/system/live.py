@@ -28,6 +28,9 @@ class LiveInfo(pydantic.BaseModel):
     is_random: bool = False
     ac_flag: int = 0
     swing_flag: int = 0
+
+
+class LiveInfoWithNotes(LiveInfo):
     notes_list: list[LiveNote]
 
 
@@ -126,7 +129,7 @@ async def get_live_info(context: idol.BasicSchoolIdolContext, live_difficulty_id
         return None
 
     # TODO: Randomize
-    return LiveInfo(
+    return LiveInfoWithNotes(
         live_difficulty_id=live_difficulty_id,
         ac_flag=live_setting.ac_flag,
         swing_flag=live_setting.swing_flag,

@@ -1,8 +1,11 @@
 import pydantic
 
+
 from .. import idol
 from .. import util
 from ..idol.system import advanced
+from ..idol.system import common
+from ..idol.system import item
 from ..idol.system import live
 from ..idol.system import museum
 from ..idol.system import unit
@@ -89,7 +92,7 @@ class LivePlayRequest(pydantic.BaseModel):
 
 
 class LivePlayList(pydantic.BaseModel):
-    live_info: live.LiveInfo
+    live_info: live.LiveInfoWithNotes
     deck_info: advanced.LiveDeckInfo
 
 
@@ -201,6 +204,66 @@ class LiveRewardRequest(pydantic.BaseModel):
     precise_score_log: LiveRewardPreciseScore
     event_point: int
     event_id: int | None
+
+
+class LiveRewardBaseInfo(pydantic.BaseModel):
+    player_exp: int
+    player_exp_unit_max: common.BeforeAfter
+    player_exp_friend_max: common.BeforeAfter
+    player_exp_lp_max: common.BeforeAfter
+    game_coin: int
+    game_coin_reward_box_flag: bool
+    social_point: int
+
+
+class LiveRewardUnitList(pydantic.BaseModel):
+    live_clear: list[item.Reward]
+    live_rank: list[item.Reward]
+    live_combo: list[item.Reward]
+
+
+class LiveRewardResponseUnitList(pydantic.BaseModel):
+    unit_owning_user_id: int
+    unit_id: int
+    position: int
+    level: int
+    level_limit_id: int
+    display_rank: int
+    unit_skill_level: int
+    is_rank_max: bool
+    is_love_max: bool
+    is_level_max: bool
+    is_signed: bool
+    before_love: int
+    love: int
+    max_love: int
+
+
+class LiveRewardNextLevel(pydantic.BaseModel):
+    level: int
+    from_exp: int
+
+
+class LiveRewardResponse(pydantic.BaseModel):
+    live_info: list[live.LiveInfo]
+    rank: int
+    combo_rank: int
+    total_love: int
+    is_high_score: bool
+    hi_score: int
+    base_reward_info: LiveRewardBaseInfo
+    reward_unit_list: LiveRewardUnitList
+    unlocked_subscenario_ids: list[int]
+    unlocked_multi_unit_scenario_ids: list[int]
+    effort_point: list  # TODO
+    is_effort_point_visible: bool
+    limited_effort_box: list  # TODO
+    unit_list: list[LiveRewardResponseUnitList]
+    before_user_info: user.UserInfoData
+    after_user_info: user.UserInfoData
+    next_level_info: list[LiveRewardNextLevel]
+    # TODO
+    museum_info: museum.MuseumInfoData
 
 
 @idol.register("live", "liveStatus")
@@ -317,6 +380,6 @@ async def live_gameover(context: idol.SchoolIdolUserParams):
 
 
 @idol.register("live", "reward")
-async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardRequest):
+async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardRequest) -> LiveRewardResponse:
     util.stub("live", "reward", request)
     raise idol.error.IdolError(idol.error.ERROR_CODE_LIVE_NOT_FOUND, 600)

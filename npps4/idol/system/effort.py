@@ -1,5 +1,6 @@
 import pydantic
 
+from . import common
 from . import item
 from ... import idol
 from ...db import main
@@ -10,11 +11,9 @@ class EffortReward(item.RewardWithCategory):
     rarity: int = 6  # TODO
 
 
-class EffortResult(pydantic.BaseModel):
+class EffortResult(common.BeforeAfter):
     live_effort_point_box_spec_id: int
     capacity: int
-    before: int
-    after: int
     rewards: list[EffortReward]
 
 
