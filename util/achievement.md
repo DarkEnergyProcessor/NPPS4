@@ -187,9 +187,13 @@ When to check: If egligible of getting login bonus.
 
 * `params1` - Amount of login required.
 
-### _Unknown_ (Type 53)
+### Clear Specific Amount of Achievement Category (Type 53)
 
-**Undocumented.**
+When to check: When completing achievement.
+
+* `params1` - Achievement category in `achievement_category_m`.
+* `params2` - Amount of achievement to clear.
+* `params3` - _Unknown_
 
 ### Collect Items (Type 55)
 

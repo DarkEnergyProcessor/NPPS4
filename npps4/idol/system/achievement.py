@@ -52,8 +52,14 @@ class AchievementContext:
         self.accomplished.extend(other.accomplished)
         self.new.extend(other.new)
 
+    def fix(self):
+        # Anything in "new" should be removed if it's in "accomplished"
+        accomplished_ids = set(ach.achievement_id for ach in self.accomplished)
+        self.new = list(filter(lambda ach: ach.achievement_id not in accomplished_ids, self.new))
+        return self
+
     def __add__(self, other: "AchievementContext"):
-        return AchievementContext(self.accomplished + other.accomplished, self.new + other.new)
+        return AchievementContext(self.accomplished + other.accomplished, self.new + other.new).fix()
 
 
 async def get_achievement_info(context: idol.BasicSchoolIdolContext, achievement_id: int):

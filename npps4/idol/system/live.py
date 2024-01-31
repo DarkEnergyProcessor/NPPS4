@@ -11,7 +11,7 @@ from ...config import config
 from ...db import main
 from ...db import live
 
-from typing import Literal, Sequence
+from typing import Iterable, Literal, Sequence
 
 
 class LiveNote(pydantic.BaseModel):
@@ -184,7 +184,7 @@ def make_rank_range(live_info: live.CommonLive, live_setting: live.LiveSetting):
     }
 
 
-def get_index_of_range(value: int, seq: Sequence[Sequence[int]], start: int = 0, default: int = -1):
+def get_index_of_range(value: int, seq: Iterable[Sequence[int]], start: int = 0, default: int = -1):
     for i, r in enumerate(seq, start):
         if value in r:
             return i
