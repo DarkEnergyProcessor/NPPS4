@@ -1,0 +1,3 @@
+SCORE = 1
+COMBO = 2
+CLEAR = 3

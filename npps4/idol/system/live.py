@@ -3,13 +3,15 @@ import random
 import pydantic
 import sqlalchemy
 
+from ...const import LIVE_GOAL_TYPE
+
 from ... import db
 from ... import idol
 from ...config import config
 from ...db import main
 from ...db import live
 
-from typing import Literal
+from typing import Literal, Sequence
 
 
 class LiveNote(pydantic.BaseModel):
@@ -88,7 +90,7 @@ async def get_normal_live_clear_status(context: idol.BasicSchoolIdolContext, use
             hi_score=a.hi_score,
             hi_combo_count=a.hi_combo_cnt,
             clear_cnt=a.clear_cnt,
-            achieved_goal_id_list=[],
+            achieved_goal_id_list=await get_achieved_goal_id_list(context, a),
         )
         for a in result.scalars()
     ]
@@ -147,3 +149,82 @@ async def get_live_info(context: idol.BasicSchoolIdolContext, live_difficulty_id
             for l in beatmap_data
         ],
     )
+
+
+async def get_goal_list_by_live_difficulty_id(context: idol.BasicSchoolIdolContext, live_difficulty_id: int):
+    q = sqlalchemy.select(live.LiveGoalReward).where(live.LiveGoalReward.live_difficulty_id == live_difficulty_id)
+    result = await context.db.live.execute(q)
+    return list(result.scalars())
+
+
+MAX_INT = 2147483647
+
+
+def make_rank_range(live_info: live.CommonLive, live_setting: live.LiveSetting):
+    return {
+        # Note: The ranges are in reverse order
+        LIVE_GOAL_TYPE.SCORE: [
+            range(live_setting.s_rank_score, MAX_INT),
+            range(live_setting.a_rank_score, live_setting.s_rank_score),
+            range(live_setting.b_rank_score, live_setting.a_rank_score),
+            range(live_setting.c_rank_score, live_setting.b_rank_score),
+        ],
+        LIVE_GOAL_TYPE.COMBO: [
+            range(live_setting.s_rank_combo, MAX_INT),
+            range(live_setting.a_rank_combo, live_setting.s_rank_combo),
+            range(live_setting.b_rank_combo, live_setting.a_rank_combo),
+            range(live_setting.c_rank_combo, live_setting.b_rank_combo),
+        ],
+        LIVE_GOAL_TYPE.CLEAR: [
+            range(live_info.s_rank_complete, MAX_INT),
+            range(live_info.a_rank_complete, live_info.s_rank_complete),
+            range(live_info.b_rank_complete, live_info.a_rank_complete),
+            range(live_info.c_rank_complete, live_info.b_rank_complete),
+        ],
+    }
+
+
+def get_index_of_range(value: int, seq: Sequence[Sequence[int]], start: int = 0, default: int = -1):
+    for i, r in enumerate(seq, start):
+        if value in r:
+            return i
+
+    return default
+
+
+LIVE_GOAL_TYPES = (LIVE_GOAL_TYPE.SCORE, LIVE_GOAL_TYPE.COMBO, LIVE_GOAL_TYPE.CLEAR)
+
+
+async def get_achieved_goal_id_list(context: idol.BasicSchoolIdolContext, clear_info: main.LiveClear):
+    live_info = await get_live_info_table(context, clear_info.live_difficulty_id)
+    result: list[int] = []
+    if live_info is not None:
+        live_setting = await get_live_setting(context, live_info)
+        if live_setting is not None:
+            # Sort out the goal rewards
+            goal_list = await get_goal_list_by_live_difficulty_id(context, clear_info.live_difficulty_id)
+            goal_list_by_type = dict(
+                (
+                    i,
+                    sorted(
+                        filter(lambda g: g.live_goal_type == i, goal_list),
+                        key=lambda g: g.rank,
+                    ),
+                )
+                for i in LIVE_GOAL_TYPES
+            )
+            rank_ranges = make_rank_range(live_info, live_setting)
+            score_rank = get_index_of_range(clear_info.hi_score, rank_ranges[LIVE_GOAL_TYPE.SCORE], 1, 5)
+            combo_rank = get_index_of_range(clear_info.hi_combo_cnt, rank_ranges[LIVE_GOAL_TYPE.COMBO], 1, 5)
+            clear_rank = get_index_of_range(clear_info.clear_cnt, rank_ranges[LIVE_GOAL_TYPE.CLEAR], 1, 5)
+            result.extend(
+                g.live_goal_reward_id for g in goal_list_by_type[LIVE_GOAL_TYPE.SCORE] if g.rank <= score_rank
+            )
+            result.extend(
+                g.live_goal_reward_id for g in goal_list_by_type[LIVE_GOAL_TYPE.COMBO] if g.rank <= combo_rank
+            )
+            result.extend(
+                g.live_goal_reward_id for g in goal_list_by_type[LIVE_GOAL_TYPE.CLEAR] if g.rank <= clear_rank
+            )
+
+    return result
