@@ -10,7 +10,7 @@ from ... import util
 from ...db import achievement
 from ...db import main
 
-from typing import Sequence
+from typing import Awaitable, Callable, Concatenate, Sequence, ParamSpec
 
 
 class Achievement(pydantic.BaseModel):
@@ -61,6 +61,9 @@ class AchievementContext:
     def __add__(self, other: "AchievementContext"):
         return AchievementContext(self.accomplished + other.accomplished, self.new + other.new).fix()
 
+    def __nonzero__(self):
+        return len(self.accomplished) > 0 and len(self.new) > 0
+
 
 async def get_achievement_info(context: idol.BasicSchoolIdolContext, achievement_id: int):
     ach = await context.db.achievement.get(achievement.Achievement, achievement_id)
@@ -103,11 +106,37 @@ async def init(context: idol.BasicSchoolIdolContext, user: main.User):
     await context.db.main.flush()
 
 
-async def test_params(ach_info: achievement.Achievement, args: Sequence[int | None]):
-    for i in range(1, min(len(args), 11) + 1):
-        if args[i] is not None:
-            if getattr(ach_info, f"params{i}", None) != args[i]:
-                return False
+async def get_unaccomplished_achievements(context: idol.BasicSchoolIdolContext, user: main.User):
+    q = sqlalchemy.select(main.Achievement).where(
+        main.Achievement.user_id == user.id, main.Achievement.is_accomplished == False
+    )
+    result = await context.db.main.execute(q)
+    unaccomplished_achievements: list[Achievement] = []
+
+    for ach in result.scalars():
+        ach_info = await get_achievement_info(context, ach.achievement_id)
+        if ach_info:
+            unaccomplished_achievements.append(Achievement.from_sqlalchemy(ach, ach_info))
+
+    return unaccomplished_achievements
+
+
+async def get_unaccomplished_achievement_count(context: idol.BasicSchoolIdolContext, user: main.User):
+    q = (
+        sqlalchemy.select(sqlalchemy.func.count())
+        .select_from(main.Achievement)
+        .where(main.Achievement.user_id == user.id, main.Achievement.is_accomplished == False)
+    )
+    result = await context.db.main.execute(q)
+    return result.scalar() or 0
+
+
+def test_params(ach_info: achievement.Achievement, args: Sequence[int | None]):
+    if args:
+        for i in range(min(len(args), 11) + 1):
+            if args[i] is not None:
+                if getattr(ach_info, f"params{i + 1}", None) != args[i]:
+                    return False
 
     return True
 
@@ -218,50 +247,131 @@ async def check_type_increment(
     return AchievementContext(accomplished=achieved, new=new)
 
 
-def check_type_1(context: idol.BasicSchoolIdolContext, user: main.User, increment: bool):
+_P = ParamSpec("_P")
+
+
+def recursive_achievement(
+    func: Callable[Concatenate[idol.BasicSchoolIdolContext, main.User, _P], Awaitable[AchievementContext]]
+):
+    async def wrapper(
+        context: idol.BasicSchoolIdolContext, user: main.User, *args: _P.args, **kwargs: _P.kwargs
+    ) -> AchievementContext:
+        result = AchievementContext()
+
+        while True:
+            ach_result = await func(context, user, *args, **kwargs)
+
+            if ach_result:
+                result = result + ach_result
+            else:
+                break
+
+        return result + await check_type_53_recursive(context, user)
+
+    return wrapper
+
+
+@recursive_achievement
+async def check_type_1(context: idol.BasicSchoolIdolContext, user: main.User, increment: bool):
     """
     Check live show clear achievements.
     """
-    return check_type_increment(context, user, 1, increment)
+    return await check_type_increment(context, user, 1, increment)
 
 
-def check_type_18(context: idol.BasicSchoolIdolContext, user: main.User, club_members: int):
+@recursive_achievement
+async def check_type_18(context: idol.BasicSchoolIdolContext, user: main.User, club_members: int):
     """
     Check amount of club members collected.
     """
-    return check_type_countable(context, user, 18, club_members)
+    return await check_type_countable(context, user, 18, club_members)
 
 
-def check_type_19(context: idol.BasicSchoolIdolContext, user: main.User, idolized: int):
+@recursive_achievement
+async def check_type_19(context: idol.BasicSchoolIdolContext, user: main.User, idolized: int):
     """
     Check amount of idolized club members.
     """
-    return check_type_countable(context, user, 19, idolized)
+    return await check_type_countable(context, user, 19, idolized)
 
 
-def check_type_20(context: idol.BasicSchoolIdolContext, user: main.User, max_love: int):
+@recursive_achievement
+async def check_type_20(context: idol.BasicSchoolIdolContext, user: main.User, max_love: int):
     """
     Check amount of max bonded idolized club members.
     """
-    return check_type_countable(context, user, 20, max_love)
+    return await check_type_countable(context, user, 20, max_love)
 
 
-def check_type_21(context: idol.BasicSchoolIdolContext, user: main.User, max_level: int):
+@recursive_achievement
+async def check_type_21(context: idol.BasicSchoolIdolContext, user: main.User, max_level: int):
     """
     Check amount of max leveled idolized club members.
     """
-    return check_type_countable(context, user, 21, max_level)
+    return await check_type_countable(context, user, 21, max_level)
 
 
-def check_type_30(context: idol.BasicSchoolIdolContext, user: main.User, rank: int | None = None):
+@recursive_achievement
+async def check_type_27(context: idol.BasicSchoolIdolContext, user: main.User, nlogins: int):
+    """
+    Check login bonus count
+    """
+    return await check_type_countable(context, user, 27, nlogins)
+
+
+@recursive_achievement
+async def check_type_30(context: idol.BasicSchoolIdolContext, user: main.User, rank: int | None = None):
     """
     Check player rank.
     """
-    return check_type_countable(context, user, 30, rank or user.level)
+    return await check_type_countable(context, user, 30, rank or user.level)
 
 
-def check_type_32(context: idol.BasicSchoolIdolContext, user: main.User, live_track_id: int, increment: bool):
+@recursive_achievement
+async def check_type_32(context: idol.BasicSchoolIdolContext, user: main.User, live_track_id: int, increment: bool):
     """
     Check live show clear of specific `live_track_id`
     """
-    return check_type_increment(context, user, 32, increment, 0, live_track_id)
+    return await check_type_increment(context, user, 32, increment, 1, live_track_id)
+
+
+async def check_type_53_recursive(context: idol.BasicSchoolIdolContext, user: main.User):
+    """
+    Check amount of achievement cleared with specific category
+    """
+    q = (
+        sqlalchemy.select(achievement.Achievement)
+        .where(achievement.Achievement.achievement_type == 53)
+        .group_by(achievement.Achievement.params1)
+    )
+    result = await context.db.achievement.execute(q)
+    achievement_category_to_check = set(int(ach.params1) for ach in result.scalars() if ach.params1 is not None)
+    achievement_id_list_by_category: dict[int, list[int]] = {}
+
+    for ach_cat in achievement_category_to_check:
+        q = sqlalchemy.select(achievement.Tag).where(achievement.Tag.achievement_category_id == ach_cat)
+        result = await context.db.achievement.execute(q)
+        achievement_id_list_by_category[ach_cat] = [ach.achievement_id for ach in result.scalars()]
+
+    achievement_result_all = AchievementContext()
+
+    while True:
+        achievement_result = AchievementContext()
+
+        for ach_cat, ach_ids in achievement_id_list_by_category.items():
+            q = (
+                sqlalchemy.select(sqlalchemy.func.count())
+                .select_from(main.Achievement)
+                .where(main.Achievement.user_id == user.id, main.Achievement.achievement_id.in_(ach_ids))
+            )
+            result = await context.db.main.execute(q)
+            achievement_result = achievement_result + await check_type_countable(
+                context, user, 53, result.scalar() or 0, 2, ach_cat
+            )
+
+        if achievement_result:
+            achievement_result_all = achievement_result_all + achievement_result
+        else:
+            break
+
+    return achievement_result_all
