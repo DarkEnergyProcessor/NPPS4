@@ -106,27 +106,39 @@ async def init(context: idol.BasicSchoolIdolContext, user: main.User):
     await context.db.main.flush()
 
 
-async def get_unaccomplished_achievements(context: idol.BasicSchoolIdolContext, user: main.User):
-    q = sqlalchemy.select(main.Achievement).where(
-        main.Achievement.user_id == user.id, main.Achievement.is_accomplished == False
-    )
+async def get_achievements(context: idol.BasicSchoolIdolContext, user: main.User, accomplished: bool | None = None):
+    if accomplished is not None:
+        q = sqlalchemy.select(main.Achievement).where(
+            main.Achievement.user_id == user.id, main.Achievement.is_accomplished == accomplished
+        )
+    else:
+        q = sqlalchemy.select(main.Achievement).where(main.Achievement.user_id == user.id)
     result = await context.db.main.execute(q)
-    unaccomplished_achievements: list[Achievement] = []
+    achievement_list: list[Achievement] = []
 
     for ach in result.scalars():
         ach_info = await get_achievement_info(context, ach.achievement_id)
         if ach_info:
-            unaccomplished_achievements.append(Achievement.from_sqlalchemy(ach, ach_info))
+            achievement_list.append(Achievement.from_sqlalchemy(ach, ach_info))
 
-    return unaccomplished_achievements
+    return achievement_list
 
 
-async def get_unaccomplished_achievement_count(context: idol.BasicSchoolIdolContext, user: main.User):
-    q = (
-        sqlalchemy.select(sqlalchemy.func.count())
-        .select_from(main.Achievement)
-        .where(main.Achievement.user_id == user.id, main.Achievement.is_accomplished == False)
-    )
+async def get_achievement_count(
+    context: idol.BasicSchoolIdolContext, user: main.User, accomplished: bool | None = None
+):
+    if accomplished is not None:
+        q = (
+            sqlalchemy.select(sqlalchemy.func.count())
+            .select_from(main.Achievement)
+            .where(main.Achievement.user_id == user.id, main.Achievement.is_accomplished == accomplished)
+        )
+    else:
+        q = (
+            sqlalchemy.select(sqlalchemy.func.count())
+            .select_from(main.Achievement)
+            .where(main.Achievement.user_id == user.id)
+        )
     result = await context.db.main.execute(q)
     return result.scalar() or 0
 
