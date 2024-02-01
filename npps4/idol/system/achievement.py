@@ -32,7 +32,7 @@ class Achievement(pydantic.BaseModel):
         return Achievement(
             achievement_id=ach.achievement_id,
             count=ach.count,
-            is_accomplished=True,
+            is_accomplished=ach.is_accomplished,
             insert_date=util.timestamp_to_datetime(ach.insert_date),
             end_date=None if ach.end_date == 0 else util.timestamp_to_datetime(ach.end_date),
             remaining_time="",  # FIXME: What to put here?
@@ -61,7 +61,7 @@ class AchievementContext:
     def __add__(self, other: "AchievementContext"):
         return AchievementContext(self.accomplished + other.accomplished, self.new + other.new).fix()
 
-    def __nonzero__(self):
+    def has_achievement(self):
         return len(self.accomplished) > 0 and len(self.new) > 0
 
 
@@ -79,13 +79,19 @@ async def get_next_achievement_ids(context: idol.BasicSchoolIdolContext, achieve
 async def add_achievement(
     context: idol.BasicSchoolIdolContext, user: main.User, ach: achievement.Achievement, time: int
 ):
+    print("ADD ACHIEVEMENT", user.id, ach.achievement_id)
     user_ach = main.Achievement(
         achievement_id=ach.achievement_id,
         user_id=user.id,
         achievement_type=ach.achievement_type,
+        count=0,
+        is_accomplished=False,
         insert_date=time,
+        end_date=None if ach.end_date is None else util.datetime_to_timestamp(ach.end_date),
+        is_new=True,
     )
     context.db.main.add(user_ach)
+    await context.db.main.flush()
     return user_ach
 
 
@@ -145,7 +151,7 @@ async def get_achievement_count(
 
 def test_params(ach_info: achievement.Achievement, args: Sequence[int | None]):
     if args:
-        for i in range(min(len(args), 11) + 1):
+        for i in range(min(len(args), 11)):
             if args[i] is not None:
                 if getattr(ach_info, f"params{i + 1}", None) != args[i]:
                     return False
@@ -166,7 +172,7 @@ async def check_type_countable(
         main.Achievement.achievement_type == achievement_type,
         main.Achievement.is_accomplished == False,
     )
-    result = await context.db.achievement.execute(q)
+    result = await context.db.main.execute(q)
 
     time = util.time()
     achieved: list[Achievement] = []
@@ -188,24 +194,14 @@ async def check_type_countable(
                 # New achievement
                 for next_ach_id in await get_next_achievement_ids(context, ach.achievement_id):
                     new_ach_info = await get_achievement_info(context, next_ach_id)
-                    if new_ach_info is None:
-                        continue
-
-                    new_ach = await add_achievement(context, user, ach_info, time)
-
                     if new_ach_info is not None:
-                        new_target_amount: int = getattr(new_ach_info, f"params{pindex}", None) or 0
-                        if new_target_amount >= count:
-                            # Trigger re-check
-                            new_result = await check_type_countable(context, user, achievement_type, count, pindex)
-                            achieved.extend(new_result.accomplished)
-                            new.extend(new_result.new)
-                        else:
-                            # Append to new achievement
-                            new.append(Achievement.from_sqlalchemy(new_ach, new_ach_info))
+                        new_ach = await add_achievement(context, user, new_ach_info, time)
+                        # Append to new achievement
+                        new.append(Achievement.from_sqlalchemy(new_ach, new_ach_info))
             else:
                 ach.count = count
 
+    await context.db.main.flush()
     return AchievementContext(accomplished=achieved, new=new)
 
 
@@ -245,17 +241,14 @@ async def check_type_increment(
                 # New achievement
                 for next_ach_id in await get_next_achievement_ids(context, ach.achievement_id):
                     new_ach_info = await get_achievement_info(context, next_ach_id)
-                    if new_ach_info is None:
-                        continue
-
-                    new_ach = await add_achievement(context, user, ach_info, time)
-
                     if new_ach_info is not None:
+                        new_ach = await add_achievement(context, user, new_ach_info, time)
                         # Append to new achievement
                         new.append(Achievement.from_sqlalchemy(new_ach, new_ach_info))
             else:
                 ach.count = count
 
+    await context.db.main.flush()
     return AchievementContext(accomplished=achieved, new=new)
 
 
@@ -272,8 +265,9 @@ def recursive_achievement(
 
         while True:
             ach_result = await func(context, user, *args, **kwargs)
+            print("achievement result", ach_result)
 
-            if ach_result:
+            if ach_result.has_achievement():
                 result = result + ach_result
             else:
                 break
@@ -369,19 +363,20 @@ async def check_type_53_recursive(context: idol.BasicSchoolIdolContext, user: ma
 
     while True:
         achievement_result = AchievementContext()
+        achievement_count_by_category: dict[int, int] = dict((i, 0) for i in achievement_id_list_by_category.keys())
 
-        for ach_cat, ach_ids in achievement_id_list_by_category.items():
-            q = (
-                sqlalchemy.select(sqlalchemy.func.count())
-                .select_from(main.Achievement)
-                .where(main.Achievement.user_id == user.id, main.Achievement.achievement_id.in_(ach_ids))
-            )
-            result = await context.db.main.execute(q)
+        achievements = await get_achievements(context, user, True)
+        for ach in achievements:
+            for ach_cat_id, ach_ids in achievement_id_list_by_category.items():
+                if ach.achievement_id in ach_ids:
+                    achievement_count_by_category[ach_cat_id] = achievement_count_by_category[ach_cat_id] + 1
+
+        for ach_cat_id in achievement_id_list_by_category.keys():
             achievement_result = achievement_result + await check_type_countable(
-                context, user, 53, result.scalar() or 0, 2, ach_cat
+                context, user, 53, achievement_count_by_category[ach_cat_id] or 0, 2, ach_cat_id
             )
 
-        if achievement_result:
+        if achievement_result.has_achievement():
             achievement_result_all = achievement_result_all + achievement_result
         else:
             break

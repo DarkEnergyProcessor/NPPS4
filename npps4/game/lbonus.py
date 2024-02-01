@@ -74,6 +74,7 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
     has_lbonus = current_datetime.day in lbonuses_day
     get_item = None
     add_effort_amount = 0
+    achievement_list = achievement.AchievementContext()
     if not has_lbonus:
         reward_item = current_month[current_datetime.day - 1].item
         add_effort_amount = 100000
@@ -92,6 +93,8 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
             reward_box_flag=False,
         )
         lbonuses_day.add(current_datetime.day)
+        # Do achievement check
+        achievement_list = achievement_list + await achievement.check_type_27(context, current_user, login_count)
 
     # Modify current_month
     for day in lbonuses_day:
@@ -121,11 +124,11 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
         start_dash_sheets=[],  # TODO
         effort_point=effort_result,
         limited_effort_box=[],  # TODO
-        accomplished_achievement_list=[],  # TODO
-        unaccomplished_achievement_cnt=0,  # TODO
+        accomplished_achievement_list=achievement_list.accomplished,
+        unaccomplished_achievement_cnt=await achievement.get_achievement_count(context, current_user, False),
         after_user_info=await user.get_user_info(context, current_user),
-        added_achievement_list=[],  # TODO
-        new_achievement_cnt=0,  # TODO
+        added_achievement_list=achievement_list.new,
+        new_achievement_cnt=len(achievement_list.new),
         museum_info=await museum.get_museum_info_data(context, current_user),
         server_timestamp=server_timestamp,
         present_cnt=present_count,
