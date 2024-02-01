@@ -79,7 +79,6 @@ async def get_next_achievement_ids(context: idol.BasicSchoolIdolContext, achieve
 async def add_achievement(
     context: idol.BasicSchoolIdolContext, user: main.User, ach: achievement.Achievement, time: int
 ):
-    print("ADD ACHIEVEMENT", user.id, ach.achievement_id)
     user_ach = main.Achievement(
         achievement_id=ach.achievement_id,
         user_id=user.id,
@@ -184,8 +183,8 @@ async def check_type_countable(
             raise ValueError("achievement info is none, database is corrupted?")
 
         if test_params(ach_info, args):
-            target_amount: int = getattr(ach_info, f"params{pindex}", None) or 0
-            if target_amount >= count:
+            target_amount = int(getattr(ach_info, f"params{pindex}", None) or 1)
+            if count >= target_amount:
                 # Achieved.
                 ach.count = min(count, target_amount)
                 ach.is_accomplished = True
@@ -230,9 +229,9 @@ async def check_type_increment(
             raise ValueError("achievement info is none, database is corrupted?")
 
         if test_params(ach_info, args):
-            target_amount: int = getattr(ach_info, f"params{pindex}", None) or 1
+            target_amount = int(getattr(ach_info, f"params{pindex}", None) or 1)
             count = ach.count + increment
-            if target_amount >= count:
+            if count >= target_amount:
                 # Achieved.
                 ach.count = min(count, target_amount)
                 ach.is_accomplished = True
@@ -265,13 +264,24 @@ def recursive_achievement(
 
         while True:
             ach_result = await func(context, user, *args, **kwargs)
-            print("achievement result", ach_result)
 
             if ach_result.has_achievement():
                 result = result + ach_result
             else:
                 break
 
+        return result + await check_type_53_recursive(context, user)
+
+    return wrapper
+
+
+def nonrecursive_achievement(
+    func: Callable[Concatenate[idol.BasicSchoolIdolContext, main.User, _P], Awaitable[AchievementContext]]
+):
+    async def wrapper(
+        context: idol.BasicSchoolIdolContext, user: main.User, *args: _P.args, **kwargs: _P.kwargs
+    ) -> AchievementContext:
+        result = await func(context, user, *args, **kwargs)
         return result + await check_type_53_recursive(context, user)
 
     return wrapper
@@ -317,12 +327,20 @@ async def check_type_21(context: idol.BasicSchoolIdolContext, user: main.User, m
     return await check_type_countable(context, user, 21, max_level)
 
 
-@recursive_achievement
+@nonrecursive_achievement
 async def check_type_27(context: idol.BasicSchoolIdolContext, user: main.User, nlogins: int):
     """
     Check login bonus count
     """
     return await check_type_countable(context, user, 27, nlogins)
+
+
+@nonrecursive_achievement
+async def check_type_29(context: idol.BasicSchoolIdolContext, user: main.User):
+    """
+    Check one-time login bonus.
+    """
+    return await check_type_countable(context, user, 29, 1)
 
 
 @recursive_achievement

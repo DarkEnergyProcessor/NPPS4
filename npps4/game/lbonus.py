@@ -94,7 +94,10 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
         )
         lbonuses_day.add(current_datetime.day)
         # Do achievement check
-        achievement_list = achievement_list + await achievement.check_type_27(context, current_user, login_count)
+        achievement_list = await achievement.check_type_27(
+            context, current_user, login_count
+        ) + await achievement.check_type_29(context, current_user)
+        print(achievement_list)
 
     # Modify current_month
     for day in lbonuses_day:
