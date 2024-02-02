@@ -123,6 +123,9 @@ async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, item: 
         case ADD_TYPE.SCENARIO:
             await scenario.unlock(context, user, item.item_id)
             return AddResult(True)
+        case ADD_TYPE.SCHOOL_IDOL_SKILL:
+            await unit.add_unit_removable_skill(context, user, item.item_id, item.amount)
+            return AddResult(True)
         case ADD_TYPE.MUSEUM:
             await museum.unlock(context, user, item.item_id)
             return AddResult(True)
