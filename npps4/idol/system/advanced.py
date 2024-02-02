@@ -8,11 +8,17 @@ from ... import idol
 from ... import leader_skill
 from ...config import config
 from ...const import ADD_TYPE
+from ...idol.system import achievement
+from ...idol.system import award
 from ...idol.system import background
+from ...idol.system import live
 from ...idol.system import museum
+from ...idol.system import reward
 from ...idol.system import scenario
 from ...idol.system import unit
 from ...db import main
+
+from typing import Awaitable, Callable
 
 
 @dataclasses.dataclass
@@ -195,6 +201,66 @@ async def test_name(context: idol.BasicSchoolIdolContext, name: str):
         raise idol.error.IdolError(idol.error.ERROR_CODE_UNAVAILABLE_WORDS, 600)
     if await config.contains_badwords(name, context):
         raise idol.error.IdolError(idol.error.ERROR_CODE_NG_WORDS, 600)
+
+
+def _replace_to_loveca(r: item.Reward):
+    r.item_id = 4
+    r.add_type = ADD_TYPE.LOVECA
+    r.amount = 1
+
+
+_ACHIEVEMENT_REWARD_REPLACE_CRITERIA: dict[
+    int, Callable[[idol.BasicSchoolIdolContext, main.User, int], Awaitable[bool]]
+] = {
+    ADD_TYPE.LIVE: live.has_live_unlock,
+    ADD_TYPE.AWARD: award.has_award,
+    ADD_TYPE.BACKGROUND: background.has_background,
+    ADD_TYPE.SCENARIO: scenario.is_unlocked,
+    ADD_TYPE.MUSEUM: museum.has,
+}
+
+
+# Certain reward can only be given once. This function replaces them to give 1 loveca instead.
+async def fixup_achievement_reward(
+    context: idol.BasicSchoolIdolContext, user: main.User, achievements: list[achievement.Achievement]
+):
+    for ach in achievements:
+        nrewards = len(ach.reward_list)
+        for i in range(nrewards):
+            ach_reward = ach.reward_list[i]
+
+            if ach_reward.add_type in _ACHIEVEMENT_REWARD_REPLACE_CRITERIA:
+                if await _ACHIEVEMENT_REWARD_REPLACE_CRITERIA[ach_reward.add_type](context, user, ach_reward.item_id):
+                    _replace_to_loveca(ach_reward)
+
+
+async def give_achievement_reward(
+    context: idol.BasicSchoolIdolContext, user: main.User, achievements: list[achievement.Achievement]
+):
+    for ach in achievements:
+        ach_info = await achievement.get_achievement_info(context, ach.achievement_id)
+        if ach_info is not None:
+            if ach_info.auto_reward_flag:
+                for r in ach.reward_list:
+                    # TODO: Proper message for reward insertion
+                    if r.reward_box_flag:
+                        await reward.add_item(
+                            context,
+                            user,
+                            r,
+                            ach_info.title or "FIXME",
+                            ach_info.title_en or ach_info.title or "FIXME EN",
+                        )
+                    else:
+                        add_result = await add_item(context, user, r)
+                        if not add_result.success:
+                            await reward.add_item(
+                                context,
+                                user,
+                                r,
+                                ach_info.title or "FIXME",
+                                ach_info.title_en or ach_info.title or "FIXME EN",
+                            )
 
 
 class TeamStatCalculator:

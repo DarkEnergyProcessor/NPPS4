@@ -34,6 +34,14 @@ async def unlock(context: idol.BasicSchoolIdolContext, user: main.User, museum_c
     return True
 
 
+async def has(context: idol.BasicSchoolIdolContext, user: main.User, museum_contents_id: int):
+    q = sqlalchemy.select(main.MuseumUnlock).where(
+        main.MuseumUnlock.user_id == user.id, main.MuseumUnlock.museum_contents_id == museum_contents_id
+    )
+    result = await context.db.main.execute(q)
+    return result.scalar() is not None
+
+
 TEST_MUSEUM_UNLOCK_ALL = False
 
 
