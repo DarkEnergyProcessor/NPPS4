@@ -228,3 +228,21 @@ async def get_achieved_goal_id_list(context: idol.BasicSchoolIdolContext, clear_
             )
 
     return result
+
+
+async def has_live_unlock(context: idol.BasicSchoolIdolContext, user: main.User, live_track_id: int):
+    q = sqlalchemy.select(live.LiveSetting).where(live.LiveSetting.live_track_id == live_track_id)
+    result = await context.db.live.execute(q)
+    live_setting_ids = [setting.live_setting_id for setting in result.scalars()]
+
+    q = sqlalchemy.select(live.NormalLive).where(live.NormalLive.live_setting_id.in_(live_setting_ids))
+    result = await context.db.live.execute(q)
+    live_difficulty_ids = [l.live_difficulty_id for l in result.scalars()]
+
+    q = (
+        sqlalchemy.select(sqlalchemy.func.count())
+        .select_from(main.LiveClear)
+        .where(main.LiveClear.live_difficulty_id.in_(live_difficulty_ids))
+    )
+    result = await context.db.main.execute(q)
+    return (result.scalar() or 0) > 0
