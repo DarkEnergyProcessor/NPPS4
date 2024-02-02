@@ -539,3 +539,62 @@ def get_leader_skill(context: idol.BasicSchoolIdolContext, leader_skill: int):
 
 def get_extra_leader_skill(context: idol.BasicSchoolIdolContext, leader_skill: int):
     return context.db.unit.get(unit.ExtraLeaderSkill, leader_skill)
+
+
+async def get_removable_skill_info(context: idol.BasicSchoolIdolContext, user: main.User, removable_skill_id: int):
+    q = sqlalchemy.select(main.RemovableSkillInfo).where(
+        main.RemovableSkillInfo.user_id == user.id,
+        main.RemovableSkillInfo.unit_removable_skill_id == removable_skill_id,
+    )
+    result = await context.db.main.execute(q)
+    return result.scalar()
+
+
+async def get_unit_removable_skill_count(
+    context: idol.BasicSchoolIdolContext, user: main.User, removable_skill_id: int
+):
+    removable_skill = await get_removable_skill_info(context, user, removable_skill_id)
+    return 0 if removable_skill is None else removable_skill.amount
+
+
+async def get_all_unit_removable_skill(context: idol.BasicSchoolIdolContext, user: main.User):
+    q = sqlalchemy.select(main.RemovableSkillInfo).where(main.RemovableSkillInfo.user_id == user.id)
+    result = await context.db.main.execute(q)
+    return list(result.scalars())
+
+
+async def get_unit_removable_skills(context: idol.BasicSchoolIdolContext, unit_data: main.Unit):
+    q = sqlalchemy.select(main.UnitRemovableSkill).where(main.UnitRemovableSkill.unit_id == unit_data.id)
+    result = await context.db.main.execute(q)
+    return list(sis.unit_removable_skill_id for sis in result.scalars())
+
+
+async def get_all_unit_removable_skills(context: idol.BasicSchoolIdolContext, user: main.User):
+    q = sqlalchemy.select(main.UnitRemovableSkill).where(main.UnitRemovableSkill.user_id == user.id)
+    result = await context.db.main.execute(q)
+    sis_by_unit_id: dict[int, list[int]] = {}
+
+    for sis in result.scalars():
+        if sis.unit_id not in sis_by_unit_id:
+            sis_info = []
+            sis_by_unit_id[sis.unit_id] = sis_info
+        else:
+            sis_info = sis_by_unit_id[sis.unit_id]
+        sis_info.append(sis.unit_removable_skill_id)
+
+    return sis_by_unit_id
+
+
+async def add_unit_removable_skill(
+    context: idol.BasicSchoolIdolContext, user: main.User, removable_skill_id: int, amount: int = 1
+):
+    removable_skill = await get_removable_skill_info(context, user, removable_skill_id)
+    if removable_skill is None:
+        removable_skill = main.RemovableSkillInfo(
+            user_id=user.id, unit_removable_skill_id=removable_skill_id, amount=0, insert_date=util.time()
+        )
+        context.db.main.add(removable_skill)
+
+    removable_skill.amount = removable_skill.amount + amount
+    await context.db.main.flush()
+    return removable_skill.amount
