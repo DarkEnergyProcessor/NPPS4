@@ -309,6 +309,7 @@ class RemovableSkillInfo(common.Base):
     )
     unit_removable_skill_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
     amount: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
+    insert_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger)
 
     __table_args__ = (sqlalchemy.UniqueConstraint(user_id, unit_removable_skill_id),)
 
