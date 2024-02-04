@@ -15,8 +15,12 @@ async def unlock_award(context: idol.BasicSchoolIdolContext, user: main.User, aw
     if has_bg:
         return False
 
-    bg = main.Award(user_id=user.id, award_id=award_id, is_set=set_active)
+    bg = main.Award(user_id=user.id, award_id=award_id)
     context.db.main.add(bg)
+
+    if set_active:
+        user.active_award = award_id
+
     await context.db.main.flush()
     return True
 
