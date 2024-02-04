@@ -21,7 +21,19 @@ type_map_override = {
 }
 
 
-class GameDBBase(sqlalchemy.orm.DeclarativeBase):
+class PrettyPrinter:
+    def __repr__(self):
+        t = type(self)
+        kvresult: list[str] = []
+
+        for var in t.__annotations__.keys():
+            if hasattr(self, var):
+                kvresult.append(f"{var}={getattr(self, var)!r}")
+
+        return f"{t.__name__}({', '.join(kvresult)})"
+
+
+class GameDBBase(sqlalchemy.orm.DeclarativeBase, PrettyPrinter):
     type_annotation_map = type_map_override
 
 
@@ -30,7 +42,7 @@ SNAKECASE_RE2 = re.compile("__([A-Z])")
 SNAKECASE_RE3 = re.compile("([a-z0-9])([A-Z])")
 
 
-class Base(sqlalchemy.orm.DeclarativeBase):
+class Base(sqlalchemy.orm.DeclarativeBase, PrettyPrinter):
     type_annotation_map = type_map_override
 
     @sqlalchemy.orm.declared_attr.directive
