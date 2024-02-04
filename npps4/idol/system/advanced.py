@@ -105,7 +105,7 @@ async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, item: 
                     user.free_sns_coin = user.free_sns_coin + item.amount
                     return AddResult(True)
                 case _:
-                    return AddResult(True)  # TODO
+                    return AddResult(False)  # TODO
         case ADD_TYPE.UNIT:
             unit_cnt = await unit.count_units(context, user, True)
             if unit_cnt < user.unit_max:
@@ -123,20 +123,20 @@ async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, item: 
             user.social_point = user.social_point + item.amount
             return AddResult(True)
         # FIXME: Actually check for their return values of these unlocks.
+        case ADD_TYPE.LIVE:
+            await live.unlock_live(context, user, item.item_id)
+            return AddResult(True)
         case ADD_TYPE.BACKGROUND:
-            await background.unlock_background(context, user, item.item_id)
-            return AddResult(True)
+            return AddResult(await background.unlock_background(context, user, item.item_id))
         case ADD_TYPE.SCENARIO:
-            await scenario.unlock(context, user, item.item_id)
-            return AddResult(True)
+            return AddResult(await scenario.unlock(context, user, item.item_id))
         case ADD_TYPE.SCHOOL_IDOL_SKILL:
             await unit.add_unit_removable_skill(context, user, item.item_id, item.amount)
             return AddResult(True)
         case ADD_TYPE.MUSEUM:
-            await museum.unlock(context, user, item.item_id)
-            return AddResult(True)
+            return AddResult(await museum.unlock(context, user, item.item_id))
         case _:
-            return AddResult(True)  # TODO
+            return AddResult(False)  # TODO
 
 
 async def get_user_guest_party_info(context: idol.BasicSchoolIdolContext, user: main.User) -> PartyInfo:
@@ -233,34 +233,47 @@ async def fixup_achievement_reward(
                 if await _ACHIEVEMENT_REWARD_REPLACE_CRITERIA[ach_reward.add_type](context, user, ach_reward.item_id):
                     _replace_to_loveca(ach_reward)
 
+            match ach_reward.add_type:
+                case ADD_TYPE.UNIT:
+                    # Always put unit to present box
+                    ach_reward.reward_box_flag = True
+
 
 async def give_achievement_reward(
+    context: idol.BasicSchoolIdolContext,
+    user: main.User,
+    ach_info: achievement.achievement.Achievement,
+    rewards: list[item.Reward],
+):
+    for r in rewards:
+        # TODO: Proper message for reward insertion
+        if r.reward_box_flag:
+            await reward.add_item(
+                context,
+                user,
+                r,
+                ach_info.title or "FIXME",
+                ach_info.title_en or ach_info.title or "FIXME EN",
+            )
+        else:
+            add_result = await add_item(context, user, r)
+            if not add_result.success:
+                await reward.add_item(
+                    context,
+                    user,
+                    r,
+                    ach_info.title or "FIXME",
+                    ach_info.title_en or ach_info.title or "FIXME EN",
+                )
+
+
+async def process_achievement_reward(
     context: idol.BasicSchoolIdolContext, user: main.User, achievements: list[achievement.Achievement]
 ):
     for ach in achievements:
         ach_info = await achievement.get_achievement_info(context, ach.achievement_id)
-        if ach_info is not None:
-            if ach_info.auto_reward_flag:
-                for r in ach.reward_list:
-                    # TODO: Proper message for reward insertion
-                    if r.reward_box_flag:
-                        await reward.add_item(
-                            context,
-                            user,
-                            r,
-                            ach_info.title or "FIXME",
-                            ach_info.title_en or ach_info.title or "FIXME EN",
-                        )
-                    else:
-                        add_result = await add_item(context, user, r)
-                        if not add_result.success:
-                            await reward.add_item(
-                                context,
-                                user,
-                                r,
-                                ach_info.title or "FIXME",
-                                ach_info.title_en or ach_info.title or "FIXME EN",
-                            )
+        if ach_info is not None and ach_info.auto_reward_flag:
+            await give_achievement_reward(context, user, ach_info, ach.reward_list)
 
 
 class TeamStatCalculator:
