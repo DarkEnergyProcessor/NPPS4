@@ -156,7 +156,6 @@ class LiveRewardLiveSetting(pydantic.BaseModel):
 
 
 class LiveRewardPreciseList(pydantic.BaseModel):
-    tp: bool
     effect: int
     count: int
     tap: float
@@ -165,6 +164,7 @@ class LiveRewardPreciseList(pydantic.BaseModel):
     accuracy: int
     is_same: bool
 
+    tp: bool | None = None
     tpf: bool | None = None
     first_touch: int | None = None
     release: float | None = None
