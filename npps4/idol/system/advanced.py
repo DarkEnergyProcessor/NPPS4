@@ -126,6 +126,8 @@ async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, item: 
         case ADD_TYPE.LIVE:
             await live.unlock_live(context, user, item.item_id)
             return AddResult(True)
+        case ADD_TYPE.AWARD:
+            return AddResult(await award.unlock_award(context, user, item.item_id))
         case ADD_TYPE.BACKGROUND:
             return AddResult(await background.unlock_background(context, user, item.item_id))
         case ADD_TYPE.SCENARIO:
