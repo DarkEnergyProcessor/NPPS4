@@ -7,9 +7,25 @@ from ..idol.system import user
 import pydantic
 
 
+class OwningRemovableSkillInfo(pydantic.BaseModel):
+    unit_removable_skill_id: int
+    total_amount: int
+    equipped_amount: int
+    insert_date: str
+
+
+class EquipRemovableSkillInfoDetail(pydantic.BaseModel):
+    unit_removable_skill_id: int
+
+
+class EquipRemovableSkillInfo(pydantic.BaseModel):
+    unit_owning_user_id: int
+    detail: list[EquipRemovableSkillInfoDetail]
+
+
 class RemovableSkillInfoResponse(pydantic.BaseModel):
-    owning_info: list
-    equipment_info: list
+    owning_info: list[OwningRemovableSkillInfo]
+    equipment_info: dict[str, EquipRemovableSkillInfo]
 
 
 class SupporterInfoResponse(pydantic.BaseModel):
@@ -88,9 +104,37 @@ async def unit_deckinfo(context: idol.SchoolIdolUserParams) -> list[UnitDeckInfo
 
 @idol.register("unit", "removableSkillInfo")
 async def unit_removableskillinfo(context: idol.SchoolIdolUserParams) -> RemovableSkillInfoResponse:
-    # TODO
-    util.stub("unit", "removableSkillInfo", context.raw_request_data)
-    return RemovableSkillInfoResponse(owning_info=[], equipment_info=[])
+    current_user = await user.get_current(context)
+
+    owning_info = await unit.get_all_unit_removable_skill(context, current_user)
+    sis_info = await unit.get_all_unit_removable_skills(context, current_user)
+
+    used_sis: dict[int, int] = {}
+    for unit_sis in sis_info.values():
+        for sis in unit_sis:
+            used_sis[sis] = used_sis.setdefault(sis, 0) + 1
+
+    return RemovableSkillInfoResponse(
+        owning_info=[
+            OwningRemovableSkillInfo(
+                unit_removable_skill_id=i.unit_removable_skill_id,
+                total_amount=i.amount,
+                equipped_amount=used_sis[i.unit_removable_skill_id],
+                insert_date=util.timestamp_to_datetime(i.insert_date),
+            )
+            for i in owning_info
+        ],
+        equipment_info=dict(
+            (
+                str(i),
+                EquipRemovableSkillInfo(
+                    unit_owning_user_id=i,
+                    detail=[EquipRemovableSkillInfoDetail(unit_removable_skill_id=sis) for sis in v],
+                ),
+            )
+            for i, v in sis_info.items()
+        ),
+    )
 
 
 @idol.register("unit", "supporterAll")
