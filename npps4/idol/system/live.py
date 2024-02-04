@@ -218,13 +218,13 @@ async def get_achieved_goal_id_list(context: idol.BasicSchoolIdolContext, clear_
             combo_rank = get_index_of_range(clear_info.hi_combo_cnt, rank_ranges[LIVE_GOAL_TYPE.COMBO], 1, 5)
             clear_rank = get_index_of_range(clear_info.clear_cnt, rank_ranges[LIVE_GOAL_TYPE.CLEAR], 1, 5)
             result.extend(
-                g.live_goal_reward_id for g in goal_list_by_type[LIVE_GOAL_TYPE.SCORE] if g.rank <= score_rank
+                g.live_goal_reward_id for g in goal_list_by_type[LIVE_GOAL_TYPE.SCORE] if score_rank <= g.rank
             )
             result.extend(
-                g.live_goal_reward_id for g in goal_list_by_type[LIVE_GOAL_TYPE.COMBO] if g.rank <= combo_rank
+                g.live_goal_reward_id for g in goal_list_by_type[LIVE_GOAL_TYPE.COMBO] if combo_rank <= g.rank
             )
             result.extend(
-                g.live_goal_reward_id for g in goal_list_by_type[LIVE_GOAL_TYPE.CLEAR] if g.rank <= clear_rank
+                g.live_goal_reward_id for g in goal_list_by_type[LIVE_GOAL_TYPE.CLEAR] if clear_rank <= g.rank
             )
 
     return result
