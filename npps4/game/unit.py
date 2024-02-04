@@ -119,7 +119,7 @@ async def unit_removableskillinfo(context: idol.SchoolIdolUserParams) -> Removab
             OwningRemovableSkillInfo(
                 unit_removable_skill_id=i.unit_removable_skill_id,
                 total_amount=i.amount,
-                equipped_amount=used_sis[i.unit_removable_skill_id],
+                equipped_amount=used_sis.get(i.unit_removable_skill_id, 0),
                 insert_date=util.timestamp_to_datetime(i.insert_date),
             )
             for i in owning_info
