@@ -2,11 +2,14 @@ import traceback
 import urllib.parse
 
 import fastapi
+import fastapi.encoders
+import fastapi.exceptions
 import fastapi.responses
 import fastapi.staticfiles
 import fastapi.templating
 
 from . import errhand
+from . import util
 
 NPPS4_VERSION = (0, 0, 1)
 
@@ -61,6 +64,18 @@ async def handler_500(request: fastapi.Request, exc: Exception):
         status_code=500,
         content={"exception": type(exc).__name__, "message": str(exc), "traceback": tb},
         headers={"Maintenance": "1"},
+    )
+
+
+@core.exception_handler(fastapi.exceptions.RequestValidationError)
+async def request_validation_exception_handler(
+    request: fastapi.Request, exc: fastapi.exceptions.RequestValidationError
+) -> fastapi.responses.JSONResponse:
+    jsonable = fastapi.encoders.jsonable_encoder(exc.errors())
+    util.log("Error handling request", jsonable, severity=util.logging.ERROR, e=exc)
+    return fastapi.responses.JSONResponse(
+        status_code=422,
+        content={"detail": jsonable},
     )
 
 
