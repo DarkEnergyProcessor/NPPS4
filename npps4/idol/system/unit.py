@@ -45,6 +45,30 @@ class UnitInfoData(pydantic.BaseModel):
     insert_date: str
 
 
+class OwningRemovableSkillInfo(pydantic.BaseModel):
+    unit_removable_skill_id: int
+    total_amount: int
+    equipped_amount: int
+    insert_date: str
+
+
+class EquipRemovableSkillInfoDetail(pydantic.BaseModel):
+    unit_removable_skill_id: int
+
+
+class EquipRemovableSkillInfo(pydantic.BaseModel):
+    unit_owning_user_id: int
+    detail: list[EquipRemovableSkillInfoDetail]
+
+
+class RemovableSkillOwningInfo(pydantic.BaseModel):
+    owning_info: list[OwningRemovableSkillInfo]
+
+
+class RemovableSkillInfoResponse(RemovableSkillOwningInfo):
+    equipment_info: dict[str, EquipRemovableSkillInfo]
+
+
 async def count_units(context: idol.BasicSchoolIdolContext, user: main.User, active: bool):
     q = (
         sqlalchemy.select(sqlalchemy.func.count())
@@ -99,8 +123,13 @@ async def add_unit(context: idol.BasicSchoolIdolContext, user: main.User, unit_i
 async def get_unit(context: idol.BasicSchoolIdolContext, unit_owning_user_id: int):
     result = await context.db.main.get(main.Unit, unit_owning_user_id)
     if result is None:
-        raise ValueError("invalid unit_owning_user_id")
+        raise idol.error.by_code(idol.error.ERROR_CODE_UNIT_NOT_EXIST)
     return result
+
+
+def validate_unit(user: main.User, unit_data: main.Unit | None):
+    if unit_data is None or unit_data.user_id != user.id:
+        raise idol.error.by_code(idol.error.ERROR_CODE_UNIT_NOT_EXIST)
 
 
 async def get_supporter_unit(context: idol.SchoolIdolParams, user: main.User, unit_id: int, ensure: bool = False):
@@ -598,3 +627,61 @@ async def add_unit_removable_skill(
     removable_skill.amount = removable_skill.amount + amount
     await context.db.main.flush()
     return removable_skill.amount
+
+
+async def attach_unit_removable_skill(context: idol.BasicSchoolIdolContext, unit: main.Unit, removable_skill_id: int):
+    q = sqlalchemy.select(main.UnitRemovableSkill).where(
+        main.UnitRemovableSkill.unit_id == unit.id,
+        main.UnitRemovableSkill.unit_removable_skill_id == removable_skill_id,
+    )
+    result = await context.db.main.execute(q)
+    if result.scalar() is None:
+        sis = main.UnitRemovableSkill(
+            unit_id=unit.id, user_id=unit.user_id, unit_removable_skill_id=removable_skill_id
+        )
+        context.db.main.add(sis)
+        await context.db.main.flush()
+        return True
+
+    return False
+
+
+async def detach_unit_removable_skill(context: idol.BasicSchoolIdolContext, unit: main.Unit, removable_skill_id: int):
+    q = sqlalchemy.delete(main.UnitRemovableSkill).where(
+        main.UnitRemovableSkill.unit_id == unit.id,
+        main.UnitRemovableSkill.unit_removable_skill_id == removable_skill_id,
+    )
+    result = await context.db.main.execute(q)
+    return result.rowcount > 0
+
+
+async def get_removable_skill_info_request(context: idol.BasicSchoolIdolContext, user: main.User):
+    owning_info = await get_all_unit_removable_skill(context, user)
+    sis_info = await get_all_unit_removable_skills(context, user)
+
+    used_sis: dict[int, int] = {}
+    for unit_sis in sis_info.values():
+        for sis in unit_sis:
+            used_sis[sis] = used_sis.setdefault(sis, 0) + 1
+
+    return RemovableSkillInfoResponse(
+        owning_info=[
+            OwningRemovableSkillInfo(
+                unit_removable_skill_id=i.unit_removable_skill_id,
+                total_amount=i.amount,
+                equipped_amount=used_sis.get(i.unit_removable_skill_id, 0),
+                insert_date=util.timestamp_to_datetime(i.insert_date),
+            )
+            for i in owning_info
+        ],
+        equipment_info=dict(
+            (
+                str(i),
+                EquipRemovableSkillInfo(
+                    unit_owning_user_id=i,
+                    detail=[EquipRemovableSkillInfoDetail(unit_removable_skill_id=sis) for sis in v],
+                ),
+            )
+            for i, v in sis_info.items()
+        ),
+    )

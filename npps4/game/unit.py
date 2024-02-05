@@ -7,27 +7,6 @@ from ..idol.system import user
 import pydantic
 
 
-class OwningRemovableSkillInfo(pydantic.BaseModel):
-    unit_removable_skill_id: int
-    total_amount: int
-    equipped_amount: int
-    insert_date: str
-
-
-class EquipRemovableSkillInfoDetail(pydantic.BaseModel):
-    unit_removable_skill_id: int
-
-
-class EquipRemovableSkillInfo(pydantic.BaseModel):
-    unit_owning_user_id: int
-    detail: list[EquipRemovableSkillInfoDetail]
-
-
-class RemovableSkillInfoResponse(pydantic.BaseModel):
-    owning_info: list[OwningRemovableSkillInfo]
-    equipment_info: dict[str, EquipRemovableSkillInfo]
-
-
 class SupporterInfoResponse(pydantic.BaseModel):
     unit_id: int
     amount: int
@@ -70,6 +49,24 @@ class UnitDeckNameRequest(pydantic.BaseModel):
     deck_name: str
 
 
+class UnitRemovableSkillRequest(pydantic.BaseModel):
+    unit_owning_user_id: int
+    unit_removable_skill_id: int
+
+
+class UnitRemovableSkillEquipmentRequest(pydantic.BaseModel):
+    equip: list[UnitRemovableSkillRequest] | None = None
+    remove: list[UnitRemovableSkillRequest] | None = None
+
+
+class UnitWaitOrActivateRequest(pydantic.BaseModel):
+    unit_owning_user_ids: list[int]
+
+
+class UnitWaitResponse(pydantic.BaseModel):
+    unit_removable_skill: unit.RemovableSkillOwningInfo
+
+
 @idol.register("unit", "accessoryAll")
 async def unit_accessoryall(context: idol.SchoolIdolUserParams) -> UnitAccessoryInfoResponse:
     # TODO
@@ -103,38 +100,9 @@ async def unit_deckinfo(context: idol.SchoolIdolUserParams) -> list[UnitDeckInfo
 
 
 @idol.register("unit", "removableSkillInfo")
-async def unit_removableskillinfo(context: idol.SchoolIdolUserParams) -> RemovableSkillInfoResponse:
+async def unit_removableskillinfo(context: idol.SchoolIdolUserParams) -> unit.RemovableSkillInfoResponse:
     current_user = await user.get_current(context)
-
-    owning_info = await unit.get_all_unit_removable_skill(context, current_user)
-    sis_info = await unit.get_all_unit_removable_skills(context, current_user)
-
-    used_sis: dict[int, int] = {}
-    for unit_sis in sis_info.values():
-        for sis in unit_sis:
-            used_sis[sis] = used_sis.setdefault(sis, 0) + 1
-
-    return RemovableSkillInfoResponse(
-        owning_info=[
-            OwningRemovableSkillInfo(
-                unit_removable_skill_id=i.unit_removable_skill_id,
-                total_amount=i.amount,
-                equipped_amount=used_sis.get(i.unit_removable_skill_id, 0),
-                insert_date=util.timestamp_to_datetime(i.insert_date),
-            )
-            for i in owning_info
-        ],
-        equipment_info=dict(
-            (
-                str(i),
-                EquipRemovableSkillInfo(
-                    unit_owning_user_id=i,
-                    detail=[EquipRemovableSkillInfoDetail(unit_removable_skill_id=sis) for sis in v],
-                ),
-            )
-            for i, v in sis_info.items()
-        ),
-    )
+    return await unit.get_removable_skill_info_request(context, current_user)
 
 
 @idol.register("unit", "supporterAll")
@@ -184,4 +152,102 @@ async def unit_deckname(context: idol.SchoolIdolUserParams, request: UnitDeckNam
     await advanced.test_name(context, request.deck_name)
 
     deck_data[0].name = request.deck_name
+    return idol.core.DummyModel()
+
+
+@idol.register("unit", "removableSkillEquipment")
+async def unit_removableskillequipment(
+    context: idol.SchoolIdolUserParams, request: UnitRemovableSkillEquipmentRequest
+) -> idol.core.DummyModel:
+    current_user = await user.get_current(context)
+
+    # TODO: Optimize
+    current_sis_info = await unit.get_removable_skill_info_request(context, current_user)
+    unequipped_sis_amount = dict(
+        (sis.unit_removable_skill_id, sis.total_amount - sis.equipped_amount) for sis in current_sis_info.owning_info
+    )
+
+    # Process "remove" list first
+    if request.remove:
+        for remove_info in request.remove:
+            unit_data = await unit.get_unit(context, remove_info.unit_owning_user_id)
+            unit.validate_unit(current_user, unit_data)
+
+            if not await unit.detach_unit_removable_skill(
+                context,
+                unit_data,
+                remove_info.unit_removable_skill_id,
+            ):
+                raise idol.error.IdolError(detail=f"no such sis {remove_info!r}")
+            unequipped_sis_amount[remove_info.unit_removable_skill_id] = (
+                unequipped_sis_amount[remove_info.unit_removable_skill_id] + 1
+            )
+
+    # Process "equip" list
+    if request.equip:
+        for equip_info in request.equip:
+            if unequipped_sis_amount[equip_info.unit_removable_skill_id] > 0:
+                unit_data = await unit.get_unit(context, equip_info.unit_owning_user_id)
+                unit.validate_unit(current_user, unit_data)
+
+                if unit_data.active:
+                    if not await unit.attach_unit_removable_skill(
+                        context,
+                        unit_data,
+                        equip_info.unit_removable_skill_id,
+                    ):
+                        raise idol.error.IdolError(detail=f"sis already exist {equip_info!r}")
+                    unequipped_sis_amount[equip_info.unit_removable_skill_id] = (
+                        unequipped_sis_amount[equip_info.unit_removable_skill_id] - 1
+                    )
+                else:
+                    raise idol.error.IdolError(detail=f"unit is inactive {equip_info.unit_owning_user_id}")
+            else:
+                raise idol.error.IdolError(detail=f"out of SIS {equip_info.unit_removable_skill_id}")
+
+    return idol.core.DummyModel()
+
+
+@idol.register("unit", "wait")
+async def unit_wait(context: idol.SchoolIdolUserParams, request: UnitWaitOrActivateRequest) -> UnitWaitResponse:
+    current_user = await user.get_current(context)
+    waiting_count = await unit.count_units(context, current_user, False)
+
+    if (waiting_count + len(request.unit_owning_user_ids)) > current_user.waiting_unit_max:
+        raise idol.error.IdolError(detail="waiting unit out of range")
+
+    for unit_owning_user_id in request.unit_owning_user_ids:
+        unit_data = await unit.get_unit(context, unit_owning_user_id)
+        unit.validate_unit(current_user, unit_data)
+
+        if unit_data.active:
+            unit_sis = await unit.get_unit_removable_skills(context, unit_data)
+            for removable_skill_id in unit_sis:
+                await unit.detach_unit_removable_skill(context, unit_data, removable_skill_id)
+
+            # Move to waiting room
+            unit_data.active = False
+
+    user_sis_info = await unit.get_removable_skill_info_request(context, current_user)
+    return UnitWaitResponse(unit_removable_skill=user_sis_info)
+
+
+@idol.register("unit", "activate")
+async def unit_activate(
+    context: idol.SchoolIdolUserParams, request: UnitWaitOrActivateRequest
+) -> idol.core.DummyModel:
+    current_user = await user.get_current(context)
+    active_count = await unit.count_units(context, current_user, True)
+
+    if (active_count + len(request.unit_owning_user_ids)) > current_user.unit_max:
+        raise idol.error.IdolError(detail="active unit out of range")
+
+    for unit_owning_user_id in request.unit_owning_user_ids:
+        unit_data = await unit.get_unit(context, unit_owning_user_id)
+        unit.validate_unit(current_user, unit_data)
+
+        if not unit_data.active:
+            # Move to active room
+            unit_data.active = True
+
     return idol.core.DummyModel()
