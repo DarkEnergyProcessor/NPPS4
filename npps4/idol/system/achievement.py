@@ -400,3 +400,9 @@ async def check_type_53_recursive(context: idol.BasicSchoolIdolContext, user: ma
             break
 
     return achievement_result_all
+
+
+async def get_achievement_filter_ids(context: idol.BasicSchoolIdolContext):
+    q = sqlalchemy.select(achievement.FilterCategory)
+    result = await context.db.achievement.execute(q)
+    return [filter_cat.achievement_filter_category_id for filter_cat in result.scalars()]

@@ -6,6 +6,31 @@ from . import common
 from ..download import download
 
 
+class FilterCategory(common.GameDBBase, common.MaybeEncrypted):
+    """```sql
+    CREATE TABLE `achievement_filter_category_m` (
+        `achievement_filter_category_id` INTEGER NOT NULL,
+        `name` TEXT,
+        `name_en` TEXT,
+        `icon_asset` TEXT,
+        `icon_asset_en` TEXT,
+        `default_select_flag` INTEGER,
+        `release_tag` TEXT, `_encryption_release_id` INTEGER NULL,
+        PRIMARY KEY (`achievement_filter_category_id`)
+    )```
+    """
+
+    __tablename__ = "achievement_filter_category_m"
+    achievement_filter_category_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, primary_key=True
+    )
+    name: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    icon_asset: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    icon_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    default_select_flag: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+
+
 class Achievement(common.GameDBBase, common.MaybeEncrypted):
     """```sql
     CREATE TABLE `achievement_m` (
@@ -68,7 +93,9 @@ class Achievement(common.GameDBBase, common.MaybeEncrypted):
     end_date: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
     default_open_flag: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     display_flag: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
-    achievement_filter_category_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    achievement_filter_category_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        sqlalchemy.ForeignKey(FilterCategory.achievement_filter_category_id)
+    )
     achievement_filter_type_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     auto_reward_flag: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     display_start_date: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()

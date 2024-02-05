@@ -1,3 +1,4 @@
+from . import achievement
 from . import ad
 from . import album
 from . import announce
