@@ -12,4 +12,4 @@ class LiveIconInfoResponse(pydantic.BaseModel):
 async def secretbox_all(context: idol.SchoolIdolUserParams) -> idol.core.DummyModel:
     # TODO
     util.stub("secretbox", "all")
-    raise idol.error.IdolError(idol.error.ERROR_CODE_LIB_ERROR, 600)
+    raise idol.error.by_code(idol.error.ERROR_CODE_LIB_ERROR)

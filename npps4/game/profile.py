@@ -69,16 +69,16 @@ async def profile_cardranking(context: idol.SchoolIdolUserParams, request: Profi
 async def profile_profileinfo(context: idol.SchoolIdolUserParams, request: ProfileRequest) -> ProfileInfoResponse:
     target_user = await user.get(context, request.user_id)
     if target_user is None:
-        raise idol.error.IdolError(idol.error.ERROR_CODE_USER_NOT_EXIST, 600)
+        raise idol.error.by_code(idol.error.ERROR_CODE_USER_NOT_EXIST)
 
     partner_unit_info = await unit.get_unit_center(context, target_user)
     if partner_unit_info is None:
-        raise idol.error.IdolError(idol.error.ERROR_CODE_USER_NOT_EXIST, 600)
+        raise idol.error.by_code(idol.error.ERROR_CODE_USER_NOT_EXIST)
     partner_unit = await unit.get_unit(context, partner_unit_info.unit_id)
 
     active_deck = await unit.load_unit_deck(context, target_user, target_user.active_deck_index)
     if active_deck is None:
-        raise idol.error.IdolError(idol.error.ERROR_CODE_USER_NOT_EXIST, 600)
+        raise idol.error.by_code(idol.error.ERROR_CODE_USER_NOT_EXIST)
 
     center_unit = await unit.get_unit(context, active_deck[1][4])
 
@@ -112,5 +112,5 @@ async def profile_profileregister(
 ) -> idol.core.DummyModel:
     # TODO
     util.stub("profile", "profileRegister", request)
-    raise idol.error.IdolError(idol.error.ERROR_CODE_ONLY_WHITESPACE_CHARACTERS, 600)
+    raise idol.error.by_code(idol.error.ERROR_CODE_ONLY_WHITESPACE_CHARACTERS)
     return idol.core.DummyModel()

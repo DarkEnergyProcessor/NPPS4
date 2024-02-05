@@ -325,7 +325,7 @@ async def live_partylist(context: idol.SchoolIdolUserParams, request: LivePartyL
 @idol.register("live", "preciseScore")
 async def live_precisescore(context: idol.SchoolIdolUserParams) -> LivePreciseScoreResponse:
     util.stub("live", "preciseScore", context.raw_request_data)
-    raise idol.error.IdolError(idol.error.ERROR_CODE_LIVE_PRECISE_LIST_NOT_FOUND, 600)
+    raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_PRECISE_LIST_NOT_FOUND)
 
 
 @idol.register("live", "play", xmc_verify=idol.XMCVerifyMode.CROSS)
@@ -333,13 +333,13 @@ async def live_play(context: idol.SchoolIdolUserParams, request: LivePlayRequest
     current_user = await user.get_current(context)
     live_setting = await live.get_live_setting_from_difficulty_id(context, request.live_difficulty_id)
     if live_setting is None:
-        raise idol.error.IdolError(idol.error.ERROR_CODE_LIVE_NOT_FOUND, 600)
+        raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_FOUND)
 
     # TODO: Check and consume LP/token
 
     beatmap_data = await live.get_live_info(context, request.live_difficulty_id, live_setting)
     if beatmap_data is None:
-        raise idol.error.IdolError(idol.error.ERROR_CODE_LIVE_NOTES_LIST_NOT_FOUND, 600)
+        raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOTES_LIST_NOT_FOUND)
 
     deck_data = await unit.load_unit_deck(context, current_user, request.unit_deck_id)
     if deck_data is None or 0 in deck_data[1]:
@@ -384,4 +384,4 @@ async def live_gameover(context: idol.SchoolIdolUserParams):
 @idol.register("live", "reward")
 async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardRequest) -> LiveRewardResponse:
     util.stub("live", "reward", context.raw_request_data)
-    raise idol.error.IdolError(idol.error.ERROR_CODE_LIVE_NOT_FOUND, 600)
+    raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_FOUND)

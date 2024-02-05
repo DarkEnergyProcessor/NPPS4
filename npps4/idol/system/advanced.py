@@ -198,11 +198,11 @@ async def get_user_guest_party_info(context: idol.BasicSchoolIdolContext, user: 
 
 async def test_name(context: idol.BasicSchoolIdolContext, name: str):
     if name.isspace():
-        raise idol.error.IdolError(idol.error.ERROR_CODE_ONLY_WHITESPACE_CHARACTERS, 600)
+        raise idol.error.by_code(idol.error.ERROR_CODE_ONLY_WHITESPACE_CHARACTERS)
     if any(ord(c) < 32 for c in name):
-        raise idol.error.IdolError(idol.error.ERROR_CODE_UNAVAILABLE_WORDS, 600)
+        raise idol.error.by_code(idol.error.ERROR_CODE_UNAVAILABLE_WORDS)
     if await config.contains_badwords(name, context):
-        raise idol.error.IdolError(idol.error.ERROR_CODE_NG_WORDS, 600)
+        raise idol.error.by_code(idol.error.ERROR_CODE_NG_WORDS)
 
 
 def _replace_to_loveca(r: item.Reward):

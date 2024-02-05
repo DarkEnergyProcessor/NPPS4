@@ -261,3 +261,7 @@ class IdolError(Exception):
         self.status_code = status_code
         self.detail = detail
         self.http_code = http_code
+
+
+def by_code(code: int):
+    return IdolError(code, 600)
