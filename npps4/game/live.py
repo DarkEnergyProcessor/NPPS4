@@ -115,17 +115,39 @@ class LivePlayResponse(pydantic.BaseModel):
     server_timestamp: int = pydantic.Field(default_factory=util.time)
 
 
+class LiveRewardPreciseList(pydantic.BaseModel):
+    effect: int
+    count: int
+    tap: float
+    note_number: float
+    position: int
+    accuracy: int
+    is_same: bool
+
+    tp: bool | None = None
+    tpf: bool | None = None
+    first_touch: int | None = None
+    release: float | None = None
+
+
+class LiveRewardTriggerLog(pydantic.BaseModel):
+    activation_rate: int
+    position: int
+
+
 # https://github.com/YumeMichi/honoka-chan/blob/6778972c1ff54a8a038ea07b676e6acdbb211f96/handler/live.go#L447
+# Along with some asking from other people.
 class LivePreciseScoreData(pydantic.BaseModel):
     has_record: bool
     live_info: live.LiveInfo
     can_replay: bool = False
-    random_seed: int | None = None
-    max_combo: int | None = None
-    update_date: str | None = None
-    precise_list: None = None
+    random_seed: int = pydantic.Field(default_factory=util.time)
+    max_combo: int
+    update_date: str
+    precise_list: list[LiveRewardPreciseList] | None = None
     deck_info: advanced.LiveDeckInfo | None = None
-    tap_adjust: None = None
+    tap_adjust: int | None = None
+    trigger_log: list[LiveRewardTriggerLog] | None = None
 
 
 class LivePreciseScoreResponse(pydantic.BaseModel):
@@ -153,26 +175,6 @@ class LiveRewardLiveSetting(pydantic.BaseModel):
     notes_speed: float
     icon: LiveRewardLiveSettingIcon
     cutin_type: int
-
-
-class LiveRewardPreciseList(pydantic.BaseModel):
-    effect: int
-    count: int
-    tap: float
-    note_number: float
-    position: int
-    accuracy: int
-    is_same: bool
-
-    tp: bool | None = None
-    tpf: bool | None = None
-    first_touch: int | None = None
-    release: float | None = None
-
-
-class LiveRewardTriggerLog(pydantic.BaseModel):
-    activation_rate: int
-    position: int
 
 
 class LiveRewardPreciseScore(pydantic.BaseModel):
@@ -381,5 +383,5 @@ async def live_gameover(context: idol.SchoolIdolUserParams):
 
 @idol.register("live", "reward")
 async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardRequest) -> LiveRewardResponse:
-    util.stub("live", "reward", request)
+    util.stub("live", "reward", context.raw_request_data)
     raise idol.error.IdolError(idol.error.ERROR_CODE_LIVE_NOT_FOUND, 600)
