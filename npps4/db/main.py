@@ -25,6 +25,7 @@ class User(common.Base):
     passwd: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
 
     name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(default="Kemp")
+    bio: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(default="Hello!")
     level: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=1)
     exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
     previous_exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
