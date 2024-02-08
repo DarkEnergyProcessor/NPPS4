@@ -83,6 +83,7 @@ async def add_achievement(
         achievement_id=ach.achievement_id,
         user_id=user.id,
         achievement_type=ach.achievement_type,
+        achievement_filter_category_id=ach.achievement_filter_category_id,
         count=0,
         is_accomplished=False,
         insert_date=time,

@@ -2,7 +2,6 @@ import pydantic
 
 from .. import idol
 from .. import util
-from ..idol.system import advanced
 from ..idol.system import museum
 from ..idol.system import profile
 from ..idol.system import unit
@@ -71,10 +70,11 @@ async def profile_profileinfo(context: idol.SchoolIdolUserParams, request: Profi
     if target_user is None:
         raise idol.error.by_code(idol.error.ERROR_CODE_USER_NOT_EXIST)
 
-    partner_unit_info = await unit.get_unit_center(context, target_user)
-    if partner_unit_info is None:
+    partner_unit_owning_user_id = await unit.get_unit_center(context, target_user)
+    if partner_unit_owning_user_id == 0:
         raise idol.error.by_code(idol.error.ERROR_CODE_USER_NOT_EXIST)
-    partner_unit = await unit.get_unit(context, partner_unit_info.unit_id)
+    partner_unit = await unit.get_unit(context, partner_unit_owning_user_id)
+    unit.validate_unit(target_user, partner_unit)
 
     active_deck = await unit.load_unit_deck(context, target_user, target_user.active_deck_index)
     if active_deck is None:

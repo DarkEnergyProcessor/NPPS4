@@ -17,21 +17,21 @@ async def unlock_award(context: idol.BasicSchoolIdolContext, user: main.User, aw
 
     bg = main.Award(user_id=user.id, award_id=award_id)
     context.db.main.add(bg)
+    await context.db.main.flush()
 
     if set_active:
-        user.active_award = award_id
+        await set_award_active(context, user, award_id)
 
-    await context.db.main.flush()
     return True
 
 
-async def get_awards(context: idol.SchoolIdolParams, user: main.User):
+async def get_awards(context: idol.BasicSchoolIdolContext, user: main.User):
     q = sqlalchemy.select(main.Award).where(main.Award.user_id == user.id)
     result = await context.db.main.execute(q)
     return result.scalars().all()
 
 
-async def set_award_active(context: idol.SchoolIdolParams, user: main.User, award_id: int):
+async def set_award_active(context: idol.BasicSchoolIdolContext, user: main.User, award_id: int):
     has_bg = await has_award(context, user, award_id)
     if not has_bg:
         return False
@@ -41,6 +41,6 @@ async def set_award_active(context: idol.SchoolIdolParams, user: main.User, awar
     return True
 
 
-async def init(context: idol.SchoolIdolParams, user: main.User):
+async def init(context: idol.BasicSchoolIdolContext, user: main.User):
     await unlock_award(context, user, 1, True)
     await unlock_award(context, user, 23)

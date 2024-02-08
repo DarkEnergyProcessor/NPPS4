@@ -323,7 +323,7 @@ async def save_unit_deck(context: idol.SchoolIdolParams, user: main.User, deck: 
 
 async def set_unit_center(context: idol.BasicSchoolIdolContext, user: main.User, unit_data: main.Unit):
     validate_unit(user, unit_data)
-    user.center_unit_owning_user_id = unit_data.unit_id
+    user.center_unit_owning_user_id = unit_data.id
     await context.db.main.flush()
 
 

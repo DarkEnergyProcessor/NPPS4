@@ -57,7 +57,7 @@ async def user_getnavi(context: idol.SchoolIdolUserParams) -> UserGetNaviRespons
     current_user = await user.get_current(context)
     center = await unit.get_unit_center(context, current_user)
     return UserGetNaviResponse(
-        user=UserNavi(user_id=context.token.user_id, unit_owning_user_id=center.unit_id if center is not None else 0),
+        user=UserNavi(user_id=context.token.user_id, unit_owning_user_id=center),
         server_timestamp=util.time(),
     )
 

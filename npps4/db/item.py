@@ -49,7 +49,7 @@ class KGItem(common.GameDBBase, common.MaybeEncrypted):
     rank: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
     enhancement_exp_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
     enhancement_pattern_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
-    mechandise_group_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
+    merchandise_group_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
     merchandise_flag: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 

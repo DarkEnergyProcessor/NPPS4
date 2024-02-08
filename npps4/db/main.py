@@ -171,8 +171,10 @@ class Achievement(common.Base):
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
         common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
     )
-    achievement_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
-    achievement_filter_category_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
+    achievement_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)  # for fast lookup
+    achievement_filter_category_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        index=True
+    )  # for fast lookup
     count: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
     is_accomplished: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False, index=True)
     is_reward_claimed: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False)
