@@ -241,7 +241,7 @@ async def remove_unit(context: idol.SchoolIdolParams, user: main.User, user_unit
         raise ValueError("invalid unit_id")
 
     # Remove from deck first
-    q = sqlalchemy.delete(main.UnitDeckPosition).where(main.UnitDeckPosition.unit_id == user_unit.id)
+    q = sqlalchemy.delete(main.UnitDeckPosition).where(main.UnitDeckPosition.unit_owning_user_id == user_unit.id)
     await context.db.main.execute(q)
 
     # Remove from unit
@@ -289,7 +289,7 @@ async def load_unit_deck(context: idol.BasicSchoolIdolContext, user: main.User, 
         q = sqlalchemy.select(main.UnitDeckPosition).where(main.UnitDeckPosition.deck_id == deck.id)
         result = await context.db.main.execute(q)
         for row in result.scalars():
-            deckunits[row.position - 1] = row.unit_id
+            deckunits[row.position - 1] = row.unit_owning_user_id
 
     return deck, deckunits
 
@@ -312,7 +312,7 @@ async def save_unit_deck(context: idol.SchoolIdolParams, user: main.User, deck: 
             else:
                 deckpos = deckposlist.get()
 
-            deckpos.unit_id = unit_id
+            deckpos.unit_owning_user_id = unit_id
             deckpos.position = i
 
     while not deckposlist.empty():
@@ -322,18 +322,13 @@ async def save_unit_deck(context: idol.SchoolIdolParams, user: main.User, deck: 
 
 
 async def set_unit_center(context: idol.BasicSchoolIdolContext, user: main.User, unit_data: main.Unit):
-    center = await context.db.main.get(main.UnitCenter, user.id)
-    if center is None:
-        center = main.UnitCenter(user_id=user.id)
-        context.db.main.add(center)
-
-    center.unit_id = unit_data.id
+    validate_unit(user, unit_data)
+    user.center_unit_owning_user_id = unit_data.unit_id
     await context.db.main.flush()
 
 
 async def get_unit_center(context: idol.BasicSchoolIdolContext, user: main.User):
-    center = await context.db.main.get(main.UnitCenter, user.id)
-    return center
+    return user.center_unit_owning_user_id
 
 
 async def idolize(context: idol.BasicSchoolIdolContext, user: main.User, unit_data: main.Unit):
@@ -593,7 +588,7 @@ async def get_all_unit_removable_skill(context: idol.BasicSchoolIdolContext, use
 
 
 async def get_unit_removable_skills(context: idol.BasicSchoolIdolContext, unit_data: main.Unit):
-    q = sqlalchemy.select(main.UnitRemovableSkill).where(main.UnitRemovableSkill.unit_id == unit_data.id)
+    q = sqlalchemy.select(main.UnitRemovableSkill).where(main.UnitRemovableSkill.unit_owning_user_id == unit_data.id)
     result = await context.db.main.execute(q)
     return list(sis.unit_removable_skill_id for sis in result.scalars())
 
@@ -604,11 +599,11 @@ async def get_all_unit_removable_skills(context: idol.BasicSchoolIdolContext, us
     sis_by_unit_id: dict[int, list[int]] = {}
 
     for sis in result.scalars():
-        if sis.unit_id not in sis_by_unit_id:
+        if sis.unit_owning_user_id not in sis_by_unit_id:
             sis_info = []
-            sis_by_unit_id[sis.unit_id] = sis_info
+            sis_by_unit_id[sis.unit_owning_user_id] = sis_info
         else:
-            sis_info = sis_by_unit_id[sis.unit_id]
+            sis_info = sis_by_unit_id[sis.unit_owning_user_id]
         sis_info.append(sis.unit_removable_skill_id)
 
     return sis_by_unit_id
@@ -631,7 +626,7 @@ async def add_unit_removable_skill(
 
 async def attach_unit_removable_skill(context: idol.BasicSchoolIdolContext, unit: main.Unit, removable_skill_id: int):
     q = sqlalchemy.select(main.UnitRemovableSkill).where(
-        main.UnitRemovableSkill.unit_id == unit.id,
+        main.UnitRemovableSkill.unit_owning_user_id == unit.id,
         main.UnitRemovableSkill.unit_removable_skill_id == removable_skill_id,
     )
     result = await context.db.main.execute(q)
@@ -648,7 +643,7 @@ async def attach_unit_removable_skill(context: idol.BasicSchoolIdolContext, unit
 
 async def detach_unit_removable_skill(context: idol.BasicSchoolIdolContext, unit: main.Unit, removable_skill_id: int):
     q = sqlalchemy.delete(main.UnitRemovableSkill).where(
-        main.UnitRemovableSkill.unit_id == unit.id,
+        main.UnitRemovableSkill.unit_owning_user_id == unit.id,
         main.UnitRemovableSkill.unit_removable_skill_id == removable_skill_id,
     )
     result = await context.db.main.execute(q)
