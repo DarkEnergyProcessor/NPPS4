@@ -632,7 +632,7 @@ async def attach_unit_removable_skill(context: idol.BasicSchoolIdolContext, unit
     result = await context.db.main.execute(q)
     if result.scalar() is None:
         sis = main.UnitRemovableSkill(
-            unit_id=unit.id, user_id=unit.user_id, unit_removable_skill_id=removable_skill_id
+            unit_owning_user_id=unit.id, user_id=unit.user_id, unit_removable_skill_id=removable_skill_id
         )
         context.db.main.add(sis)
         await context.db.main.flush()
