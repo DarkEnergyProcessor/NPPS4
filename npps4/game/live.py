@@ -349,15 +349,18 @@ async def live_play(context: idol.SchoolIdolUserParams, request: LivePlayRequest
     if guest is None:
         raise idol.error.IdolError(idol.error.ERROR_CODE_LIVE_INVALID_PARTY_USER)
 
-    guest_center = await unit.get_unit_center(context, guest)
-    if guest_center is None or guest_center.unit_id == 0:
+    guest_center_unit_owning_user_id = await unit.get_unit_center(context, guest)
+    if guest_center_unit_owning_user_id == 0:
         raise idol.error.IdolError(idol.error.ERROR_CODE_LIVE_INVALID_PARTY_USER)
 
     calculator = advanced.TeamStatCalculator(context)
     museum_data = await museum.get_museum_info_data(context, current_user)
     deck_units = [await unit.get_unit(context, i) for i in deck_data[1]]
     stats = await calculator.get_live_stats(
-        request.unit_deck_id, deck_units, await unit.get_unit(context, guest_center.unit_id), museum_data.parameter
+        request.unit_deck_id,
+        deck_units,
+        await unit.get_unit(context, guest_center_unit_owning_user_id),
+        museum_data.parameter,
     )
 
     return LivePlayResponse(
