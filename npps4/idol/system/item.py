@@ -1,5 +1,4 @@
 import pydantic
-import sqlalchemy
 
 from ... import idol
 from ...const import ADD_TYPE
