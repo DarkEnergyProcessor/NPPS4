@@ -51,6 +51,7 @@ async def add_effort(context: idol.BasicSchoolIdolContext, user: main.User, amou
             # FIXME: Proper drops. This is currently loveca + 1 at the moment.
             user.free_sns_coin = user.free_sns_coin + 1
             reward = EffortReward(add_type=3001, item_id=4, amount=1, reward_box_flag=False)
+            await item.update_item_category_id(context, reward)
             rewards.append(reward)
             result.append(
                 EffortResult(

@@ -92,6 +92,7 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
             amount=reward_item.amount,
             reward_box_flag=False,
         )
+        await item.update_item_category_id(context, get_item)
         lbonuses_day.add(current_datetime.day)
         # Do achievement check
         achievement_list = await achievement.check_type_27(
