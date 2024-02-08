@@ -2,6 +2,7 @@ import pydantic
 
 from .. import idol
 from .. import util
+from ..idol.system import advanced
 from ..idol.system import museum
 from ..idol.system import profile
 from ..idol.system import unit
@@ -95,7 +96,7 @@ async def profile_profileinfo(context: idol.SchoolIdolUserParams, request: Profi
             friend_max=target_user.friend_max,
             unit_cnt=unit_count,
             invite_code=target_user.friend_id,
-            introduction="Hello",  # TODO
+            introduction=target_user.bio,
         ),
         center_unit_info=await profile.to_profile_unit_info(context, center_unit, museum_data.parameter),
         navi_unit_info=await profile.to_profile_unit_info(context, partner_unit, museum_data.parameter),
@@ -110,7 +111,7 @@ async def profile_profileinfo(context: idol.SchoolIdolUserParams, request: Profi
 async def profile_profileregister(
     context: idol.SchoolIdolUserParams, request: ProfileRegisterRequest
 ) -> idol.core.DummyModel:
-    # TODO
-    util.stub("profile", "profileRegister", request)
-    raise idol.error.by_code(idol.error.ERROR_CODE_ONLY_WHITESPACE_CHARACTERS)
+    await advanced.test_name(context, request.introduction)
+    current_user = await user.get_current(context)
+    current_user.bio = request.introduction
     return idol.core.DummyModel()
