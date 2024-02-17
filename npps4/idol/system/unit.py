@@ -132,7 +132,9 @@ def validate_unit(user: main.User, unit_data: main.Unit | None):
         raise idol.error.by_code(idol.error.ERROR_CODE_UNIT_NOT_EXIST)
 
 
-async def get_supporter_unit(context: idol.SchoolIdolParams, user: main.User, unit_id: int, ensure: bool = False):
+async def get_supporter_unit(
+    context: idol.BasicSchoolIdolContext, user: main.User, unit_id: int, ensure: bool = False
+):
     unit_info = await get_unit_info(context, unit_id)
     if unit_info is None or unit_info.disable_rank_up == 0:
         return None
@@ -152,7 +154,7 @@ async def get_supporter_unit(context: idol.SchoolIdolParams, user: main.User, un
     return unitsupp
 
 
-async def add_supporter_unit(context: idol.SchoolIdolParams, user: main.User, unit_id: int, quantity: int = 1):
+async def add_supporter_unit(context: idol.BasicSchoolIdolContext, user: main.User, unit_id: int, quantity: int = 1):
     if quantity < 1:
         raise ValueError("invalid amount")
 
@@ -167,7 +169,7 @@ async def add_supporter_unit(context: idol.SchoolIdolParams, user: main.User, un
     return True
 
 
-async def sub_supporter_unit(context: idol.SchoolIdolParams, user: main.User, unit_id: int, quantity: int = 1):
+async def sub_supporter_unit(context: idol.BasicSchoolIdolContext, user: main.User, unit_id: int, quantity: int = 1):
     if quantity < 1:
         raise ValueError("invalid amount")
 
@@ -181,7 +183,7 @@ async def sub_supporter_unit(context: idol.SchoolIdolParams, user: main.User, un
     return False
 
 
-async def get_all_supporter_unit(context: idol.SchoolIdolParams, user: main.User):
+async def get_all_supporter_unit(context: idol.BasicSchoolIdolContext, user: main.User):
     q = (
         sqlalchemy.select(main.UnitSupporter)
         .where(main.UnitSupporter.user_id == user.id)
