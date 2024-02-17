@@ -206,9 +206,9 @@ def get_unit_rarity(context: idol.BasicSchoolIdolContext, rarity: int):
     return context.db.unit.get(unit.Rarity, rarity)
 
 
-async def get_unit_level_up_pattern(context: idol.BasicSchoolIdolContext, unit_data: unit.Unit):
+async def get_unit_level_up_pattern(context: idol.BasicSchoolIdolContext, unit_info: unit.Unit):
     q = sqlalchemy.select(unit.UnitLevelUpPattern).where(
-        unit.UnitLevelUpPattern.unit_level_up_pattern_id == unit_data.unit_level_up_pattern_id
+        unit.UnitLevelUpPattern.unit_level_up_pattern_id == unit_info.unit_level_up_pattern_id
     )
     result = await context.db.unit.execute(q)
     return list(result.scalars())
@@ -424,15 +424,15 @@ class UnitStatsResult:
 
 
 def calculate_unit_stats(
-    unit_data: unit.Unit, pattern: list[unit.UnitLevelUpPattern] | list[unit.LevelLimitPattern], exp: int
+    unit_info: unit.Unit, pattern: list[unit.UnitLevelUpPattern] | list[unit.LevelLimitPattern], exp: int
 ):
     last = pattern[-1]
     result = UnitStatsResult(
         level=last.unit_level,
-        smile=unit_data.smile_max,
-        pure=unit_data.pure_max,
-        cool=unit_data.cool_max,
-        hp=unit_data.hp_max,
+        smile=unit_info.smile_max,
+        pure=unit_info.pure_max,
+        cool=unit_info.cool_max,
+        hp=unit_info.hp_max,
         next_exp=0,
     )
 
@@ -447,6 +447,19 @@ def calculate_unit_stats(
             break
 
     return result
+
+
+def get_exp_for_target_level(
+    unit_info: unit.Unit, patterns: list[unit.UnitLevelUpPattern] | list[unit.LevelLimitPattern], level: int
+):
+    if level == 1:
+        return 0
+
+    for pattern in patterns:
+        if pattern.unit_level == level - 1:
+            return pattern.next_exp
+
+    return patterns[-2].next_exp
 
 
 def calculate_unit_skill_stats(
