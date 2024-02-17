@@ -417,6 +417,10 @@ def register(
     def wrap0(f: _PossibleEndpointFunction[_T, _U, _V]):
         nonlocal check_version, batchable
 
+        if config.is_script_mode():
+            # Do nothing when in script mode
+            return f
+
         endpoint = f"/{module}/{action}"
         signature = typing.get_type_hints(f)
         params = list(map(lambda x: x[1], filter(lambda x: x[0] != "return", signature.items())))

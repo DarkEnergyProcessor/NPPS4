@@ -246,8 +246,7 @@ async def unit_activate(
         unit_data = await unit.get_unit(context, unit_owning_user_id)
         unit.validate_unit(current_user, unit_data)
 
-        if not unit_data.active:
-            # Move to active room
-            unit_data.active = True
+        # Move to active room
+        unit_data.active = True
 
     return idol.core.DummyModel()

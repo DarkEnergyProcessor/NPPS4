@@ -185,3 +185,12 @@ def get_custom_download_protocol():
         )
 
     return _custom_download_backend_module
+
+
+def is_script_mode():
+    # Doing "python -m npps4.script" implicitly loads "npps4" module which loads "npps4.config.config".
+    # As per PYthon documentation, the sys.argv[0] will equal to "-m" if the module is being loaded, however
+    # endpoint registration happends during loading.
+    return "npps4.script_dummy" in sys.modules or (
+        len(sys.argv) > 0 and (sys.argv[0] == "-m" or "alembic" in sys.argv[0].lower())
+    )

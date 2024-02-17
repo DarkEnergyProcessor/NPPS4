@@ -1,39 +1,42 @@
-from . import achievement
-from . import ad
-from . import album
-from . import announce
-from . import award
-from . import background
-from . import banner
-from . import challenge
-from . import costume
-from . import download
-from . import event
-from . import eventscenario
-from . import exchange
-from . import friend
-from . import gdpr
-from . import handover
-from . import item
-from . import lbonus
-from . import live
-from . import liveicon
-from . import livese
-from . import login
-from . import marathon
-from . import multiunit
-from . import museum
-from . import navigation
-from . import notice
-from . import payment
-from . import personalnotice
-from . import profile
-from . import reward
-from . import scenario
-from . import secretbox
-from . import stamp
-from . import subscenario
-from . import tos
-from . import tutorial
-from . import unit
-from . import user
+from ..config import config
+
+if not config.is_script_mode():
+    from . import achievement
+    from . import ad
+    from . import album
+    from . import announce
+    from . import award
+    from . import background
+    from . import banner
+    from . import challenge
+    from . import costume
+    from . import download
+    from . import event
+    from . import eventscenario
+    from . import exchange
+    from . import friend
+    from . import gdpr
+    from . import handover
+    from . import item
+    from . import lbonus
+    from . import live
+    from . import liveicon
+    from . import livese
+    from . import login
+    from . import marathon
+    from . import multiunit
+    from . import museum
+    from . import navigation
+    from . import notice
+    from . import payment
+    from . import personalnotice
+    from . import profile
+    from . import reward
+    from . import scenario
+    from . import secretbox
+    from . import stamp
+    from . import subscenario
+    from . import tos
+    from . import tutorial
+    from . import unit
+    from . import user

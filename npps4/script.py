@@ -1,6 +1,7 @@
 import argparse
 import asyncio
 
+from . import script_dummy
 from .config import config
 
 from typing import Protocol
