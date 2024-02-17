@@ -23,7 +23,7 @@ def intrange(minval: int, maxval: int):
 
 
 async def run_script(arg: list[str]):
-    parser = argparse.ArgumentParser(__file__)
+    parser = argparse.ArgumentParser(__file__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     group = parser.add_mutually_exclusive_group(required=True)
     npps4.scriptutils.user.register_args(group)
     group2 = parser.add_mutually_exclusive_group(required=True)
@@ -47,6 +47,7 @@ async def run_script(arg: list[str]):
     parser.add_argument(
         "--add-sis-slot",
         type=intrange(0, 4),
+        default=0,
         help="Additional amount of SIS slot to unlock (automatically clamped; ignored for support cards).",
     )
     args = parser.parse_args(arg)
