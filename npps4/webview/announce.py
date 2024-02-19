@@ -1,7 +1,7 @@
 import fastapi.responses
 
-from .. import app
 from .. import util
+from ..app import app
 
 
 @app.webview.get("/announce/index")

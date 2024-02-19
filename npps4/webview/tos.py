@@ -1,4 +1,4 @@
-from .. import app
+from ..app import app
 
 
 @app.webview.get("/tos/read")

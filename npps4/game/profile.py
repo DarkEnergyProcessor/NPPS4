@@ -53,16 +53,28 @@ class ProfileRegisterRequest(pydantic.BaseModel):
     introduction: str
 
 
+class ProfileLiveCountResponse(pydantic.RootModel[list[ProfileLiveCount]]):
+    pass
+
+
+class ProfileCardRankingResponse(pydantic.RootModel[list[ProfileCardRanking]]):
+    pass
+
+
 @idol.register("profile", "liveCnt")
-async def profile_livecount(context: idol.SchoolIdolUserParams, request: ProfileRequest) -> list[ProfileLiveCount]:
+async def profile_livecount(context: idol.SchoolIdolUserParams, request: ProfileRequest) -> ProfileLiveCountResponse:
     util.stub("profile", "liveCnt", request)
-    return [ProfileLiveCount(difficulty=i, clear_cnt=0) for i in (1, 2, 3, 4, 6)]
+    return ProfileLiveCountResponse.model_validate(
+        [ProfileLiveCount(difficulty=i, clear_cnt=0) for i in (1, 2, 3, 4, 6)]
+    )
 
 
 @idol.register("profile", "cardRanking")
-async def profile_cardranking(context: idol.SchoolIdolUserParams, request: ProfileRequest) -> list[ProfileCardRanking]:
+async def profile_cardranking(
+    context: idol.SchoolIdolUserParams, request: ProfileRequest
+) -> ProfileCardRankingResponse:
     util.stub("profile", "cardRanking", request)
-    return []
+    return ProfileCardRankingResponse.model_validate([])
 
 
 @idol.register("profile", "profileInfo")

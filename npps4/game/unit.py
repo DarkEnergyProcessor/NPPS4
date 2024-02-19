@@ -27,7 +27,7 @@ class UnitDeckPositionInfoResponse(pydantic.BaseModel):
     unit_owning_user_id: int
 
 
-class UnitDeckInfoResponse(pydantic.BaseModel):
+class UnitDeckInfo(pydantic.BaseModel):
     unit_deck_id: int
     main_flag: bool
     deck_name: str
@@ -67,6 +67,10 @@ class UnitWaitResponse(pydantic.BaseModel):
     unit_removable_skill: unit.RemovableSkillOwningInfo
 
 
+class UnitDeckInfoResponse(pydantic.RootModel[list[UnitDeckInfo]]):
+    pass
+
+
 @idol.register("unit", "accessoryAll")
 async def unit_accessoryall(context: idol.SchoolIdolUserParams) -> UnitAccessoryInfoResponse:
     # TODO
@@ -75,9 +79,9 @@ async def unit_accessoryall(context: idol.SchoolIdolUserParams) -> UnitAccessory
 
 
 @idol.register("unit", "deckInfo")
-async def unit_deckinfo(context: idol.SchoolIdolUserParams) -> list[UnitDeckInfoResponse]:
+async def unit_deckinfo(context: idol.SchoolIdolUserParams) -> UnitDeckInfoResponse:
     current_user = await user.get_current(context)
-    result: list[UnitDeckInfoResponse] = []
+    result: list[UnitDeckInfo] = []
 
     for i in range(1, 19):
         decklist = await unit.load_unit_deck(context, current_user, i)
@@ -88,7 +92,7 @@ async def unit_deckinfo(context: idol.SchoolIdolUserParams) -> list[UnitDeckInfo
                 if unit_id > 0:
                     deckpos.append(UnitDeckPositionInfoResponse(position=j, unit_owning_user_id=unit_id))
 
-            deckinfo = UnitDeckInfoResponse(
+            deckinfo = UnitDeckInfo(
                 unit_deck_id=i,
                 main_flag=current_user.active_deck_index == i,
                 deck_name=decklist[0].name,
@@ -96,7 +100,7 @@ async def unit_deckinfo(context: idol.SchoolIdolUserParams) -> list[UnitDeckInfo
             )
             result.append(deckinfo)
 
-    return result
+    return UnitDeckInfoResponse.model_validate(result)
 
 
 @idol.register("unit", "removableSkillInfo")

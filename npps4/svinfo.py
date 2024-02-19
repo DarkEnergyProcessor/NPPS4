@@ -8,8 +8,8 @@ import zipfile
 import fastapi
 import honkypy
 
-from . import app
 from . import util
+from .app import app
 from .config import config
 
 SERVERINFO_TEMPLATE = {

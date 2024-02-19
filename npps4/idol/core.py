@@ -9,11 +9,10 @@ import pydantic
 import sqlalchemy.ext.asyncio
 
 from . import error
-from .. import app
-from .. import db
 from .. import idoltype
 from .. import release_key
 from .. import util
+from ..app import app
 from ..config import config
 from ..db import achievement
 from ..db import effort
@@ -26,7 +25,7 @@ from ..db import scenario
 from ..db import subscenario
 from ..db import unit
 
-from typing import Annotated, Any, Callable, Coroutine, TypeVar, Generic
+from typing import Annotated, Any, Callable, Coroutine, TypeVar, Generic, cast
 
 
 class DummyModel(pydantic.BaseModel):
@@ -230,24 +229,15 @@ _T = TypeVar("_T", bound=SchoolIdolParams)
 _U = TypeVar("_U", bound=pydantic.BaseModel)
 _V = TypeVar("_V", bound=pydantic.BaseModel, covariant=True)
 
-
-_PossibleEndpointFunction = (
-    Callable[[_T, _U], Coroutine[Any, Any, _V]]  # Request is pydantic, response is pydantic
-    | Callable[[_T, list[_U]], Coroutine[Any, Any, _V]]  # Request is list of pydantics, response is pydantic
-    | Callable[[_T, _U], Coroutine[Any, Any, list[_V]]]  # Request is pydantic, response is list of pydantics
-    | Callable[
-        [_T, list[_U]], Coroutine[Any, Any, list[_V]]
-    ]  # Request is list of pydantics, response is list of pydantics
-    | Callable[[_T], Coroutine[Any, Any, _V]]  # Request is none, response is pydantic
-    | Callable[[_T], Coroutine[Any, Any, list[_V]]]  # Request is none, response is list of pydantics
-)
+_EndpointWithRequest = Callable[[_T, _U], Coroutine[Any, Any, _V]]  # Request is pydantic, response is pydantic
+_EndpointWithoutRequest = Callable[[_T], Coroutine[Any, Any, _V]]  # Request is none, response is pydantic
+_PossibleEndpointFunction = _EndpointWithoutRequest[_T, _V] | _EndpointWithRequest[_T, _U, _V]
 
 
 @dataclasses.dataclass
 class Endpoint(Generic[_T, _U, _V]):
     context_class: type[SchoolIdolParams | SchoolIdolAuthParams | SchoolIdolUserParams]
     request_class: type[pydantic.BaseModel] | None
-    is_request_list: bool
     function: _PossibleEndpointFunction[_T, _U, _V]
     exclude_none: bool
 
@@ -439,6 +429,7 @@ def register(
                 description=f.__doc__,
                 response_model=idoltype.ResponseData[ret],
                 responses={200: {"headers": RESPONSE_HEADERS}},
+                response_model_exclude_none=exclude_none,
                 tags=tags,
             )
             @app.main.get(
@@ -447,15 +438,18 @@ def register(
                 description=f.__doc__,
                 response_model=idoltype.ResponseData[ret],
                 responses={200: {"headers": RESPONSE_HEADERS}},
+                response_model_exclude_none=exclude_none,
                 tags=tags,
             )
             async def wrap1(context: Annotated[_T, fastapi.Depends(params[0])]):
-                nonlocal ret, check_version, xmc_verify, exclude_none
+                nonlocal ret, check_version, xmc_verify, exclude_none, f
+                func = cast(_EndpointWithoutRequest[_T, _V], f)
+
                 response = await client_check(context, check_version, xmc_verify)
                 if response is None:
                     try:
                         async with context:
-                            result: _V | list[_V] = await f(context)
+                            result = await func(context)
                             response = await build_response(context, result, exclude_none=exclude_none)
                     except error.IdolError as e:
                         response = await build_response(context, e)
@@ -502,30 +496,25 @@ def register(
                 context: Annotated[_T, fastapi.Depends(params[0])],
                 request: Annotated[_U, fastapi.Depends(_get_request_data(params[1]))],
             ):
-                nonlocal ret, check_version, xmc_verify
+                nonlocal ret, check_version, xmc_verify, f
+                func = cast(_EndpointWithRequest[_T, _U, _V], f)
                 response = await client_check(context, check_version, xmc_verify)
+
                 if config.log_request_response():
                     util.log("DEBUG REQUEST", endpoint, str(context.raw_request_data, "UTF-8"))
                 if response is None:
                     try:
                         async with context:
-                            result: _V | list[_V] = await f(context, request)
+                            result = await func(context, request)
                             response = await build_response(context, result, exclude_none=exclude_none)
                     except error.IdolError as e:
                         response = await build_response(context, e)
                 return response
 
         if batchable:
-            real_request: type[_V] | None = None
-            is_request_list = False
-
-            if len(params) > 1:
-                real_request, is_request_list = _get_real_param(params[1])
-
             API_ROUTER_MAP[(module, action)] = Endpoint(
                 context_class=params[0],
-                request_class=real_request,
-                is_request_list=is_request_list,
+                request_class=None if len(params) < 2 else params[1],
                 function=f,
                 exclude_none=exclude_none,
             )
@@ -611,13 +600,15 @@ async def api_endpoint(
 
                 # *Sigh* have to reinvent the wheel.
                 if endpoint.request_class is not None:
-                    if endpoint.is_request_list:
-                        pydantic_request = list(map(endpoint.request_class.model_validate, request_data))
-                    else:
-                        pydantic_request = endpoint.request_class.model_validate(request_data)
-                    result = await endpoint.function(context, pydantic_request)  # type: ignore
+                    pydantic_request = endpoint.request_class.model_validate(request_data)
+                    func = cast(
+                        _EndpointWithRequest[SchoolIdolUserParams, pydantic.BaseModel, pydantic.BaseModel],
+                        endpoint.function,
+                    )
+                    result = await func(context, pydantic_request)
                 else:
-                    result = await endpoint.function(context)  # type: ignore
+                    func = cast(_EndpointWithoutRequest[SchoolIdolUserParams, pydantic.BaseModel], endpoint.function)
+                    result = await func(context)
 
                 await context.db.commit()
                 current_response, status_code, http_code = assemble_response_data(result, endpoint.exclude_none)

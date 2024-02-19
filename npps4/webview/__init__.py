@@ -10,8 +10,8 @@ if not config.is_script_mode():
     from . import helper
     from . import tos
 
-from .. import app
 from .. import errhand
+from ..app import app
 
 
 @app.core.get("/resources/maintenace/maintenance.php", response_class=fastapi.responses.HTMLResponse)

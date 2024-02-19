@@ -5,10 +5,10 @@ import fastapi
 import fastapi.staticfiles
 
 from . import dltype
-from .. import app
 from .. import idoltype
 from .. import release_key
 from .. import util
+from ..app import app
 from ..config import config
 
 from typing import TypeVar, Generic, Callable, Any

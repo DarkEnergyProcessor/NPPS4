@@ -8,8 +8,8 @@ import fastapi.responses
 import fastapi.staticfiles
 import fastapi.templating
 
-from . import errhand
-from . import util
+from .. import errhand
+from .. import util
 
 NPPS4_VERSION = (0, 0, 1)
 

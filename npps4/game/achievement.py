@@ -15,8 +15,12 @@ class AchievementUnaccomplishedFilter(pydantic.BaseModel):
     is_last: bool = True
 
 
+class AchievementUnaccomplishedResponse(pydantic.RootModel[list[AchievementUnaccomplishedFilter]]):
+    pass
+
+
 @idol.register("achievement", "unaccomplishList")
-async def achievement_unaccomplishlist(context: idol.SchoolIdolUserParams) -> list[AchievementUnaccomplishedFilter]:
+async def achievement_unaccomplishlist(context: idol.SchoolIdolUserParams) -> AchievementUnaccomplishedResponse:
     current_user = await user.get_current(context)
     unaccomplished = await achievement.get_achievements(context, current_user, False)
     await advanced.fixup_achievement_reward(context, current_user, unaccomplished)
@@ -35,4 +39,4 @@ async def achievement_unaccomplishlist(context: idol.SchoolIdolUserParams) -> li
             AchievementUnaccomplishedFilter(filter_category_id=fcat, achievement_list=ach_list, count=len(ach_list))
         )
 
-    return result
+    return AchievementUnaccomplishedResponse.model_validate(result)

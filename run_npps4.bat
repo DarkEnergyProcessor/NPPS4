@@ -10,5 +10,5 @@ if "%VIRTUAL_ENV%"=="" (
 	set UVICORN=%VIRTUAL_ENV%\Scripts\uvicorn
 )
 
-"%UVICORN%" npps4:uvicorn_main --port 51376 %*
+"%UVICORN%" npps4.run.app:main --port 51376 %*
 endlocal

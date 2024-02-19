@@ -8,4 +8,4 @@ else
 	UVICORN="$VIRTUAL_ENV/bin/uvicorn"
 fi
 
-"$UVICORN" npps4:uvicorn_main --port 51376 "$@"
+"$UVICORN" npps4.run.app:main --port 51376 "$@"

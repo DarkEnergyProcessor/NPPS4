@@ -5,8 +5,8 @@ from typing import Annotated
 import fastapi
 import sqlalchemy
 
-from .. import app
 from .. import idol
+from ..app import app
 from ..db import achievement
 
 ACHIEVEMENT_PARAMS = (

@@ -8,7 +8,7 @@ from ..idol.system import unit
 from ..idol.system import user
 
 
-class AlbumResponse(pydantic.BaseModel):
+class AlbumInfo(pydantic.BaseModel):
     unit_id: int
     rank_max_flag: bool
     love_max_flag: bool
@@ -20,13 +20,21 @@ class AlbumResponse(pydantic.BaseModel):
     sign_flag: bool
 
 
-class AlbumSeriesResponse(pydantic.BaseModel):
+class AlbumAllResponse(pydantic.RootModel[list[AlbumInfo]]):
+    pass
+
+
+class AlbumSeriesInfo(pydantic.BaseModel):
     series_id: int
-    unit_list: list[AlbumResponse]
+    unit_list: list[AlbumInfo]
+
+
+class AlbumSeriesAllResponse(pydantic.RootModel[list[AlbumSeriesInfo]]):
+    pass
 
 
 def album_to_response(data: main.Album):
-    return AlbumResponse(
+    return AlbumInfo(
         unit_id=data.unit_id,
         rank_max_flag=data.rank_max_flag,
         love_max_flag=data.love_max_flag,
@@ -39,33 +47,35 @@ def album_to_response(data: main.Album):
     )
 
 
-def sort_by_series_id(data: AlbumSeriesResponse):
+def sort_by_series_id(data: AlbumSeriesInfo):
     return data.series_id
 
 
-def sort_by_unit_id(data: AlbumResponse):
+def sort_by_unit_id(data: AlbumInfo):
     return data.unit_id
 
 
 @idol.register("album", "albumAll")
-async def album_albumall(context: idol.SchoolIdolUserParams) -> list[AlbumResponse]:
+async def album_albumall(context: idol.SchoolIdolUserParams) -> AlbumAllResponse:
     current_user = await user.get_current(context)
     all_album = await album.all(context, current_user)
-    return [album_to_response(a) for a in all_album]
+    return AlbumAllResponse.model_validate([album_to_response(a) for a in all_album])
 
 
 @idol.register("album", "seriesAll")
-async def album_seriesall(context: idol.SchoolIdolUserParams) -> list[AlbumSeriesResponse]:
+async def album_seriesall(context: idol.SchoolIdolUserParams) -> AlbumSeriesAllResponse:
     current_user = await user.get_current(context)
     all_album = await album.all(context, current_user)
-    series: dict[int, list[AlbumResponse]] = await album.all_series(context)
+    series: dict[int, list[AlbumInfo]] = await album.all_series(context)
 
     for a in all_album:
         unit_info = await unit.get_unit_info(context, a.unit_id)
         if unit_info is not None and unit_info.album_series_id is not None:
             series[unit_info.album_series_id].append(album_to_response(a))
 
-    return sorted(
-        [AlbumSeriesResponse(series_id=k, unit_list=sorted(v, key=sort_by_unit_id)) for k, v in series.items()],
-        key=sort_by_series_id,
+    return AlbumSeriesAllResponse.model_validate(
+        sorted(
+            [AlbumSeriesInfo(series_id=k, unit_list=sorted(v, key=sort_by_unit_id)) for k, v in series.items()],
+            key=sort_by_series_id,
+        )
     )

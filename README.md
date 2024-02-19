@@ -115,6 +115,10 @@ required dependencies.
 Otherwise, install the additional dependencies depending on which backend you want to use. Ensure to install the 
 "async" version of the database packages!
 
+* SQLite3: `aiosqlite` (already installed)
+* PostgreSQL: `asyncpg`
+* MySQL/MariaDB: `asyncmy`
+
 Running
 -----
 
@@ -125,7 +129,7 @@ alembic upgrade head
 
 Then run the server
 ```
-uvicorn npps4:uvicorn_main --port 51376
+uvicorn npps4.run.app:main --port 51376 --host <your lan IP or 0.0.0.0>
 ```
 
 **Caveat**: Currently, `--workers` option is not supported when using NPPS4-DLAPI download backend.

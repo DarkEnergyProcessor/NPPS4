@@ -2,7 +2,7 @@ import os
 
 import fastapi
 
-from . import app
+from .app import app
 from .config import config
 
 
