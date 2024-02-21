@@ -1,8 +1,10 @@
 # NPPS4 example Badwords Checker file.
 # This defines if a certain words are badwords or not.
 # Bad words are words that can't be used in team formation, names, etc.
-# You can specify other, vanilla Python file, but it must match
-# the function specification below.
+# You can specify other, vanilla Python file, but it must match the function specification below.
+#
+# STRONG WARNING: Importing any "npps4" module at global scope is not allowed due to badwords checker being loaded
+# in early phase of NPPS4 initialization (circular import)!
 #
 # This is free and unencumbered software released into the public domain.
 #
@@ -26,6 +28,10 @@
 #
 # For more information, please refer to <http://unlicense.org/>
 
+import re
+
+STRIP_WHITESPACE = re.compile(r"\s+")
+
 
 # Badwords Checker must define "has_badwords" function with these parameters:
 # * "text" (str)
@@ -33,4 +39,13 @@
 #
 # It then returns a boolean if the specified text contains badword.
 async def has_badwords(text: str, context) -> bool:
+    import npps4.data
+
+    new_text = re.sub(STRIP_WHITESPACE, "", text.lower())
+    server_data = npps4.data.get()
+
+    for badword in server_data.badwords:
+        if badword in new_text:
+            return True
+
     return False

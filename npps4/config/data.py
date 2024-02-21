@@ -29,6 +29,7 @@ class _Main(pydantic.BaseModel):
     secret_key: str
     server_private_key: str
     server_private_key_password: str = ""
+    server_data: str = "npps4/server_data.json"
 
 
 class _Database(pydantic.BaseModel):

@@ -1,9 +1,10 @@
 .vscode/
-data/
+/data/
 download-temp/
 util/sampledata/
 venv/
 
 *.pyc
+/*.ipynb
 config.toml
 maintenance.txt
