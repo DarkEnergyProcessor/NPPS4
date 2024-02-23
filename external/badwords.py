@@ -3,9 +3,6 @@
 # Bad words are words that can't be used in team formation, names, etc.
 # You can specify other, vanilla Python file, but it must match the function specification below.
 #
-# STRONG WARNING: Importing any "npps4" module at global scope is not allowed due to badwords checker being loaded
-# in early phase of NPPS4 initialization (circular import)!
-#
 # This is free and unencumbered software released into the public domain.
 #
 # Anyone is free to copy, modify, publish, use, compile, sell, or distribute
@@ -30,6 +27,9 @@
 
 import re
 
+import npps4.data
+import npps4.idol
+
 STRIP_WHITESPACE = re.compile(r"\s+")
 
 
@@ -38,9 +38,7 @@ STRIP_WHITESPACE = re.compile(r"\s+")
 # * "context" (npps4.idol.BasicSchoolIdolParams) to access the database.
 #
 # It then returns a boolean if the specified text contains badword.
-async def has_badwords(text: str, context) -> bool:
-    import npps4.data
-
+async def has_badwords(text: str, context: npps4.idol.BasicSchoolIdolContext) -> bool:
     new_text = re.sub(STRIP_WHITESPACE, "", text.lower())
     server_data = npps4.data.get()
 

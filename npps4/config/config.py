@@ -131,13 +131,17 @@ def get_login_bonus_protocol():
 
 
 BADWORDS_CHECK_FILE = os.path.join(ROOT_DIR, CONFIG_DATA.game.badwords)
-_badwords_check_module = cast(
-    cfgtype.BadwordsCheckProtocol, load_module_from_file(BADWORDS_CHECK_FILE, "npps4_badwords_check")
-)
+_badwords_check_module = None
 
 
 async def contains_badwords(string: str, context):
     global _badwords_check_module
+
+    if _badwords_check_module is None:
+        _badwords_check_module = cast(
+            cfgtype.BadwordsCheckProtocol, load_module_from_file(BADWORDS_CHECK_FILE, "npps4_badwords_check")
+        )
+
     return await _badwords_check_module.has_badwords(string, context)
 
 
@@ -189,7 +193,7 @@ def get_custom_download_protocol():
 
 def is_script_mode():
     # Doing "python -m npps4.script" implicitly loads "npps4" module which loads "npps4.config.config".
-    # As per PYthon documentation, the sys.argv[0] will equal to "-m" if the module is being loaded, however
+    # As per Python documentation, the sys.argv[0] will equal to "-m" if the module is being loaded, however
     # endpoint registration happends during loading.
     return (
         hasattr(sys, "ps1")
