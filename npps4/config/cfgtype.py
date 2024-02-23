@@ -3,7 +3,7 @@ import fastapi
 from .. import idoltype
 from ..download import dltype
 
-from typing import Iterable, Literal, Protocol
+from typing import Iterable, Literal, Protocol, Any
 
 
 class LoginBonusProtocol(Protocol):
@@ -70,4 +70,17 @@ class DownloadBackendProtocol(Protocol):
     async def get_raw_files(
         self, request: fastapi.Request, platform: idoltype.PlatformType, files: list[str]
     ) -> list[dltype.BaseInfo]:
+        ...
+
+
+class LiveDropBoxResult(Protocol):
+    new_live_effort_point_box_spec_id: int
+    offer_limited_effort_event_id: int
+    rewards: list[tuple[int, int, int, dict[str, Any] | None]]
+
+
+class LiveDropBoxProtocol(Protocol):
+    async def process_effort_box(
+        self, context, current_live_effort_point_box_spec_id: int, current_limited_effort_event_id: int, score: int
+    ) -> LiveDropBoxResult:
         ...

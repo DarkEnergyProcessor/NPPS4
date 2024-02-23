@@ -127,6 +127,10 @@ beatmaps = "external/beatmap.py"
 # Path is relative to the project root directory.
 live_unit_drop = "external/live_unit_drop.py"
 
+# Specify Live Show! Reward Box drop script.
+# Path is relative to the project root directory.
+live_box_drop = "external/live_box_drop.py"
+
 [advanced]
 # This is advanced configuration.
 # In most cases, you don't have to change anything.

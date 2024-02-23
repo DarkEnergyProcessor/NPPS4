@@ -204,3 +204,18 @@ def is_script_mode():
 
 def get_server_data_path():
     return os.path.join(ROOT_DIR, CONFIG_DATA.main.server_data)
+
+
+LIVE_BOX_DROP_FILE = os.path.join(ROOT_DIR, CONFIG_DATA.game.live_box_drop)
+_live_box_drop_module = None
+
+
+def get_live_box_drop_protocol():
+    global _live_box_drop_module
+
+    if _live_box_drop_module is None:
+        _live_box_drop_module = cast(
+            cfgtype.LiveUnitDropProtocol, load_module_from_file(LIVE_UNIT_DROP_FILE, "npps4_live_box_drop")
+        )
+
+    return _live_box_drop_module

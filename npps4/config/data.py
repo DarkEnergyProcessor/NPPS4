@@ -67,6 +67,7 @@ class _Game(pydantic.BaseModel):
     login_bonus: str = "external/login_bonus.py"
     beatmaps: str = "external/beatmap.py"
     live_unit_drop: str = "external/live_unit_drop.py"
+    live_box_drop: str = "external/live_box_drop.py"
 
 
 class _Advanced(pydantic.BaseModel):
