@@ -1,6 +1,5 @@
 from .. import idol
 from .. import util
-from ..idol import error
 
 import pydantic
 
@@ -24,14 +23,14 @@ class KIDStatusResponse(pydantic.BaseModel):
 async def handover_exec(context: idol.SchoolIdolUserParams, request: HandoverExecRequest) -> pydantic.BaseModel:
     # TODO
     util.stub("handover", "exec", request)
-    raise error.IdolError(error.ERROR_HANDOVER_INVALID_ID_OR_CODE, 600)
+    raise idol.error.by_code(idol.error.ERROR_HANDOVER_INVALID_ID_OR_CODE)
 
 
 @idol.register("handover", "kidInfo")
 async def handover_kidinfo(context: idol.SchoolIdolUserParams) -> KIDInfoResponse:
     # TODO
     util.stub("handover", "kidInfo", context.raw_request_data)
-    raise error.IdolError(error.ERROR_KLAB_ID_SERVICE_MAINTENANCE, 600)
+    raise idol.error.by_code(idol.error.ERROR_KLAB_ID_SERVICE_MAINTENANCE)
     # return KIDInfoResponse(auth_url=str(context.request.url), server_timestamp=util.time())
 
 

@@ -2,7 +2,6 @@ import pydantic
 
 from .. import idol
 from .. import util
-from ..idol import error
 
 
 class FriendListRequest(pydantic.BaseModel):
@@ -33,4 +32,4 @@ async def friend_list(context: idol.SchoolIdolUserParams, request: FriendListReq
 async def friend_search(context: idol.SchoolIdolUserParams, request: FriendSearchRequest) -> idol.core.DummyModel:
     # TODO
     util.stub("friend", "search", request)
-    raise error.IdolError(error.ERROR_CODE_FRIEND_USER_NOT_EXISTS, 600)
+    raise idol.error.by_code(idol.error.ERROR_CODE_FRIEND_USER_NOT_EXISTS)
