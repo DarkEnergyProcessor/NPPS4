@@ -44,10 +44,10 @@ class LoginBonusResponse(pydantic.BaseModel):
     start_dash_sheets: list  # TODO
     effort_point: list[effort.EffortResult]
     limited_effort_box: list  # TODO
-    accomplished_achievement_list: list[achievement.Achievement]
+    accomplished_achievement_list: list[achievement.AchievementData]
     unaccomplished_achievement_cnt: int
     after_user_info: user.UserInfoData
-    added_achievement_list: list[achievement.Achievement]
+    added_achievement_list: list[achievement.AchievementData]
     new_achievement_cnt: int
     museum_info: museum.MuseumInfoData
     server_timestamp: int
@@ -75,6 +75,8 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
     get_item = None
     add_effort_amount = 0
     achievement_list = achievement.AchievementContext()
+    accomplished_rewards = []
+    unaccomplished_rewards = []
     if not has_lbonus:
         reward_item = current_month[current_datetime.day - 1].item
         add_effort_amount = 100000
@@ -95,11 +97,21 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
         await item.update_item_category_id(context, get_item)
         lbonuses_day.add(current_datetime.day)
         # Do achievement check
-        achievement_list = await achievement.check_type_27(
-            context, current_user, login_count
-        ) + await achievement.check_type_29(context, current_user)
-        await advanced.fixup_achievement_reward(context, current_user, achievement_list.accomplished)
-        await advanced.process_achievement_reward(context, current_user, achievement_list.accomplished)
+        achievement_list.extend(
+            await achievement.check_type_27(context, current_user, login_count)
+            + await achievement.check_type_29(context, current_user)
+        )
+        accomplished_rewards.extend(
+            [await achievement.get_achievement_rewards(context, ach) for ach in achievement_list.accomplished]
+        )
+        unaccomplished_rewards.extend(
+            [await achievement.get_achievement_rewards(context, ach) for ach in achievement_list.new]
+        )
+        await advanced.fixup_achievement_reward(context, current_user, accomplished_rewards)
+        await advanced.fixup_achievement_reward(context, current_user, unaccomplished_rewards)
+        await advanced.process_achievement_reward(
+            context, current_user, achievement_list.accomplished, accomplished_rewards
+        )
 
     # Modify current_month
     for day in lbonuses_day:
@@ -129,10 +141,14 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
         start_dash_sheets=[],  # TODO
         effort_point=effort_result,
         limited_effort_box=[],  # TODO
-        accomplished_achievement_list=achievement_list.accomplished,
+        accomplished_achievement_list=await achievement.to_game_representation(
+            context, achievement_list.accomplished, accomplished_rewards
+        ),
         unaccomplished_achievement_cnt=await achievement.get_achievement_count(context, current_user, False),
         after_user_info=await user.get_user_info(context, current_user),
-        added_achievement_list=achievement_list.new,
+        added_achievement_list=await achievement.to_game_representation(
+            context, achievement_list.new, unaccomplished_rewards
+        ),
         new_achievement_cnt=len(achievement_list.new),
         museum_info=await museum.get_museum_info_data(context, current_user),
         server_timestamp=server_timestamp,

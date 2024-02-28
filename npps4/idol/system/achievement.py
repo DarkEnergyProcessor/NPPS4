@@ -5,15 +5,16 @@ import sqlalchemy
 
 from . import item
 from ... import achievement_reward
+from ... import db
 from ... import idol
 from ... import util
 from ...db import achievement
 from ...db import main
 
-from typing import Awaitable, Callable, Concatenate, Sequence, ParamSpec
+from typing import Awaitable, Callable, Concatenate, Iterable, Sequence, ParamSpec
 
 
-class Achievement(pydantic.BaseModel):
+class AchievementData(pydantic.BaseModel):
     achievement_id: int
     count: int
     is_accomplished: bool
@@ -28,8 +29,8 @@ class Achievement(pydantic.BaseModel):
     reward_list: list[item.Reward]
 
     @staticmethod
-    def from_sqlalchemy(ach: main.Achievement, info: achievement.Achievement):
-        return Achievement(
+    def from_sqlalchemy(ach: main.Achievement, info: achievement.Achievement, rewards: list[item.Reward]):
+        return AchievementData(
             achievement_id=ach.achievement_id,
             count=ach.count,
             is_accomplished=ach.is_accomplished,
@@ -39,14 +40,14 @@ class Achievement(pydantic.BaseModel):
             is_new=ach.is_new,
             for_display=bool(info.display_flag),
             is_locked=False,
-            reward_list=achievement_reward.get(ach.achievement_id),
+            reward_list=rewards,
         )
 
 
 @dataclasses.dataclass
 class AchievementContext:
-    accomplished: list[Achievement] = dataclasses.field(default_factory=list)
-    new: list[Achievement] = dataclasses.field(default_factory=list)
+    accomplished: list[main.Achievement] = dataclasses.field(default_factory=list)
+    new: list[main.Achievement] = dataclasses.field(default_factory=list)
 
     def extend(self, other: "AchievementContext"):
         self.accomplished.extend(other.accomplished)
@@ -55,7 +56,7 @@ class AchievementContext:
     def fix(self):
         # Anything in "new" should be removed if it's in "accomplished"
         accomplished_ids = set(ach.achievement_id for ach in self.accomplished)
-        self.new = list(filter(lambda ach: ach.achievement_id not in accomplished_ids, self.new))
+        self.new = [ach for ach in self.new if ach.achievement_id not in accomplished_ids]
         return self
 
     def __add__(self, other: "AchievementContext"):
@@ -66,8 +67,11 @@ class AchievementContext:
 
 
 async def get_achievement_info(context: idol.BasicSchoolIdolContext, achievement_id: int):
-    ach = await context.db.achievement.get(achievement.Achievement, achievement_id)
-    return ach
+    info = await db.get_decrypted_row(context.db.achievement, achievement.Achievement, achievement_id)
+    if info is None:
+        raise ValueError("invalid achievement")
+
+    return info
 
 
 async def get_next_achievement_ids(context: idol.BasicSchoolIdolContext, achievement_id: int):
@@ -95,6 +99,19 @@ async def add_achievement(
     return user_ach
 
 
+async def to_game_representation(
+    context: idol.BasicSchoolIdolContext, achs: list[main.Achievement], rewardss: list[list[item.Reward]]
+):
+    return [
+        AchievementData.from_sqlalchemy(ach, await get_achievement_info(context, ach.achievement_id), rewards)
+        for ach, rewards in zip(achs, rewardss)
+    ]
+
+
+async def get_achievement_rewards(context: idol.BasicSchoolIdolContext, ach: main.Achievement):
+    return achievement_reward.get(ach.achievement_id)
+
+
 async def init(context: idol.BasicSchoolIdolContext, user: main.User):
     time = util.time()
     q = sqlalchemy.select(achievement.Achievement).where(achievement.Achievement.default_open_flag == 1)
@@ -120,14 +137,32 @@ async def get_achievements(context: idol.BasicSchoolIdolContext, user: main.User
     else:
         q = sqlalchemy.select(main.Achievement).where(main.Achievement.user_id == user.id)
     result = await context.db.main.execute(q)
-    achievement_list: list[Achievement] = []
+    return list(result.scalars())
 
-    for ach in result.scalars():
-        ach_info = await get_achievement_info(context, ach.achievement_id)
-        if ach_info:
-            achievement_list.append(Achievement.from_sqlalchemy(ach, ach_info))
 
-    return achievement_list
+async def get_unclaimed_achievements(context: idol.BasicSchoolIdolContext, user: main.User):
+    q = sqlalchemy.select(main.Achievement).where(
+        main.Achievement.user_id == user.id,
+        (main.Achievement.is_accomplished == False) | (main.Achievement.is_reward_claimed == False),
+    )
+    result = await context.db.main.execute(q)
+    return list(result.scalars())
+
+
+async def get_unclaimed_achievements_by_filter_id(
+    context: idol.BasicSchoolIdolContext, user: main.User, achievement_filter_category_id: int
+):
+    q = sqlalchemy.select(main.Achievement).where(
+        main.Achievement.user_id == user.id,
+        main.Achievement.achievement_filter_category_id == achievement_filter_category_id,
+        (main.Achievement.is_accomplished == False) | (main.Achievement.is_reward_claimed == False),
+    )
+    result = await context.db.main.execute(q)
+    return list(result.scalars())
+
+
+async def mark_achievement_reward_claimed(context: idol.BasicSchoolIdolContext, ach: main.Achievement):
+    ach.is_reward_claimed = True
 
 
 async def get_achievement_count(
@@ -175,8 +210,8 @@ async def check_type_countable(
     result = await context.db.main.execute(q)
 
     time = util.time()
-    achieved: list[Achievement] = []
-    new: list[Achievement] = []
+    achieved: list[main.Achievement] = []
+    new: list[main.Achievement] = []
 
     for ach in result.scalars():
         ach_info = await get_achievement_info(context, ach.achievement_id)
@@ -189,7 +224,7 @@ async def check_type_countable(
                 # Achieved.
                 ach.count = min(count, target_amount)
                 ach.is_accomplished = True
-                achieved.append(Achievement.from_sqlalchemy(ach, ach_info))
+                achieved.append(ach)
 
                 # New achievement
                 for next_ach_id in await get_next_achievement_ids(context, ach.achievement_id):
@@ -197,7 +232,7 @@ async def check_type_countable(
                     if new_ach_info is not None:
                         new_ach = await add_achievement(context, user, new_ach_info, time)
                         # Append to new achievement
-                        new.append(Achievement.from_sqlalchemy(new_ach, new_ach_info))
+                        new.append(new_ach)
             else:
                 ach.count = count
 
@@ -221,8 +256,8 @@ async def check_type_increment(
     result = await context.db.achievement.execute(q)
 
     time = util.time()
-    achieved: list[Achievement] = []
-    new: list[Achievement] = []
+    achieved: list[main.Achievement] = []
+    new: list[main.Achievement] = []
 
     for ach in result.scalars():
         ach_info = await get_achievement_info(context, ach.achievement_id)
@@ -236,7 +271,7 @@ async def check_type_increment(
                 # Achieved.
                 ach.count = min(count, target_amount)
                 ach.is_accomplished = True
-                achieved.append(Achievement.from_sqlalchemy(ach, ach_info))
+                achieved.append(ach)
 
                 # New achievement
                 for next_ach_id in await get_next_achievement_ids(context, ach.achievement_id):
@@ -244,7 +279,7 @@ async def check_type_increment(
                     if new_ach_info is not None:
                         new_ach = await add_achievement(context, user, new_ach_info, time)
                         # Append to new achievement
-                        new.append(Achievement.from_sqlalchemy(new_ach, new_ach_info))
+                        new.append(new_ach)
             else:
                 ach.count = count
 

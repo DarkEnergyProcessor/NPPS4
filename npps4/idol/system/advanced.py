@@ -223,13 +223,10 @@ _ACHIEVEMENT_REWARD_REPLACE_CRITERIA: dict[
 
 # Certain reward can only be given once. This function replaces them to give 1 loveca instead.
 async def fixup_achievement_reward(
-    context: idol.BasicSchoolIdolContext, user: main.User, achievements: list[achievement.Achievement]
+    context: idol.BasicSchoolIdolContext, user: main.User, rewardss: list[list[item.Reward]]
 ):
-    for ach in achievements:
-        nrewards = len(ach.reward_list)
-        for i in range(nrewards):
-            ach_reward = ach.reward_list[i]
-
+    for reward_list in rewardss:
+        for ach_reward in reward_list:
             if ach_reward.add_type in _ACHIEVEMENT_REWARD_REPLACE_CRITERIA:
                 if await _ACHIEVEMENT_REWARD_REPLACE_CRITERIA[ach_reward.add_type](context, user, ach_reward.item_id):
                     _replace_to_loveca(ach_reward)
@@ -269,12 +266,16 @@ async def give_achievement_reward(
 
 
 async def process_achievement_reward(
-    context: idol.BasicSchoolIdolContext, user: main.User, achievements: list[achievement.Achievement]
+    context: idol.BasicSchoolIdolContext,
+    user: main.User,
+    achievements: list[main.Achievement],
+    rewardss: list[list[item.Reward]],
 ):
-    for ach in achievements:
+    for ach, reward_list in zip(achievements, rewardss):
         ach_info = await achievement.get_achievement_info(context, ach.achievement_id)
         if ach_info is not None and ach_info.auto_reward_flag:
-            await give_achievement_reward(context, user, ach_info, ach.reward_list)
+            await give_achievement_reward(context, user, ach_info, reward_list)
+            await achievement.mark_achievement_reward_claimed(context, ach)
 
 
 class TeamStatCalculator:
