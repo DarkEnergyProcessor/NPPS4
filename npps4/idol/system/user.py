@@ -102,8 +102,14 @@ async def create(context: idol.SchoolIdolParams, key: str, passwd: str):
     return user
 
 
-async def find_by_key(context: idol.SchoolIdolParams, key: str):
+async def find_by_key(context: idol.BasicSchoolIdolContext, key: str):
     q = sqlalchemy.select(main.User).where(main.User.key == key).limit(1)
+    result = await context.db.main.execute(q)
+    return result.scalar()
+
+
+async def find_by_invite_code(context: idol.BasicSchoolIdolContext, invite_code: int):
+    q = sqlalchemy.select(main.User).where(main.User.invite_code == invite_code).limit(1)
     result = await context.db.main.execute(q)
     return result.scalar()
 

@@ -18,29 +18,32 @@ from ...db import unit
 from typing import Literal, overload
 
 
-class UnitInfoData(pydantic.BaseModel):
+class UnitInfoCommonData(pydantic.BaseModel):
     unit_owning_user_id: int
     unit_id: int
     exp: int
     next_exp: int
     level: int
-    max_level: int
     level_limit_id: int
+    max_level: int
     rank: int
     max_rank: int
     love: int
     max_love: int
-    unit_skill_exp: int
     unit_skill_level: int
     max_hp: int
-    unit_removable_skill_capacity: int
     favorite_flag: bool
     display_rank: int
-    is_rank_max: bool
+    unit_skill_exp: int
+    unit_removable_skill_capacity: int
     is_love_max: bool
     is_level_max: bool
+    is_rank_max: bool
     is_signed: bool
     is_skill_level_max: bool
+
+
+class UnitInfoData(UnitInfoCommonData):
     is_removable_skill_capacity_max: bool
     insert_date: str
 
