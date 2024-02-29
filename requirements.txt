@@ -1,7 +1,7 @@
 aiosqlite
 alembic
 fastapi
-honkypy @ https://github.com/DarkEnergyProcessor/honky-py/releases/download/0.1.0/honkypy-0.1.0-py3-none-any.whl
+honkypy @ https://github.com/DarkEnergyProcessor/honky-py/releases/download/0.2.0/honkypy-0.2.0-py3-none-any.whl
 httpx
 itsdangerous
 jinja2
