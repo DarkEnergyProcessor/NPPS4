@@ -3,6 +3,7 @@ import pydantic
 from . import common
 from . import item
 from ... import idol
+from ...config import config
 from ...db import main
 from ...db import effort
 
@@ -37,33 +38,51 @@ async def get_effort_data(context: idol.BasicSchoolIdolContext, user: main.User)
 
 async def add_effort(context: idol.BasicSchoolIdolContext, user: main.User, amount: int):
     result: list[EffortResult] = []
-    rewards: list[EffortReward] = []
+    rewards: list[list[EffortReward]] = []
     current_effort = await get_effort_data(context, user)
+    live_box_drop_protocol = config.get_live_box_drop_protocol()
+    current_amount = amount
+    offer_limited_box_id = 0
 
-    while True:
+    # TODO: Properly handle limited effort box
+    while current_amount > 0:
         effort_spec = await get_effort_spec(context, current_effort.live_effort_point_box_spec_id)
         oldvalue = current_effort.current_point
-        current_effort.current_point = min(oldvalue + amount, effort_spec.capacity)
-        amount = amount - (current_effort.current_point - oldvalue)
+        current_effort.current_point = min(oldvalue + current_amount, effort_spec.capacity)
+        current_added = current_effort.current_point - oldvalue
+        current_amount = current_amount - current_added
 
         if current_effort.current_point >= effort_spec.capacity:
-            # Give present
-            # FIXME: Proper drops. This is currently loveca + 1 at the moment.
-            user.free_sns_coin = user.free_sns_coin + 1
-            reward = EffortReward(add_type=3001, item_id=4, amount=1, reward_box_flag=False)
-            await item.update_item_category_id(context, reward)
-            rewards.append(reward)
+            # Give reward
+            drop_box_result = await live_box_drop_protocol.process_effort_box(
+                context, current_effort.live_effort_point_box_spec_id, 0, amount
+            )
+
+            reward_list: list[EffortReward] = []
+            for add_type, item_id, item_count, additional_data in drop_box_result.rewards:
+                reward_data = EffortReward(add_type=add_type, item_id=item_id, amount=item_count)
+                if additional_data:
+                    for k, v in additional_data.items():
+                        setattr(reward_data, k, v)
+
+                await item.update_item_category_id(context, reward_data)
+                reward_list.append(reward_data)
+
+            rewards.append(reward_list)
             result.append(
                 EffortResult(
                     live_effort_point_box_spec_id=current_effort.live_effort_point_box_spec_id,
                     capacity=effort_spec.capacity,
                     before=oldvalue,
                     after=current_effort.current_point,
-                    rewards=[reward],
+                    rewards=reward_list,
                 )
             )
-            # FIXME: Select effort point box spec
+
+            current_effort.live_effort_point_box_spec_id = drop_box_result.new_live_effort_point_box_spec_id
             current_effort.current_point = 0
+            if drop_box_result.offer_limited_effort_event_id > 0:
+                offer_limited_box_id = drop_box_result.offer_limited_effort_event_id
         else:
             result.append(
                 EffortResult(
@@ -76,4 +95,4 @@ async def add_effort(context: idol.BasicSchoolIdolContext, user: main.User, amou
             )
             break
 
-    return result, rewards
+    return result, rewards, offer_limited_box_id
