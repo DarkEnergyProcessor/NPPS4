@@ -332,6 +332,38 @@ async def check_type_1(context: idol.BasicSchoolIdolContext, user: main.User, in
 
 
 @recursive_achievement
+async def check_type_2(context: idol.BasicSchoolIdolContext, user: main.User, difficulty: int, increment: bool):
+    """
+    Check live show clear achievements by specified difficulty.
+    """
+    return await check_type_increment(context, user, 2, increment, 2, difficulty)
+
+
+@recursive_achievement
+async def check_type_3(context: idol.BasicSchoolIdolContext, user: main.User, rank: int, increment: bool):
+    """
+    Check live show clear achievements by specified score rank.
+    """
+    return await check_type_increment(context, user, 3, increment, 2, rank)
+
+
+@recursive_achievement
+async def check_type_4(context: idol.BasicSchoolIdolContext, user: main.User, rank: int, increment: bool):
+    """
+    Check live show clear achievements by specified combo rank.
+    """
+    return await check_type_increment(context, user, 4, increment, 2, rank)
+
+
+@recursive_achievement
+async def check_type_7(context: idol.BasicSchoolIdolContext, user: main.User, unit_type_id: int, increment: bool):
+    """
+    Check live show clear achievements by specified combo rank.
+    """
+    return await check_type_increment(context, user, 4, increment, 2, unit_type_id)
+
+
+@recursive_achievement
 async def check_type_18(context: idol.BasicSchoolIdolContext, user: main.User, club_members: int):
     """
     Check amount of club members collected.
@@ -388,11 +420,19 @@ async def check_type_30(context: idol.BasicSchoolIdolContext, user: main.User, r
 
 
 @recursive_achievement
-async def check_type_32(context: idol.BasicSchoolIdolContext, user: main.User, live_track_id: int, increment: bool):
+async def check_type_32(context: idol.BasicSchoolIdolContext, user: main.User, live_track_id: int):
     """
     Check live show clear of specific `live_track_id`
     """
-    return await check_type_increment(context, user, 32, increment, 1, live_track_id)
+    return await check_type_countable(context, user, 32, 1, 1, live_track_id)
+
+
+@recursive_achievement
+async def check_type_37(context: idol.BasicSchoolIdolContext, user: main.User, live_track_id: int, increment: bool):
+    """
+    Check live show clear of specific `live_track_id`
+    """
+    return await check_type_increment(context, user, 37, increment, 1, live_track_id)
 
 
 async def check_type_53_recursive(context: idol.BasicSchoolIdolContext, user: main.User):
@@ -436,6 +476,14 @@ async def check_type_53_recursive(context: idol.BasicSchoolIdolContext, user: ma
             break
 
     return achievement_result_all
+
+
+@recursive_achievement
+async def check_type_58(context: idol.BasicSchoolIdolContext, user: main.User, increment: bool):
+    """
+    Check live show clear achievements.
+    """
+    return await check_type_increment(context, user, 58, increment)
 
 
 async def get_achievement_filter_ids(context: idol.BasicSchoolIdolContext):

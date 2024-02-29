@@ -6,8 +6,8 @@ import queue
 import pydantic
 import sqlalchemy
 
-from . import achievement
 from . import album
+from . import item
 from ... import db
 from ... import idol
 from ... import idoltype
@@ -402,18 +402,13 @@ async def add_love_by_deck(context: idol.BasicSchoolIdolContext, user: main.User
         if subtracted == 0:
             break
 
-    achievements = achievement.AchievementContext()
-
     for ur, ud, new_love in zip(unit_rarities, units, loves):
         ud.love = new_love
 
         if ud.love >= ur.after_love_max:
             await album.update(context, user, ud.unit_id, rank_max=True)
-            achievements.extend(await album.trigger_achievement(context, user, max_love=True))
 
     await context.db.main.flush()
-    # TODO: Live achievement.
-    return achievements
 
 
 @dataclasses.dataclass
@@ -697,4 +692,37 @@ async def get_removable_skill_info_request(context: idol.BasicSchoolIdolContext,
             )
             for i, v in sis_info.items()
         ),
+    )
+
+
+async def unit_id_to_item(
+    context: idol.BasicSchoolIdolContext,
+    /,
+    unit_id: int,
+    *,
+    cls: type[item._T] = item.Item,
+    level: int = 1,
+    exp: int = 0,
+    love: int = 0,
+    is_signed: bool = False,
+    unit_skill_exp: int = 0,
+    idolized: bool = False,
+):
+    unit_data = await get_unit_info(context, unit_id)
+    if unit_data is None:
+        raise ValueError("invalid unit_id")
+    unit_rarity = await get_unit_rarity(context, unit_data.rarity)
+    if unit_rarity is None:
+        raise ValueError("invalid unit rarity (is db corrupt?)")
+
+    return item.add_unit(
+        unit_data,
+        unit_rarity,
+        cls=cls,
+        level=level,
+        exp=exp,
+        love=love,
+        is_signed=is_signed,
+        unit_skill_exp=unit_skill_exp,
+        idolized=idolized,
     )

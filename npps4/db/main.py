@@ -333,6 +333,20 @@ class UnitRemovableSkill(common.Base):
     __table_args__ = (sqlalchemy.UniqueConstraint(unit_owning_user_id, unit_removable_skill_id),)
 
 
+class LiveInProgress(common.Base):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+    user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
+    )
+    party_user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, sqlalchemy.ForeignKey(User.id)
+    )
+    lp_factor: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    unit_deck_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+
+    __table_args__ = (sqlalchemy.UniqueConstraint(user_id),)
+
+
 engine = sqlalchemy.ext.asyncio.create_async_engine(config.get_database_url())
 sessionmaker = sqlalchemy.ext.asyncio.async_sessionmaker(engine)
 

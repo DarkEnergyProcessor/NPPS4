@@ -3,11 +3,12 @@ import random
 import pydantic
 import sqlalchemy
 
-from ...const import LIVE_GOAL_TYPE
 
+from . import item
 from ... import db
 from ... import idol
 from ...config import config
+from ...const import LIVE_GOAL_TYPE
 from ...db import main
 from ...db import live
 
@@ -50,12 +51,10 @@ async def unlock_live(context: idol.BasicSchoolIdolContext, user: main.User, liv
     result = await context.db.live.execute(q)
 
     # Get live_setting_ids
-    livesettings: list[sqlalchemy.ColumnElement[bool]] = []
-    for setting in result.scalars():
-        livesettings.append(live.NormalLive.live_setting_id == setting.live_setting_id)
+    live_setting_ids = [setting.live_setting_id for setting in result.scalars()]
 
     # Then query live_difficulty_ids
-    q = sqlalchemy.select(live.NormalLive).where(sqlalchemy.or_(sqlalchemy.false(), *livesettings))
+    q = sqlalchemy.select(live.NormalLive).where(live.NormalLive.live_setting_id.in_(live_setting_ids))
     result = await context.db.live.execute(q)
 
     # Add to live clear table
@@ -78,6 +77,14 @@ async def init(context: idol.BasicSchoolIdolContext, user: main.User):
         context.db.main.add(live_clear)
 
     await context.db.main.flush()
+
+
+async def get_live_clear_data(context: idol.BasicSchoolIdolContext, user: main.User, live_difficulty_id: int):
+    q = sqlalchemy.select(main.LiveClear).where(
+        main.LiveClear.user_id == user.id, main.LiveClear.live_difficulty_id == live_difficulty_id
+    )
+    result = await context.db.main.execute(q)
+    return result.scalar()
 
 
 async def get_normal_live_clear_status(context: idol.BasicSchoolIdolContext, user: main.User):
@@ -151,6 +158,16 @@ async def get_live_info(context: idol.BasicSchoolIdolContext, live_difficulty_id
     )
 
 
+async def get_live_info_without_notes(
+    context: idol.BasicSchoolIdolContext, live_difficulty_id: int, live_setting: live.LiveSetting
+):
+    return LiveInfo(
+        live_difficulty_id=live_difficulty_id,
+        ac_flag=live_setting.ac_flag,
+        swing_flag=live_setting.swing_flag,
+    )
+
+
 async def get_goal_list_by_live_difficulty_id(context: idol.BasicSchoolIdolContext, live_difficulty_id: int):
     q = sqlalchemy.select(live.LiveGoalReward).where(live.LiveGoalReward.live_difficulty_id == live_difficulty_id)
     result = await context.db.live.execute(q)
@@ -195,6 +212,14 @@ def get_index_of_range(value: int, seq: Iterable[Sequence[int]], start: int = 0,
 LIVE_GOAL_TYPES = (LIVE_GOAL_TYPE.SCORE, LIVE_GOAL_TYPE.COMBO, LIVE_GOAL_TYPE.CLEAR)
 
 
+def get_live_ranks(live_info: live.CommonLive, live_setting: live.LiveSetting, score: int, combo: int, clears: int):
+    rank_ranges = make_rank_range(live_info, live_setting)
+    score_rank = get_index_of_range(score, rank_ranges[LIVE_GOAL_TYPE.SCORE], 1, 5)
+    combo_rank = get_index_of_range(combo, rank_ranges[LIVE_GOAL_TYPE.COMBO], 1, 5)
+    clear_rank = get_index_of_range(clears, rank_ranges[LIVE_GOAL_TYPE.CLEAR], 1, 5)
+    return score_rank, combo_rank, clear_rank
+
+
 async def get_achieved_goal_id_list(context: idol.BasicSchoolIdolContext, clear_info: main.LiveClear):
     live_info = await get_live_info_table(context, clear_info.live_difficulty_id)
     result: list[int] = []
@@ -213,10 +238,9 @@ async def get_achieved_goal_id_list(context: idol.BasicSchoolIdolContext, clear_
                 )
                 for i in LIVE_GOAL_TYPES
             )
-            rank_ranges = make_rank_range(live_info, live_setting)
-            score_rank = get_index_of_range(clear_info.hi_score, rank_ranges[LIVE_GOAL_TYPE.SCORE], 1, 5)
-            combo_rank = get_index_of_range(clear_info.hi_combo_cnt, rank_ranges[LIVE_GOAL_TYPE.COMBO], 1, 5)
-            clear_rank = get_index_of_range(clear_info.clear_cnt, rank_ranges[LIVE_GOAL_TYPE.CLEAR], 1, 5)
+            score_rank, combo_rank, clear_rank = get_live_ranks(
+                live_info, live_setting, clear_info.hi_score, clear_info.hi_combo_cnt, clear_info.clear_cnt
+            )
             result.extend(
                 g.live_goal_reward_id for g in goal_list_by_type[LIVE_GOAL_TYPE.SCORE] if score_rank <= g.rank
             )
@@ -228,6 +252,21 @@ async def get_achieved_goal_id_list(context: idol.BasicSchoolIdolContext, clear_
             )
 
     return result
+
+
+async def get_goal_rewards(context: idol.BasicSchoolIdolContext, goal_ids: list[int]):
+    q = sqlalchemy.select(live.LiveGoalReward).where(live.LiveGoalReward.live_goal_reward_id.in_(goal_ids))
+    result = await context.db.live.execute(q)
+    return [
+        item.RewardWithCategory(
+            add_type=k.add_type,
+            item_id=k.item_id,
+            amount=k.amount,
+            item_category_id=k.item_category_id or 0,
+            reward_box_flag=False,
+        )
+        for k in result.scalars()
+    ]
 
 
 async def has_live_unlock(context: idol.BasicSchoolIdolContext, user: main.User, live_track_id: int):
@@ -242,7 +281,29 @@ async def has_live_unlock(context: idol.BasicSchoolIdolContext, user: main.User,
     q = (
         sqlalchemy.select(sqlalchemy.func.count())
         .select_from(main.LiveClear)
-        .where(main.LiveClear.live_difficulty_id.in_(live_difficulty_ids))
+        .where(main.LiveClear.user_id == user.id, main.LiveClear.live_difficulty_id.in_(live_difficulty_ids))
     )
     result = await context.db.main.execute(q)
     return (result.scalar() or 0) > 0
+
+
+async def get_live_in_progress(context: idol.BasicSchoolIdolContext, user: main.User):
+    q = sqlalchemy.select(main.LiveInProgress).where(main.LiveInProgress.user_id == user.id)
+    result = await context.db.main.execute(q)
+    return result.scalar()
+
+
+async def clean_live_in_progress(context: idol.BasicSchoolIdolContext, user: main.User):
+    q = sqlalchemy.delete(main.LiveInProgress).where(main.LiveInProgress.user_id == user.id)
+    result = await context.db.main.execute(q)
+    return result.rowcount > 0
+
+
+async def register_live_in_progress(
+    context: idol.BasicSchoolIdolContext, user: main.User, party_user: main.User, lp_factor: int, unit_deck_id: int
+):
+    wip = main.LiveInProgress(
+        user_id=user.id, party_user_id=party_user.id, lp_factor=lp_factor, unit_deck_id=unit_deck_id
+    )
+    context.db.main.add(wip)
+    await context.db.main.flush()

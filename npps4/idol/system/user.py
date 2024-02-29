@@ -152,4 +152,4 @@ async def add_exp(context: idol.BasicSchoolIdolContext, user: main.User, exp: in
         user.over_max_energy = current_energy + over_energy
 
     await context.db.main.flush()
-    # TODO: Inform level up data to live show result.
+    return level_up

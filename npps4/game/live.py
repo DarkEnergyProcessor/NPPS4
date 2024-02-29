@@ -1,15 +1,22 @@
+import copy
+import math
+
 import pydantic
 
-
+from .. import const
 from .. import idol
 from .. import util
+from ..config import config
 from ..idol.system import achievement
 from ..idol.system import advanced
+from ..idol.system import album
 from ..idol.system import class_system as class_system_module
 from ..idol.system import common
+from ..idol.system import effort
 from ..idol.system import item
 from ..idol.system import live
 from ..idol.system import museum
+from ..idol.system import reward
 from ..idol.system import unit
 from ..idol.system import user
 
@@ -360,6 +367,10 @@ async def live_precisescore(context: idol.SchoolIdolUserParams) -> LivePreciseSc
 @idol.register("live", "play", xmc_verify=idol.XMCVerifyMode.CROSS)
 async def live_play(context: idol.SchoolIdolUserParams, request: LivePlayRequest) -> LivePlayResponse:
     current_user = await user.get_current(context)
+    live_in_progress = await live.get_live_in_progress(context, current_user)
+    if live_in_progress is not None:
+        raise idol.error.IdolError(detail="Attempt to start live show twice")
+
     live_setting = await live.get_live_setting_from_difficulty_id(context, request.live_difficulty_id)
     if live_setting is None:
         raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_FOUND)
@@ -392,6 +403,9 @@ async def live_play(context: idol.SchoolIdolUserParams, request: LivePlayRequest
         museum_data.parameter,
     )
 
+    # Register live in progress
+    await live.register_live_in_progress(context, current_user, guest, request.lp_factor, request.unit_deck_id)
+
     return LivePlayResponse(
         rank_info=[
             LivePlayRankInfo(rank=5, rank_min=0, rank_max=live_setting.c_rank_score - 1),
@@ -409,10 +423,165 @@ async def live_play(context: idol.SchoolIdolUserParams, request: LivePlayRequest
 
 @idol.register("live", "gameover")
 async def live_gameover(context: idol.SchoolIdolUserParams) -> None:
-    util.stub("live", "gameover", context.raw_request_data)
+    current_user = await user.get_current(context)
+    await live.clean_live_in_progress(context, current_user)
 
 
 @idol.register("live", "reward")
 async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardRequest) -> LiveRewardResponse:
-    util.stub("live", "reward", context.raw_request_data)
-    raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_FOUND)
+    # FIXME: Perform validation to keep cheaters away?
+    # FIXME: Modularize this thing for MedFes, ChaFest, Score Match, etc.
+
+    current_user = await user.get_current(context)
+    live_in_progress = await live.get_live_in_progress(context, current_user)
+    if live_in_progress is None:
+        raise idol.error.IdolError(detail="attempt to finish live show without playing")
+
+    live_difficulty_info = await live.get_live_info_table(context, request.live_difficulty_id)
+    if live_difficulty_info is None:
+        raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_FOUND)
+
+    live_clear_data = await live.get_live_clear_data(context, current_user, request.live_difficulty_id)
+    if live_clear_data is None:
+        raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_FOUND)
+
+    live_setting = await live.get_live_setting_from_difficulty_id(context, request.live_difficulty_id)
+    if live_setting is None:
+        raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_FOUND)
+
+    # Get old data
+    old_live_clear_data = copy.copy(live_clear_data)
+    old_user_info = await user.get_user_info(context, current_user)
+
+    # Update live clear data
+    score = request.score_smile + request.score_cute + request.score_cool
+    live_clear_data.hi_score = max(live_clear_data.hi_score, score)
+    live_clear_data.hi_combo_cnt = max(live_clear_data.hi_combo_cnt, request.max_combo)
+    live_clear_data.clear_cnt = live_clear_data.clear_cnt + 1
+
+    # Get accomplished live goals
+    old_live_goals = set(await live.get_achieved_goal_id_list(context, old_live_clear_data))
+    new_live_goals = set(await live.get_achieved_goal_id_list(context, live_clear_data))
+    accomplished_live_goals = sorted(new_live_goals - old_live_goals)
+    live_goal_rewards = await live.get_goal_rewards(context, accomplished_live_goals)
+    score_rank, combo_rank, clear_rank = live.get_live_ranks(
+        live_difficulty_info, live_setting, score, request.max_combo, live_clear_data.clear_cnt
+    )
+
+    # Give live goal rewards
+    for reward_data in live_goal_rewards:
+        await advanced.add_item(context, current_user, reward_data)
+
+    # This is the intended EXP and G drop
+    target_difficulty_index = min(max(live_setting.difficulty, 1), 4) - 1
+    given_exp = const.LIVE_EXP_DROP[target_difficulty_index]
+    given_g = const.LIVE_GOLD_DROP[target_difficulty_index][score_rank - 1]
+
+    # Roll unit for live clear
+    live_unit_drop_protocol = config.get_live_unit_drop_protocol()
+    unit_id = await live_unit_drop_protocol.get_live_drop_unit(live_setting.live_setting_id, context)
+    live_clear_drop = await unit.unit_id_to_item(context, unit_id, cls=item.RewardWithCategory)
+    if request.max_combo >= live_setting.c_rank_combo:
+        unit_id = await live_unit_drop_protocol.get_live_drop_unit(live_setting.live_setting_id, context)
+        live_combo_drop = await unit.unit_id_to_item(context, unit_id, cls=item.RewardWithCategory)
+    else:
+        live_combo_drop = None
+    if score >= live_setting.c_rank_score:
+        unit_id = await live_unit_drop_protocol.get_live_drop_unit(live_setting.live_setting_id, context)
+        live_score_drop = await unit.unit_id_to_item(context, unit_id, cls=item.RewardWithCategory)
+    else:
+        live_score_drop = None
+        given_exp = math.ceil(given_exp / 2)
+
+    # Add user EXP
+    is_level_up = await user.add_exp(context, current_user, given_exp * live_in_progress.lp_factor)
+    new_user_info = await user.get_user_info(context, current_user)
+    current_user.game_coin = current_user.game_coin + given_g
+
+    # Add units
+    current_unit_count = await unit.count_units(context, current_user, True)
+    for reward_data in (live_clear_drop, live_combo_drop, live_score_drop):
+        if reward_data is not None:
+            if current_unit_count >= current_user.unit_max:
+                # Move to present box
+                reward_data.reward_box_flag = True
+                await reward.add_item(
+                    context, current_user, reward_data, "FIXME live show reward JP text", "Live Show! Reward"
+                )
+            else:
+                # Add directly
+                await unit.add_unit(context, current_user, reward_data.item_id, True)
+                current_unit_count = current_unit_count + 1
+
+    # Add bond
+    love_count = request.love_cnt * live_in_progress.lp_factor
+    await unit.add_love_by_deck(context, current_user, live_in_progress.unit_deck_id, love_count)
+
+    # Add live effort
+    effort_result, effort_reward, offer_limited_effort = await effort.add_effort(
+        context, current_user, score * live_in_progress.lp_factor
+    )
+    for rewards in effort_reward:
+        for r in rewards:
+            add_result = await advanced.add_item(context, current_user, r)
+            if not add_result.success:
+                # TODO: Message
+                await reward.add_item(
+                    context, current_user, r, "FIXME: Live Show! Clear message for JP", "Live Show! Clear"
+                )
+                r.reward_box_flag = True
+
+    # Get current deck
+    current_deck = await unit.load_unit_deck(context, current_user, live_in_progress.unit_deck_id)
+    assert current_deck is not None
+    unit_types_in_deck: set[int] = set()
+    for unit_owning_user_id in current_deck[1]:
+        unit_data = await unit.get_unit(context, unit_owning_user_id)
+        unit.validate_unit(current_user, unit_data)
+        unit_info = await unit.get_unit_info(context, unit_data.unit_id)
+        if unit_info is None:
+            raise ValueError("invalid unit_info (is db corrupt?)")
+        unit_types_in_deck.add(unit_info.unit_type_id)
+
+    # Check achievement
+    accomplished_achievement = (
+        await achievement.check_type_1(context, current_user, True)
+        + await achievement.check_type_2(context, current_user, live_setting.difficulty, True)
+        # album.trigger_achievement call below checks type 18 through 22.
+        + await album.trigger_achievement(context, current_user, obtained=True, idolized=True, max_love=True)
+        + await achievement.check_type_30(context, current_user)
+        + await achievement.check_type_32(context, current_user, live_setting.live_track_id)
+        # TODO: Check type 33
+        + await achievement.check_type_37(context, current_user, live_setting.live_track_id, True)
+        + await achievement.check_type_58(context, current_user, True)
+    )
+    if score_rank < 5:
+        accomplished_achievement = accomplished_achievement + await achievement.check_type_3(
+            context, current_user, score_rank, True
+        )
+    if combo_rank < 5:
+        accomplished_achievement = accomplished_achievement + await achievement.check_type_4(
+            context, current_user, combo_rank, True
+        )
+    for unit_type_id in unit_types_in_deck:
+        accomplished_achievement = accomplished_achievement + await achievement.check_type_7(
+            context, current_user, unit_type_id, True
+        )
+
+    return LiveRewardResponse(
+        live_info=[await live.get_live_info_without_notes(context, request.live_difficulty_id, live_setting)],
+        rank=score_rank,
+        combo_rank=combo_rank,
+        total_love=love_count,
+        is_high_score=old_live_clear_data.hi_score >= live_clear_data.hi_score,
+        hi_score=live_clear_data.hi_score,
+        base_reward_info=LiveRewardBaseInfo(
+            player_exp=given_exp,
+            player_exp_unit_max=common.BeforeAfter(before=old_user_info.unit_max, after=user_info.unit_max),
+            player_exp_friend_max=common.BeforeAfter(before=old_user_info.friend_max, after=user_info.friend_max),
+            player_exp_lp_max=common.BeforeAfter(before=old_user_info.energy_max, after=user_info.energy_max),
+            game_coin=given_g,
+            game_coin_reward_box_flag=False,
+            social_point=0,  # TODO: Add actual social point
+        ),
+    )

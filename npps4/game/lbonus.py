@@ -120,15 +120,13 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
         current_month[day - 1].received = True
 
     effort_result, effort_reward, _ = await effort.add_effort(context, current_user, add_effort_amount)
-    if effort_reward:
-        for rewards in effort_reward:
-            for r in rewards:
-                add_result = await advanced.add_item(context, current_user, r)
-                if not add_result.success:
-                    msg = strings.format_simple(
-                        strings.get("lbonus", 12), current_datetime.month, current_datetime.day
-                    )
-                    await reward.add_item(context, current_user, r, *msg)
+    for rewards in effort_reward:
+        for r in rewards:
+            add_result = await advanced.add_item(context, current_user, r)
+            if not add_result.success:
+                msg = strings.format_simple(strings.get("lbonus", 12), current_datetime.month, current_datetime.day)
+                await reward.add_item(context, current_user, r, *msg)
+                r.reward_box_flag = True
 
     current_date = f"{current_datetime.year}-{current_datetime.month}-{current_datetime.day}"
 

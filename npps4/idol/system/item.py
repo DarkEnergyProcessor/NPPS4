@@ -5,6 +5,8 @@ from ...const import ADD_TYPE
 from ...db import item
 from ...db import unit
 
+from typing import TypeVar
+
 
 class Item(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="allow")
@@ -19,7 +21,7 @@ class ItemWithCategory(Item):
 
 
 class RewardWithCategory(ItemWithCategory):
-    reward_box_flag: bool
+    reward_box_flag: bool = False
 
 
 class Reward(Item):
@@ -34,10 +36,14 @@ def add_g(amount: int):
     return Item(add_type=ADD_TYPE.GAME_COIN, item_id=3, amount=amount)
 
 
+_T = TypeVar("_T", bound=Item)
+
+
 def add_unit(
     unit_info: unit.Unit,
     unit_rarity: unit.Rarity,
     *,
+    cls: type[_T] = Item,
     level: int = 1,
     exp: int = 0,
     love: int = 0,
@@ -46,7 +52,7 @@ def add_unit(
     idolized: bool = False,
 ):
     idolized = unit_info.rank_max == unit_info.rank_min or idolized
-    t = Item(add_type=ADD_TYPE.UNIT, item_id=unit_info.unit_id, amount=1)
+    t = cls(add_type=ADD_TYPE.UNIT, item_id=unit_info.unit_id, amount=1)
     t.level = level
     t.exp = exp
     t.max_level = unit_rarity.after_level_max if idolized else unit_rarity.before_level_max

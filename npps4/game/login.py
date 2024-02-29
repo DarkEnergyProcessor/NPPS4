@@ -3,6 +3,7 @@ import base64
 from .. import idol
 from .. import util
 from ..db import main
+from ..idol.system import live
 from ..idol.system import unit
 from ..idol.system import user
 from ..idol import error
@@ -146,6 +147,10 @@ async def login_login(context: idol.SchoolIdolAuthParams, request: LoginRequest)
 
     # Login
     token = util.encapsulate_token(context.token.server_key, context.token.client_key, u.id)
+
+    # Clear WIP live shows.
+    # TODO: Should clear when can_resume_live is True?
+    await live.clean_live_in_progress(context, u)
     return LoginResponse(authorize_token=token, user_id=u.id, server_timestamp=util.time())
 
 
