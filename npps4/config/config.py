@@ -215,7 +215,7 @@ def get_live_box_drop_protocol():
 
     if _live_box_drop_module is None:
         _live_box_drop_module = cast(
-            cfgtype.LiveUnitDropProtocol, load_module_from_file(LIVE_UNIT_DROP_FILE, "npps4_live_box_drop")
+            cfgtype.LiveDropBoxProtocol, load_module_from_file(LIVE_BOX_DROP_FILE, "npps4_live_box_drop")
         )
 
     return _live_box_drop_module
