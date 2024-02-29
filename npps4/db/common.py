@@ -45,6 +45,13 @@ SNAKECASE_RE3 = re.compile("([a-z0-9])([A-Z])")
 class Base(sqlalchemy.orm.DeclarativeBase, PrettyPrinter):
     type_annotation_map = type_map_override
 
+    def __copy__(self):
+        table = self.__table__
+        primary_key = set(t.name for t in table.primary_key)
+        columns = dict((k, getattr(self, k)) for k in table.columns.keys() if k not in primary_key)
+        dup = self.__class__(**columns)
+        return dup
+
     @sqlalchemy.orm.declared_attr.directive
     def __tablename__(cls):
         name = cls.__name__
