@@ -3,7 +3,9 @@ import pydantic
 
 from .. import idol
 from .. import util
+from ..idol.system import achievement
 from ..idol.system import advanced
+from ..idol.system import class_system as class_system_module
 from ..idol.system import common
 from ..idol.system import item
 from ..idol.system import live
@@ -224,6 +226,14 @@ class LiveRewardUnitList(pydantic.BaseModel):
     live_combo: list[item.Reward]
 
 
+class LiveRewardEffortPointInfo(pydantic.BaseModel):
+    live_effort_point_box_spec_id: int
+    capacity: int
+    before: int
+    after: int
+    rewards: list[item.Reward]
+
+
 class LiveRewardResponseUnitList(pydantic.BaseModel):
     unit_owning_user_id: int
     unit_id: int
@@ -246,6 +256,11 @@ class LiveRewardNextLevel(pydantic.BaseModel):
     from_exp: int
 
 
+class LiveRewardGoalAccomplishedInfo(pydantic.BaseModel):
+    achieved_ids: list[int]
+    rewards: list[item.Reward]
+
+
 class LiveRewardResponse(pydantic.BaseModel):
     live_info: list[live.LiveInfo]
     rank: int
@@ -256,16 +271,30 @@ class LiveRewardResponse(pydantic.BaseModel):
     base_reward_info: LiveRewardBaseInfo
     reward_unit_list: LiveRewardUnitList
     unlocked_subscenario_ids: list[int]
-    unlocked_multi_unit_scenario_ids: list[int]
-    effort_point: list  # TODO
-    is_effort_point_visible: bool
-    limited_effort_box: list  # TODO
+    unlocked_multi_unit_scenario_ids: list[int] = pydantic.Field(default_factory=list)  # TODO
+    effort_point: list[LiveRewardEffortPointInfo]
+    is_effort_point_visible: bool = True
+    limited_effort_box: list = pydantic.Field(default_factory=list)  # TODO
     unit_list: list[LiveRewardResponseUnitList]
     before_user_info: user.UserInfoData
     after_user_info: user.UserInfoData
     next_level_info: list[LiveRewardNextLevel]
-    # TODO
+    goal_accomp_info: LiveRewardGoalAccomplishedInfo
+    special_reward_info: list[item.RewardWithCategory]
+    event_info: list = pydantic.Field(default_factory=list)  # TODO
+    daily_reward_info: list[item.RewardWithCategory] = pydantic.Field(default_factory=list)  # TODO
+    can_send_friend_request: bool = False
+    using_buff_info: list = pydantic.Field(default_factory=list)  # TODO
+    class_system: class_system_module.ClassSystemData = pydantic.Field(
+        default_factory=class_system_module.ClassSystemData
+    )  # TODO
+    accomplished_achievement_list: list[achievement.AchievementData]
+    unaccomplished_achievement_cnt: int
+    added_achievement_list: list[achievement.AchievementData]
+    new_achievement_cnt: int
     museum_info: museum.MuseumInfoData
+    server_timestamp: int = pydantic.Field(default_factory=util.time)
+    present_cnt: int
 
 
 @idol.register("live", "liveStatus")

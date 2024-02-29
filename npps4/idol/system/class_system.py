@@ -10,7 +10,7 @@ class ClassRankInfoData(pydantic.BaseModel):  # TODO
 
 
 class ClassSystemData(pydantic.BaseModel):  # TODO
-    rank_info: ClassRankInfoData
+    rank_info: ClassRankInfoData = pydantic.Field(default_factory=ClassRankInfoData)
     complete_flag: bool = False
     is_opened: bool = False
     is_visible: bool = False

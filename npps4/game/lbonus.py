@@ -6,7 +6,7 @@ from .. import strings
 from ..idol.system import achievement
 from ..idol.system import ad
 from ..idol.system import advanced
-from ..idol.system import class_system
+from ..idol.system import class_system as class_system_module
 from ..idol.system import effort
 from ..idol.system import item
 from ..idol.system import lbonus
@@ -40,7 +40,9 @@ class LoginBonusResponse(pydantic.BaseModel):
     ad_info: ad.AdInfo
     total_login_info: LoginBonusTotalLogin
     license_lbonus_list: list  # TODO
-    class_system: class_system.ClassSystemData
+    class_system: class_system_module.ClassSystemData = pydantic.Field(
+        default_factory=class_system_module.ClassSystemData
+    )  # TODO
     start_dash_sheets: list  # TODO
     effort_point: list[effort.EffortResult]
     limited_effort_box: list  # TODO
@@ -137,7 +139,6 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
         ad_info=ad.AdInfo(),
         total_login_info=LoginBonusTotalLogin(login_count=login_count),
         license_lbonus_list=[],  # TODO
-        class_system=class_system.ClassSystemData(rank_info=class_system.ClassRankInfoData()),
         start_dash_sheets=[],  # TODO
         effort_point=effort_result,
         limited_effort_box=[],  # TODO
