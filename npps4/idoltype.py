@@ -31,7 +31,7 @@ class ReleaseInfoData(pydantic.BaseModel):
 
 class ResponseData(pydantic.BaseModel, Generic[_S]):
     response_data: _S
-    release_info: list[ReleaseInfoData] = []
+    release_info: list[ReleaseInfoData] = pydantic.Field(default_factory=list)
     status_code: int = 200
 
 

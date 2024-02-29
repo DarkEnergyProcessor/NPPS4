@@ -32,14 +32,14 @@ class DownloadUpdateRequest(pydantic.BaseModel):
     target_os: DownloadTargetOS
     install_version: str
     external_version: str
-    package_list: list[int] = []
+    package_list: list[int] = pydantic.Field(default_factory=list)
 
 
 class DownloadBatchRequest(pydantic.BaseModel):
     client_version: str
     os: DownloadTargetOS
     package_type: DownloadPackageType
-    excluded_package_ids: list[int] = []
+    excluded_package_ids: list[int] = pydantic.Field(default_factory=list)
 
 
 class DownloadAdditionalRequest(pydantic.BaseModel):

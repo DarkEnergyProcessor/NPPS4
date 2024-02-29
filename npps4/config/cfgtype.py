@@ -38,7 +38,7 @@ class BeatmapProviderProtocol(Protocol):
 
 
 class LiveUnitDropProtocol(Protocol):
-    async def get_live_drop_unit(self, live_setting_id: int, context):
+    async def get_live_drop_unit(self, live_setting_id: int, context) -> int:
         ...
 
 
