@@ -94,7 +94,7 @@ async def trigger_achievement(
 
     if max_level:
         count = await count_album_with(context, user, main.Album.rank_level_max_flag == True)
-        result = await achievement.check_type_20(context, user, count)
+        result = await achievement.check_type_21(context, user, count)
         ach_ctx.extend(result)
 
     return ach_ctx
