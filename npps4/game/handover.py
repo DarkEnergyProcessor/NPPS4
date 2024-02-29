@@ -20,7 +20,7 @@ class KIDStatusResponse(pydantic.BaseModel):
 
 
 @idol.register("handover", "exec", batchable=False)
-async def handover_exec(context: idol.SchoolIdolUserParams, request: HandoverExecRequest) -> pydantic.BaseModel:
+async def handover_exec(context: idol.SchoolIdolUserParams, request: HandoverExecRequest) -> None:
     # TODO
     util.stub("handover", "exec", request)
     raise idol.error.by_code(idol.error.ERROR_HANDOVER_INVALID_ID_OR_CODE)

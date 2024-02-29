@@ -38,10 +38,10 @@ async def award_awardinfo(context: idol.SchoolIdolUserParams) -> AwardInfoRespon
 
 
 @idol.register("award", "set")
-async def award_set(context: idol.SchoolIdolUserParams, request: AwardSetRequest) -> idol.core.DummyModel:
+async def award_set(context: idol.SchoolIdolUserParams, request: AwardSetRequest) -> None:
     current_user = await user.get_current(context)
     if await award.has_award(context, current_user, request.award_id):
         current_user.active_award = request.award_id
-        return idol.core.DummyModel()
+        return
 
     raise error.IdolError(detail="No such award")

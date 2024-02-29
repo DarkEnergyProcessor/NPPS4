@@ -38,10 +38,10 @@ async def background_backgroundinfo(context: idol.SchoolIdolUserParams) -> Backg
 
 
 @idol.register("background", "set")
-async def background_set(context: idol.SchoolIdolUserParams, request: BackgroundSetRequest) -> idol.core.DummyModel:
+async def background_set(context: idol.SchoolIdolUserParams, request: BackgroundSetRequest) -> None:
     current_user = await user.get_current(context)
     if await background.has_background(context, current_user, request.background_id):
         current_user.active_background = request.background_id
-        return idol.core.DummyModel()
+        return
 
     raise error.IdolError(detail="No such background")

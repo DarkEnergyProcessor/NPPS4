@@ -86,9 +86,8 @@ async def user_setnotificationtoken(context: idol.SchoolIdolUserParams, request:
 
 
 @idol.register("user", "changeNavi")
-async def user_changenavi(context: idol.SchoolIdolUserParams, request: UserChangeNaviRequest) -> idol.core.DummyModel:
+async def user_changenavi(context: idol.SchoolIdolUserParams, request: UserChangeNaviRequest) -> None:
     current_user = await user.get_current(context)
     unit_data = await unit.get_unit(context, request.unit_owning_user_id)
     unit.validate_unit(current_user, unit_data)
     await unit.set_unit_center(context, current_user, unit_data)
-    return idol.core.DummyModel()

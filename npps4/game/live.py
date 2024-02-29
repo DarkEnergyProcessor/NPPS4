@@ -335,7 +335,7 @@ async def live_schedule(context: idol.SchoolIdolUserParams) -> LiveScheduleRespo
 
 
 @idol.register("live", "partyList")
-async def live_partylist(context: idol.SchoolIdolUserParams, request: LivePartyListRequest):
+async def live_partylist(context: idol.SchoolIdolUserParams, request: LivePartyListRequest) -> LivePartyListResponse:
     current_user = await user.get_current(context)
     util.stub("live", "partyList", request)
 
@@ -408,9 +408,8 @@ async def live_play(context: idol.SchoolIdolUserParams, request: LivePlayRequest
 
 
 @idol.register("live", "gameover")
-async def live_gameover(context: idol.SchoolIdolUserParams):
+async def live_gameover(context: idol.SchoolIdolUserParams) -> None:
     util.stub("live", "gameover", context.raw_request_data)
-    return idol.core.DummyModel()
 
 
 @idol.register("live", "reward")

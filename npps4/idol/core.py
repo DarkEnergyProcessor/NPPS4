@@ -28,8 +28,8 @@ from ..db import unit
 from typing import Annotated, Any, Callable, Coroutine, TypeVar, Generic, cast
 
 
-class DummyModel(pydantic.BaseModel):
-    pass
+class DummyModel(pydantic.RootModel[list]):
+    root: list = pydantic.Field(default_factory=list)
 
 
 class Database:
@@ -229,9 +229,20 @@ _T = TypeVar("_T", bound=SchoolIdolParams)
 _U = TypeVar("_U", bound=pydantic.BaseModel)
 _V = TypeVar("_V", bound=pydantic.BaseModel, covariant=True)
 
-_EndpointWithRequest = Callable[[_T, _U], Coroutine[Any, Any, _V]]  # Request is pydantic, response is pydantic
-_EndpointWithoutRequest = Callable[[_T], Coroutine[Any, Any, _V]]  # Request is none, response is pydantic
-_PossibleEndpointFunction = _EndpointWithoutRequest[_T, _V] | _EndpointWithRequest[_T, _U, _V]
+_EndpointWithRequestWithResponse = Callable[
+    [_T, _U], Coroutine[Any, Any, _V]
+]  # Request is pydantic, response is pydantic
+_EndpointWithoutRequestWithResponse = Callable[[_T], Coroutine[Any, Any, _V]]  # Request is none, response is pydantic
+_EndpointWithRequestWithoutResponse = Callable[
+    [_T, _U], Coroutine[Any, Any, None]
+]  # Request is pydantic, response is none
+_EndpointWithoutRequestWithoutResponse = Callable[[_T], Coroutine[Any, Any, None]]  # Request is none, response is none
+_PossibleEndpointFunction = (
+    _EndpointWithoutRequestWithResponse[_T, _V]
+    | _EndpointWithRequestWithResponse[_T, _U, _V]
+    | _EndpointWithRequestWithoutResponse[_T, _U]
+    | _EndpointWithoutRequestWithoutResponse[_T]
+)
 
 
 @dataclasses.dataclass
@@ -414,11 +425,13 @@ def register(
         endpoint = f"/{module}/{action}"
         signature = typing.get_type_hints(f)
         params = list(map(lambda x: x[1], filter(lambda x: x[0] != "return", signature.items())))
-        ret: type[_V | pydantic.BaseModel] = signature.get("return", pydantic.BaseModel)
+        ret: type[_V | pydantic.BaseModel | None] = signature.get("return", pydantic.BaseModel)
         tags: list[str | enum.Enum] = [module]
 
         if ret is pydantic.BaseModel:
             util.log("Possible undefined return type for endpoint:", endpoint, severity=util.logging.WARNING)
+            ret = DummyModel
+        elif ret is type(None):
             ret = DummyModel
 
         if len(params) == 1:
@@ -443,7 +456,9 @@ def register(
             )
             async def wrap1(context: Annotated[_T, fastapi.Depends(params[0])]):
                 nonlocal ret, check_version, xmc_verify, exclude_none, f
-                func = cast(_EndpointWithoutRequest[_T, _V], f)
+                func = cast(
+                    _EndpointWithoutRequestWithResponse[_T, _V] | _EndpointWithoutRequestWithoutResponse[_T], f
+                )
 
                 response = await client_check(context, check_version, xmc_verify)
                 if response is None:
@@ -497,7 +512,7 @@ def register(
                 request: Annotated[_U, fastapi.Depends(_get_request_data(params[1]))],
             ):
                 nonlocal ret, check_version, xmc_verify, f
-                func = cast(_EndpointWithRequest[_T, _U, _V], f)
+                func = cast(_EndpointWithRequestWithResponse[_T, _U, _V], f)
                 response = await client_check(context, check_version, xmc_verify)
 
                 if config.log_request_response():
@@ -602,12 +617,15 @@ async def api_endpoint(
                 if endpoint.request_class is not None:
                     pydantic_request = endpoint.request_class.model_validate(request_data)
                     func = cast(
-                        _EndpointWithRequest[SchoolIdolUserParams, pydantic.BaseModel, pydantic.BaseModel],
+                        _EndpointWithRequestWithResponse[SchoolIdolUserParams, pydantic.BaseModel, pydantic.BaseModel],
                         endpoint.function,
                     )
                     result = await func(context, pydantic_request)
                 else:
-                    func = cast(_EndpointWithoutRequest[SchoolIdolUserParams, pydantic.BaseModel], endpoint.function)
+                    func = cast(
+                        _EndpointWithoutRequestWithResponse[SchoolIdolUserParams, pydantic.BaseModel],
+                        endpoint.function,
+                    )
                     result = await func(context)
 
                 await context.db.commit()

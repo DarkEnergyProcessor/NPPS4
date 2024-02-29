@@ -134,20 +134,17 @@ async def unit_unitall(context: idol.SchoolIdolUserParams) -> UnitAllInfoRespons
 
 
 @idol.register("unit", "setDisplayRank")
-async def unit_setdisplayrank(
-    context: idol.SchoolIdolUserParams, request: UnitSetDisplayRankRequest
-) -> idol.core.DummyModel:
+async def unit_setdisplayrank(context: idol.SchoolIdolUserParams, request: UnitSetDisplayRankRequest) -> None:
     current_user = await user.get_current(context)
     target_unit = await unit.get_unit(context, request.unit_owning_user_id)
     if target_unit is None or target_unit.user_id != current_user.id:
         raise idol.error.IdolError(detail="Invalid target unit")
 
     target_unit.display_rank = request.display_rank
-    return idol.core.DummyModel()
 
 
 @idol.register("unit", "deckName")
-async def unit_deckname(context: idol.SchoolIdolUserParams, request: UnitDeckNameRequest) -> idol.core.DummyModel:
+async def unit_deckname(context: idol.SchoolIdolUserParams, request: UnitDeckNameRequest) -> None:
     current_user = await user.get_current(context)
     deck_data = await unit.load_unit_deck(context, current_user, request.unit_deck_id)
     if deck_data is None:
@@ -156,13 +153,12 @@ async def unit_deckname(context: idol.SchoolIdolUserParams, request: UnitDeckNam
     await advanced.test_name(context, request.deck_name)
 
     deck_data[0].name = request.deck_name
-    return idol.core.DummyModel()
 
 
 @idol.register("unit", "removableSkillEquipment")
 async def unit_removableskillequipment(
     context: idol.SchoolIdolUserParams, request: UnitRemovableSkillEquipmentRequest
-) -> idol.core.DummyModel:
+) -> None:
     current_user = await user.get_current(context)
 
     # TODO: Optimize
@@ -209,8 +205,6 @@ async def unit_removableskillequipment(
             else:
                 raise idol.error.IdolError(detail=f"out of SIS {equip_info.unit_removable_skill_id}")
 
-    return idol.core.DummyModel()
-
 
 @idol.register("unit", "wait")
 async def unit_wait(context: idol.SchoolIdolUserParams, request: UnitWaitOrActivateRequest) -> UnitWaitResponse:
@@ -237,9 +231,7 @@ async def unit_wait(context: idol.SchoolIdolUserParams, request: UnitWaitOrActiv
 
 
 @idol.register("unit", "activate")
-async def unit_activate(
-    context: idol.SchoolIdolUserParams, request: UnitWaitOrActivateRequest
-) -> idol.core.DummyModel:
+async def unit_activate(context: idol.SchoolIdolUserParams, request: UnitWaitOrActivateRequest) -> None:
     current_user = await user.get_current(context)
     active_count = await unit.count_units(context, current_user, True)
 
@@ -252,5 +244,3 @@ async def unit_activate(
 
         # Move to active room
         unit_data.active = True
-
-    return idol.core.DummyModel()

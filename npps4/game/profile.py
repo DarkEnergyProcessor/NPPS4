@@ -120,10 +120,7 @@ async def profile_profileinfo(context: idol.SchoolIdolUserParams, request: Profi
 
 
 @idol.register("profile", "profileRegister")
-async def profile_profileregister(
-    context: idol.SchoolIdolUserParams, request: ProfileRegisterRequest
-) -> idol.core.DummyModel:
+async def profile_profileregister(context: idol.SchoolIdolUserParams, request: ProfileRegisterRequest) -> None:
     await advanced.test_name(context, request.introduction)
     current_user = await user.get_current(context)
     current_user.bio = request.introduction
-    return idol.core.DummyModel()

@@ -26,11 +26,11 @@ async def tos_toscheck(context: idol.SchoolIdolUserParams) -> TOSCheckResponse:
 
 
 @idol.register("tos", "tosAgree", batchable=False)
-async def tos_tosagree(context: idol.SchoolIdolUserParams, request: TOSAgreeRequest) -> idol.core.DummyModel:
+async def tos_tosagree(context: idol.SchoolIdolUserParams, request: TOSAgreeRequest) -> None:
     if request.tos_id == 1:
         current_user = await user.get_current(context)
         if not await tos.is_agreed(context, current_user):
             await tos.agree(context, current_user)
-            return idol.core.DummyModel()
+            return
 
     raise error.IdolError(detail="Invalid ToS agreement")

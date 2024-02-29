@@ -11,31 +11,25 @@ class TutorialProgressRequest(pydantic.BaseModel):
 
 
 @idol.register("tutorial", "progress", batchable=False)
-async def tutorial_progress(
-    context: idol.SchoolIdolUserParams, request: TutorialProgressRequest
-) -> idol.core.DummyModel:
+async def tutorial_progress(context: idol.SchoolIdolUserParams, request: TutorialProgressRequest) -> None:
     current_user = await user.get_current(context)
     if current_user.tutorial_state == -1:
         raise error.IdolError(detail="Tutorial already finished")
 
     if current_user.tutorial_state == 0 and request.tutorial_state == 1:
         await tutorial.phase1(context, current_user)
-        return idol.core.DummyModel()
     elif current_user.tutorial_state == 1 and request.tutorial_state == 2:
         await tutorial.phase2(context, current_user)
-        return idol.core.DummyModel()
     elif current_user.tutorial_state == 2 and request.tutorial_state == 3:
         await tutorial.phase3(context, current_user)
-        return idol.core.DummyModel()
     elif current_user.tutorial_state == 3 and request.tutorial_state == -1:
         await tutorial.finalize(context, current_user)
-        return idol.core.DummyModel()
-
-    raise error.IdolError(detail=f"Unknown state, u {current_user.tutorial_state} r {request.tutorial_state}")
+    else:
+        raise error.IdolError(detail=f"Unknown state, u {current_user.tutorial_state} r {request.tutorial_state}")
 
 
 @idol.register("tutorial", "skip", batchable=False)
-async def tutorial_skip(context: idol.SchoolIdolUserParams) -> idol.core.DummyModel:
+async def tutorial_skip(context: idol.SchoolIdolUserParams) -> None:
     current_user = await user.get_current(context)
     if current_user.tutorial_state == -1:
         raise error.IdolError(detail="Tutorial already finished")
@@ -48,5 +42,3 @@ async def tutorial_skip(context: idol.SchoolIdolUserParams) -> idol.core.DummyMo
         await tutorial.phase3(context, current_user)
     if current_user.tutorial_state >= 3:
         await tutorial.finalize(context, current_user)
-
-    return idol.core.DummyModel()
