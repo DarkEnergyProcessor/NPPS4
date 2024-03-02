@@ -71,6 +71,17 @@ class UnitDeckInfoResponse(pydantic.RootModel[list[UnitDeckInfo]]):
     pass
 
 
+class UnitDeckList(pydantic.BaseModel):
+    unit_deck_detail: list[UnitDeckPositionInfoResponse]
+    unit_deck_id: int
+    main_flag: int
+    deck_name: str
+
+
+class UnitDeckRequest(pydantic.BaseModel):
+    unit_deck_list: list[UnitDeckList]
+
+
 @idol.register("unit", "accessoryAll")
 async def unit_accessoryall(context: idol.SchoolIdolUserParams) -> UnitAccessoryInfoResponse:
     # TODO
@@ -244,3 +255,48 @@ async def unit_activate(context: idol.SchoolIdolUserParams, request: UnitWaitOrA
 
         # Move to active room
         unit_data.active = True
+
+
+ALL_DECK_POSITIONS = set(range(1, 10))
+
+
+@idol.register("unit", "deck")
+async def unit_deck(context: idol.SchoolIdolUserParams, request: UnitDeckRequest) -> None:
+    current_user = await user.get_current(context)
+    clear_deck_ids = set(unit.VALID_DECK_ID)
+
+    # Replace/add deck
+    for deck_req_info in request.unit_deck_list:
+        await advanced.test_name(context, deck_req_info.deck_name)
+
+        unit_deck, _ = await unit.load_unit_deck(context, current_user, deck_req_info.unit_deck_id, True)
+        unit_deck.name = deck_req_info.deck_name
+
+        # Replace decks
+        unit_user_ids: list[int] = [0] * 9
+        for detail in deck_req_info.unit_deck_detail:
+            # Unit sanity check
+            unit_data = await unit.get_unit(context, detail.unit_owning_user_id)
+            unit.validate_unit(current_user, unit_data)
+            unit_user_ids[detail.position - 1] = detail.unit_owning_user_id
+
+        if deck_req_info.main_flag > 0:
+            # Perform additional sanity check
+            registered_deck_positions: set[int] = set()
+            for detail in deck_req_info.unit_deck_detail:
+                if detail.unit_owning_user_id > 0:
+                    registered_deck_positions.add(detail.position)
+
+            if registered_deck_positions != ALL_DECK_POSITIONS:
+                raise idol.error.by_code(idol.error.ERROR_CODE_IGNORE_MAIN_DECK)
+
+            current_user.active_deck_index = deck_req_info.unit_deck_id
+
+        await unit.save_unit_deck(context, current_user, unit_deck, unit_user_ids)
+        clear_deck_ids.remove(deck_req_info.unit_deck_id)
+
+    # Clear deck
+    for deck_id in clear_deck_ids:
+        unit_deck = await unit.load_unit_deck(context, current_user, deck_id, False)
+        if unit_deck is not None:
+            await unit.save_unit_deck(context, current_user, unit_deck[0], [0] * 9)

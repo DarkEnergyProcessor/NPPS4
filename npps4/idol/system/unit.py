@@ -322,8 +322,11 @@ async def load_unit_deck(
     ...
 
 
+VALID_DECK_ID = range(1, 19)
+
+
 async def load_unit_deck(context: idol.BasicSchoolIdolContext, user: main.User, index: int, ensure: bool = False):
-    if index not in range(1, 19):
+    if index not in VALID_DECK_ID:
         raise ValueError("deck index out of range")
 
     q = sqlalchemy.select(main.UnitDeck).where(main.UnitDeck.user_id == user.id, main.UnitDeck.deck_number == index)
