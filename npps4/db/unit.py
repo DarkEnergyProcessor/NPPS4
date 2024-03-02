@@ -639,6 +639,31 @@ class LevelLimitPattern(common.GameDBBase):
     sale_price: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
+class SignAsset(common.GameDBBase, common.MaybeEncrypted):
+    """```sql
+    CREATE TABLE `unit_sign_asset_m` (
+        `unit_id` INTEGER NOT NULL,
+        `normal_card_id` INTEGER NOT NULL,
+        `rank_max_card_id` INTEGER NOT NULL,
+        `normal_icon_asset` TEXT NOT NULL,
+        `normal_icon_asset_en` TEXT,
+        `rank_max_icon_asset` TEXT NOT NULL,
+        `rank_max_icon_asset_en` TEXT,
+        `release_tag` TEXT, `_encryption_release_id` INTEGER NULL,
+        PRIMARY KEY (`unit_id`)
+    )
+    ```"""
+
+    __tablename__ = "unit_sign_asset_m"
+    unit_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    normal_card_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    rank_max_card_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    normal_icon_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    normal_icon_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+    rank_max_icon_asset: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    rank_max_icon_asset_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+
+
 engine = sqlalchemy.ext.asyncio.create_async_engine(
     f"sqlite+aiosqlite:///file:{download.get_db_path('unit')}?mode=ro&uri=true",
 )

@@ -792,3 +792,7 @@ async def quick_create_by_unit_add(
             full_info=unit_full_info[0],
             stats=unit_full_info[1],
         )
+
+
+async def has_signed_variant(context: idol.BasicSchoolIdolContext, unit_id: int):
+    return await context.db.unit.get(unit.SignAsset, unit_id) is not None

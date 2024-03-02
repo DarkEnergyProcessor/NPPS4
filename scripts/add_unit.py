@@ -50,6 +50,7 @@ async def run_script(arg: list[str]):
         default=0,
         help="Additional amount of SIS slot to unlock (automatically clamped; ignored for support cards).",
     )
+    parser.add_argument("--signed", action="store_true", help="Give card signed by the character, when possible.")
     args = parser.parse_args(arg)
 
     async with npps4.idol.BasicSchoolIdolContext(lang=npps4.idol.Language.en) as context:
@@ -92,9 +93,12 @@ async def run_script(arg: list[str]):
             # Get EXP needed
             unit_level_up_pattern = await npps4.idol.system.unit.get_unit_level_up_pattern(context, unit_info)
             unit_exp = npps4.idol.system.unit.get_exp_for_target_level(unit_info, unit_level_up_pattern, unit_level)
+            unit_signed = bool(
+                args.signed and await npps4.idol.system.unit.has_signed_variant(context, unit_info.unit_id)
+            )
 
             for _ in range(args.amount):
-                unit_data = await npps4.idol.system.unit.add_unit(
+                unit_data = await npps4.idol.system.unit.create_unit(
                     context, target_user, unit_info.unit_id, not args.waiting_room
                 )
                 assert unit_data is not None
@@ -102,9 +106,10 @@ async def run_script(arg: list[str]):
                 if not pre_idolized and args.idolize:
                     await npps4.idol.system.unit.idolize(context, target_user, unit_data)
 
+                unit_data.is_signed = unit_signed
                 unit_data.exp = unit_exp
                 unit_data.unit_removable_skill_capacity = min(
-                    unit_info.default_removable_skill_capacity + args.add_sis_slot,
+                    unit_info.default_removable_skill_capacity + int(args.add_sis_slot),
                     unit_info.max_removable_skill_capacity,
                 )
-                await context.db.main.flush()
+                await npps4.idol.system.unit.add_unit_by_object(context, target_user, unit_data)
