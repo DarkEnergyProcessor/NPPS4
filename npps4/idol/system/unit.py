@@ -790,7 +790,9 @@ async def quick_create_by_unit_add(
         unit_full_info = await get_unit_data_full_info(context, unit_data)
         return QuickAddResult(
             unit_id=unit_id,
-            as_item_reward=UnitItemWithReward.model_validate(unit_full_info[0].model_dump()),
+            as_item_reward=UnitItemWithReward.model_validate(
+                unit_full_info[0].model_dump() | {"item_id": unit_id, "removable_skill_ids": []}
+            ),
             unit_data=unit_data,
             full_info=unit_full_info[0],
             stats=unit_full_info[1],
