@@ -46,6 +46,11 @@ class UserInfoData(pydantic.BaseModel):
     unlock_random_live_aqours: int = 0
 
 
+class NextLevelInfo(pydantic.BaseModel):
+    level: int
+    from_exp: int
+
+
 async def get(context: idol.BasicSchoolIdolContext, id: int | None = None):
     return await context.db.main.get(main.User, id)
 
@@ -127,15 +132,16 @@ async def add_exp(context: idol.BasicSchoolIdolContext, user: main.User, exp: in
     level_up = False
     over_energy = 0
     max_energy = 0
+    next_level_info = [NextLevelInfo(level=user.level, from_exp=user.exp)]
 
     user.exp = user.exp + exp
     while user.exp >= next_exp:
         level_up = True
         user.level = user.level + 1
+        next_level_info.append(NextLevelInfo(level=user.level, from_exp=next_exp))
         next_exp = core.get_next_exp_cumulative(user.level)
         max_energy = core.get_energy_by_rank(user.level)
         over_energy = over_energy + max_energy
-        # TODO: Achievement
 
     if level_up:
         t = util.time()
@@ -152,4 +158,4 @@ async def add_exp(context: idol.BasicSchoolIdolContext, user: main.User, exp: in
         user.over_max_energy = current_energy + over_energy
 
     await context.db.main.flush()
-    return level_up
+    return next_level_info

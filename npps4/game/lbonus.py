@@ -44,7 +44,7 @@ class LoginBonusResponse(pydantic.BaseModel):
         default_factory=class_system_module.ClassSystemData
     )  # TODO
     start_dash_sheets: list  # TODO
-    effort_point: list[effort.EffortResult]
+    effort_point: list[effort.EffortPointInfo]
     limited_effort_box: list  # TODO
     accomplished_achievement_list: list[achievement.AchievementData]
     unaccomplished_achievement_cnt: int
@@ -119,9 +119,9 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
     for day in lbonuses_day:
         current_month[day - 1].received = True
 
-    effort_result, effort_reward, _ = await effort.add_effort(context, current_user, add_effort_amount)
-    for rewards in effort_reward:
-        for r in rewards:
+    effort_result, _ = await effort.add_effort(context, current_user, add_effort_amount)
+    for eff in effort_result:
+        for r in eff.rewards:
             add_result = await advanced.add_item(context, current_user, r)
             if not add_result.success:
                 msg = strings.format_simple(strings.get("lbonus", 12), current_datetime.month, current_datetime.day)

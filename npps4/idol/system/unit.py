@@ -1,26 +1,31 @@
 import dataclasses
 import math
-import operator
 import queue
 
 import pydantic
 import sqlalchemy
 
 from . import album
+from . import common
 from . import item
 from ... import db
 from ... import idol
 from ... import idoltype
 from ... import util
+from ...const import ADD_TYPE
 from ...db import main
 from ...db import unit
 
-from typing import Literal, overload
+from typing import Any, Literal, TypeVar, overload, override
 
 
-class UnitInfoCommonData(pydantic.BaseModel):
-    unit_owning_user_id: int
+class UnitInfoBaseData(pydantic.BaseModel):
     unit_id: int
+    is_support_member: bool = False
+
+
+class UnitInfoCommonData(UnitInfoBaseData):
+    unit_owning_user_id: int
     exp: int
     next_exp: int
     level: int
@@ -41,6 +46,32 @@ class UnitInfoCommonData(pydantic.BaseModel):
     is_rank_max: bool
     is_signed: bool
     is_skill_level_max: bool
+
+
+class UnitBaseItem(item.Item, UnitInfoBaseData):
+    add_type: int = ADD_TYPE.UNIT
+
+    @override
+    def dump_extra_data(self) -> dict[str, Any]:
+        return dict((k, getattr(self, k)) for k in UnitInfoBaseData.model_fields.keys())
+
+
+class UnitSupportItemWithReward(UnitBaseItem, item.Reward):
+    pass
+
+
+class UnitItem(UnitBaseItem, UnitInfoCommonData):
+    removable_skill_ids: list[int]
+
+    @override
+    def dump_extra_data(self) -> dict[str, Any]:
+        return dict((k, getattr(self, k)) for k in UnitInfoCommonData.model_fields.keys()) | {
+            "removable_skill_ids": self.removable_skill_ids
+        }
+
+
+class UnitItemWithReward(UnitItem, item.Reward):
+    pass
 
 
 class UnitInfoData(UnitInfoCommonData):
@@ -92,18 +123,22 @@ async def get_all_units(context: idol.SchoolIdolParams, user: main.User, active:
     return result.scalars().all()
 
 
-async def add_unit(context: idol.BasicSchoolIdolContext, user: main.User, unit_id: int, active: bool):
+async def create_unit(
+    context: idol.BasicSchoolIdolContext, user: main.User, unit_id: int, active: bool, *, level: int = 1
+):
     unit_info = await get_unit_info(context, unit_id)
-    if unit_info is None or unit_info.disable_rank_up:
+    if unit_info is None:
+        raise ValueError("invalid unit_id")
+    if unit_info.disable_rank_up > 0:
         return None
 
     rarity = await context.db.unit.get(unit.Rarity, unit_info.rarity)
     if rarity is None:
-        return None
+        raise ValueError("cannot get rarity (is db corrupt?)")
 
     max_level = rarity.after_level_max if unit_info.rank_min == unit_info.rank_max else rarity.before_level_max
 
-    user_unit = main.Unit(
+    unit_data = main.Unit(
         user_id=user.id,
         unit_id=unit_id,
         active=active,
@@ -113,14 +148,29 @@ async def add_unit(context: idol.BasicSchoolIdolContext, user: main.User, unit_i
         unit_removable_skill_capacity=unit_info.default_removable_skill_capacity,
     )
 
+    unit_level_up_pattern = await get_unit_level_up_pattern(context, unit_info)
+    unit_data.exp = get_exp_for_target_level(unit_info, unit_level_up_pattern, level)
+
     if unit_info.rarity == 4:
         # FIXME: Determine if it's promo card and set to 2 in that case
-        user_unit.level_limit_id = 1
+        unit_data.level_limit_id = 1
 
-    context.db.main.add(user_unit)
-    await album.update(context, user, unit_id)
+    return unit_data
+
+
+async def add_unit_by_object(context: idol.BasicSchoolIdolContext, user: main.User, unit_data: main.Unit):
+    context.db.main.add(unit_data)
+    await album.update(context, user, unit_data.unit_id)
     await context.db.main.flush()
-    return user_unit
+
+
+async def add_unit(
+    context: idol.BasicSchoolIdolContext, user: main.User, unit_id: int, active: bool, *, level: int = 1
+):
+    unit_data = await create_unit(context, user, unit_id, active, level=level)
+    if unit_data is None:
+        raise ValueError("cannot add support unit")
+    await add_unit_by_object(context, user, unit_data)
 
 
 async def get_unit(context: idol.BasicSchoolIdolContext, unit_owning_user_id: int):
@@ -386,6 +436,7 @@ async def add_love_by_deck(context: idol.BasicSchoolIdolContext, user: main.User
     ]
 
     loves = [u.love for u in units]
+    before_love = loves.copy()
     # https://github.com/DarkEnergyProcessor/NPPS/blob/v3.1.x/modules/live/reward.php#L337-L369
     while love > 0:
         subtracted = 0
@@ -409,6 +460,7 @@ async def add_love_by_deck(context: idol.BasicSchoolIdolContext, user: main.User
             await album.update(context, user, ud.unit_id, rank_max=True)
 
     await context.db.main.flush()
+    return common.BeforeAfter(before=before_love, after=loves)
 
 
 @dataclasses.dataclass
@@ -490,6 +542,9 @@ async def get_unit_stats_from_unit_data(
         stats = calculate_unit_stats(unit_info, levelup_pattern, unit_data.exp)
 
     return stats
+
+
+_T = TypeVar("_T", bound=UnitBaseItem, contravariant=True)
 
 
 async def get_unit_data_full_info(context: idol.BasicSchoolIdolContext, unit_data: main.Unit):
@@ -695,34 +750,45 @@ async def get_removable_skill_info_request(context: idol.BasicSchoolIdolContext,
     )
 
 
-async def unit_id_to_item(
-    context: idol.BasicSchoolIdolContext,
-    /,
-    unit_id: int,
-    *,
-    cls: type[item._T] = item.Item,
-    level: int = 1,
-    exp: int = 0,
-    love: int = 0,
-    is_signed: bool = False,
-    unit_skill_exp: int = 0,
-    idolized: bool = False,
-):
-    unit_data = await get_unit_info(context, unit_id)
-    if unit_data is None:
-        raise ValueError("invalid unit_id")
-    unit_rarity = await get_unit_rarity(context, unit_data.rarity)
-    if unit_rarity is None:
-        raise ValueError("invalid unit rarity (is db corrupt?)")
-
-    return item.add_unit(
-        unit_data,
-        unit_rarity,
-        cls=cls,
-        level=level,
-        exp=exp,
-        love=love,
-        is_signed=is_signed,
-        unit_skill_exp=unit_skill_exp,
-        idolized=idolized,
+async def unit_to_item(context: idol.BasicSchoolIdolContext, unit_data: main.Unit, *, cls: type[_T] = UnitItem):
+    unit_info_data = await get_unit_data_full_info(context, unit_data)
+    return cls.model_validate(
+        unit_info_data[0].model_dump() | {"add_type": ADD_TYPE.UNIT, "item_id": unit_data.unit_id, "amount": 1}
     )
+
+
+async def is_support_member(context: idol.BasicSchoolIdolContext, unit_id: int):
+    unit_info = await context.db.unit.get(unit.Unit, unit_id)
+    if unit_info is None:
+        raise ValueError("invalid unit_id")
+    return unit_info.disable_rank_up > 0
+
+
+@dataclasses.dataclass
+class QuickAddResult:
+    unit_id: int
+    as_item_reward: UnitSupportItemWithReward | UnitItemWithReward
+    unit_data: main.Unit | None = None
+    full_info: UnitInfoData | None = None
+    stats: UnitStatsResult | None = None
+
+
+async def quick_create_by_unit_add(
+    context: idol.BasicSchoolIdolContext, user: main.User, unit_id: int, *, level: int = 1
+):
+    if await is_support_member(context, unit_id):
+        return QuickAddResult(
+            unit_id, UnitSupportItemWithReward(item_id=unit_id, unit_id=unit_id, is_support_member=True)
+        )
+    else:
+        unit_data = await create_unit(context, user, unit_id, True, level=level)
+        assert unit_data is not None
+        await add_unit_by_object(context, user, unit_data)
+        unit_full_info = await get_unit_data_full_info(context, unit_data)
+        return QuickAddResult(
+            unit_id=unit_id,
+            as_item_reward=UnitItemWithReward.model_validate(unit_full_info[0].model_dump()),
+            unit_data=unit_data,
+            full_info=unit_full_info[0],
+            stats=unit_full_info[1],
+        )

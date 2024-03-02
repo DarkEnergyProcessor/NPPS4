@@ -17,6 +17,7 @@ from ..idol.system import item
 from ..idol.system import live
 from ..idol.system import museum
 from ..idol.system import reward
+from ..idol.system import subscenario
 from ..idol.system import unit
 from ..idol.system import user
 
@@ -219,26 +220,18 @@ class LiveRewardRequest(pydantic.BaseModel):
 
 class LiveRewardBaseInfo(pydantic.BaseModel):
     player_exp: int
-    player_exp_unit_max: common.BeforeAfter
-    player_exp_friend_max: common.BeforeAfter
-    player_exp_lp_max: common.BeforeAfter
+    player_exp_unit_max: common.BeforeAfter[int]
+    player_exp_friend_max: common.BeforeAfter[int]
+    player_exp_lp_max: common.BeforeAfter[int]
     game_coin: int
     game_coin_reward_box_flag: bool
     social_point: int
 
 
 class LiveRewardUnitList(pydantic.BaseModel):
-    live_clear: list[item.Reward]
-    live_rank: list[item.Reward]
-    live_combo: list[item.Reward]
-
-
-class LiveRewardEffortPointInfo(pydantic.BaseModel):
-    live_effort_point_box_spec_id: int
-    capacity: int
-    before: int
-    after: int
-    rewards: list[item.Reward]
+    live_clear: list[item.Reward] = pydantic.Field(default_factory=list)
+    live_rank: list[item.Reward] = pydantic.Field(default_factory=list)
+    live_combo: list[item.Reward] = pydantic.Field(default_factory=list)
 
 
 class LiveRewardResponseUnitList(pydantic.BaseModel):
@@ -257,15 +250,29 @@ class LiveRewardResponseUnitList(pydantic.BaseModel):
     love: int
     max_love: int
 
-
-class LiveRewardNextLevel(pydantic.BaseModel):
-    level: int
-    from_exp: int
+    @staticmethod
+    def from_unit_data(unit_data_full: unit.UnitInfoData, *, position: int, before_love: int):
+        return LiveRewardResponseUnitList(
+            unit_owning_user_id=unit_data_full.unit_owning_user_id,
+            unit_id=unit_data_full.unit_id,
+            position=position,
+            level=unit_data_full.level,
+            level_limit_id=unit_data_full.level_limit_id,
+            before_love=before_love,
+            love=unit_data_full.love,
+            max_love=unit_data_full.max_love,
+            unit_skill_level=unit_data_full.unit_skill_level,
+            display_rank=unit_data_full.display_rank,
+            is_rank_max=unit_data_full.is_rank_max,
+            is_love_max=unit_data_full.is_love_max,
+            is_level_max=unit_data_full.is_level_max,
+            is_signed=unit_data_full.is_signed,
+        )
 
 
 class LiveRewardGoalAccomplishedInfo(pydantic.BaseModel):
     achieved_ids: list[int]
-    rewards: list[item.Reward]
+    rewards: list[item.RewardWithCategory]
 
 
 class LiveRewardResponse(pydantic.BaseModel):
@@ -279,13 +286,13 @@ class LiveRewardResponse(pydantic.BaseModel):
     reward_unit_list: LiveRewardUnitList
     unlocked_subscenario_ids: list[int]
     unlocked_multi_unit_scenario_ids: list[int] = pydantic.Field(default_factory=list)  # TODO
-    effort_point: list[LiveRewardEffortPointInfo]
+    effort_point: list[effort.EffortPointInfo]
     is_effort_point_visible: bool = True
     limited_effort_box: list = pydantic.Field(default_factory=list)  # TODO
     unit_list: list[LiveRewardResponseUnitList]
     before_user_info: user.UserInfoData
     after_user_info: user.UserInfoData
-    next_level_info: list[LiveRewardNextLevel]
+    next_level_info: list[user.NextLevelInfo]
     goal_accomp_info: LiveRewardGoalAccomplishedInfo
     special_reward_info: list[item.RewardWithCategory]
     event_info: list = pydantic.Field(default_factory=list)  # TODO
@@ -480,22 +487,23 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
     # Roll unit for live clear
     live_unit_drop_protocol = config.get_live_unit_drop_protocol()
     unit_id = await live_unit_drop_protocol.get_live_drop_unit(live_setting.live_setting_id, context)
-    live_clear_drop = await unit.unit_id_to_item(context, unit_id, cls=item.RewardWithCategory)
+
+    # FIXME: Drop different kinds of levels. Currently it's fixed at level 1.
+    live_clear_drop = await unit.quick_create_by_unit_add(context, current_user, unit_id)
     if request.max_combo >= live_setting.c_rank_combo:
         unit_id = await live_unit_drop_protocol.get_live_drop_unit(live_setting.live_setting_id, context)
-        live_combo_drop = await unit.unit_id_to_item(context, unit_id, cls=item.RewardWithCategory)
+        live_combo_drop = await unit.quick_create_by_unit_add(context, current_user, unit_id)
     else:
         live_combo_drop = None
     if score >= live_setting.c_rank_score:
         unit_id = await live_unit_drop_protocol.get_live_drop_unit(live_setting.live_setting_id, context)
-        live_score_drop = await unit.unit_id_to_item(context, unit_id, cls=item.RewardWithCategory)
+        live_score_drop = await unit.quick_create_by_unit_add(context, current_user, unit_id)
     else:
         live_score_drop = None
         given_exp = math.ceil(given_exp / 2)
 
     # Add user EXP
-    is_level_up = await user.add_exp(context, current_user, given_exp * live_in_progress.lp_factor)
-    new_user_info = await user.get_user_info(context, current_user)
+    next_level_info = await user.add_exp(context, current_user, given_exp * live_in_progress.lp_factor)
     current_user.game_coin = current_user.game_coin + given_g
 
     # Add units
@@ -504,25 +512,32 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
         if reward_data is not None:
             if current_unit_count >= current_user.unit_max:
                 # Move to present box
-                reward_data.reward_box_flag = True
+                reward_data.as_item_reward.reward_box_flag = True
                 await reward.add_item(
-                    context, current_user, reward_data, "FIXME live show reward JP text", "Live Show! Reward"
+                    context,
+                    current_user,
+                    reward_data.as_item_reward,
+                    "FIXME live show reward JP text",
+                    "Live Show! Reward",
                 )
             else:
                 # Add directly
-                await unit.add_unit(context, current_user, reward_data.item_id, True)
-                current_unit_count = current_unit_count + 1
+                if reward_data.unit_data:
+                    await unit.add_unit_by_object(context, current_user, reward_data.unit_data)
+                    current_unit_count = current_unit_count + 1
+                else:
+                    await unit.add_supporter_unit(context, current_user, reward_data.unit_id)
 
     # Add bond
     love_count = request.love_cnt * live_in_progress.lp_factor
-    await unit.add_love_by_deck(context, current_user, live_in_progress.unit_deck_id, love_count)
+    before_after_loves = await unit.add_love_by_deck(context, current_user, live_in_progress.unit_deck_id, love_count)
 
     # Add live effort
-    effort_result, effort_reward, offer_limited_effort = await effort.add_effort(
+    effort_result, offer_limited_effort = await effort.add_effort(
         context, current_user, score * live_in_progress.lp_factor
     )
-    for rewards in effort_reward:
-        for r in rewards:
+    for eff in effort_result:
+        for r in eff.rewards:
             add_result = await advanced.add_item(context, current_user, r)
             if not add_result.success:
                 # TODO: Message
@@ -533,15 +548,30 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
 
     # Get current deck
     current_deck = await unit.load_unit_deck(context, current_user, live_in_progress.unit_deck_id)
+    subscenario_unlocks: list[int] = []
     assert current_deck is not None
     unit_types_in_deck: set[int] = set()
+    unit_deck_full_info: list[unit.UnitInfoData] = []
     for unit_owning_user_id in current_deck[1]:
         unit_data = await unit.get_unit(context, unit_owning_user_id)
         unit.validate_unit(current_user, unit_data)
+
         unit_info = await unit.get_unit_info(context, unit_data.unit_id)
         if unit_info is None:
             raise ValueError("invalid unit_info (is db corrupt?)")
         unit_types_in_deck.add(unit_info.unit_type_id)
+
+        # Try to unlock subscenario
+        unit_rarity = await unit.get_unit_rarity(context, unit_info.rarity)
+        if unit_rarity is None:
+            raise ValueError("invalid unit_rarity (is db corrupt?)")
+
+        if unit_data.love >= unit_rarity.after_love_max:
+            subscenario_id = await subscenario.get_subscenario_id_of_unit_id(context, unit_data.unit_id)
+            if subscenario_id > 0 and await subscenario.unlock(context, current_user, subscenario_id):
+                subscenario_unlocks.append(subscenario_id)
+
+        unit_deck_full_info.append((await unit.get_unit_data_full_info(context, unit_data))[0])
 
     # Check achievement
     accomplished_achievement = (
@@ -568,6 +598,32 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
             context, current_user, unit_type_id, True
         )
 
+    # Give achievements
+    accomplished_achievement_rewards = [
+        await achievement.get_achievement_rewards(context, ach) for ach in accomplished_achievement.accomplished
+    ]
+    new_achievement_rewards = [
+        await achievement.get_achievement_rewards(context, ach) for ach in accomplished_achievement.new
+    ]
+    await advanced.fixup_achievement_reward(context, current_user, accomplished_achievement_rewards)
+    await advanced.fixup_achievement_reward(context, current_user, new_achievement_rewards)
+    for ach, reward_data in zip(accomplished_achievement.accomplished, accomplished_achievement_rewards):
+        ach_info = await achievement.get_achievement_info(context, ach.achievement_id)
+        await advanced.give_achievement_reward(context, current_user, ach_info, reward_data)
+
+    # Clean live in progress
+    context.db.main.expunge(live_in_progress)
+    await live.clean_live_in_progress(context, current_user)
+
+    # Create response
+    reward_unit_list = LiveRewardUnitList()
+    reward_unit_list.live_clear.append(live_clear_drop.as_item_reward)
+    if live_combo_drop is not None:
+        reward_unit_list.live_combo.append(live_combo_drop.as_item_reward)
+    if live_score_drop is not None:
+        reward_unit_list.live_rank.append(live_score_drop.as_item_reward)
+    user_info = await user.get_user_info(context, current_user)
+
     return LiveRewardResponse(
         live_info=[await live.get_live_info_without_notes(context, request.live_difficulty_id, live_setting)],
         rank=score_rank,
@@ -584,4 +640,30 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
             game_coin_reward_box_flag=False,
             social_point=0,  # TODO: Add actual social point
         ),
+        reward_unit_list=reward_unit_list,
+        unlocked_subscenario_ids=subscenario_unlocks,
+        effort_point=effort_result,
+        unit_list=[
+            LiveRewardResponseUnitList.from_unit_data(
+                unit_data_full, position=i + 1, before_love=before_after_loves.before[i]
+            )
+            for i, unit_data_full in enumerate(unit_deck_full_info)
+        ],
+        before_user_info=old_user_info,
+        after_user_info=await user.get_user_info(context, current_user),
+        next_level_info=next_level_info,
+        goal_accomp_info=LiveRewardGoalAccomplishedInfo(
+            achieved_ids=accomplished_live_goals, rewards=live_goal_rewards
+        ),
+        special_reward_info=[],  # TODO: Give 1 loveca on clearing this track for the first time.
+        accomplished_achievement_list=await achievement.to_game_representation(
+            context, accomplished_achievement.accomplished, accomplished_achievement_rewards
+        ),
+        unaccomplished_achievement_cnt=await achievement.get_achievement_count(context, current_user, False),
+        added_achievement_list=await achievement.to_game_representation(
+            context, accomplished_achievement.new, new_achievement_rewards
+        ),
+        new_achievement_cnt=len(accomplished_achievement.new),
+        museum_info=await museum.get_museum_info_data(context, current_user),
+        present_cnt=await reward.count_presentbox(context, current_user),
     )

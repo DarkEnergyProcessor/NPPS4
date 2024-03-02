@@ -14,8 +14,11 @@ _T = TypeVar("_T", bound=common.MaybeEncrypted)
 
 async def get_decrypted_row(session: sqlalchemy.ext.asyncio.AsyncSession, cls: type[_T], id: int) -> _T | None:
     obj = await session.get(cls, id)
+    return decrypt_row(session, obj)
 
-    if isinstance(obj, common.MaybeEncrypted) and obj._encryption_release_id is not None:
+
+def decrypt_row(session: sqlalchemy.ext.asyncio.AsyncSession, obj: _T | None) -> _T | None:
+    if obj is not None and obj._encryption_release_id is not None:
         key = release_key.get(obj._encryption_release_id)
 
         if key is None:

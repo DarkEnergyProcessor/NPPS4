@@ -12,7 +12,7 @@ class EffortReward(item.RewardWithCategory):
     rarity: int = 6  # TODO
 
 
-class EffortResult(common.BeforeAfter):
+class EffortPointInfo(common.BeforeAfter[int]):
     live_effort_point_box_spec_id: int
     capacity: int
     rewards: list[EffortReward]
@@ -37,8 +37,7 @@ async def get_effort_data(context: idol.BasicSchoolIdolContext, user: main.User)
 
 
 async def add_effort(context: idol.BasicSchoolIdolContext, user: main.User, amount: int):
-    result: list[EffortResult] = []
-    rewards: list[list[EffortReward]] = []
+    result: list[EffortPointInfo] = []
     current_effort = await get_effort_data(context, user)
     live_box_drop_protocol = config.get_live_box_drop_protocol()
     current_amount = amount
@@ -68,9 +67,8 @@ async def add_effort(context: idol.BasicSchoolIdolContext, user: main.User, amou
                 await item.update_item_category_id(context, reward_data)
                 reward_list.append(reward_data)
 
-            rewards.append(reward_list)
             result.append(
-                EffortResult(
+                EffortPointInfo(
                     live_effort_point_box_spec_id=current_effort.live_effort_point_box_spec_id,
                     capacity=effort_spec.capacity,
                     before=oldvalue,
@@ -83,16 +81,14 @@ async def add_effort(context: idol.BasicSchoolIdolContext, user: main.User, amou
             current_effort.current_point = 0
             if drop_box_result.offer_limited_effort_event_id > 0:
                 offer_limited_box_id = drop_box_result.offer_limited_effort_event_id
-        else:
-            result.append(
-                EffortResult(
-                    live_effort_point_box_spec_id=current_effort.live_effort_point_box_spec_id,
-                    capacity=effort_spec.capacity,
-                    before=oldvalue,
-                    after=current_effort.current_point,
-                    rewards=[],
-                )
-            )
-            break
 
-    return result, rewards, offer_limited_box_id
+    result.append(
+        EffortPointInfo(
+            live_effort_point_box_spec_id=current_effort.live_effort_point_box_spec_id,
+            capacity=effort_spec.capacity,
+            before=oldvalue,
+            after=current_effort.current_point,
+            rewards=[],
+        )
+    )
+    return result, offer_limited_box_id

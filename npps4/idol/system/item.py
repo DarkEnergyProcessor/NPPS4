@@ -5,7 +5,7 @@ from ...const import ADD_TYPE
 from ...db import item
 from ...db import unit
 
-from typing import TypeVar
+from typing import Any, TypeVar
 
 
 class Item(pydantic.BaseModel):
@@ -15,17 +15,24 @@ class Item(pydantic.BaseModel):
     item_id: int
     amount: int = 1
 
+    def dump_extra_data(self) -> dict[str, Any]:
+        return {}
+
 
 class ItemWithCategory(Item):
     item_category_id: int = 0
 
 
-class RewardWithCategory(ItemWithCategory):
+class RewardFlag(pydantic.BaseModel):
     reward_box_flag: bool = False
 
 
-class Reward(Item):
-    reward_box_flag: bool = False
+class Reward(Item, RewardFlag):
+    pass
+
+
+class RewardWithCategory(ItemWithCategory, RewardFlag):
+    pass
 
 
 def add_loveca(amount: int):
@@ -37,32 +44,6 @@ def add_g(amount: int):
 
 
 _T = TypeVar("_T", bound=Item)
-
-
-def add_unit(
-    unit_info: unit.Unit,
-    unit_rarity: unit.Rarity,
-    *,
-    cls: type[_T] = Item,
-    level: int = 1,
-    exp: int = 0,
-    love: int = 0,
-    is_signed: bool = False,
-    unit_skill_exp: int = 0,
-    idolized: bool = False,
-):
-    idolized = unit_info.rank_max == unit_info.rank_min or idolized
-    t = cls(add_type=ADD_TYPE.UNIT, item_id=unit_info.unit_id, amount=1)
-    t.level = level
-    t.exp = exp
-    t.max_level = unit_rarity.after_level_max if idolized else unit_rarity.before_level_max
-    t.rank = unit_info.rank_max if idolized else unit_info.rank_min
-    t.love = love
-    t.is_signed = is_signed
-    t.unit_skill_exp = unit_skill_exp
-    t.display_rank = idolized
-    t.unit_removable_skill_capacity = unit_info.default_removable_skill_capacity
-    return t
 
 
 async def get_item_category_by_id(context: idol.BasicSchoolIdolContext, item_id: int):

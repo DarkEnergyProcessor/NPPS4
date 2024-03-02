@@ -1,6 +1,10 @@
 import pydantic
 
+from typing import Generic, TypeVar
 
-class BeforeAfter(pydantic.BaseModel):
-    before: int
-    after: int
+_T = TypeVar("_T")
+
+
+class BeforeAfter(pydantic.BaseModel, Generic[_T]):
+    before: _T
+    after: _T

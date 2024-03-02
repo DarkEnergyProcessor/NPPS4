@@ -1,5 +1,8 @@
 import sqlalchemy
 
+from npps4.db import subscenario
+
+from ... import db
 from ... import idol
 from ...db import main
 
@@ -48,3 +51,10 @@ async def complete(context: idol.BasicSchoolIdolContext, user: main.User, subsce
     sc.completed = True
     await context.db.main.flush()
     return True
+
+
+async def get_subscenario_id_of_unit_id(context: idol.BasicSchoolIdolContext, unit_id: int):
+    q = sqlalchemy.select(subscenario.SubScenario).where(subscenario.SubScenario.unit_id == unit_id)
+    result = await context.db.subscenario.execute(q)
+    sc_info = db.decrypt_row(context.db.subscenario, result.scalar())
+    return sc_info.subscenario_id if sc_info is not None else 0
