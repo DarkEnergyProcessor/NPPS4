@@ -44,7 +44,7 @@ async def add_effort(context: idol.BasicSchoolIdolContext, user: main.User, amou
     offer_limited_box_id = 0
 
     # TODO: Properly handle limited effort box
-    while current_amount > 0:
+    while True:
         effort_spec = await get_effort_spec(context, current_effort.live_effort_point_box_spec_id)
         oldvalue = current_effort.current_point
         current_effort.current_point = min(oldvalue + current_amount, effort_spec.capacity)
@@ -81,6 +81,9 @@ async def add_effort(context: idol.BasicSchoolIdolContext, user: main.User, amou
             current_effort.current_point = 0
             if drop_box_result.offer_limited_effort_event_id > 0:
                 offer_limited_box_id = drop_box_result.offer_limited_effort_event_id
+
+        if current_amount <= 0:
+            break
 
     result.append(
         EffortPointInfo(
