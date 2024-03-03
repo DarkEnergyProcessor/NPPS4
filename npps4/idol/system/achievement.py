@@ -253,7 +253,7 @@ async def check_type_increment(
         main.Achievement.achievement_type == achievement_type,
         main.Achievement.is_accomplished == False,
     )
-    result = await context.db.achievement.execute(q)
+    result = await context.db.main.execute(q)
 
     time = util.time()
     achieved: list[main.Achievement] = []

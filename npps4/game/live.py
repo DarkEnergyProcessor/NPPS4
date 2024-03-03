@@ -633,9 +633,9 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
         hi_score=live_clear_data.hi_score,
         base_reward_info=LiveRewardBaseInfo(
             player_exp=given_exp,
-            player_exp_unit_max=common.BeforeAfter(before=old_user_info.unit_max, after=user_info.unit_max),
-            player_exp_friend_max=common.BeforeAfter(before=old_user_info.friend_max, after=user_info.friend_max),
-            player_exp_lp_max=common.BeforeAfter(before=old_user_info.energy_max, after=user_info.energy_max),
+            player_exp_unit_max=common.BeforeAfter[int](before=old_user_info.unit_max, after=user_info.unit_max),
+            player_exp_friend_max=common.BeforeAfter[int](before=old_user_info.friend_max, after=user_info.friend_max),
+            player_exp_lp_max=common.BeforeAfter[int](before=old_user_info.energy_max, after=user_info.energy_max),
             game_coin=given_g,
             game_coin_reward_box_flag=False,
             social_point=0,  # TODO: Add actual social point

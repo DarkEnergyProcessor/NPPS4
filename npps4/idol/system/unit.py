@@ -463,7 +463,7 @@ async def add_love_by_deck(context: idol.BasicSchoolIdolContext, user: main.User
             await album.update(context, user, ud.unit_id, rank_max=True)
 
     await context.db.main.flush()
-    return common.BeforeAfter(before=before_love, after=loves)
+    return common.BeforeAfter[list[int]](before=before_love, after=loves)
 
 
 @dataclasses.dataclass
