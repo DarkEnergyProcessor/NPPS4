@@ -1,6 +1,7 @@
 import dataclasses
 import enum
 import json
+import traceback
 import typing
 import urllib.parse
 
@@ -406,6 +407,11 @@ RESPONSE_HEADERS = {
 }
 
 
+def _exception_traceback_to_str(exc: Exception):
+    tb = traceback.format_exception(exc)
+    return "\n".join(tb)
+
+
 def register(
     module: str,
     action: str,
@@ -414,6 +420,7 @@ def register(
     batchable: bool = True,
     xmc_verify: idoltype.XMCVerifyMode = idoltype.XMCVerifyMode.SHARED,
     exclude_none: bool = False,
+    allow_retry_on_unhandled_exception: bool = False,
 ):
     def wrap0(f: _PossibleEndpointFunction[_T, _U, _V]):
         nonlocal check_version, batchable
@@ -455,7 +462,7 @@ def register(
                 tags=tags,
             )
             async def wrap1(context: Annotated[_T, fastapi.Depends(params[0])]):
-                nonlocal ret, check_version, xmc_verify, exclude_none, f
+                nonlocal ret, check_version, xmc_verify, exclude_none, f, allow_retry_on_unhandled_exception
                 func = cast(
                     _EndpointWithoutRequestWithResponse[_T, _V] | _EndpointWithoutRequestWithoutResponse[_T], f
                 )
@@ -468,6 +475,13 @@ def register(
                             response = await build_response(context, result, exclude_none=exclude_none)
                     except error.IdolError as e:
                         response = await build_response(context, e)
+                    except Exception as e:
+                        if allow_retry_on_unhandled_exception:
+                            response = await build_response(
+                                context, error.IdolError(detail=_exception_traceback_to_str(e))
+                            )
+                        else:
+                            raise e from None
                 return response
 
         else:
@@ -511,7 +525,7 @@ def register(
                 context: Annotated[_T, fastapi.Depends(params[0])],
                 request: Annotated[_U, fastapi.Depends(_get_request_data(params[1]))],
             ):
-                nonlocal ret, check_version, xmc_verify, f
+                nonlocal ret, check_version, xmc_verify, f, allow_retry_on_unhandled_exception
                 func = cast(_EndpointWithRequestWithResponse[_T, _U, _V], f)
                 response = await client_check(context, check_version, xmc_verify)
 
@@ -524,6 +538,14 @@ def register(
                             response = await build_response(context, result, exclude_none=exclude_none)
                     except error.IdolError as e:
                         response = await build_response(context, e)
+                    except Exception as e:
+                        if allow_retry_on_unhandled_exception:
+                            traceback.print_exception(e)
+                            response = await build_response(
+                                context, error.IdolError(detail=_exception_traceback_to_str(e))
+                            )
+                        else:
+                            raise e from None
                 return response
 
         if batchable:
