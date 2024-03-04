@@ -256,6 +256,7 @@ class Endpoint(Generic[_T, _U, _V]):
     function: _PossibleEndpointFunction[_T, _U, _V]
     exclude_none: bool
     log_response_data: bool
+    profile: bool
 
 
 def _get_request_data(model: type[_U]):
@@ -429,7 +430,7 @@ def register(
     profile_this_endpoint: bool = False,
 ):
     def wrap0(f: _PossibleEndpointFunction[_T, _U, _V]):
-        nonlocal batchable
+        nonlocal batchable, log_response_data, profile_this_endpoint
 
         if config.is_script_mode():
             # Do nothing when in script mode
@@ -481,7 +482,7 @@ def register(
                             if profile_this_endpoint:
                                 with cProfile.Profile() as profile_obj:
                                     result = await func(context)
-                                    profile_obj.print_stats()
+                                    profile_obj.print_stats("time")
                             else:
                                 result = await func(context)
                             response = await build_response(context, result, exclude_none=exclude_none)
@@ -551,7 +552,7 @@ def register(
                             if profile_this_endpoint:
                                 with cProfile.Profile() as profile_obj:
                                     result = await func(context, request)
-                                    profile_obj.print_stats()
+                                    profile_obj.print_stats("time")
                             else:
                                 result = await func(context, request)
                             response = await build_response(context, result, exclude_none=exclude_none)
@@ -577,6 +578,7 @@ def register(
                 function=f,
                 exclude_none=exclude_none,
                 log_response_data=log_response_data,
+                profile=profile_this_endpoint,
             )
         return f
 
@@ -666,14 +668,25 @@ async def api_endpoint(
                             | _EndpointWithRequestWithoutResponse[SchoolIdolUserParams, pydantic.BaseModel],
                             endpoint.function,
                         )
-                        result = await func(context, pydantic_request)
+
+                        if endpoint.profile:
+                            with cProfile.Profile() as profile_obj:
+                                result = await func(context, pydantic_request)
+                                profile_obj.print_stats("time")
+                        else:
+                            result = await func(context, pydantic_request)
                     else:
                         func = cast(
                             _EndpointWithoutRequestWithResponse[SchoolIdolUserParams, pydantic.BaseModel]
                             | _EndpointWithoutRequestWithoutResponse[SchoolIdolUserParams],
                             endpoint.function,
                         )
-                        result = await func(context)
+                        if endpoint.profile:
+                            with cProfile.Profile() as profile_obj:
+                                result = await func(context)
+                                profile_obj.print_stats("time")
+                        else:
+                            result = await func(context)
 
                     if endpoint.log_response_data and result is not None:
                         _log_response_data(module, action, result)
