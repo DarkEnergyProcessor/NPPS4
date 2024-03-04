@@ -1,3 +1,4 @@
+import cProfile
 import dataclasses
 import enum
 import json
@@ -425,9 +426,10 @@ def register(
     # These are only for debug purpose.
     log_response_data: bool = False,
     allow_retry_on_unhandled_exception: bool = False,
+    profile_this_endpoint: bool = False,
 ):
     def wrap0(f: _PossibleEndpointFunction[_T, _U, _V]):
-        nonlocal check_version, batchable
+        nonlocal batchable
 
         if config.is_script_mode():
             # Do nothing when in script mode
@@ -466,7 +468,8 @@ def register(
                 tags=tags,
             )
             async def wrap1(context: Annotated[_T, fastapi.Depends(params[0])]):
-                nonlocal check_version, xmc_verify, exclude_none, f, allow_retry_on_unhandled_exception, log_response_data
+                nonlocal check_version, xmc_verify, exclude_none, f, allow_retry_on_unhandled_exception
+                nonlocal log_response_data, profile_this_endpoint
                 func = cast(
                     _EndpointWithoutRequestWithResponse[_T, _V] | _EndpointWithoutRequestWithoutResponse[_T], f
                 )
@@ -475,7 +478,12 @@ def register(
                 if response is None:
                     try:
                         async with context:
-                            result = await func(context)
+                            if profile_this_endpoint:
+                                with cProfile.Profile() as profile_obj:
+                                    result = await func(context)
+                                    profile_obj.print_stats()
+                            else:
+                                result = await func(context)
                             response = await build_response(context, result, exclude_none=exclude_none)
 
                             if log_response_data and result is not None:
@@ -533,13 +541,19 @@ def register(
                 request: Annotated[_U, fastapi.Depends(_get_request_data(params[1]))],
             ):
                 nonlocal check_version, xmc_verify, f, allow_retry_on_unhandled_exception, log_response_data
+                nonlocal profile_this_endpoint
                 func = cast(_EndpointWithRequestWithResponse[_T, _U, _V], f)
                 response = await client_check(context, check_version, xmc_verify)
 
                 if response is None:
                     try:
                         async with context:
-                            result = await func(context, request)
+                            if profile_this_endpoint:
+                                with cProfile.Profile() as profile_obj:
+                                    result = await func(context, request)
+                                    profile_obj.print_stats()
+                            else:
+                                result = await func(context, request)
                             response = await build_response(context, result, exclude_none=exclude_none)
 
                             if log_response_data and result is not None:
@@ -556,7 +570,7 @@ def register(
                             raise e from None
                 return response
 
-        if batchable:
+        if batchable and xmc_verify != idoltype.XMCVerifyMode.CROSS:
             API_ROUTER_MAP[(module, action)] = Endpoint(
                 context_class=params[0],
                 request_class=None if len(params) < 2 else params[1],
