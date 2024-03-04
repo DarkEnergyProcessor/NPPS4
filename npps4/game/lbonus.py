@@ -102,6 +102,7 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
         achievement_list.extend(
             await achievement.check_type_27(context, current_user, login_count)
             + await achievement.check_type_29(context, current_user)
+            + await achievement.check_type_53_recursive(context, current_user)
         )
         accomplished_rewards.extend(
             [await achievement.get_achievement_rewards(context, ach) for ach in achievement_list.accomplished]

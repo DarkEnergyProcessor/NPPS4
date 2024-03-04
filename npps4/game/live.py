@@ -593,17 +593,12 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
         + await achievement.check_type_58(context, current_user, True)
     )
     if score_rank < 5:
-        accomplished_achievement = accomplished_achievement + await achievement.check_type_3(
-            context, current_user, score_rank, True
-        )
+        accomplished_achievement.extend(await achievement.check_type_3(context, current_user, score_rank, True))
     if combo_rank < 5:
-        accomplished_achievement = accomplished_achievement + await achievement.check_type_4(
-            context, current_user, combo_rank, True
-        )
+        accomplished_achievement.extend(await achievement.check_type_4(context, current_user, combo_rank, True))
     for unit_type_id in unit_types_in_deck:
-        accomplished_achievement = accomplished_achievement + await achievement.check_type_7(
-            context, current_user, unit_type_id, True
-        )
+        accomplished_achievement.extend(await achievement.check_type_7(context, current_user, unit_type_id, True))
+    accomplished_achievement.extend(await achievement.check_type_53_recursive(context, current_user))
 
     # Give achievements
     accomplished_achievement_rewards = [

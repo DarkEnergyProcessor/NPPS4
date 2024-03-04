@@ -75,6 +75,10 @@ async def trigger_achievement(
     max_love: bool = False,
     max_level: bool = False,
 ):
+    """
+    Check for achievement type 18 through 21
+    """
+
     ach_ctx = achievement.AchievementContext()
 
     if obtained:

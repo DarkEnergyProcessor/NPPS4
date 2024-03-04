@@ -290,40 +290,38 @@ async def check_type_increment(
 _P = ParamSpec("_P")
 
 
-def recursive_achievement(
-    func: Callable[Concatenate[idol.BasicSchoolIdolContext, main.User, _P], Awaitable[AchievementContext]]
-):
-    async def wrapper(
-        context: idol.BasicSchoolIdolContext, user: main.User, *args: _P.args, **kwargs: _P.kwargs
-    ) -> AchievementContext:
-        result = AchievementContext()
+def recursive_achievement(achievement_type: int, /):
+    def wrapper0(
+        func: Callable[Concatenate[idol.BasicSchoolIdolContext, main.User, _P], Awaitable[AchievementContext]]
+    ):
+        async def wrapper1(
+            context: idol.BasicSchoolIdolContext, user: main.User, *args: _P.args, **kwargs: _P.kwargs
+        ) -> AchievementContext:
+            nonlocal achievement_type
+            result = AchievementContext()
 
-        while True:
-            ach_result = await func(context, user, *args, **kwargs)
+            while True:
+                keep_traversing = False
+                ach_result = await func(context, user, *args, **kwargs)
 
-            if ach_result.has_achievement():
-                result = result + ach_result
-            else:
-                break
+                if ach_result.has_achievement():
+                    result = result + ach_result
 
-        return result + await check_type_53_recursive(context, user)
+                    for ach in ach_result.new:
+                        if ach.achievement_type == achievement_type:
+                            keep_traversing = True
+                            break
 
-    return wrapper
+                if not keep_traversing:
+                    break
 
+            return result
 
-def nonrecursive_achievement(
-    func: Callable[Concatenate[idol.BasicSchoolIdolContext, main.User, _P], Awaitable[AchievementContext]]
-):
-    async def wrapper(
-        context: idol.BasicSchoolIdolContext, user: main.User, *args: _P.args, **kwargs: _P.kwargs
-    ) -> AchievementContext:
-        result = await func(context, user, *args, **kwargs)
-        return result + await check_type_53_recursive(context, user)
+        return wrapper1
 
-    return wrapper
+    return wrapper0
 
 
-@recursive_achievement
 async def check_type_1(context: idol.BasicSchoolIdolContext, user: main.User, increment: bool):
     """
     Check live show clear achievements.
@@ -331,7 +329,6 @@ async def check_type_1(context: idol.BasicSchoolIdolContext, user: main.User, in
     return await check_type_increment(context, user, 1, increment)
 
 
-@recursive_achievement
 async def check_type_2(context: idol.BasicSchoolIdolContext, user: main.User, difficulty: int, increment: bool):
     """
     Check live show clear achievements by specified difficulty.
@@ -339,7 +336,6 @@ async def check_type_2(context: idol.BasicSchoolIdolContext, user: main.User, di
     return await check_type_increment(context, user, 2, increment, 2, difficulty)
 
 
-@recursive_achievement
 async def check_type_3(context: idol.BasicSchoolIdolContext, user: main.User, rank: int, increment: bool):
     """
     Check live show clear achievements by specified score rank.
@@ -347,7 +343,6 @@ async def check_type_3(context: idol.BasicSchoolIdolContext, user: main.User, ra
     return await check_type_increment(context, user, 3, increment, 2, rank)
 
 
-@recursive_achievement
 async def check_type_4(context: idol.BasicSchoolIdolContext, user: main.User, rank: int, increment: bool):
     """
     Check live show clear achievements by specified combo rank.
@@ -355,7 +350,6 @@ async def check_type_4(context: idol.BasicSchoolIdolContext, user: main.User, ra
     return await check_type_increment(context, user, 4, increment, 2, rank)
 
 
-@recursive_achievement
 async def check_type_7(context: idol.BasicSchoolIdolContext, user: main.User, unit_type_id: int, increment: bool):
     """
     Check live show clear achievements by specified combo rank.
@@ -363,7 +357,7 @@ async def check_type_7(context: idol.BasicSchoolIdolContext, user: main.User, un
     return await check_type_increment(context, user, 4, increment, 2, unit_type_id)
 
 
-@recursive_achievement
+@recursive_achievement(18)
 async def check_type_18(context: idol.BasicSchoolIdolContext, user: main.User, club_members: int):
     """
     Check amount of club members collected.
@@ -371,7 +365,7 @@ async def check_type_18(context: idol.BasicSchoolIdolContext, user: main.User, c
     return await check_type_countable(context, user, 18, club_members)
 
 
-@recursive_achievement
+@recursive_achievement(19)
 async def check_type_19(context: idol.BasicSchoolIdolContext, user: main.User, idolized: int):
     """
     Check amount of idolized club members.
@@ -379,7 +373,7 @@ async def check_type_19(context: idol.BasicSchoolIdolContext, user: main.User, i
     return await check_type_countable(context, user, 19, idolized)
 
 
-@recursive_achievement
+@recursive_achievement(20)
 async def check_type_20(context: idol.BasicSchoolIdolContext, user: main.User, max_love: int):
     """
     Check amount of max bonded idolized club members.
@@ -387,7 +381,7 @@ async def check_type_20(context: idol.BasicSchoolIdolContext, user: main.User, m
     return await check_type_countable(context, user, 20, max_love)
 
 
-@recursive_achievement
+@recursive_achievement(21)
 async def check_type_21(context: idol.BasicSchoolIdolContext, user: main.User, max_level: int):
     """
     Check amount of max leveled idolized club members.
@@ -395,7 +389,6 @@ async def check_type_21(context: idol.BasicSchoolIdolContext, user: main.User, m
     return await check_type_countable(context, user, 21, max_level)
 
 
-@nonrecursive_achievement
 async def check_type_27(context: idol.BasicSchoolIdolContext, user: main.User, nlogins: int):
     """
     Check login bonus count
@@ -403,7 +396,6 @@ async def check_type_27(context: idol.BasicSchoolIdolContext, user: main.User, n
     return await check_type_countable(context, user, 27, nlogins)
 
 
-@nonrecursive_achievement
 async def check_type_29(context: idol.BasicSchoolIdolContext, user: main.User):
     """
     Check one-time login bonus.
@@ -411,7 +403,7 @@ async def check_type_29(context: idol.BasicSchoolIdolContext, user: main.User):
     return await check_type_countable(context, user, 29, 1)
 
 
-@recursive_achievement
+@recursive_achievement(30)
 async def check_type_30(context: idol.BasicSchoolIdolContext, user: main.User, rank: int | None = None):
     """
     Check player rank.
@@ -419,7 +411,7 @@ async def check_type_30(context: idol.BasicSchoolIdolContext, user: main.User, r
     return await check_type_countable(context, user, 30, rank or user.level)
 
 
-@recursive_achievement
+@recursive_achievement(32)
 async def check_type_32(context: idol.BasicSchoolIdolContext, user: main.User, live_track_id: int):
     """
     Check live show clear of specific `live_track_id`
@@ -427,7 +419,6 @@ async def check_type_32(context: idol.BasicSchoolIdolContext, user: main.User, l
     return await check_type_countable(context, user, 32, 1, 1, live_track_id)
 
 
-@recursive_achievement
 async def check_type_37(context: idol.BasicSchoolIdolContext, user: main.User, live_track_id: int, increment: bool):
     """
     Check live show clear of specific `live_track_id`
@@ -435,7 +426,7 @@ async def check_type_37(context: idol.BasicSchoolIdolContext, user: main.User, l
     return await check_type_increment(context, user, 37, increment, 1, live_track_id)
 
 
-async def check_type_53_recursive(context: idol.BasicSchoolIdolContext, user: main.User):
+async def check_type_53_old(context: idol.BasicSchoolIdolContext, user: main.User):
     """
     Check amount of achievement cleared with specific category
     """
@@ -478,7 +469,42 @@ async def check_type_53_recursive(context: idol.BasicSchoolIdolContext, user: ma
     return achievement_result_all
 
 
-@recursive_achievement
+@recursive_achievement(53)
+async def check_type_53(
+    context: idol.BasicSchoolIdolContext, user: main.User, achievement_category_id: int, count: int
+):
+    """
+    Check amount of achievement cleared with specific category
+    """
+    return await check_type_countable(context, user, 53, count, 2, achievement_category_id)
+
+
+async def check_type_53_recursive(context: idol.BasicSchoolIdolContext, user: main.User):
+    """
+    Check amount of achievement cleared on all available categories
+    """
+    result_complete = AchievementContext()
+
+    while True:
+        keep_going = False
+        all_accomplished_by_category = await count_accomplished_achievement_by_category(context, user)
+        result = AchievementContext()
+        for achievement_category_id, amount in all_accomplished_by_category:
+            result.extend(await check_type_53(context, user, achievement_category_id, amount))
+
+        result_complete.extend(result)
+        # Should we keep recurse?
+        for ach in result.new:
+            if ach.achievement_type == 53:
+                keep_going = True
+                break
+
+        if not keep_going:
+            break
+
+    return result_complete
+
+
 async def check_type_58(context: idol.BasicSchoolIdolContext, user: main.User, increment: bool):
     """
     Check live show clear achievements.
@@ -490,3 +516,25 @@ async def get_achievement_filter_ids(context: idol.BasicSchoolIdolContext):
     q = sqlalchemy.select(achievement.FilterCategory)
     result = await context.db.achievement.execute(q)
     return [filter_cat.achievement_filter_category_id for filter_cat in result.scalars()]
+
+
+async def count_accomplished_achievement_by_category(context: idol.BasicSchoolIdolContext, user: main.User):
+    # Get all achieved
+    q = (
+        sqlalchemy.select(main.Achievement)
+        .where(main.Achievement.user_id == user.id, main.Achievement.is_accomplished == True)
+        .with_only_columns(main.Achievement.achievement_id)
+    )
+    print(q)
+    result = await context.db.main.execute(q)
+    all_accomplished = list(result.scalars())
+
+    q = (
+        sqlalchemy.select(achievement.Tag)
+        .where(achievement.Tag.achievement_id.in_(all_accomplished))
+        .with_only_columns(
+            achievement.Tag.achievement_category_id, sqlalchemy.func.count(achievement.Tag.achievement_id.distinct())
+        )
+    )
+    result = await context.db.achievement.execute(q)
+    return [(int(r[0]), int(r[1])) for r in result]
