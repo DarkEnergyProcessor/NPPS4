@@ -1,6 +1,8 @@
 import dataclasses
 import enum
 import json
+import os
+import os.path
 import traceback
 import typing
 import urllib.parse
@@ -351,13 +353,17 @@ async def build_response(context: SchoolIdolParams, response: _PossibleResponse[
     )
 
 
-def _get_real_param(param: type[idoltype._S]):
-    origin = typing.get_origin(param)
+def _log_response_data(module: str, action: str, response_data: pydantic.BaseModel):
+    output_dir = os.path.join(config.get_data_directory(), "log_response_data")
+    os.makedirs(output_dir, exist_ok=True)
+    t = util.time()
+    filename = f"{module}_{action}_{t:08x}.json"
 
-    if origin is list:
-        return typing.get_args(param)[0], True
-    else:
-        return param, False
+    with open(os.path.join(output_dir, filename), "w", encoding="utf-8", newline="\n") as f:
+        jsonable = response_data.model_dump()
+        json.dump(jsonable, f, ensure_ascii=False, indent="\t")
+
+    util.log(f"Response data for {module}/{action} is saved to {filename}", severity=util.logging.DEBUG)
 
 
 def _fix_schema(absdest: str, schema: dict[str, Any]):
@@ -460,7 +466,7 @@ def register(
                 tags=tags,
             )
             async def wrap1(context: Annotated[_T, fastapi.Depends(params[0])]):
-                nonlocal ret, check_version, xmc_verify, exclude_none, f, allow_retry_on_unhandled_exception
+                nonlocal check_version, xmc_verify, exclude_none, f, allow_retry_on_unhandled_exception, log_response_data
                 func = cast(
                     _EndpointWithoutRequestWithResponse[_T, _V] | _EndpointWithoutRequestWithoutResponse[_T], f
                 )
@@ -471,6 +477,9 @@ def register(
                         async with context:
                             result = await func(context)
                             response = await build_response(context, result, exclude_none=exclude_none)
+
+                            if log_response_data and result is not None:
+                                _log_response_data(module, action, result)
                     except error.IdolError as e:
                         response = await build_response(context, e)
                     except Exception as e:
@@ -523,7 +532,7 @@ def register(
                 context: Annotated[_T, fastapi.Depends(params[0])],
                 request: Annotated[_U, fastapi.Depends(_get_request_data(params[1]))],
             ):
-                nonlocal ret, check_version, xmc_verify, f, allow_retry_on_unhandled_exception
+                nonlocal check_version, xmc_verify, f, allow_retry_on_unhandled_exception, log_response_data
                 func = cast(_EndpointWithRequestWithResponse[_T, _U, _V], f)
                 response = await client_check(context, check_version, xmc_verify)
 
@@ -532,6 +541,9 @@ def register(
                         async with context:
                             result = await func(context, request)
                             response = await build_response(context, result, exclude_none=exclude_none)
+
+                            if log_response_data and result is not None:
+                                _log_response_data(module, action, result)
                     except error.IdolError as e:
                         response = await build_response(context, e)
                     except Exception as e:
@@ -607,7 +619,7 @@ _api_request_data_schema = {
             }
         },
     },
-)  # type: ignore
+)
 async def api_endpoint(
     context: Annotated[SchoolIdolUserParams, fastapi.Depends(SchoolIdolUserParams)],
     request: Annotated[list[BatchRequest], fastapi.Depends(_get_request_data(BatchRequestRoot))],
@@ -649,10 +661,11 @@ async def api_endpoint(
                         )
                         result = await func(context)
 
+                    if endpoint.log_response_data and result is not None:
+                        _log_response_data(module, action, result)
+
                     current_response, status_code, http_code = assemble_response_data(result, endpoint.exclude_none)
                 except Exception as e:
-                    await context.db.rollback()
-
                     if not isinstance(e, error.IdolError):
                         util.log(f'Error processing "{module}/{action}"', severity=util.logging.ERROR, e=e)
 
