@@ -252,6 +252,7 @@ class Endpoint(Generic[_T, _U, _V]):
     request_class: type[pydantic.BaseModel] | None
     function: _PossibleEndpointFunction[_T, _U, _V]
     exclude_none: bool
+    log_response_data: bool
 
 
 def _get_request_data(model: type[_U]):
@@ -415,6 +416,8 @@ def register(
     batchable: bool = True,
     xmc_verify: idoltype.XMCVerifyMode = idoltype.XMCVerifyMode.SHARED,
     exclude_none: bool = False,
+    # These are only for debug purpose.
+    log_response_data: bool = False,
     allow_retry_on_unhandled_exception: bool = False,
 ):
     def wrap0(f: _PossibleEndpointFunction[_T, _U, _V]):
@@ -547,6 +550,7 @@ def register(
                 request_class=None if len(params) < 2 else params[1],
                 function=f,
                 exclude_none=exclude_none,
+                log_response_data=log_response_data,
             )
         return f
 
@@ -612,45 +616,49 @@ async def api_endpoint(
     raw_request_data = json.loads(context.raw_request_data)
 
     if response is None:
-        response_data: list[BatchResponse] = []
+        async with context:
+            response_data: list[BatchResponse] = []
 
-        for request_data in raw_request_data:
-            module, action = request_data["module"], request_data["action"]
+            for request_data in raw_request_data:
+                module, action = request_data["module"], request_data["action"]
 
-            try:
-                # Find endpoint
-                endpoint = API_ROUTER_MAP.get((module, action))
-                if endpoint is None:
-                    msg = f"Endpoint not found: {module}/{action}"
-                    util.log(msg, json.dumps(request_data), severity=util.logging.ERROR)
-                    raise error.IdolError(error.ERROR_CODE_LIB_ERROR, 404, msg, http_code=404)
+                try:
+                    # Find endpoint
+                    endpoint = API_ROUTER_MAP.get((module, action))
+                    if endpoint is None:
+                        msg = f"Endpoint not found: {module}/{action}"
+                        util.log(msg, json.dumps(request_data), severity=util.logging.ERROR)
+                        raise error.IdolError(error.ERROR_CODE_LIB_ERROR, 404, msg, http_code=404)
 
-                # *Sigh* have to reinvent the wheel.
-                if endpoint.request_class is not None:
-                    pydantic_request = endpoint.request_class.model_validate(request_data)
-                    func = cast(
-                        _EndpointWithRequestWithResponse[SchoolIdolUserParams, pydantic.BaseModel, pydantic.BaseModel],
-                        endpoint.function,
-                    )
-                    result = await func(context, pydantic_request)
-                else:
-                    func = cast(
-                        _EndpointWithoutRequestWithResponse[SchoolIdolUserParams, pydantic.BaseModel],
-                        endpoint.function,
-                    )
-                    result = await func(context)
+                    # *Sigh* have to reinvent the wheel.
+                    if endpoint.request_class is not None:
+                        pydantic_request = endpoint.request_class.model_validate(request_data)
+                        func = cast(
+                            _EndpointWithRequestWithResponse[
+                                SchoolIdolUserParams, pydantic.BaseModel, pydantic.BaseModel
+                            ]
+                            | _EndpointWithRequestWithoutResponse[SchoolIdolUserParams, pydantic.BaseModel],
+                            endpoint.function,
+                        )
+                        result = await func(context, pydantic_request)
+                    else:
+                        func = cast(
+                            _EndpointWithoutRequestWithResponse[SchoolIdolUserParams, pydantic.BaseModel]
+                            | _EndpointWithoutRequestWithoutResponse[SchoolIdolUserParams],
+                            endpoint.function,
+                        )
+                        result = await func(context)
 
-                await context.db.commit()
-                current_response, status_code, http_code = assemble_response_data(result, endpoint.exclude_none)
-            except Exception as e:
-                await context.db.rollback()
+                    current_response, status_code, http_code = assemble_response_data(result, endpoint.exclude_none)
+                except Exception as e:
+                    await context.db.rollback()
 
-                if not isinstance(e, error.IdolError):
-                    util.log(f'Error processing "{module}/{action}"', severity=util.logging.ERROR, e=e)
+                    if not isinstance(e, error.IdolError):
+                        util.log(f'Error processing "{module}/{action}"', severity=util.logging.ERROR, e=e)
 
-                current_response, status_code, http_code = assemble_response_data(e)
+                    current_response, status_code, http_code = assemble_response_data(e)
 
-            response_data.append(BatchResponse(result=current_response, status=status_code, timeStamp=util.time()))
+                response_data.append(BatchResponse(result=current_response, status=status_code, timeStamp=util.time()))
 
-        response = await build_response(context, response_data, False)
+            response = await build_response(context, response_data, False)
     return response
