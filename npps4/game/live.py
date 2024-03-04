@@ -229,9 +229,15 @@ class LiveRewardBaseInfo(pydantic.BaseModel):
 
 
 class LiveRewardUnitList(pydantic.BaseModel):
-    live_clear: list[item.Reward] = pydantic.Field(default_factory=list)
-    live_rank: list[item.Reward] = pydantic.Field(default_factory=list)
-    live_combo: list[item.Reward] = pydantic.Field(default_factory=list)
+    live_clear: list[item.Reward | unit.UnitSupportItemWithReward | unit.UnitItemWithReward] = pydantic.Field(
+        default_factory=list
+    )
+    live_rank: list[item.Reward | unit.UnitSupportItemWithReward | unit.UnitItemWithReward] = pydantic.Field(
+        default_factory=list
+    )
+    live_combo: list[item.Reward | unit.UnitSupportItemWithReward | unit.UnitItemWithReward] = pydantic.Field(
+        default_factory=list
+    )
 
 
 class LiveRewardResponseUnitList(pydantic.BaseModel):
@@ -489,6 +495,7 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
     unit_id = await live_unit_drop_protocol.get_live_drop_unit(live_setting.live_setting_id, context)
 
     # FIXME: Drop different kinds of levels. Currently it's fixed at level 1.
+    # FIXME: It does not show a new character screen. There must be a flag for it.
     live_clear_drop = await unit.quick_create_by_unit_add(context, current_user, unit_id)
     if request.max_combo >= live_setting.c_rank_combo:
         unit_id = await live_unit_drop_protocol.get_live_drop_unit(live_setting.live_setting_id, context)
@@ -629,8 +636,8 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
         rank=score_rank,
         combo_rank=combo_rank,
         total_love=love_count,
-        is_high_score=old_live_clear_data.hi_score >= live_clear_data.hi_score,
-        hi_score=live_clear_data.hi_score,
+        is_high_score=live_clear_data.hi_score > old_live_clear_data.hi_score,
+        hi_score=old_live_clear_data.hi_score,
         base_reward_info=LiveRewardBaseInfo(
             player_exp=given_exp,
             player_exp_unit_max=common.BeforeAfter[int](before=old_user_info.unit_max, after=user_info.unit_max),

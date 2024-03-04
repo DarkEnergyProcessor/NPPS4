@@ -29,6 +29,7 @@ class UserInfoData(pydantic.BaseModel):
     social_point: int
     unit_max: int
     waiting_unit_max: int
+    current_energy: int
     energy_max: int
     energy_full_time: str
     license_live_energy_recoverly_time: int
@@ -77,6 +78,7 @@ async def get_user_info(context: idol.BasicSchoolIdolContext, user: main.User):
         social_point=user.social_point,
         unit_max=user.unit_max,
         waiting_unit_max=user.waiting_unit_max,
+        current_energy=get_current_energy(user),
         energy_max=user.energy_max,
         energy_full_time=util.timestamp_to_datetime(user.energy_full_time),
         license_live_energy_recoverly_time=user.license_live_energy_recoverly_time,
