@@ -328,9 +328,7 @@ def assemble_response_data(response: _PossibleResponse[_V], exclude_none: bool =
     return response_data, status_code, http_code
 
 
-async def build_response(
-    context: SchoolIdolParams, response: _PossibleResponse[_V], log: bool = True, exclude_none: bool = False
-):
+async def build_response(context: SchoolIdolParams, response: _PossibleResponse[_V], exclude_none: bool = False):
     response_data_dict, status_code, http_code = assemble_response_data(response, exclude_none)
     response_data = {
         "response_data": response_data_dict,
@@ -339,9 +337,6 @@ async def build_response(
     }
     jsondatastr = json.dumps(response_data)
     jsondata = jsondatastr.encode("UTF-8")
-
-    if config.log_request_response() and log:
-        util.log("DEBUG RESPONSE", str(context.request.url), jsondatastr)
 
     return fastapi.responses.Response(
         jsondata,
@@ -529,8 +524,6 @@ def register(
                 func = cast(_EndpointWithRequestWithResponse[_T, _U, _V], f)
                 response = await client_check(context, check_version, xmc_verify)
 
-                if config.log_request_response():
-                    util.log("DEBUG REQUEST", endpoint, str(context.raw_request_data, "UTF-8"))
                 if response is None:
                     try:
                         async with context:
@@ -618,9 +611,6 @@ async def api_endpoint(
     response = await client_check(context, True, idoltype.XMCVerifyMode.SHARED)
     raw_request_data = json.loads(context.raw_request_data)
 
-    if config.log_request_response():
-        util.log("DEBUG REQUEST /api:", str(context.raw_request_data, "UTF-8"))
-
     if response is None:
         response_data: list[BatchResponse] = []
 
@@ -661,10 +651,6 @@ async def api_endpoint(
                 current_response, status_code, http_code = assemble_response_data(e)
 
             response_data.append(BatchResponse(result=current_response, status=status_code, timeStamp=util.time()))
-
-            if config.log_request_response():
-                util.log("DEBUG REQUEST /api - ", module, action, ":::", json.dumps(request_data))
-                util.log("DEBUG RESPONSE /api - ", module, action, ":::", json.dumps(current_response))
 
         response = await build_response(context, response_data, False)
     return response

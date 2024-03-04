@@ -30,17 +30,3 @@ async def server_info(filehash: str):
             )
     else:
         raise fastapi.exceptions.HTTPException(404, "Not found")
-
-
-@app.core.get("/capture/{capture}")
-async def set_capture(capture: bool | int):
-    if isinstance(capture, int):
-        capture = capture > 0
-
-    oldval = config.log_request_response(capture)
-    return {"old": oldval, "new": capture}
-
-
-@app.core.get("/capture")
-async def get_capture():
-    return {"old": config.log_request_response()}

@@ -100,18 +100,6 @@ def inject_server_info():
     return CONFIG_DATA.download.send_patched_server_info
 
 
-_log_request_response_flag = False
-
-
-def log_request_response(set: bool | None = None):
-    global _log_request_response_flag
-    old = _log_request_response_flag
-    if set is not None:
-        _log_request_response_flag = set
-
-    return old
-
-
 def load_module_from_file(file: str, modulename: str):
     loader = importlib.machinery.SourceFileLoader(modulename, file)
     spec = importlib.util.spec_from_loader(loader.name, loader)
