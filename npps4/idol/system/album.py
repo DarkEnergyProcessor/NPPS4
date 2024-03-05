@@ -102,3 +102,9 @@ async def trigger_achievement(
         ach_ctx.extend(result)
 
     return ach_ctx
+
+
+async def has_ever_got_unit(context: idol.BasicSchoolIdolContext, user: main.User, unit_id: int):
+    q = sqlalchemy.select(main.Album).where(main.Album.user_id == user.id, main.Album.unit_id == unit_id)
+    result = await context.db.main.execute(q)
+    return result.scalar() is not None

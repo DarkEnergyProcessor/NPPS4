@@ -151,3 +151,26 @@ def ensure_no_none(list_to: list[_T | None], exc: type[_E] = Exception, *args) -
         raise exc(*args)
 
     return cast(list[_T], list_to)
+
+
+class _MeasureClass:
+    def __init__(self, name: str, severity: int):
+        self.t = 0
+        self.name = name
+        self.severity = severity
+
+    def __enter__(self):
+        self.t = timelib.perf_counter_ns()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        t = ((self.t - timelib.perf_counter_ns()) // 1000) / 1000000
+
+        if exc_type is None:
+            log(f"Measuring performance of '{self.name}' took {t} seconds.", severity=self.severity)
+
+        return None
+
+
+def measure(name: str = "", severity: int = logging.DEBUG):
+    return _MeasureClass(name, severity)

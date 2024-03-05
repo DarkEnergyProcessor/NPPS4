@@ -525,13 +525,13 @@ async def count_accomplished_achievement_by_category(context: idol.BasicSchoolId
         .where(main.Achievement.user_id == user.id, main.Achievement.is_accomplished == True)
         .with_only_columns(main.Achievement.achievement_id)
     )
-    print(q)
     result = await context.db.main.execute(q)
     all_accomplished = list(result.scalars())
 
     q = (
         sqlalchemy.select(achievement.Tag)
         .where(achievement.Tag.achievement_id.in_(all_accomplished))
+        .group_by(achievement.Tag.achievement_category_id)
         .with_only_columns(
             achievement.Tag.achievement_category_id, sqlalchemy.func.count(achievement.Tag.achievement_id.distinct())
         )

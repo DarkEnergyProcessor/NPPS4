@@ -354,6 +354,9 @@ async def live_schedule(context: idol.SchoolIdolUserParams) -> LiveScheduleRespo
     )
 
 
+DEBUG_SERVER_SCORE_CALCULATE = True
+
+
 @idol.register("live", "partyList")
 async def live_partylist(context: idol.SchoolIdolUserParams, request: LivePartyListRequest) -> LivePartyListResponse:
     current_user = await user.get_current(context)
@@ -362,6 +365,28 @@ async def live_partylist(context: idol.SchoolIdolUserParams, request: LivePartyL
     # TODO: Check LP/token
 
     party_list = [await advanced.get_user_guest_party_info(context, current_user)]
+
+    # DEBUG live score
+    if DEBUG_SERVER_SCORE_CALCULATE:
+        guest_center_unit_owning_user_id = await unit.get_unit_center(context, current_user)
+        assert guest_center_unit_owning_user_id != 0
+        museum_data = await museum.get_museum_info_data(context, current_user)
+
+        for unit_deck_id in await unit.find_all_valid_deck_number_ids(context, current_user):
+            deck_data = await unit.load_unit_deck(context, current_user, unit_deck_id)
+            if deck_data is None or 0 in deck_data[1]:
+                raise idol.error.IdolError(idol.error.ERROR_CODE_LIVE_INVALID_UNIT_DECK)
+
+            calculator = advanced.TeamStatCalculator(context)
+            deck_units = [await unit.get_unit(context, i) for i in deck_data[1]]
+            stats = await calculator.get_live_stats(
+                unit_deck_id,
+                deck_units,
+                await unit.get_unit(context, guest_center_unit_owning_user_id),
+                museum_data.parameter,
+            )
+            print("===== TEAM STAT CALCULATOR FOR", deck_data[0].name, "=====")
+            print(stats)
 
     return LivePartyListResponse(
         # TODO
@@ -530,7 +555,10 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
             else:
                 # Add directly
                 if reward_data.unit_data:
+                    assert reward_data.full_info is not None
                     await unit.add_unit_by_object(context, current_user, reward_data.unit_data)
+                    # Update unit_owning_user_id
+                    reward_data.update_unit_owning_user_id()
                     current_unit_count = current_unit_count + 1
                 else:
                     await unit.add_supporter_unit(context, current_user, reward_data.unit_id)

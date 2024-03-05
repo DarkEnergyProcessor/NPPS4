@@ -36,6 +36,7 @@ class UnitInfoCommonData(UnitInfoBaseData):
     love: int
     max_love: int
     unit_skill_level: int
+    skill_level: int
     max_hp: int
     favorite_flag: bool
     display_rank: int
@@ -50,6 +51,7 @@ class UnitInfoCommonData(UnitInfoBaseData):
 
 class UnitBaseItem(item.Item, UnitInfoBaseData):
     add_type: int = ADD_TYPE.UNIT
+    new_unit_flag: bool = False
 
     @override
     def dump_extra_data(self) -> dict[str, Any]:
@@ -65,7 +67,7 @@ class UnitItem(UnitBaseItem, UnitInfoCommonData):
 
     @override
     def dump_extra_data(self) -> dict[str, Any]:
-        return dict((k, getattr(self, k)) for k in UnitInfoCommonData.model_fields.keys()) | {
+        return dict((k, getattr(self, k)) for k in UnitItem.model_fields.keys()) | {
             "removable_skill_ids": self.removable_skill_ids
         }
 
@@ -142,9 +144,16 @@ async def create_unit(
         user_id=user.id,
         unit_id=unit_id,
         active=active,
+        favorite_flag=False,
+        is_signed=False,
+        insert_date=util.time(),
+        exp=0,
+        skill_exp=0,
         max_level=max_level,
+        love=0,
         rank=unit_info.rank_min,
         display_rank=unit_info.rank_min,
+        level_limit_id=0,
         unit_removable_skill_capacity=unit_info.default_removable_skill_capacity,
     )
 
@@ -395,6 +404,17 @@ async def save_unit_deck(context: idol.SchoolIdolParams, user: main.User, deck: 
     await context.db.main.flush()
 
 
+async def find_all_valid_deck_number_ids(context: idol.SchoolIdolParams, user: main.User):
+    result: set[int] = set()
+
+    for i in VALID_DECK_ID:
+        deck_data = await load_unit_deck(context, user, i, False)
+        if deck_data is not None and all(deck_data[1]):
+            result.add(i)
+
+    return result
+
+
 async def set_unit_center(context: idol.BasicSchoolIdolContext, user: main.User, unit_data: main.Unit):
     validate_unit(user, unit_data)
     user.center_unit_owning_user_id = unit_data.id
@@ -593,7 +613,7 @@ async def get_unit_data_full_info(context: idol.BasicSchoolIdolContext, unit_dat
 
     return (
         UnitInfoData(
-            unit_owning_user_id=unit_data.id,
+            unit_owning_user_id=unit_data.id or 0,
             unit_id=unit_data.unit_id,
             exp=unit_data.exp,
             next_exp=real_max_exp,
@@ -606,6 +626,7 @@ async def get_unit_data_full_info(context: idol.BasicSchoolIdolContext, unit_dat
             max_love=max_love,
             unit_skill_exp=unit_data.skill_exp,
             unit_skill_level=skill_stats[0],
+            skill_level=skill_stats[0],
             max_hp=stats.hp,
             unit_removable_skill_capacity=unit_data.unit_removable_skill_capacity,
             favorite_flag=unit_data.favorite_flag,
@@ -791,13 +812,24 @@ class QuickAddResult:
     full_info: UnitInfoData | None = None
     stats: UnitStatsResult | None = None
 
+    def update_unit_owning_user_id(self):
+        if self.unit_data is not None:
+            if self.full_info is not None:
+                self.full_info.unit_owning_user_id = self.unit_data.id
+            if isinstance(self.as_item_reward, UnitItemWithReward):
+                self.as_item_reward.unit_owning_user_id = self.unit_data.id
+
 
 async def quick_create_by_unit_add(
     context: idol.BasicSchoolIdolContext, user: main.User, unit_id: int, *, level: int = 1
 ):
+    new_unit_flag = not await album.has_ever_got_unit(context, user, unit_id)
     if await is_support_member(context, unit_id):
         return QuickAddResult(
-            unit_id, UnitSupportItemWithReward(item_id=unit_id, unit_id=unit_id, is_support_member=True)
+            unit_id,
+            UnitSupportItemWithReward(
+                item_id=unit_id, unit_id=unit_id, is_support_member=True, new_unit_flag=new_unit_flag
+            ),
         )
     else:
         unit_data = await create_unit(context, user, unit_id, True, level=level)
@@ -806,7 +838,8 @@ async def quick_create_by_unit_add(
         return QuickAddResult(
             unit_id=unit_id,
             as_item_reward=UnitItemWithReward.model_validate(
-                unit_full_info[0].model_dump() | {"item_id": unit_id, "removable_skill_ids": []}
+                unit_full_info[0].model_dump()
+                | {"item_id": unit_id, "removable_skill_ids": [], "new_unit_flag": new_unit_flag}
             ),
             unit_data=unit_data,
             full_info=unit_full_info[0],
