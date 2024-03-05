@@ -29,8 +29,8 @@ async def update(
             rank_max_flag=False,
             love_max_flag=False,
             rank_level_max_flag=False,
-            highest_love_per_unit=0,
-            favorite_point=0,
+            highest_love_per_unit=0,  # TODO
+            favorite_point=0,  # TODO
             sign_flag=False,
         )
         context.db.main.add(album)

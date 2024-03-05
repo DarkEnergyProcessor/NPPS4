@@ -159,8 +159,24 @@ async def create_unit(
 
 
 async def add_unit_by_object(context: idol.BasicSchoolIdolContext, user: main.User, unit_data: main.Unit):
+    unit_info = await get_unit_info(context, unit_data.unit_id)
+    if unit_info is None:
+        raise ValueError("unit info not found")
+
+    rarity = await get_unit_rarity(context, unit_info.rarity)
+    if rarity is None:
+        raise ValueError("unit rarity not found")
+
+    stats = await get_unit_stats_from_unit_data(context, unit_data, unit_info, rarity)
     context.db.main.add(unit_data)
-    await album.update(context, user, unit_data.unit_id)
+    await album.update(
+        context,
+        user,
+        unit_data.unit_id,
+        rank_max=unit_data.rank >= unit_info.rank_max,
+        love_max=unit_data.love >= rarity.after_love_max,
+        rank_level_max=stats.level >= rarity.after_level_max,
+    )
     await context.db.main.flush()
 
 
@@ -786,7 +802,6 @@ async def quick_create_by_unit_add(
     else:
         unit_data = await create_unit(context, user, unit_id, True, level=level)
         assert unit_data is not None
-        await add_unit_by_object(context, user, unit_data)
         unit_full_info = await get_unit_data_full_info(context, unit_data)
         return QuickAddResult(
             unit_id=unit_id,
