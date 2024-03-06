@@ -12,7 +12,7 @@ def _get_next_exp_base(rank: int) -> int:
         return 11
     elif rank < 34:
         # Rank < 34 is exactly this formula
-        return round(_get_next_exp_base(rank - 1) + 34.45 / 33)
+        return round(_get_next_exp_base(rank - 1) + 34.45 * rank / 33)
     else:
         return round(34.45 * rank - 551)
 
@@ -30,6 +30,7 @@ def get_next_exp_cumulative(rank: int):
     return sum(map(get_next_exp, range(1, rank + 1)))
 
 
+# functools.cache does not play very well with type checking right now.
 if not TYPE_CHECKING:
     get_next_exp_cumulative = functools.cache(get_next_exp_cumulative)
     get_next_exp = functools.cache(get_next_exp)
