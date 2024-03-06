@@ -455,6 +455,30 @@ LOVE_POS_CALC_ORDER = (4, 0, 1, 2, 3, 5, 6, 7, 8)
 LOVE_POS_CALC_WEIGHT = (5, 1, 1, 1, 1, 1, 1, 1, 1)
 
 
+def _get_added_love(love: int, current_love: list[int], max_love: list[int]):
+    after_love = current_love.copy()
+
+    # https://github.com/DarkEnergyProcessor/NPPS/blob/v3.1.x/modules/live/reward.php#L337-L369
+    while love > 0:
+        subtracted = 0
+
+        for i, weight in zip(LOVE_POS_CALC_ORDER, LOVE_POS_CALC_WEIGHT):
+            old_love = after_love[i]
+            new_love = min(old_love + min(weight, love), max_love[i])
+            added_love = new_love - old_love
+            after_love[i] = new_love
+            subtracted = subtracted + added_love
+            love = love - added_love
+
+            if love <= 0:
+                break
+
+        if subtracted == 0:
+            break
+
+    return after_love
+
+
 async def add_love_by_deck(context: idol.BasicSchoolIdolContext, user: main.User, deck_index: int, love: int):
     deck_data = await load_unit_deck(context, user, deck_index, False)
     if deck_data is None:
@@ -474,23 +498,8 @@ async def add_love_by_deck(context: idol.BasicSchoolIdolContext, user: main.User
         for ur, ui, ud in zip(unit_rarities, unit_infos, units)
     ]
 
-    loves = [u.love for u in units]
-    before_love = loves.copy()
-    # https://github.com/DarkEnergyProcessor/NPPS/blob/v3.1.x/modules/live/reward.php#L337-L369
-    while love > 0:
-        subtracted = 0
-
-        for order, weight in zip(LOVE_POS_CALC_ORDER, LOVE_POS_CALC_WEIGHT):
-            new_love = min(loves[order] + min(weight, love), max_loves[order])
-            loves[order] = new_love
-            subtracted = subtracted + new_love
-            love = love - new_love
-
-            if love <= 0:
-                break
-
-        if subtracted == 0:
-            break
+    before_love = [u.love for u in units]
+    loves = _get_added_love(love, before_love, max_loves)
 
     for ur, ud, new_love in zip(unit_rarities, units, loves):
         ud.love = new_love
