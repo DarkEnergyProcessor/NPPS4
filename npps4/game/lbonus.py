@@ -35,7 +35,7 @@ class LoginBonusTotalLogin(pydantic.BaseModel):
     reward: list[item_model.Item] | None = None
 
 
-class LoginBonusResponse(advanced.AchievementMixin):
+class LoginBonusResponse(achievement.AchievementMixin):
     sheets: list = pydantic.Field(default_factory=list)
     calendar_info: LoginBonusCalendarInfo
     ad_info: ad_model.AdInfo

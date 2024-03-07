@@ -91,13 +91,6 @@ class LiveDeckInfo(pydantic.BaseModel):
     unit_list: list[LiveDeckUnitAttribute]
 
 
-class AchievementMixin(pydantic.BaseModel):
-    accomplished_achievement_list: list[achievement.AchievementData]
-    unaccomplished_achievement_cnt: int
-    added_achievement_list: list[achievement.AchievementData]
-    new_achievement_cnt: int
-
-
 async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, item: item_model.Item):
     match item.add_type:
         case ADD_TYPE.ITEM:

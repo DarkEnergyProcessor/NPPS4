@@ -1,12 +1,10 @@
 import itertools
 
-import pydantic
 import sqlalchemy
 
-from . import item
 from ... import idol
-from ...const import ADD_TYPE
 from ...db import main
+from ...db import scenario
 
 
 async def init(context: idol.BasicSchoolIdolContext, user: main.User):
@@ -39,6 +37,11 @@ async def get_all(context: idol.BasicSchoolIdolContext, user: main.User):
     q = sqlalchemy.select(main.Scenario).where(main.Scenario.user_id == user.id)
     result = await context.db.main.execute(q)
     return list(result.scalars())
+
+
+async def valid(context: idol.BasicSchoolIdolContext, scenario_id: int):
+    scenario_data = await context.db.scenario.get(scenario.Scenario, scenario_id)
+    return scenario_data is not None
 
 
 async def is_unlocked(context: idol.BasicSchoolIdolContext, user: main.User, scenario_id: int):

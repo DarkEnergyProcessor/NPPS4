@@ -32,7 +32,7 @@ class ScenarioRewardRequest(ScenarioStartupRequest):
     is_skipped: bool
 
 
-class ScenarioRewardResponse(advanced.AchievementMixin):
+class ScenarioRewardResponse(achievement.AchievementMixin):
     clear_scenario: ScenarioStartupRequest
     before_user_info: user.UserInfoData
     after_user_info: user.UserInfoData
@@ -61,6 +61,13 @@ async def scenario_scenariostatus(context: idol.SchoolIdolUserParams) -> Scenari
 async def scenario_startup(
     context: idol.SchoolIdolUserParams, request: ScenarioStartupRequest
 ) -> ScenarioStartupResponse:
-    # TODO
-    util.stub("scenario", "startup", request)
+    # Sanity check
+    if not await scenario.valid(context, request.scenario_id):
+        raise idol.error.by_code(idol.error.ERROR_CODE_SCENARIO_NOT_FOUND)
+
+    # Sanity check #2
+    current_user = await user.get_current(context)
+    if not await scenario.is_unlocked(context, current_user, request.scenario_id):
+        raise idol.error.by_code(idol.error.ERROR_CODE_SCENARIO_NOT_AVAILABLE)
+
     return ScenarioStartupResponse(scenario_id=request.scenario_id)

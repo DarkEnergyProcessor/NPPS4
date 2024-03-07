@@ -274,7 +274,7 @@ class LiveRewardGoalAccomplishedInfo(pydantic.BaseModel):
     rewards: list[item_model.Item]
 
 
-class LiveRewardResponse(advanced.AchievementMixin):
+class LiveRewardResponse(achievement.AchievementMixin):
     live_info: list[live.LiveInfo]
     rank: int
     combo_rank: int

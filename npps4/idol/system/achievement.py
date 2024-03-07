@@ -44,6 +44,13 @@ class AchievementData(pydantic.BaseModel):
         )
 
 
+class AchievementMixin(pydantic.BaseModel):
+    accomplished_achievement_list: list[AchievementData]
+    unaccomplished_achievement_cnt: int
+    added_achievement_list: list[AchievementData]
+    new_achievement_cnt: int
+
+
 @dataclasses.dataclass
 class AchievementContext:
     accomplished: list[main.Achievement] = dataclasses.field(default_factory=list)
