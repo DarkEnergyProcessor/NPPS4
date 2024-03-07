@@ -408,6 +408,15 @@ async def check_type_21(context: idol.BasicSchoolIdolContext, user: main.User, m
     return await check_type_countable(context, user, 21, max_level)
 
 
+async def check_type_23(context: idol.BasicSchoolIdolContext, user: main.User, scenario_id: int):
+    """
+    Check main story clear.
+    """
+
+    # Note, there's no "count" in scenario but the database requires it, so specify unused parameter index (e.g. 2)
+    return await check_type_countable(context, user, 23, 1, 2, scenario_id)
+
+
 async def check_type_27(context: idol.BasicSchoolIdolContext, user: main.User, nlogins: int):
     """
     Check login bonus count
@@ -524,11 +533,27 @@ async def check_type_53_recursive(context: idol.BasicSchoolIdolContext, user: ma
     return result_complete
 
 
+async def check_type_57(context: idol.BasicSchoolIdolContext, user: main.User, completed_scenario_count: int):
+    """
+    Check amount of cleared main stories.
+    """
+
+    return await check_type_countable(context, user, 57, completed_scenario_count)
+
+
 async def check_type_58(context: idol.BasicSchoolIdolContext, user: main.User, increment: bool):
     """
     Check live show clear achievements.
     """
     return await check_type_increment(context, user, 58, increment)
+
+
+async def check_type_59(context: idol.BasicSchoolIdolContext, user: main.User, unlocked_scenario_count: int):
+    """
+    Check amount of unlocked main stories.
+    """
+
+    return await check_type_countable(context, user, 59, unlocked_scenario_count)
 
 
 async def get_achievement_filter_ids(context: idol.BasicSchoolIdolContext):

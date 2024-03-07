@@ -64,3 +64,19 @@ async def complete(context: idol.BasicSchoolIdolContext, user: main.User, scenar
     sc.completed = True
     await context.db.main.flush()
     return True
+
+
+async def count_completed(context: idol.BasicSchoolIdolContext, user: main.User):
+    q = (
+        sqlalchemy.select(sqlalchemy.func.count())
+        .select_from(main.Scenario)
+        .where(main.Scenario.user_id == user.id, main.Scenario.completed == True)
+    )
+    result = await context.db.main.execute(q)
+    return result.scalar() or 0
+
+
+async def count(context: idol.BasicSchoolIdolContext, user: main.User):
+    q = sqlalchemy.select(sqlalchemy.func.count()).select_from(main.Scenario).where(main.Scenario.user_id == user.id)
+    result = await context.db.main.execute(q)
+    return result.scalar() or 0
