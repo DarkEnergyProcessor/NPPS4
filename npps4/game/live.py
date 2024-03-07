@@ -7,6 +7,7 @@ from .. import const
 from .. import idol
 from .. import util
 from ..config import config
+from ..const import ADD_TYPE
 from ..idol.system import achievement
 from ..idol.system import advanced
 from ..idol.system import album
@@ -17,6 +18,7 @@ from ..idol.system import item_model
 from ..idol.system import live
 from ..idol.system import museum
 from ..idol.system import reward
+from ..idol.system import scenario
 from ..idol.system import subscenario
 from ..idol.system import unit
 from ..idol.system import unit_model
@@ -614,7 +616,21 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
         accomplished_achievement.extend(await achievement.check_type_7(context, current_user, unit_type_id, True))
     accomplished_achievement.extend(await achievement.check_type_53_recursive(context, current_user))
 
-    # Give achievements
+    # Process achievement rewards part 1
+    accomplished_achievement_rewards = [
+        await achievement.get_achievement_rewards(context, ach) for ach in accomplished_achievement.accomplished
+    ]
+    await advanced.fixup_achievement_reward(context, current_user, accomplished_achievement_rewards)
+
+    # Check achievement part 2
+    unlocked_scenario = await scenario.count(context, current_user)
+    for reward_list in accomplished_achievement_rewards:
+        for reward_data in reward_list:
+            if reward_data.add_type == ADD_TYPE.SCENARIO:
+                unlocked_scenario = unlocked_scenario + 1
+    accomplished_achievement.extend(await achievement.check_type_59(context, current_user, unlocked_scenario))
+
+    # Process achievement rewards part 2
     accomplished_achievement_rewards = [
         await achievement.get_achievement_rewards(context, ach) for ach in accomplished_achievement.accomplished
     ]
@@ -623,6 +639,8 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
     ]
     await advanced.fixup_achievement_reward(context, current_user, accomplished_achievement_rewards)
     await advanced.fixup_achievement_reward(context, current_user, new_achievement_rewards)
+
+    # Give achievement rewards
     await advanced.process_achievement_reward(
         context, current_user, accomplished_achievement.accomplished, accomplished_achievement_rewards
     )

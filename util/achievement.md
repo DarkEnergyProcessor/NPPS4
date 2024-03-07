@@ -224,7 +224,7 @@ When to check: Clearing a live show.
 
 ### Unlock Main Story (Type 59)
 
-When to check: Clearing a main story.
+When to check: Clearing a live show.
 
 * `params1` - Amount of main story to unlock.
 
