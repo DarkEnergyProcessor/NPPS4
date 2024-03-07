@@ -18,7 +18,7 @@ class LiveUnitDropChance(pydantic.BaseModel):
     live_specific: int
 
 
-class ItemWithWeight(item.Item):
+class ItemWithWeight(item.item_model.Item):
     weight: int
 
 

@@ -258,7 +258,7 @@ async def get_goal_rewards(context: idol.BasicSchoolIdolContext, goal_ids: list[
     q = sqlalchemy.select(live.LiveGoalReward).where(live.LiveGoalReward.live_goal_reward_id.in_(goal_ids))
     result = await context.db.live.execute(q)
     return [
-        item.RewardWithCategory(
+        item.item_model.Item(
             add_type=k.add_type,
             item_id=k.item_id,
             amount=k.amount,

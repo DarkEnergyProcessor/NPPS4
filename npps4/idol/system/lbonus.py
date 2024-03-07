@@ -16,7 +16,7 @@ class LoginBonusCalendar(pydantic.BaseModel):
     special_image_asset: str = ""
     received: bool
     ad_received: bool = False
-    item: item.Item
+    item: item.item_model.Item
 
 
 async def has_login_bonus(context: idol.BasicSchoolIdolContext, user: main.User, year: int, month: int, day: int):
@@ -58,7 +58,7 @@ async def get_calendar(context: idol.BasicSchoolIdolContext, year: int, month: i
             day=day,
             day_of_the_week=dotw,
             received=False,
-            item=item.Item(add_type=add_type, item_id=item_id, amount=amount),
+            item=item.item_model.Item(add_type=add_type, item_id=item_id, amount=amount),
         )
 
         if special is not None:

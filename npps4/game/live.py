@@ -13,12 +13,13 @@ from ..idol.system import album
 from ..idol.system import class_system as class_system_module
 from ..idol.system import common
 from ..idol.system import effort
-from ..idol.system import item
+from ..idol.system import item_model
 from ..idol.system import live
 from ..idol.system import museum
 from ..idol.system import reward
 from ..idol.system import subscenario
 from ..idol.system import unit
+from ..idol.system import unit_model
 from ..idol.system import user
 
 
@@ -227,9 +228,9 @@ class LiveRewardBaseInfo(common.BaseRewardInfo):
 
 
 class LiveRewardUnitList(pydantic.BaseModel):
-    live_clear: list[advanced.AnyItemWithReward] = pydantic.Field(default_factory=list)
-    live_rank: list[advanced.AnyItemWithReward] = pydantic.Field(default_factory=list)
-    live_combo: list[advanced.AnyItemWithReward] = pydantic.Field(default_factory=list)
+    live_clear: list[common.AnyItem] = pydantic.Field(default_factory=list)
+    live_rank: list[common.AnyItem] = pydantic.Field(default_factory=list)
+    live_combo: list[common.AnyItem] = pydantic.Field(default_factory=list)
 
 
 class LiveRewardResponseUnitList(pydantic.BaseModel):
@@ -249,7 +250,7 @@ class LiveRewardResponseUnitList(pydantic.BaseModel):
     max_love: int
 
     @staticmethod
-    def from_unit_data(unit_data_full: unit.UnitInfoData, *, position: int, before_love: int):
+    def from_unit_data(unit_data_full: unit_model.UnitInfoData, *, position: int, before_love: int):
         return LiveRewardResponseUnitList(
             unit_owning_user_id=unit_data_full.unit_owning_user_id,
             unit_id=unit_data_full.unit_id,
@@ -270,7 +271,7 @@ class LiveRewardResponseUnitList(pydantic.BaseModel):
 
 class LiveRewardGoalAccomplishedInfo(pydantic.BaseModel):
     achieved_ids: list[int]
-    rewards: list[item.RewardWithCategory]
+    rewards: list[item_model.Item]
 
 
 class LiveRewardResponse(advanced.AchievementMixin):
@@ -292,9 +293,9 @@ class LiveRewardResponse(advanced.AchievementMixin):
     after_user_info: user.UserInfoData
     next_level_info: list[user.NextLevelInfo]
     goal_accomp_info: LiveRewardGoalAccomplishedInfo
-    special_reward_info: list[item.RewardWithCategory]
+    special_reward_info: list[item_model.Item]
     event_info: list = pydantic.Field(default_factory=list)  # TODO
-    daily_reward_info: list[item.RewardWithCategory] = pydantic.Field(default_factory=list)  # TODO
+    daily_reward_info: list[item_model.Item] = pydantic.Field(default_factory=list)  # TODO
     can_send_friend_request: bool = False
     using_buff_info: list = pydantic.Field(default_factory=list)  # TODO
     class_system: class_system_module.ClassSystemData = pydantic.Field(
@@ -571,7 +572,7 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
     subscenario_unlocks: list[int] = []
     assert current_deck is not None
     unit_types_in_deck: set[int] = set()
-    unit_deck_full_info: list[unit.UnitInfoData] = []
+    unit_deck_full_info: list[unit_model.UnitInfoData] = []
     for unit_owning_user_id in current_deck[1]:
         unit_data = await unit.get_unit(context, unit_owning_user_id)
         unit.validate_unit(current_user, unit_data)

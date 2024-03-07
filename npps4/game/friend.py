@@ -3,6 +3,7 @@ import pydantic
 from .. import idol
 from .. import util
 from ..idol.system import unit
+from ..idol.system import unit_model
 from ..idol.system import user
 
 
@@ -36,7 +37,7 @@ class FriendSearchUserInfo(pydantic.BaseModel):
     comment: str
 
 
-class FriendSearchUnitInfo(unit.UnitInfoCommonData):
+class FriendSearchUnitInfo(unit_model.UnitInfoData):
     attribute: int
     smile: int
     cute: int
@@ -113,6 +114,7 @@ async def friend_search(context: idol.SchoolIdolUserParams, request: FriendSearc
             display_rank=unit_data_full_info.display_rank,
             unit_skill_exp=unit_data_full_info.unit_skill_exp,
             unit_removable_skill_capacity=unit_data_full_info.unit_removable_skill_capacity,
+            is_removable_skill_capacity_max=unit_data_full_info.is_removable_skill_capacity_max,
             is_love_max=unit_data_full_info.is_love_max,
             is_level_max=unit_data_full_info.is_level_max,
             is_rank_max=unit_data_full_info.is_rank_max,

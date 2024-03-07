@@ -2,7 +2,7 @@ import dataclasses
 
 import sqlalchemy
 
-from . import item
+from . import item_model
 from ... import idol
 from ... import util
 from ...const import ADD_TYPE
@@ -25,7 +25,7 @@ class RewardUnitData:
 async def _add_item_internal(
     context: idol.BasicSchoolIdolContext,
     user: main.User,
-    item_data: item.Item,
+    item_data: item_model.Item,
     reason_jp: str,
     reason_en: str | None = None,
     expire: int = 0,
@@ -42,7 +42,7 @@ async def _add_item_internal(
 def add_item(
     context: idol.BasicSchoolIdolContext,
     user: main.User,
-    item_data: item.Item,
+    item_data: item_model.Item,
     reason_jp: str,
     reason_en: str | None = None,
     expire: int = 0,
@@ -56,7 +56,7 @@ def add_item(
 async def add_unit(
     context: idol.BasicSchoolIdolContext,
     user: main.User,
-    item_data: item.Item,
+    item_data: item_model.Item,
     unit_data: RewardUnitData,
     reason_jp: str,
     reason_en: str | None = None,

@@ -3,7 +3,7 @@ import dataclasses
 import pydantic
 import sqlalchemy
 
-from . import item
+from . import item_model
 from ... import achievement_reward
 from ... import db
 from ... import idol
@@ -26,10 +26,10 @@ class AchievementData(pydantic.BaseModel):
     is_locked: bool
     open_condition_string: str = ""
     accomplish_id: str = ""
-    reward_list: list[item.Reward]
+    reward_list: list[item_model.Item]
 
     @staticmethod
-    def from_sqlalchemy(ach: main.Achievement, info: achievement.Achievement, rewards: list[item.Reward]):
+    def from_sqlalchemy(ach: main.Achievement, info: achievement.Achievement, rewards: list[item_model.Item]):
         return AchievementData(
             achievement_id=ach.achievement_id,
             count=ach.count,
@@ -100,7 +100,7 @@ async def add_achievement(
 
 
 async def to_game_representation(
-    context: idol.BasicSchoolIdolContext, achs: list[main.Achievement], rewardss: list[list[item.Reward]]
+    context: idol.BasicSchoolIdolContext, achs: list[main.Achievement], rewardss: list[list[item_model.Item]]
 ):
     return [
         AchievementData.from_sqlalchemy(ach, await get_achievement_info(context, ach.achievement_id), rewards)

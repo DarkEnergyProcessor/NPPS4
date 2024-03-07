@@ -2,6 +2,7 @@ from .. import idol
 from .. import util
 from ..idol.system import advanced
 from ..idol.system import unit
+from ..idol.system import unit_model
 from ..idol.system import user
 
 import pydantic
@@ -35,8 +36,8 @@ class UnitDeckInfo(pydantic.BaseModel):
 
 
 class UnitAllInfoResponse(pydantic.BaseModel):
-    active: list[unit.UnitInfoData]
-    waiting: list[unit.UnitInfoData]
+    active: list[unit_model.UnitInfoData]
+    waiting: list[unit_model.UnitInfoData]
 
 
 class UnitSetDisplayRankRequest(pydantic.BaseModel):
@@ -64,7 +65,7 @@ class UnitWaitOrActivateRequest(pydantic.BaseModel):
 
 
 class UnitWaitResponse(pydantic.BaseModel):
-    unit_removable_skill: unit.RemovableSkillOwningInfo
+    unit_removable_skill: unit_model.RemovableSkillOwningInfo
 
 
 class UnitDeckInfoResponse(pydantic.RootModel[list[UnitDeckInfo]]):
@@ -115,7 +116,7 @@ async def unit_deckinfo(context: idol.SchoolIdolUserParams) -> UnitDeckInfoRespo
 
 
 @idol.register("unit", "removableSkillInfo")
-async def unit_removableskillinfo(context: idol.SchoolIdolUserParams) -> unit.RemovableSkillInfoResponse:
+async def unit_removableskillinfo(context: idol.SchoolIdolUserParams) -> unit_model.RemovableSkillInfoResponse:
     current_user = await user.get_current(context)
     return await unit.get_removable_skill_info_request(context, current_user)
 
@@ -135,7 +136,7 @@ async def unit_unitall(context: idol.SchoolIdolUserParams) -> UnitAllInfoRespons
     current_user = await user.get_current(context)
     units = await unit.get_all_units(context, current_user)
 
-    unit_result: dict[bool, list[unit.UnitInfoData]] = {False: [], True: []}
+    unit_result: dict[bool, list[unit_model.UnitInfoData]] = {False: [], True: []}
 
     for unit_data in units:
         unit_serialized_data, _ = await unit.get_unit_data_full_info(context, unit_data)

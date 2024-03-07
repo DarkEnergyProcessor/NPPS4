@@ -2,7 +2,7 @@ import dataclasses
 
 import pydantic
 
-from . import item
+from . import item_model
 from . import unit
 from ... import idol
 from ... import leader_skill
@@ -98,12 +98,7 @@ class AchievementMixin(pydantic.BaseModel):
     new_achievement_cnt: int
 
 
-AnyItemWithReward = (
-    item.Reward | unit.UnitSupportItemWithReward | unit.UnitItemWithReward | scenario.ScenarioItemReward
-)
-
-
-async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, item: item.Item):
+async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, item: item_model.Item):
     match item.add_type:
         case ADD_TYPE.ITEM:
             match item.item_id:
@@ -216,7 +211,7 @@ async def test_name(context: idol.BasicSchoolIdolContext, name: str):
         raise idol.error.by_code(idol.error.ERROR_CODE_NG_WORDS)
 
 
-def _replace_to_loveca(r: item.Reward):
+def _replace_to_loveca(r: item_model.Item):
     r.item_id = 4
     r.add_type = ADD_TYPE.LOVECA
     r.amount = 1
@@ -235,7 +230,7 @@ _ACHIEVEMENT_REWARD_REPLACE_CRITERIA: dict[
 
 # Certain reward can only be given once. This function replaces them to give 1 loveca instead.
 async def fixup_achievement_reward(
-    context: idol.BasicSchoolIdolContext, user: main.User, rewardss: list[list[item.Reward]]
+    context: idol.BasicSchoolIdolContext, user: main.User, rewardss: list[list[item_model.Item]]
 ):
     for reward_list in rewardss:
         for ach_reward in reward_list:
@@ -253,7 +248,7 @@ async def give_achievement_reward(
     context: idol.BasicSchoolIdolContext,
     user: main.User,
     ach_info: achievement.achievement.Achievement,
-    rewards: list[item.Reward],
+    rewards: list[item_model.Item],
 ):
     for r in rewards:
         # TODO: Proper message for reward insertion
@@ -281,7 +276,7 @@ async def process_achievement_reward(
     context: idol.BasicSchoolIdolContext,
     user: main.User,
     achievements: list[main.Achievement],
-    rewardss: list[list[item.Reward]],
+    rewardss: list[list[item_model.Item]],
 ):
     for ach, reward_list in zip(achievements, rewardss):
         ach_info = await achievement.get_achievement_info(context, ach.achievement_id)

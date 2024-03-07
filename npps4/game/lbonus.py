@@ -4,11 +4,12 @@ from .. import idol
 from .. import util
 from .. import strings
 from ..idol.system import achievement
-from ..idol.system import ad
+from ..idol.system import ad_model
 from ..idol.system import advanced
 from ..idol.system import class_system as class_system_module
 from ..idol.system import effort
 from ..idol.system import item
+from ..idol.system import item_model
 from ..idol.system import lbonus
 from ..idol.system import museum
 from ..idol.system import reward
@@ -25,19 +26,19 @@ class LoginBonusCalendarInfo(pydantic.BaseModel):
     current_date: str
     current_month: LoginBonusCalendarMonthInfo
     next_month: LoginBonusCalendarMonthInfo
-    get_item: item.RewardWithCategory | None = None
+    get_item: item_model.Item | None = None
 
 
 class LoginBonusTotalLogin(pydantic.BaseModel):
     login_count: int
     remaining_count: int = 2147483647  # TODO
-    reward: list[item.Reward] | None = None
+    reward: list[item_model.Item] | None = None
 
 
 class LoginBonusResponse(advanced.AchievementMixin):
     sheets: list = pydantic.Field(default_factory=list)
     calendar_info: LoginBonusCalendarInfo
-    ad_info: ad.AdInfo
+    ad_info: ad_model.AdInfo
     total_login_info: LoginBonusTotalLogin
     license_lbonus_list: list  # TODO
     class_system: class_system_module.ClassSystemData = pydantic.Field(
@@ -86,11 +87,8 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
         await lbonus.mark_login_bonus(
             context, current_user, current_datetime.year, current_datetime.month, current_datetime.day
         )
-        get_item = item.RewardWithCategory(
-            add_type=reward_item.add_type,
-            item_id=reward_item.item_id,
-            amount=reward_item.amount,
-            reward_box_flag=False,
+        get_item = item_model.Item(
+            add_type=reward_item.add_type, item_id=reward_item.item_id, amount=reward_item.amount
         )
         await item.update_item_category_id(context, get_item)
         lbonuses_day.add(current_datetime.day)
@@ -136,7 +134,7 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
             next_month=LoginBonusCalendarMonthInfo(year=next_year, month=next_month_num, days=next_month),
             get_item=get_item,
         ),
-        ad_info=ad.AdInfo(),
+        ad_info=ad_model.AdInfo(),
         total_login_info=LoginBonusTotalLogin(login_count=login_count),
         license_lbonus_list=[],  # TODO
         start_dash_sheets=[],  # TODO

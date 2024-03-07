@@ -2,20 +2,17 @@ import pydantic
 
 from . import common
 from . import item
+from . import item_model
 from ... import idol
 from ...config import config
 from ...db import main
 from ...db import effort
 
 
-class EffortReward(item.RewardWithCategory):
-    rarity: int = 6  # TODO
-
-
 class EffortPointInfo(common.BeforeAfter[int]):
     live_effort_point_box_spec_id: int
     capacity: int
-    rewards: list[EffortReward]
+    rewards: list[item_model.Item]
 
 
 async def get_effort_spec(context: idol.BasicSchoolIdolContext, live_effort_point_box_spec_id: int):
@@ -57,9 +54,9 @@ async def add_effort(context: idol.BasicSchoolIdolContext, user: main.User, amou
                 context, current_effort.live_effort_point_box_spec_id, 0, amount
             )
 
-            reward_list: list[EffortReward] = []
+            reward_list: list[item_model.Item] = []
             for add_type, item_id, item_count, additional_data in drop_box_result.rewards:
-                reward_data = EffortReward(add_type=add_type, item_id=item_id, amount=item_count)
+                reward_data = item_model.Item(add_type=add_type, item_id=item_id, amount=item_count)
                 if additional_data:
                     for k, v in additional_data.items():
                         setattr(reward_data, k, v)

@@ -3,9 +3,9 @@ import pydantic
 from .. import idol
 from .. import util
 
-from ..idol.system import ad
+from ..idol.system import ad_model
 from ..idol.system import class_system
-from ..idol.system import item
+from ..idol.system import item_model
 from ..idol.system import museum
 from ..idol.system import user
 
@@ -31,7 +31,7 @@ class RewardListResponse(pydantic.BaseModel):
     limit: int = 20
     order: int
     items: list[IncentiveItem]
-    ad_info: ad.AdInfo
+    ad_info: ad_model.AdInfo
 
 
 class RewardListRequest(pydantic.BaseModel):
@@ -48,12 +48,12 @@ class RewardListRequest(pydantic.BaseModel):
     offset: int = 0
 
 
-class RewardIncentiveItem(item.RewardWithCategory):
-    incentive_id: int
-
-
 class RewardOpenRequest(pydantic.BaseModel):
     incentive_id: int
+
+
+class RewardIncentiveItem(item_model.Item, RewardOpenRequest):
+    pass
 
 
 class RewardOpenAllResponse(pydantic.BaseModel):
@@ -82,14 +82,14 @@ class RewardHistoryResponse(pydantic.BaseModel):
     item_count: int
     limit: int = 20
     history: list[IncentiveItem]
-    ad_info: ad.AdInfo
+    ad_info: ad_model.AdInfo
 
 
 @idol.register("reward", "rewardList")
 async def reward_rewardlist(context: idol.SchoolIdolUserParams, request: RewardListRequest) -> RewardListResponse:
     # TODO
     util.stub("reward", "rewardList", request)
-    return RewardListResponse(item_count=0, order=request.order, items=[], ad_info=ad.AdInfo())
+    return RewardListResponse(item_count=0, order=request.order, items=[], ad_info=ad_model.AdInfo())
 
 
 @idol.register("reward", "open")
@@ -128,4 +128,4 @@ async def reward_rewardhistory(
 ) -> RewardHistoryResponse:
     # TODO
     util.stub("reward", "rewardHistory", request)
-    return RewardHistoryResponse(item_count=0, history=[], ad_info=ad.AdInfo())
+    return RewardHistoryResponse(item_count=0, history=[], ad_info=ad_model.AdInfo())

@@ -14,6 +14,7 @@ import Cryptodome.Hash.SHA1
 import Cryptodome.Util.Padding
 import Cryptodome.Signature.pkcs1_15
 import itsdangerous.serializer
+import pydantic
 
 from .config import config
 
@@ -174,3 +175,7 @@ class _MeasureClass:
 
 def measure(name: str = "", severity: int = logging.DEBUG):
     return _MeasureClass(name, severity)
+
+
+def shallow_dump(model: pydantic.BaseModel, /):
+    return dict((k, getattr(model, k)) for k in model.__class__.model_fields.keys())

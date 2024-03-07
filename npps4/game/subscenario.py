@@ -1,7 +1,6 @@
 from .. import const
 from .. import idol
 from .. import util
-from ..idol.system import advanced
 from ..idol.system import class_system as class_system_module
 from ..idol.system import common
 from ..idol.system import item
@@ -34,17 +33,13 @@ class SubScenarioRewardRequest(SubScenarioStartupRequest):
     is_skipped: bool
 
 
-class SubscenarioRewardWithComment(pydantic.RootModel[advanced.AnyItemWithReward]):
-    root: advanced.AnyItemWithReward
-
-
 class SubScenarioRewardResponse(pydantic.BaseModel):
     clear_subscenario: SubScenarioStartupRequest
     before_user_info: user.UserInfoData
     after_user_info: user.UserInfoData
     next_level_info: list[user.NextLevelInfo]
     base_reward_info: common.BaseRewardInfo
-    item_reward_info: list[advanced.AnyItemWithReward]
+    item_reward_info: list[common.AnyItem]
     class_system: class_system_module.ClassSystemData = pydantic.Field(
         default_factory=class_system_module.ClassSystemData
     )  # TODO
@@ -96,7 +91,7 @@ async def subscenario_reward(
     # Add G and loveca
     current_user.free_sns_coin = current_user.free_sns_coin + const.SUBSCENARIO_LOVECA_REWARD_AMOUNT
     current_user.game_coin = current_user.game_coin + const.SUBSCENARIO_GAME_COIN_REWARD_AMOUNT
-    loveca_reward = item.add_loveca(const.SUBSCENARIO_LOVECA_REWARD_AMOUNT, cls=item.Reward)
+    loveca_reward = item.add_loveca(const.SUBSCENARIO_LOVECA_REWARD_AMOUNT)
     loveca_reward.comment = (
         const.SUBSCENARIO_REWARD_COMMENT_JP if context.is_lang_jp() else const.SUBSCENARIO_REWARD_COMMENT_EN
     )

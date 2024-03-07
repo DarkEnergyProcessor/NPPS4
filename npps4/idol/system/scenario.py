@@ -9,23 +9,6 @@ from ...const import ADD_TYPE
 from ...db import main
 
 
-class AdditionalScenarioStatus(pydantic.BaseModel):
-    scenario_id: int
-    status: int = 1
-
-
-class ScenarioItemReward(item.Reward):
-    add_type: int = ADD_TYPE.SCENARIO
-    amount: int = 1
-    additional_scenario_status: AdditionalScenarioStatus
-
-
-def make_scenario_reward(scenario_id: int):
-    return ScenarioItemReward(
-        item_id=scenario_id, additional_scenario_status=AdditionalScenarioStatus(scenario_id=scenario_id)
-    )
-
-
 async def init(context: idol.BasicSchoolIdolContext, user: main.User):
     for i in itertools.chain(range(1, 4), range(184, 189)):
         sc = main.Scenario(user_id=user.id, scenario_id=i, completed=True)

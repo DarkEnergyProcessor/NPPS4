@@ -2,12 +2,11 @@ import dataclasses
 import math
 import queue
 
-import pydantic
 import sqlalchemy
 
 from . import album
 from . import common
-from . import item
+from . import unit_model
 from ... import db
 from ... import idol
 from ... import idoltype
@@ -16,93 +15,7 @@ from ...const import ADD_TYPE
 from ...db import main
 from ...db import unit
 
-from typing import Any, Literal, TypeVar, overload, override
-
-
-class UnitInfoBaseData(pydantic.BaseModel):
-    unit_id: int
-    is_support_member: bool = False
-
-
-class UnitInfoCommonData(UnitInfoBaseData):
-    unit_owning_user_id: int
-    exp: int
-    next_exp: int
-    level: int
-    level_limit_id: int
-    max_level: int
-    rank: int
-    max_rank: int
-    love: int
-    max_love: int
-    unit_skill_level: int
-    skill_level: int
-    max_hp: int
-    favorite_flag: bool
-    display_rank: int
-    unit_skill_exp: int
-    unit_removable_skill_capacity: int
-    is_love_max: bool
-    is_level_max: bool
-    is_rank_max: bool
-    is_signed: bool
-    is_skill_level_max: bool
-
-
-class UnitBaseItem(item.Item, UnitInfoBaseData):
-    add_type: int = ADD_TYPE.UNIT
-    new_unit_flag: bool = False
-
-    @override
-    def dump_extra_data(self) -> dict[str, Any]:
-        return dict((k, getattr(self, k)) for k in UnitInfoBaseData.model_fields.keys())
-
-
-class UnitSupportItemWithReward(UnitBaseItem, item.Reward):
-    pass
-
-
-class UnitItem(UnitBaseItem, UnitInfoCommonData):
-    removable_skill_ids: list[int]
-
-    @override
-    def dump_extra_data(self) -> dict[str, Any]:
-        return dict((k, getattr(self, k)) for k in UnitItem.model_fields.keys()) | {
-            "removable_skill_ids": self.removable_skill_ids
-        }
-
-
-class UnitItemWithReward(UnitItem, item.Reward):
-    pass
-
-
-class UnitInfoData(UnitInfoCommonData):
-    is_removable_skill_capacity_max: bool
-    insert_date: str
-
-
-class OwningRemovableSkillInfo(pydantic.BaseModel):
-    unit_removable_skill_id: int
-    total_amount: int
-    equipped_amount: int
-    insert_date: str
-
-
-class EquipRemovableSkillInfoDetail(pydantic.BaseModel):
-    unit_removable_skill_id: int
-
-
-class EquipRemovableSkillInfo(pydantic.BaseModel):
-    unit_owning_user_id: int
-    detail: list[EquipRemovableSkillInfoDetail]
-
-
-class RemovableSkillOwningInfo(pydantic.BaseModel):
-    owning_info: list[OwningRemovableSkillInfo]
-
-
-class RemovableSkillInfoResponse(RemovableSkillOwningInfo):
-    equipment_info: dict[str, EquipRemovableSkillInfo]
+from typing import Literal, TypeVar, overload
 
 
 async def count_units(context: idol.BasicSchoolIdolContext, user: main.User, active: bool):
@@ -592,7 +505,7 @@ async def get_unit_stats_from_unit_data(
     return stats
 
 
-_T = TypeVar("_T", bound=UnitBaseItem, contravariant=True)
+_T = TypeVar("_T", bound=unit_model.UnitSupportItem, contravariant=True)
 
 
 async def get_unit_data_full_info(context: idol.BasicSchoolIdolContext, unit_data: main.Unit):
@@ -621,7 +534,7 @@ async def get_unit_data_full_info(context: idol.BasicSchoolIdolContext, unit_dat
     removable_skill_max = unit_data.unit_removable_skill_capacity == unit_info.max_removable_skill_capacity
 
     return (
-        UnitInfoData(
+        unit_model.UnitInfoData(
             unit_owning_user_id=unit_data.id or 0,
             unit_id=unit_data.unit_id,
             exp=unit_data.exp,
@@ -776,9 +689,9 @@ async def get_removable_skill_info_request(context: idol.BasicSchoolIdolContext,
         for sis in unit_sis:
             used_sis[sis] = used_sis.setdefault(sis, 0) + 1
 
-    return RemovableSkillInfoResponse(
+    return unit_model.RemovableSkillInfoResponse(
         owning_info=[
-            OwningRemovableSkillInfo(
+            unit_model.OwningRemovableSkillInfo(
                 unit_removable_skill_id=i.unit_removable_skill_id,
                 total_amount=i.amount,
                 equipped_amount=used_sis.get(i.unit_removable_skill_id, 0),
@@ -789,9 +702,9 @@ async def get_removable_skill_info_request(context: idol.BasicSchoolIdolContext,
         equipment_info=dict(
             (
                 str(i),
-                EquipRemovableSkillInfo(
+                unit_model.EquipRemovableSkillInfo(
                     unit_owning_user_id=i,
-                    detail=[EquipRemovableSkillInfoDetail(unit_removable_skill_id=sis) for sis in v],
+                    detail=[unit_model.EquipRemovableSkillInfoDetail(unit_removable_skill_id=sis) for sis in v],
                 ),
             )
             for i, v in sis_info.items()
@@ -799,7 +712,9 @@ async def get_removable_skill_info_request(context: idol.BasicSchoolIdolContext,
     )
 
 
-async def unit_to_item(context: idol.BasicSchoolIdolContext, unit_data: main.Unit, *, cls: type[_T] = UnitItem):
+async def unit_to_item(
+    context: idol.BasicSchoolIdolContext, unit_data: main.Unit, *, cls: type[_T] = unit_model.UnitItem
+):
     unit_info_data = await get_unit_data_full_info(context, unit_data)
     return cls.model_validate(
         unit_info_data[0].model_dump() | {"add_type": ADD_TYPE.UNIT, "item_id": unit_data.unit_id, "amount": 1}
@@ -816,16 +731,16 @@ async def is_support_member(context: idol.BasicSchoolIdolContext, unit_id: int):
 @dataclasses.dataclass
 class QuickAddResult:
     unit_id: int
-    as_item_reward: UnitSupportItemWithReward | UnitItemWithReward
+    as_item_reward: unit_model.UnitSupportItem | unit_model.UnitItem
     unit_data: main.Unit | None = None
-    full_info: UnitInfoData | None = None
+    full_info: unit_model.UnitInfoData | None = None
     stats: UnitStatsResult | None = None
 
     def update_unit_owning_user_id(self):
         if self.unit_data is not None:
             if self.full_info is not None:
                 self.full_info.unit_owning_user_id = self.unit_data.id
-            if isinstance(self.as_item_reward, UnitItemWithReward):
+            if isinstance(self.as_item_reward, unit_model.UnitItem):
                 self.as_item_reward.unit_owning_user_id = self.unit_data.id
 
 
@@ -836,7 +751,7 @@ async def quick_create_by_unit_add(
     if await is_support_member(context, unit_id):
         return QuickAddResult(
             unit_id,
-            UnitSupportItemWithReward(
+            unit_model.UnitSupportItem(
                 item_id=unit_id, unit_id=unit_id, is_support_member=True, new_unit_flag=new_unit_flag
             ),
         )
@@ -846,9 +761,8 @@ async def quick_create_by_unit_add(
         unit_full_info = await get_unit_data_full_info(context, unit_data)
         return QuickAddResult(
             unit_id=unit_id,
-            as_item_reward=UnitItemWithReward.model_validate(
-                unit_full_info[0].model_dump()
-                | {"item_id": unit_id, "removable_skill_ids": [], "new_unit_flag": new_unit_flag}
+            as_item_reward=unit_model.UnitItem(
+                item_id=unit_id, new_unit_flag=new_unit_flag, **util.shallow_dump(unit_full_info[0])
             ),
             unit_data=unit_data,
             full_info=unit_full_info[0],
