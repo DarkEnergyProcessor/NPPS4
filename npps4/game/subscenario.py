@@ -91,7 +91,7 @@ async def subscenario_reward(
     # Add G and loveca
     current_user.free_sns_coin = current_user.free_sns_coin + const.SUBSCENARIO_LOVECA_REWARD_AMOUNT
     current_user.game_coin = current_user.game_coin + const.SUBSCENARIO_GAME_COIN_REWARD_AMOUNT
-    loveca_reward = item.add_loveca(const.SUBSCENARIO_LOVECA_REWARD_AMOUNT)
+    loveca_reward = item.loveca(const.SUBSCENARIO_LOVECA_REWARD_AMOUNT)
     loveca_reward.comment = (
         const.SUBSCENARIO_REWARD_COMMENT_JP if context.is_lang_jp() else const.SUBSCENARIO_REWARD_COMMENT_EN
     )

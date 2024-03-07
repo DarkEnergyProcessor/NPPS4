@@ -3,6 +3,7 @@ import dataclasses
 import datetime as datetimelib
 import hashlib
 import hmac
+import itertools
 import logging
 import pickle
 import random
@@ -178,4 +179,5 @@ def measure(name: str = "", severity: int = logging.DEBUG):
 
 
 def shallow_dump(model: pydantic.BaseModel, /):
-    return dict((k, getattr(model, k)) for k in model.__class__.model_fields.keys())
+    keys = itertools.chain(model.__class__.model_fields.keys(), model.model_computed_fields.keys())
+    return {k: getattr(model, k) for k in keys}
