@@ -65,8 +65,15 @@ async def subscenario_status(context: idol.SchoolIdolUserParams) -> SubScenarioS
 async def subscenario_startup(
     context: idol.SchoolIdolUserParams, request: SubScenarioStartupRequest
 ) -> SubScenarioStartupResponse:
-    # TODO
-    util.stub("subscenario", "startup", request)
+    # Sanity check
+    if not await subscenario.valid(context, request.subscenario_id):
+        raise idol.error.by_code(idol.error.ERROR_CODE_SUBSCENARIO_NOT_FOUND)
+
+    # Sanity check #2
+    current_user = await user.get_current(context)
+    if not await subscenario.is_unlocked(context, current_user, request.subscenario_id):
+        raise idol.error.by_code(idol.error.ERROR_CODE_SUBSCENARIO_NOT_AVAILABLE)
+
     return SubScenarioStartupResponse(subscenario_id=request.subscenario_id)
 
 
