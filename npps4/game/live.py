@@ -218,26 +218,18 @@ class LiveRewardRequest(pydantic.BaseModel):
     event_id: int | None
 
 
-class LiveRewardBaseInfo(pydantic.BaseModel):
+class LiveRewardBaseInfo(common.BaseRewardInfo):
     player_exp: int
     player_exp_unit_max: common.BeforeAfter[int]
     player_exp_friend_max: common.BeforeAfter[int]
     player_exp_lp_max: common.BeforeAfter[int]
-    game_coin: int
-    game_coin_reward_box_flag: bool
     social_point: int
 
 
 class LiveRewardUnitList(pydantic.BaseModel):
-    live_clear: list[item.Reward | unit.UnitSupportItemWithReward | unit.UnitItemWithReward] = pydantic.Field(
-        default_factory=list
-    )
-    live_rank: list[item.Reward | unit.UnitSupportItemWithReward | unit.UnitItemWithReward] = pydantic.Field(
-        default_factory=list
-    )
-    live_combo: list[item.Reward | unit.UnitSupportItemWithReward | unit.UnitItemWithReward] = pydantic.Field(
-        default_factory=list
-    )
+    live_clear: list[advanced.AnyItemWithReward] = pydantic.Field(default_factory=list)
+    live_rank: list[advanced.AnyItemWithReward] = pydantic.Field(default_factory=list)
+    live_combo: list[advanced.AnyItemWithReward] = pydantic.Field(default_factory=list)
 
 
 class LiveRewardResponseUnitList(pydantic.BaseModel):
@@ -281,7 +273,7 @@ class LiveRewardGoalAccomplishedInfo(pydantic.BaseModel):
     rewards: list[item.RewardWithCategory]
 
 
-class LiveRewardResponse(pydantic.BaseModel):
+class LiveRewardResponse(advanced.AchievementMixin):
     live_info: list[live.LiveInfo]
     rank: int
     combo_rank: int
@@ -308,10 +300,6 @@ class LiveRewardResponse(pydantic.BaseModel):
     class_system: class_system_module.ClassSystemData = pydantic.Field(
         default_factory=class_system_module.ClassSystemData
     )  # TODO
-    accomplished_achievement_list: list[achievement.AchievementData]
-    unaccomplished_achievement_cnt: int
-    added_achievement_list: list[achievement.AchievementData]
-    new_achievement_cnt: int
     museum_info: museum.MuseumInfoData
     server_timestamp: int = pydantic.Field(default_factory=util.time)
     present_cnt: int

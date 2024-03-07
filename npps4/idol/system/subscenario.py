@@ -31,6 +31,11 @@ async def get_all(context: idol.BasicSchoolIdolContext, user: main.User):
     return list(result.scalars())
 
 
+async def valid(context: idol.BasicSchoolIdolContext, subscenario_id: int):
+    subscenario_data = await context.db.subscenario.get(subscenario.SubScenario, subscenario_id)
+    return subscenario_data is not None
+
+
 async def is_unlocked(context: idol.BasicSchoolIdolContext, user: main.User, subscenario_id: int):
     sc = await get(context, user, subscenario_id)
     return sc is not None

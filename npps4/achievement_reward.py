@@ -1,4 +1,5 @@
 from .const import ADD_TYPE
+from .idol.system import advanced
 from .idol.system import item
 
 _reward_def = item.add_loveca(1)
@@ -7,7 +8,7 @@ ACHIEVEMENT_REWARD_DEFAULT = item.Reward(
 )
 
 # TODO: Get achievement present?
-ACHIEVEMENT_REWARDS: dict[int, list[item.Reward]] = {
+ACHIEVEMENT_REWARDS: dict[int, list[advanced.AnyItemWithReward]] = {
     49: [item.Reward(add_type=ADD_TYPE.LOVECA, item_id=4)],
     62: [item.Reward(add_type=ADD_TYPE.ITEM, item_id=5)],
     103: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id=4)],  # Reward: 1 - We are μ's (1st Years) - Story 1

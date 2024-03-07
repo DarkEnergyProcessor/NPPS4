@@ -25,6 +25,7 @@ class ItemWithCategory(Item):
 
 class RewardFlag(pydantic.BaseModel):
     reward_box_flag: bool = False
+    comment: str = ""
 
 
 class Reward(Item, RewardFlag):
@@ -35,15 +36,15 @@ class RewardWithCategory(ItemWithCategory, RewardFlag):
     pass
 
 
-def add_loveca(amount: int):
-    return Item(add_type=ADD_TYPE.LOVECA, item_id=4, amount=amount)
-
-
-def add_g(amount: int):
-    return Item(add_type=ADD_TYPE.GAME_COIN, item_id=3, amount=amount)
-
-
 _T = TypeVar("_T", bound=Item)
+
+
+def add_loveca(amount: int, *, cls: type[_T] = Item) -> _T:
+    return cls(add_type=ADD_TYPE.LOVECA, item_id=4, amount=amount)
+
+
+def add_g(amount: int, *, cls: type[_T] = Item) -> _T:
+    return cls(add_type=ADD_TYPE.GAME_COIN, item_id=3, amount=amount)
 
 
 async def get_item_category_by_id(context: idol.BasicSchoolIdolContext, item_id: int):

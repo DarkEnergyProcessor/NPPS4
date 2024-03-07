@@ -34,7 +34,7 @@ class LoginBonusTotalLogin(pydantic.BaseModel):
     reward: list[item.Reward] | None = None
 
 
-class LoginBonusResponse(pydantic.BaseModel):
+class LoginBonusResponse(advanced.AchievementMixin):
     sheets: list = pydantic.Field(default_factory=list)
     calendar_info: LoginBonusCalendarInfo
     ad_info: ad.AdInfo
@@ -46,11 +46,7 @@ class LoginBonusResponse(pydantic.BaseModel):
     start_dash_sheets: list  # TODO
     effort_point: list[effort.EffortPointInfo]
     limited_effort_box: list  # TODO
-    accomplished_achievement_list: list[achievement.AchievementData]
-    unaccomplished_achievement_cnt: int
     after_user_info: user.UserInfoData
-    added_achievement_list: list[achievement.AchievementData]
-    new_achievement_cnt: int
     museum_info: museum.MuseumInfoData
     server_timestamp: int
     present_cnt: int

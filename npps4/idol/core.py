@@ -141,6 +141,9 @@ class BasicSchoolIdolContext:
             await self.db.rollback()
         await self.db.cleanup()
 
+    def is_lang_jp(self):
+        return self.lang == idoltype.Language.jp
+
 
 class SchoolIdolParams(BasicSchoolIdolContext):
     """Context object used for unauthenticated request."""
