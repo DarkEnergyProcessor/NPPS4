@@ -6,6 +6,7 @@ httpx
 itsdangerous
 jinja2
 pycryptodomex
+pydantic
 python-multipart
 sqlalchemy[asyncio]
 tomli; python_version<"3.11"
