@@ -161,6 +161,18 @@ async def get_unclaimed_achievements_by_filter_id(
     return list(result.scalars())
 
 
+async def get_accomplished_achievements_by_filter_id(
+    context: idol.BasicSchoolIdolContext, user: main.User, achievement_filter_category_id: int
+):
+    q = sqlalchemy.select(main.Achievement).where(
+        main.Achievement.user_id == user.id,
+        main.Achievement.achievement_filter_category_id == achievement_filter_category_id,
+        main.Achievement.is_accomplished == True,
+    )
+    result = await context.db.main.execute(q)
+    return list(result.scalars())
+
+
 async def mark_achievement_reward_claimed(context: idol.BasicSchoolIdolContext, ach: main.Achievement):
     ach.is_reward_claimed = True
 

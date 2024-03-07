@@ -34,3 +34,21 @@ async def achievement_unaccomplishlist(context: idol.SchoolIdolUserParams) -> Ac
         )
 
     return AchievementUnaccomplishedResponse.model_validate(result)
+
+
+@idol.register("achievement", "initialAccomplishedList")
+async def achievement_initialaccomplishlist(context: idol.SchoolIdolUserParams) -> AchievementUnaccomplishedResponse:
+    current_user = await user.get_current(context)
+    filter_ids = await achievement.get_achievement_filter_ids(context)
+
+    result: list[AchievementUnaccomplishedFilter] = []
+    for fcat in filter_ids:
+        accomplished = await achievement.get_accomplished_achievements_by_filter_id(context, current_user, fcat)
+        accomplished_rewards = [await achievement.get_achievement_rewards(context, ach) for ach in accomplished]
+        await advanced.fixup_achievement_reward(context, current_user, accomplished_rewards)
+        ach_list = await achievement.to_game_representation(context, accomplished, accomplished_rewards)
+        result.append(
+            AchievementUnaccomplishedFilter(filter_category_id=fcat, achievement_list=ach_list, count=len(ach_list))
+        )
+
+    return AchievementUnaccomplishedResponse.model_validate(result)
