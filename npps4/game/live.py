@@ -634,9 +634,9 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
     ]
     await advanced.fixup_achievement_reward(context, current_user, accomplished_achievement_rewards)
     await advanced.fixup_achievement_reward(context, current_user, new_achievement_rewards)
-    for ach, reward_data in zip(accomplished_achievement.accomplished, accomplished_achievement_rewards):
-        ach_info = await achievement.get_achievement_info(context, ach.achievement_id)
-        await advanced.give_achievement_reward(context, current_user, ach_info, reward_data)
+    await advanced.process_achievement_reward(
+        context, current_user, accomplished_achievement.accomplished, accomplished_achievement_rewards
+    )
 
     # Clean live in progress
     context.db.main.expunge(live_in_progress)
