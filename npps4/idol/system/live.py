@@ -302,8 +302,14 @@ async def clean_live_in_progress(context: idol.BasicSchoolIdolContext, user: mai
 async def register_live_in_progress(
     context: idol.BasicSchoolIdolContext, user: main.User, party_user: main.User, lp_factor: int, unit_deck_id: int
 ):
-    wip = main.LiveInProgress(
-        user_id=user.id, party_user_id=party_user.id, lp_factor=lp_factor, unit_deck_id=unit_deck_id
-    )
-    context.db.main.add(wip)
+    live_in_progress = await get_live_in_progress(context, user)
+    if live_in_progress is None:
+        wip = main.LiveInProgress(
+            user_id=user.id, party_user_id=party_user.id, lp_factor=lp_factor, unit_deck_id=unit_deck_id
+        )
+        context.db.main.add(wip)
+    else:
+        live_in_progress.party_user_id = party_user.id
+        live_in_progress.lp_factor = lp_factor
+        live_in_progress.unit_deck_id = unit_deck_id
     await context.db.main.flush()

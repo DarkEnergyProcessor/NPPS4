@@ -9,6 +9,7 @@ if not config.is_script_mode():
     from . import background
     from . import banner
     from . import challenge
+    from . import common
     from . import costume
     from . import download
     from . import event

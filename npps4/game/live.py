@@ -116,7 +116,7 @@ class LivePlayResponse(pydantic.BaseModel):
     rank_info: list[LivePlayRankInfo]
     energy_full_time: str
     over_max_energy: int
-    available_live_resume: bool = False
+    available_live_resume: bool = True
     live_list: list[LivePlayList]
     is_marathon_event: bool = False
     marathon_event_id: int | None = None
@@ -328,7 +328,7 @@ async def live_livestatus(context: idol.SchoolIdolUserParams) -> LiveStatusRespo
         training_live_status_list=[],
         marathon_live_status_list=[],
         free_live_status_list=[],
-        can_resume_live=False,
+        can_resume_live=True,
     )
 
 
@@ -405,9 +405,6 @@ async def live_precisescore(context: idol.SchoolIdolUserParams) -> LivePreciseSc
 @idol.register("live", "play", xmc_verify=idol.XMCVerifyMode.CROSS)
 async def live_play(context: idol.SchoolIdolUserParams, request: LivePlayRequest) -> LivePlayResponse:
     current_user = await user.get_current(context)
-    live_in_progress = await live.get_live_in_progress(context, current_user)
-    if live_in_progress is not None:
-        raise idol.error.IdolError(detail="Attempt to start live show twice")
 
     live_setting = await live.get_live_setting_from_difficulty_id(context, request.live_difficulty_id)
     if live_setting is None:
