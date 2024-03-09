@@ -17,7 +17,7 @@ import npps4.db.main
 import npps4.db.item
 import npps4.scriptutils.user
 
-from urllib.parse import parse_qs
+import urllib.parse
 
 async def get_backgrounds(uid: str, to_unlock: list[str]) -> tuple[list[Background],list[Background]]:
     async with npps4.idol.BasicSchoolIdolContext(lang=npps4.idol.Language.en) as context:
