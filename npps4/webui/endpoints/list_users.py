@@ -19,7 +19,12 @@ async def run_script(args: list[str]):
     return users
 
 @webui.app.get("/list_users.html")
-def list_users(request: fastapi.Request):
-    users = asyncio.run(run_script([]))
+async def list_users(request: fastapi.Request):
+    async with idol.BasicSchoolIdolContext(lang=idol.Language.en):
+        q = sqlalchemy.select(main.User)
+        result = await context.db.main.execute(q)
+        users = [ {'name':user.name, 'id':user.id} for user in result.scalars()]
+
+    return template.template.TemplateResponse("list_users.html", {"request": request, "users": users})
 
     return template.template.TemplateResponse("list_users.html", {"request": request, "users": users})
