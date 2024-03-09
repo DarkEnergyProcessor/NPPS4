@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+</head>
+
+<body>
+	<main>
+		<h1>Unlocked backgrounds</h1>
+		<table border="1">
+			  {% for bg in unlocked_backgrounds %}
+			  <tr><td><pre>{{ bg.description_en.replace('\\n','\n') }}</pre></td></tr>
+			  {% endfor %}
+		</table>
+
+		<h1>Locked backgrounds</h1>
+		<form action="unlock_backgrounds.html">
+			<input type="hidden" name="uid" value="{{ uid }}"/>
+			<input type="submit" value="Unlock"/>
+			<table border="1">
+			  {% for bg in locked_backgrounds %}
+			  <tr>
+				  <td><input type="checkbox" name="bg_id" value="{{ bg.background_id }}"/></td>
+				  <td><pre>{{ bg.description_en.replace('\\n','\n') }}</pre></td>
+			  </tr>
+			  {% endfor %}
+		</table>
+		</form>
+
+
+
+	</main>
+	<footer><i>Copyright (c) 2024 Dark Energy Processor. NPPS4 is licensed under zlib/libpng license.</i></footer>
+</body>
+
+</html>

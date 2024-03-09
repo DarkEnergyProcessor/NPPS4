@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+</head>
+
+<body>
+	<main>
+		<h1>Users</h1>
+		<ul>
+			  {% for user in users %}
+			  <li>{{ user.name }} : <a href="unlock_backgrounds.html?uid={{ user.id }}"}>Unlock backgrounds</a></li>
+			  {% endfor %}
+		</ul>
+	</main>
+	<footer><i>Copyright (c) 2024 Dark Energy Processor. NPPS4 is licensed under zlib/libpng license.</i></footer>
+</body>
+
+</html>
