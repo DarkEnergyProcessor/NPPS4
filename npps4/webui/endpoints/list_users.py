@@ -6,8 +6,8 @@ from ...app import webui
 
 import sqlalchemy
 
-import npps4.db.main
-import npps4.idol
+from ... import idol
+from ...db import main
 
 async def run_script(args: list[str]):
     context = npps4.idol.BasicSchoolIdolContext(lang=npps4.idol.Language.en)
