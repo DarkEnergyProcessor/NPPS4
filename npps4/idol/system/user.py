@@ -87,7 +87,7 @@ async def get_user_info(context: idol.BasicSchoolIdolContext, user: main.User):
         training_energy=user.training_energy,
         training_energy_max=user.training_energy_max,
         friend_max=user.friend_max,
-        invite_code=user.friend_id,
+        invite_code=user.invite_code,
         insert_date=util.timestamp_to_datetime(user.insert_date),
         update_date=util.timestamp_to_datetime(user.update_date),
         tutorial_state=user.tutorial_state,
@@ -99,7 +99,7 @@ async def create(context: idol.SchoolIdolParams, key: str, passwd: str):
     user.set_passwd(passwd)
     context.db.main.add(user)
     await context.db.main.flush()
-    user.invite_code = core.get_invite_code(user.id)
+    user.invite_code = f"{core.get_invite_code(user.id):09d}"
     await achievement.init(context, user)
     await background.init(context, user)
     await award.init(context, user)

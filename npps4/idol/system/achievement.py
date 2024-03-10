@@ -98,7 +98,7 @@ async def add_achievement(
         count=0,
         is_accomplished=False,
         insert_date=time,
-        end_date=None if ach.end_date is None else util.datetime_to_timestamp(ach.end_date),
+        end_date=0 if ach.end_date is None else util.datetime_to_timestamp(ach.end_date),
         is_new=True,
     )
     context.db.main.add(user_ach)

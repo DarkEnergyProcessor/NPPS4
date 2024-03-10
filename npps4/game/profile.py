@@ -107,7 +107,7 @@ async def profile_profileinfo(context: idol.SchoolIdolUserParams, request: Profi
             energy_max=target_user.energy_max,
             friend_max=target_user.friend_max,
             unit_cnt=unit_count,
-            invite_code=target_user.friend_id,
+            invite_code=target_user.invite_code,
             introduction=target_user.bio,
         ),
         center_unit_info=await profile.to_profile_unit_info(context, center_unit, museum_data.parameter),

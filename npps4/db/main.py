@@ -1,28 +1,24 @@
 import base64
 import hashlib
 import hmac
-import json
 
 import sqlalchemy
 import sqlalchemy.ext.asyncio
 import sqlalchemy.orm
 
 from . import common
-from .. import const
 from .. import idoltype
 from .. import util
 from ..config import config
 from ..idol.system import core
 
-from typing import overload
-
 SALT_SIZE = 16
 
 
-class User(common.Base):
-    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
-    key: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(index=True)
-    passwd: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
+class User(common.Base, kw_only=True):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
+    key: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(default=None, index=True)
+    passwd: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(default=None)
 
     name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(default="Kemp")
     bio: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(default="Hello!")
@@ -37,21 +33,31 @@ class User(common.Base):
     unit_max: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=320)
     waiting_unit_max: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=1000)
     energy_max: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=25)
-    energy_full_time: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=util.time)
+    energy_full_time: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, default_factory=util.time
+    )
     license_live_energy_recoverly_time: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=60)
     energy_full_need_time: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
     over_max_energy: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
     training_energy: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=3)
     training_energy_max: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=3)
     friend_max: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=10)
-    invite_code: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0, index=True)
-    insert_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=util.time)
-    update_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=util.time)
+    invite_code: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(
+        default="", index=True
+    )  # Note: We can't mark this field as unique as their computation depends on `id`.
+    insert_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default_factory=util.time)
+    update_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, default_factory=util.time, onupdate=util.time
+    )
     tutorial_state: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
     active_deck_index: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=1)
     active_background: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=1)
     active_award: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=1)
     center_unit_owning_user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
+    live_effort_point_box_spec_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=1)
+    limited_effort_event_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
+    current_live_effort_point: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
+    current_limited_effort_point: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
 
     def set_passwd(self, passwd: str):
         salt = util.randbytes(SALT_SIZE)
@@ -67,37 +73,36 @@ class User(common.Base):
         hmac_hash = hmac.new(salt, passwd.encode("UTF-8"), digestmod=hashlib.sha512).digest()
         return result[SALT_SIZE:] == hmac_hash[SALT_SIZE:]
 
-    @property
-    def friend_id(self):
-        return "%09d" % self.invite_code
 
-
-class Background(common.Base):
-    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+class Background(common.Base, kw_only=True):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
         common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
     )
     background_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
-    insert_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=util.time)
+    insert_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default_factory=util.time)
 
 
-class Award(common.Base):
-    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+class Award(common.Base, kw_only=True):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
         common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
     )
     award_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
-    insert_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=util.time)
+    insert_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default_factory=util.time)
 
 
-class TOSAgree(common.Base):
+class TOSAgree(common.Base, kw_only=True):
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
         common.IDInteger, sqlalchemy.ForeignKey(User.id), primary_key=True
     )
+    tos_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+
+    __table_args__ = (sqlalchemy.UniqueConstraint(user_id, tos_id),)
 
 
-class Unit(common.Base):
-    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+class Unit(common.Base, kw_only=True):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
         common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
     )
@@ -105,7 +110,7 @@ class Unit(common.Base):
     active: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(index=True)
     favorite_flag: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False)
     is_signed: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False)
-    insert_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=util.time)
+    insert_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default_factory=util.time)
 
     exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
     skill_exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
@@ -117,32 +122,28 @@ class Unit(common.Base):
     unit_removable_skill_capacity: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
-class UnitDeck(common.Base):
-    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+class UnitDeck(common.Base, kw_only=True):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
         common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
     )
     deck_number: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
     name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    unit_owning_user_id_1: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
+    unit_owning_user_id_2: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
+    unit_owning_user_id_3: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
+    unit_owning_user_id_4: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
+    unit_owning_user_id_5: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
+    unit_owning_user_id_6: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
+    unit_owning_user_id_7: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
+    unit_owning_user_id_8: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
+    unit_owning_user_id_9: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
 
     __table_args__ = (sqlalchemy.UniqueConstraint(user_id, deck_number),)
 
 
-class UnitDeckPosition(common.Base):
-    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
-    deck_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
-        common.IDInteger, sqlalchemy.ForeignKey(UnitDeck.id), index=True
-    )
-    position: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
-    unit_owning_user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
-        common.IDInteger, sqlalchemy.ForeignKey(Unit.id), index=True
-    )
-
-    __table_args__ = (sqlalchemy.UniqueConstraint(deck_id, unit_owning_user_id),)
-
-
-class UnitSupporter(common.Base):
-    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+class UnitSupporter(common.Base, kw_only=True):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
         common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
     )
@@ -152,8 +153,8 @@ class UnitSupporter(common.Base):
     __table_args__ = (sqlalchemy.UniqueConstraint(user_id, unit_id),)
 
 
-class Album(common.Base):
-    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+class Album(common.Base, kw_only=True):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
         common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
     )
@@ -166,8 +167,8 @@ class Album(common.Base):
     sign_flag: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False)
 
 
-class Achievement(common.Base):
-    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+class Achievement(common.Base, kw_only=True):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
     achievement_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, index=True)
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
         common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
@@ -180,7 +181,10 @@ class Achievement(common.Base):
     is_accomplished: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False, index=True)
     is_reward_claimed: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False)
     insert_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
-        common.IDInteger, default=util.time, index=True
+        common.IDInteger, default_factory=util.time, index=True
+    )
+    update_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, default_factory=util.time, onupdate=util.time, index=True
     )
     end_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0, index=True)
     is_new: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=True, index=True)
@@ -188,16 +192,8 @@ class Achievement(common.Base):
     __table_args__ = (sqlalchemy.UniqueConstraint(achievement_id, user_id),)
 
 
-class LiveEffort(common.Base):
-    user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
-        common.IDInteger, sqlalchemy.ForeignKey(User.id), primary_key=True
-    )
-    live_effort_point_box_spec_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=1)
-    current_point: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
-
-
-class LoginBonus(common.Base):
-    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+class LoginBonus(common.Base, kw_only=True):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
         common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
     )
@@ -208,89 +204,59 @@ class LoginBonus(common.Base):
     __table_args__ = (sqlalchemy.UniqueConstraint(user_id, year, month, day),)
 
 
-class Incentive(common.Base):
-    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+class Incentive(common.Base, kw_only=True):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
         common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
     )
     add_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
     item_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
     amount: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=1)
-    message: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()  # JSON-data
+    message_jp: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(default="")
+    message_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(default=None)
     insert_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
-        common.IDInteger, default=util.time, index=True
+        common.IDInteger, default_factory=util.time, index=True
     )
     expire_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0, index=True)
+    extra_data: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(default=None)  # JSON-data
     claimed: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False)
 
-    @overload
-    def set_message(self, message_jp: str, message_en: str | None = None, /):
-        ...
-
-    @overload
-    def set_message(self, message: tuple[str, str | None], /):
-        ...
-
-    def set_message(self, message_jp: str | tuple[str, str | None], message_en: str | None = None, /):
-        if isinstance(message_jp, tuple):
-            message_jp, message_en = message_jp
-
-        result = {const.INCENTIVE_MESSAGE_NAME: message_jp}
-        if message_en is not None:
-            result[const.INCENTIVE_MESSAGE_NAME_EN] = message_en
-
-        self.message = json.dumps(result, separators=(",", ":"))
-
-    def get_message(self, language: idoltype.Language):
-        message: dict[str, str] = json.loads(self.message)
-
-        if language == idoltype.Language.en:
-            return message.get(const.INCENTIVE_MESSAGE_NAME_EN, message[const.INCENTIVE_MESSAGE_NAME])
+    def get_message(self, language: idoltype.Language = idoltype.Language.en):
+        if language == idoltype.Language.jp:
+            return self.message_jp
         else:
-            return message[const.INCENTIVE_MESSAGE_NAME]
+            return self.message_en or self.message_jp
 
 
-class IncentiveUnitOption(common.Base):
-    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
-        common.IDInteger, sqlalchemy.ForeignKey(Incentive.id), primary_key=True
-    )
-    unit_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
-
-    is_signed: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False)
-    exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
-    skill_exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
-    max_level: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
-    love: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)  # Bond
-    rank: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()  # Non-idolized = 1, idolized = 2
-    display_rank: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()  # Same as rank
-    level_limit_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
-    unit_removable_skill_capacity: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
-
-
-class Scenario(common.Base):
-    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+class Scenario(common.Base, kw_only=True):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
         common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
     )
     scenario_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, index=True)
     completed: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False, index=True)
 
+    __table_args__ = (sqlalchemy.UniqueConstraint(user_id, scenario_id),)
 
-class SubScenario(common.Base):
-    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+
+class SubScenario(common.Base, kw_only=True):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
         common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
     )
     subscenario_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, index=True)
     completed: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False, index=True)
 
+    __table_args__ = (sqlalchemy.UniqueConstraint(user_id, subscenario_id),)
 
-class LiveClear(common.Base):
-    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+
+class LiveClear(common.Base, kw_only=True):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
         common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
     )
     live_difficulty_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, index=True)
+    difficulty: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)  # for fast lookup
     hi_score: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
     hi_combo_cnt: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
     clear_cnt: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
@@ -298,8 +264,8 @@ class LiveClear(common.Base):
     __table_args__ = (sqlalchemy.UniqueConstraint(user_id, live_difficulty_id),)
 
 
-class MuseumUnlock(common.Base):
-    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+class MuseumUnlock(common.Base, kw_only=True):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
         common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
     )
@@ -308,8 +274,8 @@ class MuseumUnlock(common.Base):
     __table_args__ = (sqlalchemy.UniqueConstraint(user_id, museum_contents_id),)
 
 
-class RemovableSkillInfo(common.Base):
-    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+class RemovableSkillInfo(common.Base, kw_only=True):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
         common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
     )
@@ -320,8 +286,8 @@ class RemovableSkillInfo(common.Base):
     __table_args__ = (sqlalchemy.UniqueConstraint(user_id, unit_removable_skill_id),)
 
 
-class UnitRemovableSkill(common.Base):
-    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+class UnitRemovableSkill(common.Base, kw_only=True):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
     unit_owning_user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
         common.IDInteger, sqlalchemy.ForeignKey(Unit.id), index=True
     )
@@ -333,18 +299,16 @@ class UnitRemovableSkill(common.Base):
     __table_args__ = (sqlalchemy.UniqueConstraint(unit_owning_user_id, unit_removable_skill_id),)
 
 
-class LiveInProgress(common.Base):
-    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, primary_key=True)
+class LiveInProgress(common.Base, kw_only=True):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
-        common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
+        common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True, unique=True
     )
     party_user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
         common.IDInteger, sqlalchemy.ForeignKey(User.id)
     )
     lp_factor: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     unit_deck_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
-
-    __table_args__ = (sqlalchemy.UniqueConstraint(user_id),)
 
 
 engine = sqlalchemy.ext.asyncio.create_async_engine(config.get_database_url())

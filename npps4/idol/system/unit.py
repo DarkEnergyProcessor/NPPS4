@@ -109,6 +109,7 @@ async def add_unit(
     if unit_data is None:
         raise ValueError("cannot add support unit")
     await add_unit_by_object(context, user, unit_data)
+    return unit_data
 
 
 async def get_unit(context: idol.BasicSchoolIdolContext, unit_owning_user_id: int):
@@ -229,16 +230,40 @@ async def get_unit_skill_level_up_pattern(context: idol.BasicSchoolIdolContext, 
     return list(result.scalars())
 
 
-async def remove_unit(context: idol.SchoolIdolParams, user: main.User, user_unit: main.Unit):
-    if user_unit.user_id != user.id:
-        raise ValueError("invalid unit_id")
+async def remove_unit(context: idol.SchoolIdolParams, user: main.User, unit_data: main.Unit):
+    validate_unit(user, unit_data)
 
     # Remove from deck first
-    q = sqlalchemy.delete(main.UnitDeckPosition).where(main.UnitDeckPosition.unit_owning_user_id == user_unit.id)
-    await context.db.main.execute(q)
+    q = sqlalchemy.select(main.UnitDeck).where(main.UnitDeck.user_id == user.id)
+    result = await context.db.main.execute(q)
+
+    for deck in result.scalars():
+        if deck.unit_owning_user_id_1 == unit_data.id:
+            deck.unit_owning_user_id_1 = 0
+        elif deck.unit_owning_user_id_2 == unit_data.id:
+            deck.unit_owning_user_id_2 = 0
+        elif deck.unit_owning_user_id_3 == unit_data.id:
+            deck.unit_owning_user_id_3 = 0
+        elif deck.unit_owning_user_id_4 == unit_data.id:
+            deck.unit_owning_user_id_4 = 0
+        elif deck.unit_owning_user_id_5 == unit_data.id:
+            deck.unit_owning_user_id_5 = 0
+        elif deck.unit_owning_user_id_6 == unit_data.id:
+            deck.unit_owning_user_id_6 = 0
+        elif deck.unit_owning_user_id_7 == unit_data.id:
+            deck.unit_owning_user_id_7 = 0
+        elif deck.unit_owning_user_id_8 == unit_data.id:
+            deck.unit_owning_user_id_8 = 0
+        elif deck.unit_owning_user_id_9 == unit_data.id:
+            deck.unit_owning_user_id_9 = 0
+        else:
+            continue
+
+        if user.active_deck_index == deck.deck_number:
+            raise idol.error.by_code(idol.error.ERROR_CODE_IGNORE_MAIN_DECK_UNIT)
 
     # Remove from unit
-    await context.db.main.delete(user_unit)
+    await context.db.main.delete(unit_data)
     await context.db.main.flush()
 
 
@@ -282,38 +307,37 @@ async def load_unit_deck(context: idol.BasicSchoolIdolContext, user: main.User, 
         context.db.main.add(deck)
         await context.db.main.flush()
     else:
-        q = sqlalchemy.select(main.UnitDeckPosition).where(main.UnitDeckPosition.deck_id == deck.id)
-        result = await context.db.main.execute(q)
-        for row in result.scalars():
-            deckunits[row.position - 1] = row.unit_owning_user_id
+        deckunits[0] = deck.unit_owning_user_id_1
+        deckunits[1] = deck.unit_owning_user_id_2
+        deckunits[2] = deck.unit_owning_user_id_3
+        deckunits[3] = deck.unit_owning_user_id_4
+        deckunits[4] = deck.unit_owning_user_id_5
+        deckunits[5] = deck.unit_owning_user_id_6
+        deckunits[6] = deck.unit_owning_user_id_7
+        deckunits[7] = deck.unit_owning_user_id_8
+        deckunits[8] = deck.unit_owning_user_id_9
 
     return deck, deckunits
 
 
-async def save_unit_deck(context: idol.SchoolIdolParams, user: main.User, deck: main.UnitDeck, units: list[int]):
+async def save_unit_deck(
+    context: idol.SchoolIdolParams, user: main.User, deck: main.UnitDeck, unit_owning_user_ids: list[int]
+):
     if deck.user_id != user.id:
         raise ValueError("invalid deck")
 
-    q = sqlalchemy.select(main.UnitDeckPosition).where(main.UnitDeckPosition.deck_id == deck.id)
-    result = await context.db.main.execute(q)
-    deckposlist: queue.SimpleQueue[main.UnitDeckPosition] = queue.SimpleQueue()
-    for deckpos in result.scalars():
-        deckposlist.put(deckpos)
+    if len(unit_owning_user_ids) > len(set(unit_owning_user_ids)):
+        raise ValueError("unit_owning_user_ids has duplicates")
 
-    for i, unit_id in enumerate(units, 1):
-        if unit_id > 0:
-            if deckposlist.empty():
-                deckpos = main.UnitDeckPosition(deck_id=deck.id, position=i)
-                context.db.main.add(deckpos)
-            else:
-                deckpos = deckposlist.get()
-
-            deckpos.unit_owning_user_id = unit_id
-            deckpos.position = i
-
-    while not deckposlist.empty():
-        await context.db.main.delete(deckposlist.get())
-
+    deck.unit_owning_user_id_1 = unit_owning_user_ids[0]
+    deck.unit_owning_user_id_2 = unit_owning_user_ids[1]
+    deck.unit_owning_user_id_3 = unit_owning_user_ids[2]
+    deck.unit_owning_user_id_4 = unit_owning_user_ids[3]
+    deck.unit_owning_user_id_5 = unit_owning_user_ids[4]
+    deck.unit_owning_user_id_6 = unit_owning_user_ids[5]
+    deck.unit_owning_user_id_7 = unit_owning_user_ids[6]
+    deck.unit_owning_user_id_8 = unit_owning_user_ids[7]
+    deck.unit_owning_user_id_9 = unit_owning_user_ids[8]
     await context.db.main.flush()
 
 

@@ -23,35 +23,31 @@ async def get_effort_spec(context: idol.BasicSchoolIdolContext, live_effort_poin
     return effort_spec
 
 
-async def get_effort_data(context: idol.BasicSchoolIdolContext, user: main.User):
-    live_effort = await context.db.main.get(main.LiveEffort, user.id)
-    if live_effort is None:
-        live_effort = main.LiveEffort(user_id=user.id)
-        context.db.main.add(live_effort)
-        await context.db.main.flush()
-
-    return live_effort
-
-
 async def add_effort(context: idol.BasicSchoolIdolContext, user: main.User, amount: int):
     result: list[EffortPointInfo] = []
-    current_effort = await get_effort_data(context, user)
     live_box_drop_protocol = config.get_live_box_drop_protocol()
     current_amount = amount
     offer_limited_box_id = 0
 
     # TODO: Properly handle limited effort box
     while True:
-        effort_spec = await get_effort_spec(context, current_effort.live_effort_point_box_spec_id)
-        oldvalue = current_effort.current_point
-        current_effort.current_point = min(oldvalue + current_amount, effort_spec.capacity)
-        current_added = current_effort.current_point - oldvalue
-        current_amount = current_amount - current_added
+        is_limited = user.limited_effort_event_id > 0
+        effort_spec = await get_effort_spec(context, user.live_effort_point_box_spec_id)
+        capacity = effort_spec.limited_capacity if is_limited else effort_spec.capacity
+        oldvalue = user.current_limited_effort_point if is_limited else user.current_live_effort_point
+        newvalue = min(oldvalue + current_amount, capacity)
+        addedvalue = newvalue - oldvalue
+        current_amount = current_amount - addedvalue
 
-        if current_effort.current_point >= effort_spec.capacity:
+        if is_limited:
+            user.current_limited_effort_point = newvalue
+        else:
+            user.current_live_effort_point = newvalue
+
+        if newvalue >= capacity:
             # Give reward
             drop_box_result = await live_box_drop_protocol.process_effort_box(
-                context, current_effort.live_effort_point_box_spec_id, 0, amount
+                context, user.live_effort_point_box_spec_id, user.limited_effort_event_id, amount
             )
 
             reward_list: list[item_model.Item] = []
@@ -64,18 +60,24 @@ async def add_effort(context: idol.BasicSchoolIdolContext, user: main.User, amou
                 await item.update_item_category_id(context, reward_data)
                 reward_list.append(reward_data)
 
+            # FIXME: This does NOT handle limited effort box properly!
             result.append(
                 EffortPointInfo(
-                    live_effort_point_box_spec_id=current_effort.live_effort_point_box_spec_id,
+                    live_effort_point_box_spec_id=user.live_effort_point_box_spec_id,
                     capacity=effort_spec.capacity,
                     before=oldvalue,
-                    after=current_effort.current_point,
+                    after=newvalue,
                     rewards=reward_list,
                 )
             )
 
-            current_effort.live_effort_point_box_spec_id = drop_box_result.new_live_effort_point_box_spec_id
-            current_effort.current_point = 0
+            if is_limited:
+                user.limited_effort_event_id = 0
+                user.current_limited_effort_point = 0
+            else:
+                user.live_effort_point_box_spec_id = drop_box_result.new_live_effort_point_box_spec_id
+                user.current_live_effort_point = 0
+
             if drop_box_result.offer_limited_effort_event_id > 0:
                 offer_limited_box_id = drop_box_result.offer_limited_effort_event_id
 
@@ -84,11 +86,12 @@ async def add_effort(context: idol.BasicSchoolIdolContext, user: main.User, amou
 
     result.append(
         EffortPointInfo(
-            live_effort_point_box_spec_id=current_effort.live_effort_point_box_spec_id,
+            live_effort_point_box_spec_id=user.live_effort_point_box_spec_id,
             capacity=effort_spec.capacity,
             before=oldvalue,
-            after=current_effort.current_point,
+            after=user.current_live_effort_point,
             rewards=[],
         )
     )
+    await context.db.main.flush()
     return result, offer_limited_box_id

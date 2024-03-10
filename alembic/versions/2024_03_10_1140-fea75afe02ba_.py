@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: eb7aa83ce83e
+Revision ID: fea75afe02ba
 Revises: 
-Create Date: 2024-02-08 14:34:04.268398
+Create Date: 2024-03-10 11:40:57.873239
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "eb7aa83ce83e"
+revision: str = "fea75afe02ba"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -45,7 +45,7 @@ def upgrade() -> None:
         sa.Column("training_energy", sa.Integer(), nullable=False),
         sa.Column("training_energy_max", sa.Integer(), nullable=False),
         sa.Column("friend_max", sa.Integer(), nullable=False),
-        sa.Column("invite_code", sa.Integer(), nullable=False),
+        sa.Column("invite_code", sa.Text(), nullable=False),
         sa.Column("insert_date", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
         sa.Column("update_date", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
         sa.Column("tutorial_state", sa.Integer(), nullable=False),
@@ -53,6 +53,10 @@ def upgrade() -> None:
         sa.Column("active_background", sa.Integer(), nullable=False),
         sa.Column("active_award", sa.Integer(), nullable=False),
         sa.Column("center_unit_owning_user_id", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
+        sa.Column("live_effort_point_box_spec_id", sa.Integer(), nullable=False),
+        sa.Column("limited_effort_event_id", sa.Integer(), nullable=False),
+        sa.Column("current_live_effort_point", sa.Integer(), nullable=False),
+        sa.Column("current_limited_effort_point", sa.Integer(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
     with op.batch_alter_table("user", schema=None) as batch_op:
@@ -70,6 +74,7 @@ def upgrade() -> None:
         sa.Column("is_accomplished", sa.Boolean(), nullable=False),
         sa.Column("is_reward_claimed", sa.Boolean(), nullable=False),
         sa.Column("insert_date", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
+        sa.Column("update_date", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
         sa.Column("end_date", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
         sa.Column("is_new", sa.Boolean(), nullable=False),
         sa.ForeignKeyConstraint(
@@ -91,6 +96,7 @@ def upgrade() -> None:
         batch_op.create_index(batch_op.f("ix_achievement_insert_date"), ["insert_date"], unique=False)
         batch_op.create_index(batch_op.f("ix_achievement_is_accomplished"), ["is_accomplished"], unique=False)
         batch_op.create_index(batch_op.f("ix_achievement_is_new"), ["is_new"], unique=False)
+        batch_op.create_index(batch_op.f("ix_achievement_update_date"), ["update_date"], unique=False)
         batch_op.create_index(batch_op.f("ix_achievement_user_id"), ["user_id"], unique=False)
 
     op.create_table(
@@ -156,9 +162,11 @@ def upgrade() -> None:
         sa.Column("add_type", sa.Integer(), nullable=False),
         sa.Column("item_id", sa.Integer(), nullable=False),
         sa.Column("amount", sa.Integer(), nullable=False),
-        sa.Column("message", sa.Text(), nullable=False),
+        sa.Column("message_jp", sa.Text(), nullable=False),
+        sa.Column("message_en", sa.Text(), nullable=True),
         sa.Column("insert_date", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
         sa.Column("expire_date", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
+        sa.Column("extra_data", sa.Text(), nullable=True),
         sa.Column("claimed", sa.Boolean(), nullable=False),
         sa.ForeignKeyConstraint(
             ["user_id"],
@@ -178,6 +186,7 @@ def upgrade() -> None:
         sa.Column("id", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
         sa.Column("user_id", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
         sa.Column("live_difficulty_id", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
+        sa.Column("difficulty", sa.Integer(), nullable=False),
         sa.Column("hi_score", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
         sa.Column("hi_combo_cnt", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
         sa.Column("clear_cnt", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
@@ -189,20 +198,30 @@ def upgrade() -> None:
         sa.UniqueConstraint("user_id", "live_difficulty_id"),
     )
     with op.batch_alter_table("live_clear", schema=None) as batch_op:
+        batch_op.create_index(batch_op.f("ix_live_clear_difficulty"), ["difficulty"], unique=False)
         batch_op.create_index(batch_op.f("ix_live_clear_live_difficulty_id"), ["live_difficulty_id"], unique=False)
         batch_op.create_index(batch_op.f("ix_live_clear_user_id"), ["user_id"], unique=False)
 
     op.create_table(
-        "live_effort",
+        "live_in_progress",
+        sa.Column("id", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
         sa.Column("user_id", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
-        sa.Column("live_effort_point_box_spec_id", sa.Integer(), nullable=False),
-        sa.Column("current_point", sa.Integer(), nullable=False),
+        sa.Column("party_user_id", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
+        sa.Column("lp_factor", sa.Integer(), nullable=False),
+        sa.Column("unit_deck_id", sa.Integer(), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["party_user_id"],
+            ["user.id"],
+        ),
         sa.ForeignKeyConstraint(
             ["user_id"],
             ["user.id"],
         ),
-        sa.PrimaryKeyConstraint("user_id"),
+        sa.PrimaryKeyConstraint("id"),
     )
+    with op.batch_alter_table("live_in_progress", schema=None) as batch_op:
+        batch_op.create_index(batch_op.f("ix_live_in_progress_user_id"), ["user_id"], unique=True)
+
     op.create_table(
         "login_bonus",
         sa.Column("id", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
@@ -270,6 +289,7 @@ def upgrade() -> None:
             ["user.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("user_id", "scenario_id"),
     )
     with op.batch_alter_table("scenario", schema=None) as batch_op:
         batch_op.create_index(batch_op.f("ix_scenario_completed"), ["completed"], unique=False)
@@ -287,6 +307,7 @@ def upgrade() -> None:
             ["user.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("user_id", "subscenario_id"),
     )
     with op.batch_alter_table("sub_scenario", schema=None) as batch_op:
         batch_op.create_index(batch_op.f("ix_sub_scenario_completed"), ["completed"], unique=False)
@@ -296,11 +317,13 @@ def upgrade() -> None:
     op.create_table(
         "tos_agree",
         sa.Column("user_id", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
+        sa.Column("tos_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
             ["user_id"],
             ["user.id"],
         ),
         sa.PrimaryKeyConstraint("user_id"),
+        sa.UniqueConstraint("user_id", "tos_id"),
     )
     op.create_table(
         "unit",
@@ -335,6 +358,15 @@ def upgrade() -> None:
         sa.Column("user_id", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
         sa.Column("deck_number", sa.Integer(), nullable=False),
         sa.Column("name", sa.Text(), nullable=False),
+        sa.Column("unit_owning_user_id_1", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
+        sa.Column("unit_owning_user_id_2", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
+        sa.Column("unit_owning_user_id_3", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
+        sa.Column("unit_owning_user_id_4", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
+        sa.Column("unit_owning_user_id_5", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
+        sa.Column("unit_owning_user_id_6", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
+        sa.Column("unit_owning_user_id_7", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
+        sa.Column("unit_owning_user_id_8", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
+        sa.Column("unit_owning_user_id_9", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
         sa.ForeignKeyConstraint(
             ["user_id"],
             ["user.id"],
@@ -362,48 +394,6 @@ def upgrade() -> None:
     with op.batch_alter_table("unit_supporter", schema=None) as batch_op:
         batch_op.create_index(batch_op.f("ix_unit_supporter_unit_id"), ["unit_id"], unique=False)
         batch_op.create_index(batch_op.f("ix_unit_supporter_user_id"), ["user_id"], unique=False)
-
-    op.create_table(
-        "incentive_unit_option",
-        sa.Column("id", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
-        sa.Column("unit_id", sa.Integer(), nullable=False),
-        sa.Column("is_signed", sa.Boolean(), nullable=False),
-        sa.Column("exp", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
-        sa.Column("skill_exp", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
-        sa.Column("max_level", sa.Integer(), nullable=False),
-        sa.Column("love", sa.Integer(), nullable=False),
-        sa.Column("rank", sa.Integer(), nullable=False),
-        sa.Column("display_rank", sa.Integer(), nullable=False),
-        sa.Column("level_limit_id", sa.Integer(), nullable=False),
-        sa.Column("unit_removable_skill_capacity", sa.Integer(), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["id"],
-            ["incentive.id"],
-        ),
-        sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_table(
-        "unit_deck_position",
-        sa.Column("id", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
-        sa.Column("deck_id", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
-        sa.Column("position", sa.Integer(), nullable=False),
-        sa.Column("unit_owning_user_id", sa.BigInteger().with_variant(sa.INTEGER(), "sqlite"), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["deck_id"],
-            ["unit_deck.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["unit_owning_user_id"],
-            ["unit.id"],
-        ),
-        sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("deck_id", "unit_owning_user_id"),
-    )
-    with op.batch_alter_table("unit_deck_position", schema=None) as batch_op:
-        batch_op.create_index(batch_op.f("ix_unit_deck_position_deck_id"), ["deck_id"], unique=False)
-        batch_op.create_index(
-            batch_op.f("ix_unit_deck_position_unit_owning_user_id"), ["unit_owning_user_id"], unique=False
-        )
 
     op.create_table(
         "unit_removable_skill",
@@ -438,12 +428,6 @@ def downgrade() -> None:
         batch_op.drop_index(batch_op.f("ix_unit_removable_skill_unit_owning_user_id"))
 
     op.drop_table("unit_removable_skill")
-    with op.batch_alter_table("unit_deck_position", schema=None) as batch_op:
-        batch_op.drop_index(batch_op.f("ix_unit_deck_position_unit_owning_user_id"))
-        batch_op.drop_index(batch_op.f("ix_unit_deck_position_deck_id"))
-
-    op.drop_table("unit_deck_position")
-    op.drop_table("incentive_unit_option")
     with op.batch_alter_table("unit_supporter", schema=None) as batch_op:
         batch_op.drop_index(batch_op.f("ix_unit_supporter_user_id"))
         batch_op.drop_index(batch_op.f("ix_unit_supporter_unit_id"))
@@ -489,10 +473,14 @@ def downgrade() -> None:
         batch_op.drop_index(batch_op.f("ix_login_bonus_day"))
 
     op.drop_table("login_bonus")
-    op.drop_table("live_effort")
+    with op.batch_alter_table("live_in_progress", schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f("ix_live_in_progress_user_id"))
+
+    op.drop_table("live_in_progress")
     with op.batch_alter_table("live_clear", schema=None) as batch_op:
         batch_op.drop_index(batch_op.f("ix_live_clear_user_id"))
         batch_op.drop_index(batch_op.f("ix_live_clear_live_difficulty_id"))
+        batch_op.drop_index(batch_op.f("ix_live_clear_difficulty"))
 
     op.drop_table("live_clear")
     with op.batch_alter_table("incentive", schema=None) as batch_op:
@@ -523,6 +511,7 @@ def downgrade() -> None:
     op.drop_table("album")
     with op.batch_alter_table("achievement", schema=None) as batch_op:
         batch_op.drop_index(batch_op.f("ix_achievement_user_id"))
+        batch_op.drop_index(batch_op.f("ix_achievement_update_date"))
         batch_op.drop_index(batch_op.f("ix_achievement_is_new"))
         batch_op.drop_index(batch_op.f("ix_achievement_is_accomplished"))
         batch_op.drop_index(batch_op.f("ix_achievement_insert_date"))

@@ -1,8 +1,5 @@
 from . import ADD_TYPE
 
-INCENTIVE_MESSAGE_NAME = "text"
-INCENTIVE_MESSAGE_NAME_EN = "text_en"
-
 # https://w.atwiki.jp/lovelive-sif/pages/38.html
 LIVE_EXP_DROP = [12, 26, 43, 83]
 LIVE_GOLD_DROP = [

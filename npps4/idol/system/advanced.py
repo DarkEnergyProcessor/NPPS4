@@ -124,7 +124,7 @@ async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, item: 
             return AddResult(True)
         # FIXME: Actually check for their return values of these unlocks.
         case ADD_TYPE.LIVE:
-            await live.unlock_live(context, user, item.item_id)
+            await live.unlock_normal_live(context, user, item.item_id)
             return AddResult(True)
         case ADD_TYPE.AWARD:
             return AddResult(await award.unlock_award(context, user, item.item_id))

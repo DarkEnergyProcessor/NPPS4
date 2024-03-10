@@ -46,34 +46,40 @@ class LiveStatus(pydantic.BaseModel):
     achieved_goal_id_list: list[int]
 
 
-async def unlock_live(context: idol.BasicSchoolIdolContext, user: main.User, live_track_id: int):
+async def unlock_normal_live(context: idol.BasicSchoolIdolContext, user: main.User, live_track_id: int):
     q = sqlalchemy.select(live.LiveSetting).where(live.LiveSetting.live_track_id == live_track_id)
     result = await context.db.live.execute(q)
 
     # Get live_setting_ids
-    live_setting_ids = [setting.live_setting_id for setting in result.scalars()]
+    for setting_data in result.scalars():
+        # Then query live_difficulty_ids
+        q = sqlalchemy.select(live.NormalLive).where(live.NormalLive.live_setting_id == setting_data.live_setting_id)
+        result = await context.db.live.execute(q)
 
-    # Then query live_difficulty_ids
-    q = sqlalchemy.select(live.NormalLive).where(live.NormalLive.live_setting_id.in_(live_setting_ids))
-    result = await context.db.live.execute(q)
-
-    # Add to live clear table
-    for normallive in result.scalars():
-        live_clear = main.LiveClear(user_id=user.id, live_difficulty_id=normallive.live_difficulty_id)
-        context.db.main.add(live_clear)
+        # Add to live clear table
+        normallive = result.scalar()
+        if normallive is not None:
+            live_clear = main.LiveClear(
+                user_id=user.id, live_difficulty_id=normallive.live_difficulty_id, difficulty=setting_data.difficulty
+            )
+            context.db.main.add(live_clear)
 
     await context.db.main.flush()
 
 
 async def init(context: idol.BasicSchoolIdolContext, user: main.User):
-    await unlock_live(context, user, 1)  # Bokura no LIVE Kimi to no LIFE
+    await unlock_normal_live(context, user, 1)  # Bokura no LIVE Kimi to no LIFE
 
     # Unlock the rest of the live shows.
     q = sqlalchemy.select(live.NormalLive).where(live.NormalLive.default_unlocked_flag == 1)
     result = await context.db.live.execute(q)
 
     for normallive in result.scalars():
-        live_clear = main.LiveClear(user_id=user.id, live_difficulty_id=normallive.live_difficulty_id)
+        setting_data = await context.db.live.get(live.LiveSetting, normallive.live_setting_id)
+        assert setting_data is not None
+        live_clear = main.LiveClear(
+            user_id=user.id, live_difficulty_id=normallive.live_difficulty_id, difficulty=setting_data.difficulty
+        )
         context.db.main.add(live_clear)
 
     await context.db.main.flush()
