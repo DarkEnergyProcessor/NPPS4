@@ -1,11 +1,9 @@
 import base64
-import dataclasses
 import datetime as datetimelib
 import hashlib
 import hmac
 import itertools
 import logging
-import pickle
 import random
 import time as timelib
 
@@ -14,7 +12,6 @@ import Cryptodome.Cipher.AES
 import Cryptodome.Hash.SHA1
 import Cryptodome.Util.Padding
 import Cryptodome.Signature.pkcs1_15
-import itsdangerous.serializer
 import pydantic
 
 from .config import config
