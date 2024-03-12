@@ -1,8 +1,8 @@
 from . import unit
 from . import user
-from ... import idol
-from ...db import main
-from ...db import game_mater
+from .. import idol
+from ..db import main
+from ..db import game_mater
 
 
 async def phase1(context: idol.BasicSchoolIdolContext, u: main.User):

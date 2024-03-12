@@ -8,7 +8,7 @@ from ... import idol
 from ...app import webui
 from ...db import item
 from ...db import main
-from ...idol.system import background
+from ...system import background
 
 from typing import Annotated
 

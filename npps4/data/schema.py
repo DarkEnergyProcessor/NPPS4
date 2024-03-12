@@ -1,6 +1,6 @@
 import pydantic
 
-from ..idol.system import item
+from ..system import item
 
 
 class LiveUnitDrop(pydantic.BaseModel):

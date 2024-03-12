@@ -2,9 +2,9 @@ import itertools
 
 import sqlalchemy
 
-from ... import idol
-from ...db import main
-from ...db import scenario
+from .. import idol
+from ..db import main
+from ..db import scenario
 
 
 async def init(context: idol.BasicSchoolIdolContext, user: main.User):

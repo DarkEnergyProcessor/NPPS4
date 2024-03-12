@@ -1,7 +1,7 @@
 from .. import idol
 from ..idol import error
-from ..idol.system import tutorial
-from ..idol.system import user
+from ..system import tutorial
+from ..system import user
 
 import pydantic
 

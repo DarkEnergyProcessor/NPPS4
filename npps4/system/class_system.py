@@ -1,6 +1,6 @@
 import pydantic
 
-from ... import util
+from .. import util
 
 
 class ClassRankInfoData(pydantic.BaseModel):  # TODO

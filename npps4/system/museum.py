@@ -1,9 +1,9 @@
 import pydantic
 import sqlalchemy
 
-from ... import idol
-from ...db import main
-from ...db import museum
+from .. import idol
+from ..db import main
+from ..db import museum
 
 
 class MuseumParameterData(pydantic.BaseModel):

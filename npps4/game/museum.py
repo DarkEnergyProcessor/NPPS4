@@ -1,8 +1,8 @@
 import pydantic
 
 from .. import idol
-from ..idol.system import museum
-from ..idol.system import user
+from ..system import museum
+from ..system import user
 
 
 class MuseumInfoResponse(pydantic.BaseModel):

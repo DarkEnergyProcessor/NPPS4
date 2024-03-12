@@ -1,7 +1,7 @@
 import pydantic
 
 from . import item_model
-from ...const import ADD_TYPE
+from ..const import ADD_TYPE
 
 
 class AdditionalScenarioStatus(pydantic.BaseModel):

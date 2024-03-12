@@ -8,21 +8,21 @@ from .. import idol
 from .. import util
 from ..config import config
 from ..const import ADD_TYPE
-from ..idol.system import achievement
-from ..idol.system import advanced
-from ..idol.system import album
-from ..idol.system import class_system as class_system_module
-from ..idol.system import common
-from ..idol.system import effort
-from ..idol.system import item_model
-from ..idol.system import live
-from ..idol.system import museum
-from ..idol.system import reward
-from ..idol.system import scenario
-from ..idol.system import subscenario
-from ..idol.system import unit
-from ..idol.system import unit_model
-from ..idol.system import user
+from ..system import achievement
+from ..system import advanced
+from ..system import album
+from ..system import class_system as class_system_module
+from ..system import common
+from ..system import effort
+from ..system import item_model
+from ..system import live
+from ..system import museum
+from ..system import reward
+from ..system import scenario
+from ..system import subscenario
+from ..system import unit
+from ..system import unit_model
+from ..system import user
 
 
 class EventInfo(pydantic.BaseModel):

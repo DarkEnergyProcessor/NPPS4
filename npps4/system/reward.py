@@ -3,10 +3,10 @@ import json
 import sqlalchemy
 
 from . import item_model
-from ... import idol
-from ... import util
-from ...const import ADD_TYPE
-from ...db import main
+from .. import idol
+from .. import util
+from ..const import ADD_TYPE
+from ..db import main
 
 
 async def add_item(

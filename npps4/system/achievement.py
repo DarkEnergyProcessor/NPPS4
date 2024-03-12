@@ -4,12 +4,12 @@ import pydantic
 import sqlalchemy
 
 from . import item_model
-from ... import achievement_reward
-from ... import db
-from ... import idol
-from ... import util
-from ...db import achievement
-from ...db import main
+from .. import achievement_reward
+from .. import db
+from .. import idol
+from .. import util
+from ..db import achievement
+from ..db import main
 
 from typing import Awaitable, Callable, Concatenate, Iterable, Sequence, ParamSpec
 

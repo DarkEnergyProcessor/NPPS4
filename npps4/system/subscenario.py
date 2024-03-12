@@ -1,9 +1,9 @@
 import sqlalchemy
 
-from ... import db
-from ... import idol
-from ...db import main
-from ...db import subscenario
+from .. import db
+from .. import idol
+from ..db import main
+from ..db import subscenario
 
 
 async def unlock(context: idol.BasicSchoolIdolContext, user: main.User, subscenario_id: int):

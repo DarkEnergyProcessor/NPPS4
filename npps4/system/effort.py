@@ -3,10 +3,10 @@ import pydantic
 from . import common
 from . import item
 from . import item_model
-from ... import idol
-from ...config import config
-from ...db import main
-from ...db import effort
+from .. import idol
+from ..config import config
+from ..db import main
+from ..db import effort
 
 
 class EffortPointInfo(common.BeforeAfter[int]):

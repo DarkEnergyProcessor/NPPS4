@@ -2,9 +2,9 @@ import pydantic
 
 from . import museum
 from . import unit
-from ... import idol
-from ... import util
-from ...db import main
+from .. import idol
+from .. import util
+from ..db import main
 
 
 class ProfileUnitInfo(pydantic.BaseModel):

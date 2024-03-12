@@ -1,9 +1,9 @@
 import sqlalchemy
 
 from . import achievement
-from ... import idol
-from ...db import main
-from ...db import unit
+from .. import idol
+from ..db import main
+from ..db import unit
 
 
 async def update(

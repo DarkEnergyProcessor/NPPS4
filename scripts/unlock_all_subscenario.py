@@ -3,7 +3,7 @@ import argparse
 import sqlalchemy
 
 import npps4.idol
-import npps4.idol.system.subscenario
+import npps4.system.subscenario
 import npps4.db.main
 import npps4.db.subscenario
 import npps4.scriptutils.user
@@ -21,7 +21,7 @@ async def run_script(arg: list[str]):
         q = sqlalchemy.select(npps4.db.subscenario.SubScenario)
         result = await context.db.subscenario.execute(q)
         for game_subsc in result.scalars():
-            subsc = await npps4.idol.system.subscenario.get(context, target_user, game_subsc.subscenario_id)
+            subsc = await npps4.system.subscenario.get(context, target_user, game_subsc.subscenario_id)
             if subsc is None:
                 subsc = npps4.db.main.SubScenario(user_id=target_user.id, subscenario_id=game_subsc.subscenario_id)
                 context.db.main.add(subsc)

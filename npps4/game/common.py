@@ -2,8 +2,8 @@ import pydantic
 
 from .. import idol
 from .. import util
-from ..idol.system import live
-from ..idol.system import user
+from ..system import live
+from ..system import user
 
 
 class CommonLiveResumeRequest(pydantic.BaseModel):

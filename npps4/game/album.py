@@ -3,9 +3,9 @@ import pydantic
 from .. import idol
 
 from ..db import main
-from ..idol.system import album
-from ..idol.system import unit
-from ..idol.system import user
+from ..system import album
+from ..system import unit
+from ..system import user
 
 
 class AlbumInfo(pydantic.BaseModel):

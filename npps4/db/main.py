@@ -10,7 +10,7 @@ from . import common
 from .. import idoltype
 from .. import util
 from ..config import config
-from ..idol.system import core
+from ..system import core
 
 SALT_SIZE = 16
 

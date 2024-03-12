@@ -3,8 +3,8 @@ import pydantic
 from .. import idol
 from .. import util
 from ..idol import error
-from ..idol.system import background
-from ..idol.system import user
+from ..system import background
+from ..system import user
 
 
 class BackgroundInfo(pydantic.BaseModel):

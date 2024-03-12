@@ -3,17 +3,17 @@ import pydantic
 from .. import idol
 from .. import util
 from .. import strings
-from ..idol.system import achievement
-from ..idol.system import ad_model
-from ..idol.system import advanced
-from ..idol.system import class_system as class_system_module
-from ..idol.system import effort
-from ..idol.system import item
-from ..idol.system import item_model
-from ..idol.system import lbonus
-from ..idol.system import museum
-from ..idol.system import reward
-from ..idol.system import user
+from ..system import achievement
+from ..system import ad_model
+from ..system import advanced
+from ..system import class_system as class_system_module
+from ..system import effort
+from ..system import item
+from ..system import item_model
+from ..system import lbonus
+from ..system import museum
+from ..system import reward
+from ..system import user
 
 
 class LoginBonusCalendarMonthInfo(pydantic.BaseModel):

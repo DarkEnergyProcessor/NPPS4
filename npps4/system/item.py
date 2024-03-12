@@ -1,7 +1,7 @@
 from . import item_model
-from ... import idol
-from ...const import ADD_TYPE
-from ...db import item
+from .. import idol
+from ..const import ADD_TYPE
+from ..db import item
 
 
 async def get_item_category_for_type_1000(context: idol.BasicSchoolIdolContext, item_id: int):

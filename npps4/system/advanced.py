@@ -4,19 +4,19 @@ import pydantic
 
 from . import item_model
 from . import unit
-from ... import idol
-from ... import leader_skill
-from ...config import config
-from ...const import ADD_TYPE
-from ...idol.system import achievement
-from ...idol.system import award
-from ...idol.system import background
-from ...idol.system import live
-from ...idol.system import museum
-from ...idol.system import reward
-from ...idol.system import scenario
-from ...idol.system import unit
-from ...db import main
+from .. import idol
+from .. import leader_skill
+from ..config import config
+from ..const import ADD_TYPE
+from ..system import achievement
+from ..system import award
+from ..system import background
+from ..system import live
+from ..system import museum
+from ..system import reward
+from ..system import scenario
+from ..system import unit
+from ..db import main
 
 from typing import Awaitable, Callable
 

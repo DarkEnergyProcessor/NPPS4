@@ -7,13 +7,13 @@ import sqlalchemy
 from . import album
 from . import common
 from . import unit_model
-from ... import db
-from ... import idol
-from ... import idoltype
-from ... import util
-from ...const import ADD_TYPE
-from ...db import main
-from ...db import unit
+from .. import db
+from .. import idol
+from .. import idoltype
+from .. import util
+from ..const import ADD_TYPE
+from ..db import main
+from ..db import unit
 
 from typing import Literal, TypeVar, overload
 

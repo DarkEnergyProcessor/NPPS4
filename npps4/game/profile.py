@@ -2,11 +2,11 @@ import pydantic
 
 from .. import idol
 from .. import util
-from ..idol.system import advanced
-from ..idol.system import museum
-from ..idol.system import profile
-from ..idol.system import unit
-from ..idol.system import user
+from ..system import advanced
+from ..system import museum
+from ..system import profile
+from ..system import unit
+from ..system import user
 
 
 class ProfileLiveCount(pydantic.BaseModel):

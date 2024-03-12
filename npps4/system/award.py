@@ -1,7 +1,7 @@
 import sqlalchemy
 
-from ... import idol
-from ...db import main
+from .. import idol
+from ..db import main
 
 
 async def has_award(context: idol.BasicSchoolIdolContext, user: main.User, award_id: int):

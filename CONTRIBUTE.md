@@ -58,7 +58,7 @@ import sqlalchemy
 # Current project relative import
 from . import idol
 from .config import config
-from .idol.system import background
+from .system import background
 
 # typing
 from typing import Any, TypeVar, cast

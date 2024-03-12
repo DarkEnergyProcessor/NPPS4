@@ -1,7 +1,7 @@
 import sqlalchemy
 
-from ... import idol
-from ...db import main
+from .. import idol
+from ..db import main
 
 
 async def has_background(context: idol.BasicSchoolIdolContext, user: main.User, background_id: int):

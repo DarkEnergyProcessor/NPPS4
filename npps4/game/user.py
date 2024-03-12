@@ -1,9 +1,9 @@
 from .. import idol
 from .. import util
 from ..idol import error
-from ..idol.system import advanced
-from ..idol.system import unit
-from ..idol.system import user
+from ..system import advanced
+from ..system import unit
+from ..system import user
 
 import pydantic
 

@@ -5,12 +5,12 @@ import sqlalchemy
 
 
 from . import item
-from ... import db
-from ... import idol
-from ...config import config
-from ...const import LIVE_GOAL_TYPE
-from ...db import main
-from ...db import live
+from .. import db
+from .. import idol
+from ..config import config
+from ..const import LIVE_GOAL_TYPE
+from ..db import main
+from ..db import live
 
 from typing import Iterable, Literal, Sequence
 

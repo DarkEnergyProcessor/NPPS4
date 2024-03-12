@@ -1,8 +1,8 @@
 from .. import idol
 from .. import util
 from ..idol import error
-from ..idol.system import tos
-from ..idol.system import user
+from ..system import tos
+from ..system import user
 
 import pydantic
 

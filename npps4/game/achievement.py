@@ -3,9 +3,9 @@ import pydantic
 
 from .. import idol
 from .. import util
-from ..idol.system import achievement
-from ..idol.system import advanced
-from ..idol.system import user
+from ..system import achievement
+from ..system import advanced
+from ..system import user
 
 
 class AchievementUnaccomplishedFilter(pydantic.BaseModel):

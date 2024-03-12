@@ -3,11 +3,11 @@ import pydantic
 from .. import idol
 from .. import util
 
-from ..idol.system import ad_model
-from ..idol.system import class_system
-from ..idol.system import item_model
-from ..idol.system import museum
-from ..idol.system import user
+from ..system import ad_model
+from ..system import class_system
+from ..system import item_model
+from ..system import museum
+from ..system import user
 
 from typing import Any
 

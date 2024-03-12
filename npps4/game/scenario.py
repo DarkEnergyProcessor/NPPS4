@@ -1,12 +1,12 @@
 from .. import idol
 from .. import util
-from ..idol.system import achievement
-from ..idol.system import advanced
-from ..idol.system import class_system as class_system_module
-from ..idol.system import museum
-from ..idol.system import reward
-from ..idol.system import scenario
-from ..idol.system import user
+from ..system import achievement
+from ..system import advanced
+from ..system import class_system as class_system_module
+from ..system import museum
+from ..system import reward
+from ..system import scenario
+from ..system import user
 
 import pydantic
 

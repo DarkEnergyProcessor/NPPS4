@@ -4,15 +4,15 @@ import pydantic
 import sqlalchemy
 
 from . import core
-from ... import idol
-from ... import util
-from ...idol.system import achievement
-from ...idol.system import award
-from ...idol.system import background
-from ...idol.system import live
-from ...idol.system import scenario
-from ...db import main
-from ...db import game_mater
+from .. import idol
+from .. import util
+from ..system import achievement
+from ..system import award
+from ..system import background
+from ..system import live
+from ..system import scenario
+from ..db import main
+from ..db import game_mater
 
 
 class UserInfoData(pydantic.BaseModel):

@@ -4,9 +4,9 @@ import pydantic
 import sqlalchemy
 
 from . import item
-from ... import idol
-from ...config import config
-from ...db import main
+from .. import idol
+from ..config import config
+from ..db import main
 
 
 class LoginBonusCalendar(pydantic.BaseModel):

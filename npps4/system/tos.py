@@ -1,7 +1,7 @@
 import sqlalchemy
 
-from ... import idol
-from ...db import main
+from .. import idol
+from ..db import main
 
 
 async def is_agreed(context: idol.SchoolIdolParams, user: main.User, tos_id: int):

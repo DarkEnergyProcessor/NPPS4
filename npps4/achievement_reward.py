@@ -1,8 +1,8 @@
 from .const import ADD_TYPE
-from .idol.system import common
-from .idol.system import item
-from .idol.system import item_model
-from .idol.system import scenario_model
+from .system import common
+from .system import item
+from .system import item_model
+from .system import scenario_model
 
 ACHIEVEMENT_REWARD_DEFAULT = item.loveca(1)
 

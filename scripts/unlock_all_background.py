@@ -3,7 +3,7 @@ import argparse
 import sqlalchemy
 
 import npps4.idol
-import npps4.idol.system.background
+import npps4.system.background
 import npps4.db.main
 import npps4.db.item
 import npps4.scriptutils.user
@@ -20,5 +20,5 @@ async def run_script(arg: list[str]):
         q = sqlalchemy.select(npps4.db.item.Background)
         result = await context.db.item.execute(q)
         for game_bg in result.scalars():
-            if not await npps4.idol.system.background.has_background(context, target_user, game_bg.background_id):
-                await npps4.idol.system.background.unlock_background(context, target_user, game_bg.background_id)
+            if not await npps4.system.background.has_background(context, target_user, game_bg.background_id):
+                await npps4.system.background.unlock_background(context, target_user, game_bg.background_id)

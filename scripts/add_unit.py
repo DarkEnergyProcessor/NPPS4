@@ -3,7 +3,7 @@ import argparse
 import sqlalchemy
 
 import npps4.idol
-import npps4.idol.system.unit
+import npps4.system.unit
 import npps4.db.main
 import npps4.db.unit
 import npps4.scriptutils.user
@@ -68,10 +68,10 @@ async def run_script(arg: list[str]):
 
         if unit_info.disable_rank_up > 0:
             # Support cards
-            await npps4.idol.system.unit.add_supporter_unit(context, target_user, unit_info.unit_id, args.amount)
+            await npps4.system.unit.add_supporter_unit(context, target_user, unit_info.unit_id, args.amount)
         else:
             if not args.force:
-                unit_count = await npps4.idol.system.unit.count_units(context, target_user, not args.waiting_room)
+                unit_count = await npps4.system.unit.count_units(context, target_user, not args.waiting_room)
                 if (unit_count + args.amount) > (
                     target_user.waiting_unit_max if args.waiting_room else target_user.unit_max
                 ):
@@ -81,7 +81,7 @@ async def run_script(arg: list[str]):
             pre_idolized = unit_info.rank_min == unit_info.rank_max
 
             # Get rarity info
-            unit_rarity = await npps4.idol.system.unit.get_unit_rarity(context, unit_info.rarity)
+            unit_rarity = await npps4.system.unit.get_unit_rarity(context, unit_info.rarity)
             assert unit_rarity is not None
 
             # Clamp level
@@ -91,20 +91,18 @@ async def run_script(arg: list[str]):
             )
 
             # Get EXP needed
-            unit_level_up_pattern = await npps4.idol.system.unit.get_unit_level_up_pattern(context, unit_info)
-            unit_exp = npps4.idol.system.unit.get_exp_for_target_level(unit_info, unit_level_up_pattern, unit_level)
-            unit_signed = bool(
-                args.signed and await npps4.idol.system.unit.has_signed_variant(context, unit_info.unit_id)
-            )
+            unit_level_up_pattern = await npps4.system.unit.get_unit_level_up_pattern(context, unit_info)
+            unit_exp = npps4.system.unit.get_exp_for_target_level(unit_info, unit_level_up_pattern, unit_level)
+            unit_signed = bool(args.signed and await npps4.system.unit.has_signed_variant(context, unit_info.unit_id))
 
             for _ in range(args.amount):
-                unit_data = await npps4.idol.system.unit.create_unit(
+                unit_data = await npps4.system.unit.create_unit(
                     context, target_user, unit_info.unit_id, not args.waiting_room
                 )
                 assert unit_data is not None
 
                 if not pre_idolized and args.idolize:
-                    await npps4.idol.system.unit.idolize(context, target_user, unit_data)
+                    await npps4.system.unit.idolize(context, target_user, unit_data)
 
                 unit_data.is_signed = unit_signed
                 unit_data.exp = unit_exp
@@ -112,4 +110,4 @@ async def run_script(arg: list[str]):
                     unit_info.default_removable_skill_capacity + int(args.add_sis_slot),
                     unit_info.max_removable_skill_capacity,
                 )
-                await npps4.idol.system.unit.add_unit_by_object(context, target_user, unit_data)
+                await npps4.system.unit.add_unit_by_object(context, target_user, unit_data)
