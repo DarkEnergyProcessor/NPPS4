@@ -3,10 +3,11 @@ import urllib.parse
 import fastapi
 
 from . import database
+from . import session
 from .. import idoltype
 from .. import util
 
-from typing import Annotated
+from typing import Annotated, override
 
 
 class BasicSchoolIdolContext:
@@ -28,6 +29,9 @@ class BasicSchoolIdolContext:
 
     def is_lang_jp(self):
         return self.lang == idoltype.Language.jp
+
+    async def finalize(self):
+        pass
 
 
 class SchoolIdolParams(BasicSchoolIdolContext):
@@ -59,6 +63,7 @@ class SchoolIdolParams(BasicSchoolIdolContext):
             self.nonce = 0
 
         self.token_text = authorize_parsed.get("token")
+        self.token: session.TokenData | None = None
 
         ts = util.time()
         try:
@@ -94,14 +99,16 @@ class SchoolIdolAuthParams(SchoolIdolParams):
         request_data: Annotated[bytes | None, fastapi.Form(exclude=True, include=False)] = None,
     ):
         super().__init__(request, authorize, client_version, lang, platform_type, request_data)
-        token = None
+        self.token_async = None
         if self.token_text is not None:
-            token = util.decapsulate_token(self.token_text)
+            self.token_async = session.decapsulate_token(self, self.token_text)
 
-        if token is None:
+    @override
+    async def finalize(self):
+        if self.token_async is not None:
+            self.token = await self.token_async
+        if self.token is None:
             raise fastapi.HTTPException(403, detail="Invalid token")
-
-        self.token = token
 
 
 class SchoolIdolUserParams(SchoolIdolAuthParams):
@@ -120,5 +127,10 @@ class SchoolIdolUserParams(SchoolIdolAuthParams):
         request_data: Annotated[bytes | None, fastapi.Form(exclude=True, include=False)] = None,
     ):
         super().__init__(request, authorize, client_version, lang, platform_type, request_data)
+
+    @override
+    async def finalize(self):
+        await super().finalize()
+        assert self.token is not None
         if self.token.user_id == 0:
             raise fastapi.HTTPException(403, detail="Not logged in!")

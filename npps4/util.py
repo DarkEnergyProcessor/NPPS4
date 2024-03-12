@@ -46,38 +46,6 @@ def sign_message(content: bytes, request_xmc_hex: str | None):
     return str(base64.b64encode(sign.sign(sha1)), "UTF-8")
 
 
-@dataclasses.dataclass
-class TokenData:
-    client_key: bytes
-    server_key: bytes
-    user_id: int
-
-
-TOKEN_SERIALIZER = itsdangerous.serializer.Serializer(config.get_secret_key(), serializer=pickle)
-SALT_SIZE = 8
-
-
-def encapsulate_token(server_key: bytes, client_key: bytes, user_id: int):
-    global TOKEN_SERIALIZER, SALT_SIZE
-
-    data = TokenData(client_key, server_key, user_id)
-    salt = randbytes(SALT_SIZE)
-    result: bytes = TOKEN_SERIALIZER.dumps(data, salt)  # type: ignore
-    return str(base64.b64encode(salt + result), "UTF-8")
-
-
-def decapsulate_token(token_data: str):
-    global TOKEN_SERIALIZER, SALT_SIZE
-
-    token = base64.b64decode(token_data.replace(" ", "+"))
-    salt, result = token[:SALT_SIZE], token[SALT_SIZE:]
-    try:
-        data: TokenData = TOKEN_SERIALIZER.loads(result, salt)
-        return data
-    except itsdangerous.BadSignature:
-        return None
-
-
 def decrypt_rsa(data: bytes):
     pkcs = Cryptodome.Cipher.PKCS1_v1_5.new(config.get_server_rsa())
     return pkcs.decrypt(data, None)

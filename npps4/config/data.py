@@ -29,11 +29,12 @@ class _Main(pydantic.BaseModel):
     secret_key: str
     server_private_key: str
     server_private_key_password: str = ""
-    server_data: str = "npps4/server_data.json"
+    server_data: str
+    session_expiry: int = 0
 
 
 class _Database(pydantic.BaseModel):
-    url: str = "sqlite+aiosqlite:///data/main.sqlite3"
+    url: str
 
 
 class _DownloadNone(pydantic.BaseModel):

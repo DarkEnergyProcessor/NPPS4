@@ -57,6 +57,9 @@ async def get(context: idol.BasicSchoolIdolContext, id: int | None = None):
 
 
 async def get_current(context: idol.SchoolIdolUserParams):
+    if context.token is None:
+        raise ValueError("logic error, token is None")
+
     result = await context.db.main.get(main.User, context.token.user_id)
     if result is None:
         raise ValueError("logic error, user is None")

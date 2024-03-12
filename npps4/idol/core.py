@@ -81,6 +81,9 @@ async def client_check(context: contexttype.SchoolIdolParams, check_version: boo
             },
         )
 
+    await context.finalize()
+    assert context.token is not None
+
     # XMC check
     if config.need_xmc_verify() and context.raw_request_data is not None and xmc_verify != idoltype.XMCVerifyMode.NONE:
         if context.x_message_code is None:

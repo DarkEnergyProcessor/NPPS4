@@ -207,3 +207,8 @@ def get_live_box_drop_protocol():
         )
 
     return _live_box_drop_module
+
+
+def get_session_expiry_time():
+    global CONFIG_DATA
+    return CONFIG_DATA.main.session_expiry

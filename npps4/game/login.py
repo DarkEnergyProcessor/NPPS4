@@ -3,10 +3,10 @@ import base64
 from .. import idol
 from .. import util
 from ..db import main
-from ..idol.system import live
 from ..idol.system import unit
 from ..idol.system import user
 from ..idol import error
+from ..idol import session
 
 import fastapi
 import pydantic
@@ -130,6 +130,7 @@ class StarterUnitSelectResponse(pydantic.BaseModel):
 async def login_login(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> LoginResponse:
     """Login user"""
 
+    assert context.token is not None
     # Decrypt credentials
     key = util.xorbytes(context.token.client_key[:16], context.token.server_key[:16])
     loginkey = util.decrypt_aes(key, base64.b64decode(request.login_key))
@@ -146,7 +147,8 @@ async def login_login(context: idol.SchoolIdolAuthParams, request: LoginRequest)
         raise error.IdolError(error_code=407, status_code=600, detail="Login not found")
 
     # Login
-    token = util.encapsulate_token(context.token.server_key, context.token.client_key, u.id)
+    token = await session.encapsulate_token(context, context.token.server_key, context.token.client_key, u.id)
+    await session.invalidate_current(context)
     return LoginResponse(authorize_token=token, user_id=u.id, server_timestamp=util.time())
 
 
@@ -162,7 +164,7 @@ async def login_authkey(context: idol.SchoolIdolParams, request: AuthkeyRequest)
 
     # Create new token
     server_key = util.randbytes(32)
-    token = util.encapsulate_token(server_key, client_key, 0)
+    token = await session.encapsulate_token(context, server_key, client_key)
 
     # Log
     util.log("My client key is", client_key)
@@ -178,6 +180,8 @@ async def login_authkey(context: idol.SchoolIdolParams, request: AuthkeyRequest)
 @idol.register("login", "startUp", check_version=False, batchable=False)
 async def login_startup(context: idol.SchoolIdolAuthParams, request: LoginRequest) -> StartupResponse:
     """Register new account."""
+
+    assert context.token is not None
     key = util.xorbytes(context.token.client_key[:16], context.token.server_key[:16])
     loginkey = util.decrypt_aes(key, base64.b64decode(request.login_key))
     passwd = util.decrypt_aes(key, base64.b64decode(request.login_passwd))
@@ -188,7 +192,7 @@ async def login_startup(context: idol.SchoolIdolAuthParams, request: LoginReques
 
     # Create user
     u = await user.create(context, str(loginkey, "UTF-8"), str(passwd, "UTF-8"))
-
+    await session.invalidate_current(context)
     return StartupResponse(user_id=str(u.id))
 
 

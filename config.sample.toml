@@ -29,6 +29,11 @@ server_private_key_password = ""
 # A sensible default based on version 59.4 is provided.
 server_data = "npps4/server_data.json"
 
+# Session token expiration in seconds.
+# If you don't want user token to expire, set this to 0.
+# The default is 72 hours (3 days).
+session_expiry = 259200
+
 [database]
 # This is database-related configuration.
 # NPPS4 uses SQLAlchemy for its ORM mapper library.

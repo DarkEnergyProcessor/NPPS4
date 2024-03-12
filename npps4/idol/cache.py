@@ -7,6 +7,7 @@ from ..db import main
 
 async def load_response(context: contexttype.SchoolIdolParams, endpoint: str):
     if isinstance(context, contexttype.SchoolIdolUserParams) and context.nonce > 0:
+        assert context.token is not None
         q = sqlalchemy.select(main.RequestCache).where(
             main.RequestCache.user_id == context.token.user_id, main.RequestCache.nonce == context.nonce
         )
@@ -23,6 +24,7 @@ async def load_response(context: contexttype.SchoolIdolParams, endpoint: str):
 
 async def store_response(context: contexttype.SchoolIdolParams, endpoint: str, response: bytes):
     if isinstance(context, contexttype.SchoolIdolUserParams) and context.nonce > 0:
+        assert context.token is not None
         user_id = context.token.user_id
         nonce = context.nonce
         q = sqlalchemy.select(main.RequestCache).where(
@@ -43,6 +45,7 @@ async def store_response(context: contexttype.SchoolIdolParams, endpoint: str, r
 
 async def clear(context: contexttype.SchoolIdolParams):
     if isinstance(context, contexttype.SchoolIdolUserParams):
+        assert context.token is not None
         q = sqlalchemy.delete(main.RequestCache).where(main.RequestCache.user_id == context.token.user_id)
         result = await context.db.main.execute(q)
         return result.rowcount
