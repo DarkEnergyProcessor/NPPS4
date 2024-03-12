@@ -1,12 +1,12 @@
 import sqlalchemy
 
-from . import contexttype
+from . import session
 from .. import util
 from ..db import main
 
 
-async def load_response(context: contexttype.SchoolIdolParams, endpoint: str):
-    if isinstance(context, contexttype.SchoolIdolUserParams) and context.nonce > 0:
+async def load_response(context: session.SchoolIdolParams, endpoint: str):
+    if isinstance(context, session.SchoolIdolUserParams) and context.nonce > 0:
         assert context.token is not None
         q = sqlalchemy.select(main.RequestCache).where(
             main.RequestCache.user_id == context.token.user_id, main.RequestCache.nonce == context.nonce
@@ -22,8 +22,8 @@ async def load_response(context: contexttype.SchoolIdolParams, endpoint: str):
     return None
 
 
-async def store_response(context: contexttype.SchoolIdolParams, endpoint: str, response: bytes):
-    if isinstance(context, contexttype.SchoolIdolUserParams) and context.nonce > 0:
+async def store_response(context: session.SchoolIdolParams, endpoint: str, response: bytes):
+    if isinstance(context, session.SchoolIdolUserParams) and context.nonce > 0:
         assert context.token is not None
         user_id = context.token.user_id
         nonce = context.nonce
@@ -43,11 +43,7 @@ async def store_response(context: contexttype.SchoolIdolParams, endpoint: str, r
         util.log("Stored cache for endpoint", endpoint, context.nonce)
 
 
-async def clear(context: contexttype.SchoolIdolParams):
-    if isinstance(context, contexttype.SchoolIdolUserParams):
-        assert context.token is not None
-        q = sqlalchemy.delete(main.RequestCache).where(main.RequestCache.user_id == context.token.user_id)
-        result = await context.db.main.execute(q)
-        return result.rowcount
-
-    return 0
+async def clear(context: session.BasicSchoolIdolContext, user_id: int):
+    q = sqlalchemy.delete(main.RequestCache).where(main.RequestCache.user_id == user_id)
+    result = await context.db.main.execute(q)
+    return result.rowcount

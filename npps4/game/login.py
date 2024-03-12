@@ -5,6 +5,7 @@ from .. import util
 from ..db import main
 from ..system import unit
 from ..system import user
+from ..idol import cache
 from ..idol import error
 from ..idol import session
 
@@ -149,6 +150,7 @@ async def login_login(context: idol.SchoolIdolAuthParams, request: LoginRequest)
     # Login
     token = await session.encapsulate_token(context, context.token.server_key, context.token.client_key, u.id)
     await session.invalidate_current(context)
+    await cache.clear(context, u.id)
     return LoginResponse(authorize_token=token, user_id=u.id, server_timestamp=util.time())
 
 

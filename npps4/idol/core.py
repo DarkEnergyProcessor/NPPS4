@@ -11,7 +11,7 @@ import fastapi
 import pydantic
 
 from . import cache
-from . import contexttype
+from . import session
 from . import error
 from .. import idoltype
 from .. import release_key
@@ -28,9 +28,9 @@ class DummyModel(pydantic.RootModel[list]):
 
 # Backward compatibility
 # TODO: Rewrite all endpoints to use new imports and remove this
-from .contexttype import BasicSchoolIdolContext, SchoolIdolParams, SchoolIdolAuthParams, SchoolIdolUserParams
+from .session import BasicSchoolIdolContext, SchoolIdolParams, SchoolIdolAuthParams, SchoolIdolUserParams
 
-_T = TypeVar("_T", bound=contexttype.SchoolIdolParams)
+_T = TypeVar("_T", bound=session.SchoolIdolParams)
 _U = TypeVar("_U", bound=pydantic.BaseModel)
 _V = TypeVar("_V", bound=pydantic.BaseModel, covariant=True)
 
@@ -70,7 +70,7 @@ def _get_request_data(model: type[_U]):
     return actual_getter
 
 
-async def client_check(context: contexttype.SchoolIdolParams, check_version: bool, xmc_verify: idoltype.XMCVerifyMode):
+async def client_check(context: session.SchoolIdolParams, check_version: bool, xmc_verify: idoltype.XMCVerifyMode):
     # Maintenance check
     if config.is_maintenance():
         return fastapi.responses.JSONResponse(
@@ -81,14 +81,17 @@ async def client_check(context: contexttype.SchoolIdolParams, check_version: boo
             },
         )
 
-    await context.finalize()
-    assert context.token is not None
+    # Only for /login/authkey.
+    if xmc_verify != idoltype.XMCVerifyMode.NONE and context.token is None:
+        raise fastapi.HTTPException(403, detail="Invalid token")
 
     # XMC check
     if config.need_xmc_verify() and context.raw_request_data is not None and xmc_verify != idoltype.XMCVerifyMode.NONE:
+        assert context.token is not None
+
         if context.x_message_code is None:
             raise fastapi.HTTPException(422, "Invalid X-Message-Code")
-        if not isinstance(context, contexttype.SchoolIdolAuthParams):
+        if not isinstance(context, session.SchoolIdolAuthParams):
             raise fastapi.HTTPException(422, "Invalid X-Message-Code (no token)")
 
         if xmc_verify == idoltype.XMCVerifyMode.SHARED:
@@ -138,9 +141,12 @@ def assemble_response_data(response: _PossibleResponse[_V], exclude_none: bool =
 
 
 async def build_response(
-    context: contexttype.SchoolIdolParams, response: _PossibleResponse[_V] | bytes, exclude_none: bool = False
+    context: session.SchoolIdolParams, response: _PossibleResponse[_V] | bytes, exclude_none: bool = False
 ):
-    if not isinstance(response, bytes):
+    if isinstance(response, bytes):
+        http_code = 200
+        status_code = 200
+    else:
         response_data_dict, status_code, http_code = assemble_response_data(
             cast(_PossibleResponse[_V], response), exclude_none
         )
@@ -266,6 +272,9 @@ def register(
                     _EndpointWithoutRequestWithResponse[_T, _V] | _EndpointWithoutRequestWithoutResponse[_T], f
                 )
 
+                async with context:
+                    await context.finalize()
+
                 response = await client_check(context, check_version, xmc_verify)
                 if response is None:
                     try:
@@ -328,6 +337,10 @@ def register(
             ):
                 nonlocal check_version, xmc_verify, f, allow_retry_on_unhandled_exception, log_response_data
                 nonlocal profile_this_endpoint, endpoint
+
+                async with context:
+                    await context.finalize()
+
                 func = cast(_EndpointWithRequestWithResponse[_T, _U, _V], f)
                 response = await client_check(context, check_version, xmc_verify)
 
@@ -454,9 +467,12 @@ _api_request_data_schema = {
     },
 )
 async def api_endpoint(
-    context: Annotated[contexttype.SchoolIdolUserParams, fastapi.Depends(contexttype.SchoolIdolUserParams)],
+    context: Annotated[session.SchoolIdolUserParams, fastapi.Depends(session.SchoolIdolUserParams)],
     request: Annotated[list[BatchRequest], fastapi.Depends(_get_request_data(BatchRequestRoot))],
 ):
+    async with context:
+        await context.finalize()
+
     response = await client_check(context, True, idoltype.XMCVerifyMode.SHARED)
     raw_request_data = json.loads(context.raw_request_data)
 
@@ -490,10 +506,10 @@ async def api_endpoint(
                             pydantic_request = endpoint.request_class.model_validate(request_data)
                             func = cast(
                                 _EndpointWithRequestWithResponse[
-                                    contexttype.SchoolIdolUserParams, pydantic.BaseModel, pydantic.BaseModel
+                                    session.SchoolIdolUserParams, pydantic.BaseModel, pydantic.BaseModel
                                 ]
                                 | _EndpointWithRequestWithoutResponse[
-                                    contexttype.SchoolIdolUserParams, pydantic.BaseModel
+                                    session.SchoolIdolUserParams, pydantic.BaseModel
                                 ],
                                 endpoint.function,
                             )
@@ -506,10 +522,8 @@ async def api_endpoint(
                                 result = await func(context, pydantic_request)
                         else:
                             func = cast(
-                                _EndpointWithoutRequestWithResponse[
-                                    contexttype.SchoolIdolUserParams, pydantic.BaseModel
-                                ]
-                                | _EndpointWithoutRequestWithoutResponse[contexttype.SchoolIdolUserParams],
+                                _EndpointWithoutRequestWithResponse[session.SchoolIdolUserParams, pydantic.BaseModel]
+                                | _EndpointWithoutRequestWithoutResponse[session.SchoolIdolUserParams],
                                 endpoint.function,
                             )
                             if endpoint.profile:
