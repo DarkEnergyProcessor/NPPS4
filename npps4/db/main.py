@@ -74,6 +74,18 @@ class User(common.Base, kw_only=True):
         return result[SALT_SIZE:] == hmac_hash[SALT_SIZE:]
 
 
+class RequestCache(common.Base, kw_only=True):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
+    user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
+    )
+    endpoint: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+    nonce: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, index=True)
+    response: sqlalchemy.orm.Mapped[bytes] = sqlalchemy.orm.mapped_column()
+
+    __table_args__ = (sqlalchemy.UniqueConstraint(user_id, nonce),)
+
+
 class Background(common.Base, kw_only=True):
     id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
