@@ -1,4 +1,5 @@
 import copy
+import datetime
 import hashlib
 import io
 import json
@@ -115,7 +116,11 @@ def generate_server_info(request: fastapi.Request, platform: int, version: tuple
         print(jsondata)
         result = io.BytesIO()
         with zipfile.ZipFile(result, "w") as z:
-            with z.open("config/server_info.json", "w") as f:
+            now = datetime.datetime.utcnow()
+            info = zipfile.ZipInfo(
+                "config/server_info.json", (now.year, now.month, now.day, now.hour, now.minute, now.second)
+            )
+            with z.open(info, "w") as f:
                 dctx = honkypy.encrypt_setup_by_gametype("JP", "config/server_info.json", 3)
                 f.write(dctx.emit_header())
                 f.write(dctx.decrypt_block(jsondata))
