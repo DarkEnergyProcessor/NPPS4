@@ -62,6 +62,7 @@ def get_hash_key(request: fastapi.Request, platform: int, version: tuple[int, in
     root_path: str = request.scope.get("root_path") or "/"
     return (
         root_path
+        + request.url.scheme
         + request.url.netloc
         + app.main.prefix
         + app.webview.prefix
@@ -87,14 +88,7 @@ def generate_server_info(request: fastapi.Request, platform: int, version: tuple
         if root_path[-1] != "/":
             root_path = root_path + "/"
 
-        platform_type: int = int(platform)
-        if platform_type == 1:
-            scheme = "https"
-        elif platform_type == 2:
-            scheme = "http"
-        else:
-            raise fastapi.HTTPException(422, "Unknown platform type")
-
+        scheme = request.url.scheme
         ver: str = util.sif_version_string(version)
         end_point = make_endpoint(app.main.prefix, scheme, request)
         end_point = end_point[end_point.index("/", 8) :]
