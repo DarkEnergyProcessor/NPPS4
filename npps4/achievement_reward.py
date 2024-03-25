@@ -703,6 +703,18 @@ ACHIEVEMENT_REWARDS: dict[int, list[common.AnyItem]] = {
     10290165: [scenario_model.ScenarioItem(item_id=3102)],  # Reward: Tail the 2nd Years! - Tail the 2nd Years! 1
     10290166: [scenario_model.ScenarioItem(item_id=3103)],  # Reward: Tail the 2nd Years! - Tail the 2nd Years! 2
     10290167: [scenario_model.ScenarioItem(item_id=3104)],  # Reward: Tail the 2nd Years! - Tail the 2nd Years! 3
+    10370001: [item_model.Item(add_type=ADD_TYPE.LIVE, item_id=13)],  # Reward: Bokura wa Ima no Naka de
+    10370002: [item_model.Item(add_type=ADD_TYPE.LIVE, item_id=20)],  # Reward: Kitto Seishun ga Kikoeru
+    10370003: [item_model.Item(add_type=ADD_TYPE.LIVE, item_id=214)],  # Reward: It's our miraculous time
+    10370004: [item_model.Item(add_type=ADD_TYPE.LIVE, item_id=230)],  # Reward: Donna Tokimo Zutto
+    10370005: [item_model.Item(add_type=ADD_TYPE.LIVE, item_id=419)],  # Reward: Angelic Angel
+    10370006: [item_model.Item(add_type=ADD_TYPE.LIVE, item_id=442)],  # Reward: SUNNY DAY SONG
+    10370007: [item_model.Item(add_type=ADD_TYPE.LIVE, item_id=444)],  # Reward: Bokutachi wa Hitotsu no Hikari
+    10370008: [item_model.Item(add_type=ADD_TYPE.LIVE, item_id=447)],  # Reward: HEART to HEART!
+    10370009: [item_model.Item(add_type=ADD_TYPE.LIVE, item_id=448)],  # Reward: Arashi no Naka no Koi dakara
+    10370010: [item_model.Item(add_type=ADD_TYPE.LIVE, item_id=141)],  # Reward: Takaramonos
+    10370011: [item_model.Item(add_type=ADD_TYPE.LIVE, item_id=146)],  # Reward: Paradise Live
+    10370012: [item_model.Item(add_type=ADD_TYPE.LIVE, item_id=460)],  # Reward: MOMENT RING
     20010007: [
         item.loveca(1),
         item.game_coin(10000),
