@@ -356,6 +356,7 @@ def register(
                             else:
                                 result = await func(context, request)
                             response = await build_response(context, result, exclude_none=exclude_none)
+                            await cache.store_response(context, endpoint, response.body)
 
                             if log_response_data and result is not None:
                                 _log_response_data(module, action, result)
