@@ -3,6 +3,7 @@ import dataclasses
 import pydantic
 import sqlalchemy
 
+from . import common
 from . import item_model
 from .. import achievement_reward
 from .. import db
@@ -26,7 +27,7 @@ class AchievementData(pydantic.BaseModel):
     is_locked: bool
     open_condition_string: str = ""
     accomplish_id: str = ""
-    reward_list: list[item_model.Item]
+    reward_list: list[common.AnyItem]
 
     @staticmethod
     def from_sqlalchemy(ach: main.Achievement, info: achievement.Achievement, rewards: list[item_model.Item]):
