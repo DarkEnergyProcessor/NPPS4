@@ -97,6 +97,7 @@ async def scenario_reward(context: idol.SchoolIdolUserParams, request: ScenarioR
         await achievement.check_type_23(context, current_user, request.scenario_id)
         + await achievement.check_type_57(context, current_user, finished_scenario_count)
         + await achievement.check_type_53_recursive(context, current_user)
+        + await achievement.check_type_30(context, current_user)
     )
 
     # Give achievement rewards
