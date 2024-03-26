@@ -125,9 +125,7 @@ def _call_api(
 
 
 @overload
-def _call_api(
-    endpoint: str, request_data: dict[str, Any] | list[Any] | None = None, /, *, raw: Literal[True]
-) -> bytes:
+def _call_api(endpoint: str, request_data: dict[str, Any] | list[Any] | None = None, /, *, raw: Literal[True]) -> bytes:
     ...
 
 

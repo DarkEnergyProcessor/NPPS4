@@ -43,9 +43,7 @@ class BeatmapData(pydantic.BaseModel):
     effect_value: float
     position: int
     speed: float = 1.0  # Beatmap speed multipler
-    vanish: Literal[
-        0, 1, 2
-    ] = 0  # 0 = Normal; 1 = Note hidden as it approaches; 2 = Note shows just before its timing.
+    vanish: Literal[0, 1, 2] = 0  # 0 = Normal; 1 = Note hidden as it approaches; 2 = Note shows just before its timing.
 
 
 # Beatmap provider file must define "get_beatmap_data" async function with these parameters:

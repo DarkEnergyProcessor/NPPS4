@@ -268,9 +268,7 @@ def register(
             async def wrap1(context: Annotated[_T, fastapi.Depends(params[0])]):
                 nonlocal check_version, xmc_verify, exclude_none, f, allow_retry_on_unhandled_exception
                 nonlocal log_response_data, profile_this_endpoint, endpoint
-                func = cast(
-                    _EndpointWithoutRequestWithResponse[_T, _V] | _EndpointWithoutRequestWithoutResponse[_T], f
-                )
+                func = cast(_EndpointWithoutRequestWithResponse[_T, _V] | _EndpointWithoutRequestWithoutResponse[_T], f)
 
                 async with context:
                     await context.finalize()
@@ -497,9 +495,7 @@ async def api_endpoint(
                                 _EndpointWithRequestWithResponse[
                                     session.SchoolIdolUserParams, pydantic.BaseModel, pydantic.BaseModel
                                 ]
-                                | _EndpointWithRequestWithoutResponse[
-                                    session.SchoolIdolUserParams, pydantic.BaseModel
-                                ],
+                                | _EndpointWithRequestWithoutResponse[session.SchoolIdolUserParams, pydantic.BaseModel],
                                 endpoint.function,
                             )
 
@@ -525,9 +521,7 @@ async def api_endpoint(
                         if endpoint.log_response_data and result is not None:
                             _log_response_data(module, action, result)
 
-                        current_response, status_code, http_code = assemble_response_data(
-                            result, endpoint.exclude_none
-                        )
+                        current_response, status_code, http_code = assemble_response_data(result, endpoint.exclude_none)
                     except Exception as e:
                         if not isinstance(e, error.IdolError):
                             util.log(f'Error processing "{module}/{action}"', severity=util.logging.ERROR, e=e)

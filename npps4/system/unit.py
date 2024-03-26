@@ -124,9 +124,7 @@ def validate_unit(user: main.User, unit_data: main.Unit | None):
         raise idol.error.by_code(idol.error.ERROR_CODE_UNIT_NOT_EXIST)
 
 
-async def get_supporter_unit(
-    context: idol.BasicSchoolIdolContext, user: main.User, unit_id: int, ensure: bool = False
-):
+async def get_supporter_unit(context: idol.BasicSchoolIdolContext, user: main.User, unit_id: int, ensure: bool = False):
     unit_info = await get_unit_info(context, unit_id)
     if unit_info is None or unit_info.disable_rank_up == 0:
         return None
@@ -301,9 +299,7 @@ async def load_unit_deck(context: idol.BasicSchoolIdolContext, user: main.User, 
         if not ensure:
             return None
 
-        deck = main.UnitDeck(
-            user_id=user.id, deck_number=index, name=TEAM_NAMING[context.lang].format(chr(index + 64))
-        )
+        deck = main.UnitDeck(user_id=user.id, deck_number=index, name=TEAM_NAMING[context.lang].format(chr(index + 64)))
         context.db.main.add(deck)
         await context.db.main.flush()
     else:

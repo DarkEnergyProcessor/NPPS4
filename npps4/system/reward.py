@@ -48,9 +48,7 @@ async def count_presentbox(context: idol.BasicSchoolIdolContext, user: main.User
     q = (
         sqlalchemy.select(sqlalchemy.func.count())
         .select_from(main.Incentive)
-        .where(
-            main.Incentive.user_id == user.id, (main.Incentive.expire_date == 0) | (main.Incentive.expire_date >= t)
-        )
+        .where(main.Incentive.user_id == user.id, (main.Incentive.expire_date == 0) | (main.Incentive.expire_date >= t))
     )
     qc = await context.db.main.execute(q)
     return qc.scalar() or 0

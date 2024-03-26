@@ -75,9 +75,7 @@ class DownloadUpdateResponse(pydantic.RootModel[list[DownloadUpdateInfo]]):
 
 
 @idol.register("download", "update", check_version=False, batchable=False)
-async def download_update(
-    context: idol.SchoolIdolAuthParams, request: DownloadUpdateRequest
-) -> DownloadUpdateResponse:
+async def download_update(context: idol.SchoolIdolAuthParams, request: DownloadUpdateRequest) -> DownloadUpdateResponse:
     try:
         install_version = util.parse_sif_version(request.install_version)
         external_version = util.parse_sif_version(request.external_version)
@@ -132,8 +130,6 @@ async def download_additional(
 
 
 @idol.register("download", "getUrl", check_version=False, batchable=False)
-async def download_geturl(
-    context: idol.SchoolIdolAuthParams, request: DownloadGetUrlRequest
-) -> DownloadGetUrlResponse:
+async def download_geturl(context: idol.SchoolIdolAuthParams, request: DownloadGetUrlRequest) -> DownloadGetUrlResponse:
     links = await download.get_raw_files(context.request, _TARGET_OS_REMAP[request.os.value], request.path_list)
     return DownloadGetUrlResponse(url_list=[link.url for link in links])
