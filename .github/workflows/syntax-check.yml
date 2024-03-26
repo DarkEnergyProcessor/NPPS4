@@ -1,0 +1,21 @@
+name: Syntax Check
+on: [push, pull_request]
+
+jobs:
+  syntax-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v5.0.0
+        with:
+          python-version: '3.12'
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Virtual Environment
+        run: python -m venv venv
+      - name: Install requirements and Black
+        run: venv/bin/pip install -r requirements.txt black
+      - name: Check Black Formatter
+        run: venv/bin/black -l 120 --check .
+      - name: Check PyRight Syntax
+        run: npx pyright
