@@ -8,8 +8,7 @@ from typing import Protocol
 
 
 class Script(Protocol):
-    async def run_script(self, args: list[str]):
-        ...
+    async def run_script(self, args: list[str]): ...
 
 
 def load_script(path: str):

@@ -272,15 +272,13 @@ TEAM_NAMING = {idoltype.Language.en: "Team {0}", idoltype.Language.jp: "ユニ�
 @overload
 async def load_unit_deck(
     context: idol.BasicSchoolIdolContext, user: main.User, index: int, ensure: Literal[False] = False
-) -> tuple[main.UnitDeck, list[int]] | None:
-    ...
+) -> tuple[main.UnitDeck, list[int]] | None: ...
 
 
 @overload
 async def load_unit_deck(
     context: idol.BasicSchoolIdolContext, user: main.User, index: int, ensure: Literal[True]
-) -> tuple[main.UnitDeck, list[int]]:
-    ...
+) -> tuple[main.UnitDeck, list[int]]: ...
 
 
 VALID_DECK_ID = range(1, 19)

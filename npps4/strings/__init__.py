@@ -17,13 +17,11 @@ CLIENT_STRINGS = game_mater.STRINGS
 
 
 @overload
-def get(string_key: str, string_value: int | str, context: idol.Language | idol.BasicSchoolIdolContext) -> str:
-    ...
+def get(string_key: str, string_value: int | str, context: idol.Language | idol.BasicSchoolIdolContext) -> str: ...
 
 
 @overload
-def get(string_key: str, string_value: int | str) -> tuple[str, str | None]:
-    ...
+def get(string_key: str, string_value: int | str) -> tuple[str, str | None]: ...
 
 
 def get(string_key: str, string_value: int | str, context: idol.Language | idol.BasicSchoolIdolContext | None = None):
@@ -52,13 +50,11 @@ POSITIONAL_MATCH = re.compile(r"%\d+\$[a-z]")
 
 
 @overload
-def format_mapped(string: str, /, **kwargs: int | str) -> str:
-    ...
+def format_mapped(string: str, /, **kwargs: int | str) -> str: ...
 
 
 @overload
-def format_mapped(string: tuple[str, str | None], /, **kwargs: int | str) -> tuple[str, str | None]:
-    ...
+def format_mapped(string: tuple[str, str | None], /, **kwargs: int | str) -> tuple[str, str | None]: ...
 
 
 def format_mapped(string: str | tuple[str, str | None], /, **kwargs: int | str):
@@ -81,13 +77,11 @@ _FMT_SPECIFIER: dict[str, tuple[type, Callable[[Any], str]]] = {
 
 
 @overload
-def format_positional(string: str, /, *args: int | str) -> str:
-    ...
+def format_positional(string: str, /, *args: int | str) -> str: ...
 
 
 @overload
-def format_positional(string: tuple[str, str | None], /, *args: int | str) -> tuple[str, str | None]:
-    ...
+def format_positional(string: tuple[str, str | None], /, *args: int | str) -> tuple[str, str | None]: ...
 
 
 def format_positional(string: str | tuple[str, str | None], /, *args: int | str):
@@ -118,13 +112,11 @@ def format_positional(string: str | tuple[str, str | None], /, *args: int | str)
 
 
 @overload
-def format_simple(string: str, /, *args: int | str) -> str:
-    ...
+def format_simple(string: str, /, *args: int | str) -> str: ...
 
 
 @overload
-def format_simple(string: tuple[str, str | None], /, *args: int | str) -> tuple[str, str | None]:
-    ...
+def format_simple(string: tuple[str, str | None], /, *args: int | str) -> tuple[str, str | None]: ...
 
 
 def format_simple(string: str | tuple[str, str | None], /, *args: int | str):

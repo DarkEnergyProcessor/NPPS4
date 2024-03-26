@@ -202,9 +202,9 @@ def _fix_schema(absdest: str, schema: dict[str, Any]):
             if "$ref" in data:
                 ref: str = data["$ref"]
                 target = ref.split("/")[-1]
-                data[
-                    "$ref"
-                ] = f"#/paths/{absdest.replace('~', '~0').replace('/', '~1')}/post/requestBody/$defs/{target}"
+                data["$ref"] = (
+                    f"#/paths/{absdest.replace('~', '~0').replace('/', '~1')}/post/requestBody/$defs/{target}"
+                )
 
             i = data.values()
         elif isinstance(data, list):

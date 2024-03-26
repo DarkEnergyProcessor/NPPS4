@@ -36,9 +36,11 @@ async def banner_bannerlist(context: idol.SchoolIdolUserParams) -> BannerListRes
             BannerInfo(
                 banner_type=18,
                 target_id=1,
-                asset_path="en/assets/image/handover/banner/banner_01.png"
-                if context.lang == idol.Language.en
-                else "assets/image/handover/banner/banner_01.png",
+                asset_path=(
+                    "en/assets/image/handover/banner/banner_01.png"
+                    if context.lang == idol.Language.en
+                    else "assets/image/handover/banner/banner_01.png"
+                ),
                 is_registered=False,
                 fixed_flag=False,
                 back_side=False,
@@ -50,9 +52,11 @@ async def banner_bannerlist(context: idol.SchoolIdolUserParams) -> BannerListRes
             BannerInfo(
                 banner_type=2,
                 target_id=1,
-                asset_path="en/assets/image/webview/wv_ba_01.png"
-                if context.lang == idol.Language.en
-                else "assets/image/webview/wv_ba_01.png",
+                asset_path=(
+                    "en/assets/image/webview/wv_ba_01.png"
+                    if context.lang == idol.Language.en
+                    else "assets/image/webview/wv_ba_01.png"
+                ),
                 webview_url=f"{url.scheme}://{hostname}:{port}",
                 fixed_flag=False,
                 back_side=True,

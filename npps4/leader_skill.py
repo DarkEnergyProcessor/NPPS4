@@ -4,8 +4,7 @@ from typing import Protocol
 
 
 class _LeaderSkillCalcFunc(Protocol):
-    def __call__(self, smile: int, pure: int, cool: int, by: float) -> tuple[int, int, int]:
-        ...
+    def __call__(self, smile: int, pure: int, cool: int, by: float) -> tuple[int, int, int]: ...
 
 
 def inc_smile(smile: int, pure: int, cool: int, by: float):
