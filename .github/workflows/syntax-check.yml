@@ -18,4 +18,7 @@ jobs:
       - name: Check Black Formatter
         run: venv/bin/black -l 120 --check .
       - name: Check PyRight Syntax
-        run: npx pyright
+        run: |
+          set -e
+          source venv/bin/activate
+          npx pyright
