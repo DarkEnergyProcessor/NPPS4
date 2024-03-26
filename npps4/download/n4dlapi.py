@@ -60,15 +60,13 @@ async def _call_api_async_notry(
 @overload
 async def _call_api_async(
     endpoint: str, request_data: dict[str, Any] | list[Any] | None = None, /, *, raw: Literal[False] = False
-) -> Any:
-    ...
+) -> Any: ...
 
 
 @overload
 async def _call_api_async(
     endpoint: str, request_data: dict[str, Any] | list[Any] | None = None, /, *, raw: Literal[True]
-) -> bytes:
-    ...
+) -> bytes: ...
 
 
 async def _call_api_async(
@@ -120,13 +118,13 @@ def _call_api_notry(
 @overload
 def _call_api(
     endpoint: str, request_data: dict[str, Any] | list[Any] | None = None, /, *, raw: Literal[False] = False
-) -> Any:
-    ...
+) -> Any: ...
 
 
 @overload
-def _call_api(endpoint: str, request_data: dict[str, Any] | list[Any] | None = None, /, *, raw: Literal[True]) -> bytes:
-    ...
+def _call_api(
+    endpoint: str, request_data: dict[str, Any] | list[Any] | None = None, /, *, raw: Literal[True]
+) -> bytes: ...
 
 
 def _call_api(endpoint: str, request_data: dict[str, Any] | list[Any] | None = None, /, *, raw: bool = False):
