@@ -12,7 +12,7 @@ class Item(pydantic.BaseModel):
     item_category_id: int = 0
     reward_box_flag: bool = False
     comment: str = ""
-    rarity: int = 6  # For effort. TODO
+    # rarity: int = 6  # For effort. TODO
 
     def dump_extra_data(self) -> dict[str, Any]:
         dump = self.model_dump()

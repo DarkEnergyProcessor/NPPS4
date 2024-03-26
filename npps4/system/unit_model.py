@@ -8,12 +8,16 @@ class UnitSupportItem(item_model.Item):
     add_type: int = ADD_TYPE.UNIT
     new_unit_flag: bool = False
     is_support_member: bool = False
-    unit_id: int
+    item_id: int = pydantic.Field(exclude=True)
+
+    @pydantic.computed_field
+    @property
+    def unit_id(self) -> int:
+        return self.item_id
 
 
-class UnitInfoData(pydantic.BaseModel):
+class UnitInfoBase(pydantic.BaseModel):
     unit_owning_user_id: int
-    unit_id: int
     exp: int
     next_exp: int
     level: int
@@ -39,7 +43,11 @@ class UnitInfoData(pydantic.BaseModel):
     insert_date: str = ""
 
 
-class UnitItem(UnitSupportItem, UnitInfoData):
+class UnitInfoData(UnitInfoBase):
+    unit_id: int
+
+
+class UnitItem(UnitSupportItem, UnitInfoBase):
     removable_skill_ids: list[int] = pydantic.Field(default_factory=list)
 
 

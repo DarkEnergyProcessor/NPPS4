@@ -775,9 +775,7 @@ async def quick_create_by_unit_add(
     if await is_support_member(context, unit_id):
         return QuickAddResult(
             unit_id,
-            unit_model.UnitSupportItem(
-                item_id=unit_id, unit_id=unit_id, is_support_member=True, new_unit_flag=new_unit_flag
-            ),
+            unit_model.UnitSupportItem(item_id=unit_id, is_support_member=True, new_unit_flag=new_unit_flag),
         )
     else:
         unit_data = await create_unit(context, user, unit_id, True, level=level)

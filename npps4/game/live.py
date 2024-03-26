@@ -273,7 +273,7 @@ class LiveRewardResponseUnitList(pydantic.BaseModel):
 
 class LiveRewardGoalAccomplishedInfo(pydantic.BaseModel):
     achieved_ids: list[int]
-    rewards: list[item_model.Item]
+    rewards: list[common.AnyItem]
 
 
 class LiveRewardResponse(achievement.AchievementMixin):
@@ -295,9 +295,9 @@ class LiveRewardResponse(achievement.AchievementMixin):
     after_user_info: user.UserInfoData
     next_level_info: list[user.NextLevelInfo]
     goal_accomp_info: LiveRewardGoalAccomplishedInfo
-    special_reward_info: list[item_model.Item]
+    special_reward_info: list[common.AnyItem]
     event_info: list = pydantic.Field(default_factory=list)  # TODO
-    daily_reward_info: list[item_model.Item] = pydantic.Field(default_factory=list)  # TODO
+    daily_reward_info: list[common.AnyItem] = pydantic.Field(default_factory=list)  # TODO
     can_send_friend_request: bool = False
     using_buff_info: list = pydantic.Field(default_factory=list)  # TODO
     class_system: class_system_module.ClassSystemData = pydantic.Field(
