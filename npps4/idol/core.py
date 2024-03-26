@@ -424,12 +424,6 @@ class BatchRequest(pydantic.BaseModel):
 class BatchRequestRoot(pydantic.RootModel):
     root: list[BatchRequest]
 
-    def __iter__(self):
-        return iter(self.root)
-
-    def __getitem__(self, item):
-        return self.root[item]
-
 
 class BatchResponse(pydantic.BaseModel):
     result: dict | list
@@ -440,12 +434,6 @@ class BatchResponse(pydantic.BaseModel):
 
 class BatchResponseRoot(pydantic.RootModel):
     root: list[BatchResponse]
-
-    def __iter__(self):
-        return iter(self.root)
-
-    def __getitem__(self, item):
-        return self.root[item]
 
 
 _api_request_data_schema = {
