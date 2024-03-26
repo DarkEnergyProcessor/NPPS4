@@ -183,6 +183,19 @@ def _log_response_data(module: str, action: str, response_data: pydantic.BaseMod
     util.log(f"Response data for {module}/{action} is saved to {filename}", severity=util.logging.DEBUG)
 
 
+def _write_profile_data(module: str, action: str, prof: cProfile.Profile):
+    output_dir = os.path.join(config.get_data_directory(), "profile_endpoint")
+    os.makedirs(output_dir, exist_ok=True)
+    t = util.time()
+    filename = f"{module}_{action}_{t:08x}.prof"
+
+    try:
+        prof.dump_stats(os.path.join(output_dir, filename))
+        util.log(f"Profile result for {module}/{action} is saved to {filename}", severity=util.logging.DEBUG)
+    except OSError as e:
+        util.log(f"Unable to save profile result for {module}/{action} to {filename}", e=e, severity=util.logging.DEBUG)
+
+
 def _fix_schema(absdest: str, schema: dict[str, Any]):
     defs: dict[str, Any] | None = None
 
@@ -281,9 +294,10 @@ def register(
 
                             if cached_response is None:
                                 if profile_this_endpoint:
-                                    with cProfile.Profile() as profile_obj:
+                                    profile_obj = cProfile.Profile()
+                                    with profile_obj:
                                         result = await func(context)
-                                        profile_obj.print_stats("time")
+                                    _write_profile_data(module, action, profile_obj)
                                 else:
                                     result = await func(context)
                                 response = await build_response(context, result, exclude_none=exclude_none)
@@ -347,17 +361,21 @@ def register(
                         async with context:
                             cached_response = await cache.load_response(context, endpoint)
 
-                            if profile_this_endpoint:
-                                with cProfile.Profile() as profile_obj:
+                            if cached_response is None:
+                                if profile_this_endpoint:
+                                    profile_obj = cProfile.Profile()
+                                    with profile_obj:
+                                        result = await func(context, request)
+                                    _write_profile_data(module, action, profile_obj)
+                                else:
                                     result = await func(context, request)
-                                    profile_obj.print_stats("time")
-                            else:
-                                result = await func(context, request)
-                            response = await build_response(context, result, exclude_none=exclude_none)
-                            await cache.store_response(context, endpoint, response.body)
+                                response = await build_response(context, result, exclude_none=exclude_none)
+                                await cache.store_response(context, endpoint, response.body)
 
-                            if log_response_data and result is not None:
-                                _log_response_data(module, action, result)
+                                if log_response_data and result is not None:
+                                    _log_response_data(module, action, result)
+                            else:
+                                result = await build_response(context, cached_response, exclude_none=exclude_none)
                     except error.IdolError as e:
                         response = await build_response(context, e)
                     except Exception as e:
@@ -500,9 +518,10 @@ async def api_endpoint(
                             )
 
                             if endpoint.profile:
-                                with cProfile.Profile() as profile_obj:
+                                profile_obj = cProfile.Profile()
+                                with profile_obj:
                                     result = await func(context, pydantic_request)
-                                    profile_obj.print_stats("time")
+                                _write_profile_data(module, action, profile_obj)
                             else:
                                 result = await func(context, pydantic_request)
                         else:
@@ -512,9 +531,10 @@ async def api_endpoint(
                                 endpoint.function,
                             )
                             if endpoint.profile:
-                                with cProfile.Profile() as profile_obj:
+                                profile_obj = cProfile.Profile()
+                                with profile_obj:
                                     result = await func(context)
-                                    profile_obj.print_stats("time")
+                                _write_profile_data(module, action, profile_obj)
                             else:
                                 result = await func(context)
 
