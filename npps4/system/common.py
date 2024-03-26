@@ -8,6 +8,8 @@ from typing import Generic, TypeVar
 
 _T = TypeVar("_T")
 
+AnyItem = item_model.Item | unit_model.UnitSupportItem | unit_model.UnitItem | scenario_model.ScenarioItem
+
 
 class BeforeAfter(pydantic.BaseModel, Generic[_T]):
     before: _T
@@ -19,4 +21,6 @@ class BaseRewardInfo(pydantic.BaseModel):
     game_coin_reward_box_flag: bool
 
 
-AnyItem = item_model.Item | unit_model.UnitSupportItem | unit_model.UnitItem | scenario_model.ScenarioItem
+class ItemCount(pydantic.BaseModel):
+    item_id: int
+    amount: int
