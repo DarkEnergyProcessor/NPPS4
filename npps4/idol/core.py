@@ -26,10 +26,6 @@ class DummyModel(pydantic.RootModel[list]):
     root: list = pydantic.Field(default_factory=list)
 
 
-# Backward compatibility
-# TODO: Rewrite all endpoints to use new imports and remove this
-from .session import BasicSchoolIdolContext, SchoolIdolParams, SchoolIdolAuthParams, SchoolIdolUserParams
-
 _T = TypeVar("_T", bound=session.SchoolIdolParams)
 _U = TypeVar("_U", bound=pydantic.BaseModel)
 _V = TypeVar("_V", bound=pydantic.BaseModel, covariant=True)

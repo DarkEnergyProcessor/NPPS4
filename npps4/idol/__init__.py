@@ -1,10 +1,9 @@
 import fastapi
 
 from . import error
-from .core import BasicSchoolIdolContext, SchoolIdolParams, SchoolIdolAuthParams, SchoolIdolUserParams, register
+from .core import register
+from .session import BasicSchoolIdolContext, SchoolIdolParams, SchoolIdolAuthParams, SchoolIdolUserParams
 from ..idoltype import Language, PlatformType, XMCVerifyMode
-
-from typing import Annotated
 
 
 def create_basic_context(request: fastapi.Request):
