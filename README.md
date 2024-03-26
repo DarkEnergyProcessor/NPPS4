@@ -2,7 +2,9 @@ Null-Pointer Private Server: Revisited
 =====
 
 [![Python: 3.12](https://img.shields.io/badge/Python-3.12-blue)](https://www.python.org/)
-[![Code style: black](https://img.shields.io/badge/Code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Static Type Checker: PyRight](https://img.shields.io/badge/Static%20Type%20Checker-PyRight-CEB98F)](https://github.com/microsoft/pyright)
+[![Code Style: Black](https://img.shields.io/badge/Code%20Style-Black-000000.svg)](https://github.com/psf/black)
+[![Syntax Check](https://github.com/DarkEnergyProcessor/NPPS4/actions/workflows/syntax-check.yml/badge.svg)](https://github.com/DarkEnergyProcessor/NPPS4/actions/workflows/syntax-check.yml)
 
 WIP SIF 9.11 private server written using FastAPI.
 
@@ -16,7 +18,7 @@ Notes
 Requirements
 -----
 
-Codes are tested on Python 3.12. Older Python version may work but no guarantees. To contribute, Python 3.12 is
+Codes are tested on Python 3.12. Older Python version may work but not guarantees. To contribute, Python 3.12 is
 required.
 
 Install
