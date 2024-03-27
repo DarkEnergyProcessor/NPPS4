@@ -14,8 +14,8 @@ from ..system import album
 from ..system import class_system as class_system_module
 from ..system import common
 from ..system import effort
-from ..system import item_model
 from ..system import live
+from ..system import live_model
 from ..system import museum
 from ..system import reward
 from ..system import scenario
@@ -76,7 +76,7 @@ class LiveScheduleResponse(pydantic.BaseModel):
 
 
 class LiveStatusResponse(pydantic.BaseModel):
-    normal_live_status_list: list[live.LiveStatus]
+    normal_live_status_list: list[live_model.LiveStatus]
     special_live_status_list: list
     training_live_status_list: list
     marathon_live_status_list: list
@@ -105,7 +105,7 @@ class LivePlayRequest(pydantic.BaseModel):
 
 
 class LivePlayList(pydantic.BaseModel):
-    live_info: live.LiveInfoWithNotes
+    live_info: live_model.LiveInfoWithNotes
     deck_info: advanced.LiveDeckInfo
 
 
@@ -152,7 +152,7 @@ class LiveRewardTriggerLog(pydantic.BaseModel):
 # Along with some asking from other people.
 class LivePreciseScoreData(pydantic.BaseModel):
     has_record: bool
-    live_info: live.LiveInfo
+    live_info: live_model.LiveInfo
     can_replay: bool = False
     random_seed: int = pydantic.Field(default_factory=util.time)
     max_combo: int
@@ -277,7 +277,7 @@ class LiveRewardGoalAccomplishedInfo(pydantic.BaseModel):
 
 
 class LiveRewardResponse(achievement.AchievementMixin):
-    live_info: list[live.LiveInfo]
+    live_info: list[live_model.LiveInfo]
     rank: int
     combo_rank: int
     total_love: int

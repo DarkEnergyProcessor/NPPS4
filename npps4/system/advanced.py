@@ -2,20 +2,20 @@ import dataclasses
 
 import pydantic
 
+from . import achievement
+from . import award
+from . import background
+from . import common
 from . import item_model
+from . import live
+from . import museum
+from . import reward
+from . import scenario
 from . import unit
 from .. import idol
 from .. import leader_skill
 from ..config import config
 from ..const import ADD_TYPE
-from ..system import achievement
-from ..system import award
-from ..system import background
-from ..system import live
-from ..system import museum
-from ..system import reward
-from ..system import scenario
-from ..system import unit
 from ..db import main
 
 from typing import Awaitable, Callable
@@ -91,7 +91,7 @@ class LiveDeckInfo(pydantic.BaseModel):
     unit_list: list[LiveDeckUnitAttribute]
 
 
-async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, item: item_model.Item):
+async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, item: common.AnyItem):
     match item.add_type:
         case ADD_TYPE.ITEM:
             match item.item_id:
@@ -125,6 +125,9 @@ async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, item: 
         # FIXME: Actually check for their return values of these unlocks.
         case ADD_TYPE.LIVE:
             await live.unlock_normal_live(context, user, item.item_id)
+            item.additional_normal_live_status_list = await live.get_normal_live_clear_status_of_track(
+                context, user, item.item_id
+            )
             return AddResult(True)
         case ADD_TYPE.AWARD:
             return AddResult(await award.unlock_award(context, user, item.item_id))
