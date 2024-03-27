@@ -437,7 +437,7 @@ async def check_type_30(context: idol.BasicSchoolIdolContext, user: main.User, r
     """
     Check player rank.
     """
-    return await check_type_countable(context, user, 30, rank or user.level)
+    return await check_type_countable(context, user, 30, user.level if rank is None else rank)
 
 
 @recursive_achievement(32)
@@ -445,14 +445,18 @@ async def check_type_32(context: idol.BasicSchoolIdolContext, user: main.User, l
     """
     Check live show clear of specific `live_track_id`
     """
-    return await check_type_countable(context, user, 32, 1, 1, live_track_id)
+
+    # Note, there's no "count" in here but the database requires it, so specify unused parameter index (e.g. 2)
+    return await check_type_countable(context, user, 32, 1, 2, live_track_id)
 
 
 async def check_type_37(context: idol.BasicSchoolIdolContext, user: main.User, live_track_id: int, increment: bool):
     """
     Check live show clear of specific `live_track_id`
     """
-    return await check_type_increment(context, user, 37, increment, 1, live_track_id)
+
+    # Note, there's no "count" in here but the database requires it, so specify unused parameter index (e.g. 2)
+    return await check_type_increment(context, user, 37, increment, 2, live_track_id)
 
 
 async def check_type_53_old(context: idol.BasicSchoolIdolContext, user: main.User):
