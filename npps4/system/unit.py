@@ -320,8 +320,13 @@ async def save_unit_deck(
     if deck.user_id != user.id:
         raise ValueError("invalid deck")
 
-    if len(unit_owning_user_ids) > len(set(unit_owning_user_ids)):
-        raise ValueError("unit_owning_user_ids has duplicates")
+    unique_unit_owning_user_ids: set[int] = set()
+    for uid in unit_owning_user_ids:
+        if uid > 0:
+            if uid in unique_unit_owning_user_ids:
+                raise ValueError("unit_owning_user_ids has duplicates")
+            else:
+                unique_unit_owning_user_ids.add(uid)
 
     deck.unit_owning_user_id_1 = unit_owning_user_ids[0]
     deck.unit_owning_user_id_2 = unit_owning_user_ids[1]
