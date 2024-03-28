@@ -231,6 +231,9 @@ async def get_unit_skill_level_up_pattern(context: idol.BasicSchoolIdolContext, 
 async def remove_unit(context: idol.SchoolIdolParams, user: main.User, unit_data: main.Unit):
     validate_unit(user, unit_data)
 
+    if user.center_unit_owning_user_id == unit_data.id:
+        raise idol.error.by_code(idol.error.ERROR_CODE_UNIT_NOT_DISPOSE)
+
     # Remove from deck first
     q = sqlalchemy.select(main.UnitDeck).where(main.UnitDeck.user_id == user.id)
     result = await context.db.main.execute(q)
@@ -259,6 +262,11 @@ async def remove_unit(context: idol.SchoolIdolParams, user: main.User, unit_data
 
         if user.active_deck_index == deck.deck_number:
             raise idol.error.by_code(idol.error.ERROR_CODE_IGNORE_MAIN_DECK_UNIT)
+
+    # Remove SIS
+    unit_sis = await get_unit_removable_skills(context, unit_data)
+    for removable_skill_id in unit_sis:
+        await detach_unit_removable_skill(context, unit_data, removable_skill_id)
 
     # Remove from unit
     await context.db.main.delete(unit_data)
