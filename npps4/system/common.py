@@ -10,11 +10,11 @@ from typing import Generic, TypeVar
 _T = TypeVar("_T")
 
 AnyItem = (
-    item_model.Item
-    | unit_model.UnitSupportItem
+    unit_model.UnitSupportItem
     | unit_model.UnitItem
     | scenario_model.ScenarioItem
     | live_model.LiveItem
+    | item_model.Item
 )
 
 
