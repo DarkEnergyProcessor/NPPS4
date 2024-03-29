@@ -146,3 +146,10 @@ def measure(name: str = "", severity: int = logging.DEBUG):
 def shallow_dump(model: pydantic.BaseModel, /):
     keys = itertools.chain(model.__class__.model_fields.keys(), model.model_computed_fields.keys())
     return {k: getattr(model, k) for k in keys}
+
+
+def java_hash_code(string: str):
+    h = 0
+    for s in string:
+        h = (h * 31 + ord(s)) & 0xFFFFFFFF
+    return h
