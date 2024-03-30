@@ -31,19 +31,19 @@ class LiveEffortRewardDrops(pydantic.BaseModel):
 
 class SecretboxCost(pydantic.BaseModel):
     cost_type: const.SECRETBOX_COST_TYPE
-    cost_item_id: int | None
+    cost_item_id: int | None = None
     cost_amount: int
 
 
 class SecretboxButton(pydantic.BaseModel):
-    name: str | None
-    name_en: str | None
+    name: str | None = None
+    name_en: str | None = None
     button_type: const.SECRETBOX_BUTTON_TYPE
     costs: list[SecretboxCost]
     unit_count: int
-    guarantee_specific_rarity_amount: int  # 0 = no guarantee
-    guaranteed_rarity: int  # 0 = no guarantee
-    rate_modifier: list[int] | None
+    guarantee_specific_rarity_amount: int = 0  # 0 = no guarantee
+    guaranteed_rarity: int = 0  # 0 = no guarantee
+    rate_modifier: list[int] | None = None
 
 
 class SecretboxData(pydantic.BaseModel):
@@ -57,16 +57,14 @@ class SecretboxData(pydantic.BaseModel):
     end_time: int
 
     add_gauge: int
-    free_once_a_day_display: SecretboxCost | None  # Always scout 1. None = no free once a day.
+    free_once_a_day_display: SecretboxCost | None = None  # Always scout 1. None = no free once a day.
     buttons: list[SecretboxButton]
 
-    animation_layout_type: const.SECRETBOX_LAYOUT_TYPE
+    animation_layout_type: const.SECRETBOX_ANIMATION_TYPE
     animation_asset_layout: list[str]
     animation_asset_layout_en: list[str | None]
     menu_asset: str
     menu_asset_en: str | None
-    banner_asset: str | None
-    banner_asset_en: str | None
 
     rarity_names: list[str]
     rarity_rates: list[int]
