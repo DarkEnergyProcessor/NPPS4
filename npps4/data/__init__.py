@@ -72,7 +72,7 @@ def update():
         ],
         secretbox_data=list(server_data.secretbox_data.values()),
     )
-    json_dict = serialized_data.model_dump(mode="json")
+    json_dict = serialized_data.model_dump(mode="json", exclude_defaults=True)
     json_encoded = json.dumps(json_dict, ensure_ascii=False, indent="\t")
 
     with open(SERVER_DATA_PATH, "w", encoding="utf-8", newline="\n") as f:

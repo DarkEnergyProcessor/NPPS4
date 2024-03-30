@@ -42,7 +42,7 @@ class SecretboxButton(pydantic.BaseModel):
     costs: list[SecretboxCost]
     unit_count: int
     guarantee_specific_rarity_amount: int = 0  # 0 = no guarantee
-    guaranteed_rarity: int = 0  # 0 = no guarantee
+    guaranteed_rarity: int = 0  # 0 = no guarantee, > 0 = 1-based index of rarity_pools
     rate_modifier: list[int] | None = None
 
 
