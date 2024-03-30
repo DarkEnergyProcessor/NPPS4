@@ -36,11 +36,14 @@ class SecretboxCost(pydantic.BaseModel):
 
 
 class SecretboxButton(pydantic.BaseModel):
+    name: str | None
+    name_en: str | None
     button_type: const.SECRETBOX_BUTTON_TYPE
     costs: list[SecretboxCost]
     unit_count: int
     guarantee_specific_rarity_amount: int  # 0 = no guarantee
     guaranteed_rarity: int  # 0 = no guarantee
+    rate_modifier: list[int] | None
 
 
 class SecretboxData(pydantic.BaseModel):
@@ -62,8 +65,12 @@ class SecretboxData(pydantic.BaseModel):
     animation_asset_layout_en: list[str | None]
     menu_asset: str
     menu_asset_en: str | None
+    banner_asset: str | None
+    banner_asset_en: str | None
 
+    rarity_names: list[str]
     rarity_rates: list[int]
+    rarity_pools: list[list[int]]  # List of unit IDs in each pool
 
     @property
     def secretbox_id(self) -> int:
@@ -76,3 +83,4 @@ class SerializedServerData(pydantic.BaseModel):
     common_live_unit_drops: list[LiveUnitDrop]
     live_specific_live_unit_drops: list[LiveSpecificLiveUnitDrop]
     live_effort_drops: list[LiveEffortRewardDrops]
+    secretbox_data: list[SecretboxData] = pydantic.Field(default_factory=list)
