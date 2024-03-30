@@ -13,12 +13,18 @@ class SecretboxGaugeInfo(pydantic.BaseModel):
     gauge_point: int = 0
 
 
-class SecretboxAllAnimationAsset(pydantic.BaseModel):
+class SecretboxAllAnimation2Asset(pydantic.BaseModel):
     type: const.SECRETBOX_ANIMATION_TYPE
     background_asset: str
     additional_asset_1: str
     additional_asset_2: str
+
+
+class SecretboxAllAnimation3Asset(SecretboxAllAnimation2Asset):
     additional_asset_3: str
+
+
+AnySecretboxAllAnimationAsset = SecretboxAllAnimation3Asset | SecretboxAllAnimation2Asset
 
 
 class SecretboxAllCost(pydantic.BaseModel):
@@ -78,7 +84,7 @@ AnySecretboxInfo = SecretboxAllSecretboxInfo | SecretboxAllSecretboxInfoWithShow
 class SecretboxAllPage(pydantic.BaseModel):
     menu_asset: str
     page_order: int
-    animation_assets: SecretboxAllAnimationAsset
+    animation_assets: AnySecretboxAllAnimationAsset
     button_list: list[AnySecretboxButton]
     secret_box_info: AnySecretboxInfo
 
