@@ -75,8 +75,11 @@ def update():
     json_dict = serialized_data.model_dump(mode="json", exclude_defaults=True)
     json_encoded = json.dumps(json_dict, ensure_ascii=False, indent="\t")
 
-    with open(SERVER_DATA_PATH, "w", encoding="utf-8", newline="\n") as f:
+    t = time.time_ns()
+    temp_filename = SERVER_DATA_PATH + f"temp_{t}.json"
+    with open(temp_filename, "w", encoding="utf-8", newline="\n") as f:
         f.write(json_encoded)
+    os.replace(temp_filename, SERVER_DATA_PATH)
 
     server_data = dataclasses.replace(server_data)  # Create new copy
     last_server_data_timestamp = time.time_ns()
