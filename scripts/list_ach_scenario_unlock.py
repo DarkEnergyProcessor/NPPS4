@@ -6,14 +6,6 @@ import npps4.db.achievement
 import npps4.db.scenario
 import npps4.idol
 
-from typing import TypeVar, cast
-
-_T = TypeVar("_T")
-
-
-def assume_some(v: _T | None) -> _T:
-    return cast(_T, v)
-
 
 def select_en(jp: str, en: str | None):
     return en or jp
@@ -40,10 +32,10 @@ async def run_script(args: list[str]):
         for ach_id in sorted(ach_trees, key=lambda k: k.achievement_id):
             ach = main_story_ach[ach_id.next_achievement_id]
             scenario_id = int(ach.params1 or 0)
-            scenario = assume_some(await context.db.scenario.get(npps4.db.scenario.Scenario, scenario_id))
-            scenario_chapter = assume_some(
-                await context.db.scenario.get(npps4.db.scenario.Chapter, scenario.scenario_chapter_id)
-            )
+            scenario = await context.db.scenario.get(npps4.db.scenario.Scenario, scenario_id)
+            assert scenario is not None
+            scenario_chapter = await context.db.scenario.get(npps4.db.scenario.Chapter, scenario.scenario_chapter_id)
+            assert scenario_chapter is not None
             scenario_chapter_name = select_en(scenario_chapter.name, scenario_chapter.name_en)
             scenario_name = select_en(scenario.title, scenario.title_en)
             print(

@@ -5,9 +5,6 @@ from ..system import live_model
 from . import scenario_model
 from . import unit_model
 
-from typing import Generic, TypeVar
-
-_T = TypeVar("_T")
 
 AnyItem = (
     unit_model.UnitSupportItem
@@ -18,7 +15,7 @@ AnyItem = (
 )
 
 
-class BeforeAfter(pydantic.BaseModel, Generic[_T]):
+class BeforeAfter[_T](pydantic.BaseModel):
     before: _T
     after: _T
 

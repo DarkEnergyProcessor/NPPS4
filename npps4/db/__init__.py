@@ -7,17 +7,17 @@ from .. import util
 
 import sqlalchemy.ext.asyncio
 
-from typing import TypeVar, Any
-
-_T = TypeVar("_T", bound=common.MaybeEncrypted)
+from typing import Any
 
 
-async def get_decrypted_row(session: sqlalchemy.ext.asyncio.AsyncSession, cls: type[_T], id: int) -> _T | None:
+async def get_decrypted_row[
+    _T: common.MaybeEncrypted
+](session: sqlalchemy.ext.asyncio.AsyncSession, cls: type[_T], id: int) -> _T | None:
     obj = await session.get(cls, id)
     return decrypt_row(session, obj)
 
 
-def decrypt_row(session: sqlalchemy.ext.asyncio.AsyncSession, obj: _T | None) -> _T | None:
+def decrypt_row[_T: common.MaybeEncrypted](session: sqlalchemy.ext.asyncio.AsyncSession, obj: _T | None) -> _T | None:
     if obj is not None and obj._encryption_release_id is not None:
         key = release_key.get(obj._encryption_release_id)
 

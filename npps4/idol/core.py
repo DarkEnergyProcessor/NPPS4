@@ -19,7 +19,7 @@ from .. import util
 from ..app import app
 from ..config import config
 
-from typing import Annotated, Any, Callable, Coroutine, TypeVar, Generic, cast
+from typing import Annotated, Any, Awaitable, Callable, TypeVar, Generic, cast
 
 
 class DummyModel(pydantic.RootModel[list]):
@@ -30,14 +30,10 @@ _T = TypeVar("_T", bound=session.SchoolIdolParams)
 _U = TypeVar("_U", bound=pydantic.BaseModel)
 _V = TypeVar("_V", bound=pydantic.BaseModel, covariant=True)
 
-_EndpointWithRequestWithResponse = Callable[
-    [_T, _U], Coroutine[Any, Any, _V]
-]  # Request is pydantic, response is pydantic
-_EndpointWithoutRequestWithResponse = Callable[[_T], Coroutine[Any, Any, _V]]  # Request is none, response is pydantic
-_EndpointWithRequestWithoutResponse = Callable[
-    [_T, _U], Coroutine[Any, Any, None]
-]  # Request is pydantic, response is none
-_EndpointWithoutRequestWithoutResponse = Callable[[_T], Coroutine[Any, Any, None]]  # Request is none, response is none
+_EndpointWithRequestWithResponse = Callable[[_T, _U], Awaitable[_V]]  # Request is pydantic, response is pydantic
+_EndpointWithoutRequestWithResponse = Callable[[_T], Awaitable[_V]]  # Request is none, response is pydantic
+_EndpointWithRequestWithoutResponse = Callable[[_T, _U], Awaitable[None]]  # Request is pydantic, response is none
+_EndpointWithoutRequestWithoutResponse = Callable[[_T], Awaitable[None]]  # Request is none, response is none
 _PossibleEndpointFunction = (
     _EndpointWithoutRequestWithResponse[_T, _V]
     | _EndpointWithRequestWithResponse[_T, _U, _V]

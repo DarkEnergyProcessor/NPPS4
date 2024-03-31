@@ -109,11 +109,7 @@ def datetime_to_timestamp(dt: str):
     return int(dtobj.timestamp())
 
 
-_T = TypeVar("_T")
-_E = TypeVar("_E", bound=Exception)
-
-
-def ensure_no_none(list_to: list[_T | None], exc: type[_E] = Exception, *args) -> list[_T]:
+def ensure_no_none[_T, _E: Exception](list_to: list[_T | None], exc: type[_E] = Exception, *args):
     if None in list_to:
         raise exc(*args)
 

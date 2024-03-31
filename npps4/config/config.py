@@ -3,11 +3,7 @@ import importlib.machinery
 import importlib.util
 import os
 import sys
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
+import tomllib
 
 import Cryptodome.PublicKey.RSA
 

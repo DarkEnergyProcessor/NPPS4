@@ -6,14 +6,6 @@ import npps4.db.achievement
 import npps4.db.live
 import npps4.idol
 
-from typing import TypeVar, cast
-
-_T = TypeVar("_T")
-
-
-def assume_some(v: _T | None) -> _T:
-    return cast(_T, v)
-
 
 def select_en(jp: str, en: str | None):
     return en or jp
@@ -40,7 +32,8 @@ async def run_script(args: list[str]):
         for ach_id in sorted(ach_trees, key=lambda k: k.achievement_id):
             ach = live_clear_ach[ach_id.next_achievement_id]
             live_track_id = int(ach.params1 or 0)
-            live_track = assume_some(await context.db.live.get(npps4.db.live.LiveTrack, live_track_id))
+            live_track = await context.db.live.get(npps4.db.live.LiveTrack, live_track_id)
+            assert live_track is not None
             track_name = select_en(live_track.name, live_track.name_en)
             # 110: [item.Reward(add_type=ADD_TYPE.LIVE, item_id=3)],  # Reward: Snow Halation
             print(

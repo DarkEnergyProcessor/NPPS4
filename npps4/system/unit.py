@@ -15,7 +15,7 @@ from ..const import ADD_TYPE
 from ..db import main
 from ..db import unit
 
-from typing import Literal, TypeVar, overload
+from typing import Literal, overload
 
 
 async def count_units(context: idol.BasicSchoolIdolContext, user: main.User, active: bool):
@@ -536,9 +536,6 @@ async def get_unit_stats_from_unit_data(
     return stats
 
 
-_T = TypeVar("_T", bound=unit_model.UnitSupportItem, contravariant=True)
-
-
 async def get_unit_data_full_info(context: idol.BasicSchoolIdolContext, unit_data: main.Unit):
     unit_info = await get_unit_info(context, unit_data.unit_id)
     if unit_info is None:
@@ -743,9 +740,9 @@ async def get_removable_skill_info_request(context: idol.BasicSchoolIdolContext,
     )
 
 
-async def unit_to_item(
-    context: idol.BasicSchoolIdolContext, unit_data: main.Unit, *, cls: type[_T] = unit_model.UnitItem
-):
+async def unit_to_item[
+    _T: unit_model.UnitSupportItem
+](context: idol.BasicSchoolIdolContext, unit_data: main.Unit, *, cls: type[_T] = unit_model.UnitItem):
     unit_info_data = await get_unit_data_full_info(context, unit_data)
     return cls.model_validate(
         unit_info_data[0].model_dump() | {"add_type": ADD_TYPE.UNIT, "item_id": unit_data.unit_id, "amount": 1}

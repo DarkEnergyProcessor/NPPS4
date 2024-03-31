@@ -140,10 +140,7 @@ def _call_api(endpoint: str, request_data: dict[str, Any] | list[Any] | None = N
                 raise e from None
 
 
-_T = TypeVar("_T", bound=dltype.BaseInfo)
-
-
-def _fixup_links(links: list[_T], platform: int):
+def _fixup_links[_T: dltype.BaseInfo](links: list[_T], platform: int):
     for link in links:
         if link.url.startswith("https://") and platform == 2:
             # Android doesn't support HTTPS

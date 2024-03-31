@@ -11,7 +11,7 @@ from .. import util
 from ..app import app
 from ..config import config
 
-from typing import TypeVar, Generic, Callable, Any
+from typing import Callable, Any
 
 _NEED_GENERATION = (1, 1)
 _PLATFORM_MAP = ["iOS", "Android"]
@@ -21,10 +21,7 @@ if _archive_root[-1] == "/":
     _archive_root = _archive_root[:-1]
 
 
-_T = TypeVar("_T")
-
-
-class _MemoizeByModTime(Generic[_T]):
+class _MemoizeByModTime[_T]:
     def __init__(self, f: Callable[[str], _T]):
         self.f = f
         self.map: dict[str, tuple[int, _T]] = {}

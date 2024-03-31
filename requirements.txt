@@ -9,5 +9,4 @@ pycryptodomex
 pydantic
 python-multipart
 sqlalchemy[asyncio]
-tomli; python_version<"3.11"
 uvicorn[standard]
