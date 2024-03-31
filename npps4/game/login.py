@@ -291,7 +291,7 @@ async def login_unitlist(context: idol.SchoolIdolUserParams) -> StarterUnitListR
                         ],
                         center_unit_id=center_uid,
                     )
-                    for initial_id, center_uid in enumerate(unit_list, 1 + (catid - 1) * 10)
+                    for initial_id, center_uid in enumerate(unit_list, 1 + (catid - 1) * 9)
                 ],
             )
             for catid, unit_list in enumerate(INITIAL_UNIT_IDS, 1)
