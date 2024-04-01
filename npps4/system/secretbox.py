@@ -1,3 +1,6 @@
+import itertools
+import operator
+
 from . import secretbox_model
 from .. import data
 from .. import idol
@@ -22,11 +25,18 @@ def _determine_en_path(context: idol.BasicSchoolIdolContext, path: str, path_en:
         return path_en
 
 
-def _encode_cost_id(secretbox_id: int, button_index: int, cost_index: int, /):
+def encode_cost_id(secretbox_id: int, button_index: int, cost_index: int, /):
     return (button_index << 36) | (cost_index << 32) | secretbox_id
 
 
-async def get_secretbox_data(context: idol.BasicSchoolIdolContext, user: main.User):
+def decode_cost_id(cost_id: int):
+    secretbox_id = cost_id & 0xFFFFFFFF
+    button_index = (cost_id >> 32) & 0xF
+    cost_index = cost_id >> 36
+    return secretbox_id, button_index, cost_index
+
+
+async def get_all_secretbox_data_response(context: idol.BasicSchoolIdolContext, user: main.User):
     server_data = data.get()
     member_category_list: dict[int, list[secretbox_model.SecretboxAllPage]] = {}
 
@@ -57,7 +67,7 @@ async def get_secretbox_data(context: idol.BasicSchoolIdolContext, user: main.Us
                     secret_box_button_type=button.button_type,
                     cost_list=[
                         secretbox_model.SecretboxAllCost(
-                            id=_encode_cost_id(secretbox_id, i, j),
+                            id=encode_cost_id(secretbox_id, i, j),
                             payable=False,
                             unit_count=button.unit_count,
                             type=cost.cost_type,
@@ -90,3 +100,32 @@ async def get_secretbox_data(context: idol.BasicSchoolIdolContext, user: main.Us
         ),
         key=lambda k: k.member_category,
     )
+
+
+def get_secretbox_data(secretbox_id: int):
+    server_data = data.get()
+    return server_data.secretbox_data[secretbox_id]
+
+
+def roll_units(secretbox_id: int, amount: int, /, *, guarantee_rarity: int = 0, guarantee_amount: int = 0):
+    secretbox_data = get_secretbox_data(secretbox_id)
+    # Calculate weighted probabilities
+    picked_rarity_index = util.SYSRAND.choices(
+        range(len(secretbox_data.rarity_rates)), secretbox_data.rarity_rates, k=amount
+    )
+
+    if guarantee_rarity > 0 and guarantee_amount > 0:
+        rindex = guarantee_rarity - 1
+        indices = range(amount)
+        while sum(k >= rindex for k in picked_rarity_index) < guarantee_amount:
+            random_index = util.SYSRAND.choice(indices)
+            if picked_rarity_index[random_index] < rindex:
+                picked_rarity_index[random_index] = rindex
+
+    # Start rolling
+    return [util.SYSRAND.choice(secretbox_data.rarity_pools[i]) for i in picked_rarity_index]
+
+
+def get_secretbox_button(secretbox_id: int, button_index: int):
+    secretbox_data = get_secretbox_data(secretbox_id)
+    return secretbox_data.buttons[button_index - 1]

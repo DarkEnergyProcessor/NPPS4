@@ -798,3 +798,8 @@ async def quick_create_by_unit_add(
 
 async def has_signed_variant(context: idol.BasicSchoolIdolContext, unit_id: int):
     return await context.db.unit.get(unit.SignAsset, unit_id) is not None
+
+
+async def is_unit_max(context: idol.BasicSchoolIdolContext, user: main.User):
+    unit_count = await count_units(context, user, True)
+    return unit_count >= user.unit_max

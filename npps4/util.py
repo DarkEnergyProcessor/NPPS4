@@ -16,7 +16,7 @@ import pydantic
 
 from .config import config
 
-from typing import Any, TypeVar, cast
+from typing import Any, cast
 
 SYSRAND = random.SystemRandom()
 

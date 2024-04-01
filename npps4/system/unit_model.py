@@ -3,11 +3,14 @@ import pydantic
 from . import item_model
 from ..const import ADD_TYPE
 
+from typing import Any
+
 
 class UnitSupportItem(item_model.Item):
     add_type: int = ADD_TYPE.UNIT
     new_unit_flag: bool = False
     is_support_member: bool = False
+    is_hit: Any | None = None
     item_id: int = pydantic.Field(exclude=True)
 
     @pydantic.computed_field
@@ -49,6 +52,9 @@ class UnitInfoData(UnitInfoBase):
 
 class UnitItem(UnitSupportItem, UnitInfoBase):
     removable_skill_ids: list[int] = pydantic.Field(default_factory=list)
+
+
+type AnyUnitItem = UnitItem | UnitSupportItem
 
 
 class OwningRemovableSkillInfo(pydantic.BaseModel):

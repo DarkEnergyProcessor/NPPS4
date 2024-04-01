@@ -6,13 +6,7 @@ from . import scenario_model
 from . import unit_model
 
 
-AnyItem = (
-    unit_model.UnitSupportItem
-    | unit_model.UnitItem
-    | scenario_model.ScenarioItem
-    | live_model.LiveItem
-    | item_model.Item
-)
+AnyItem = unit_model.AnyUnitItem | scenario_model.ScenarioItem | live_model.LiveItem | item_model.Item
 
 
 class BeforeAfter[_T](pydantic.BaseModel):

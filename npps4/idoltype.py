@@ -2,8 +2,6 @@ import enum
 
 import pydantic
 
-from typing import TypeVar, Generic
-
 
 class Language(str, enum.Enum):
     en = "en"
