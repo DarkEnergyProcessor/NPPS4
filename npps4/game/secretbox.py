@@ -39,7 +39,7 @@ class SecretboxItems(pydantic.BaseModel):
     item: list[common.AnyItem]
 
 
-class SecretboxPonResponse(achievement.AchievementMixin):
+class SecretboxPonResponse(achievement.AchievementMixin, common.TimestampMixin):
     is_unit_max: bool
     item_list: list[common.ItemCount]
     gauge_info: SecretboxAddedGaugeInfo = pydantic.Field(default_factory=SecretboxAddedGaugeInfo)  # TODO
@@ -53,7 +53,6 @@ class SecretboxPonResponse(achievement.AchievementMixin):
     promotion_performance_rate: int = 0
     secret_box_parcel_type: int = 1
     museum_info: museum.MuseumInfoData
-    server_timestamp: int = pydantic.Field(default_factory=util.time)
     present_cnt: int
 
 

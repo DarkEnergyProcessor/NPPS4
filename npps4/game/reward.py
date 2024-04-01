@@ -5,6 +5,7 @@ from .. import util
 
 from ..system import ad_model
 from ..system import class_system
+from ..system import common
 from ..system import item_model
 from ..system import museum
 from ..system import user
@@ -56,7 +57,7 @@ class RewardIncentiveItem(item_model.Item, RewardOpenRequest):
     pass
 
 
-class RewardOpenAllResponse(pydantic.BaseModel):
+class RewardOpenAllResponse(common.TimestampMixin):
     reward_num: int
     opened_num: int
     total_num: int
@@ -68,7 +69,6 @@ class RewardOpenAllResponse(pydantic.BaseModel):
     class_system: class_system.ClassSystemData
     new_achievement_cnt: int
     museum_info: museum.MuseumInfoData
-    server_timestamp: int
     present_cnt: int
 
 
@@ -117,7 +117,6 @@ async def reward_openall(context: idol.SchoolIdolUserParams, request: RewardList
         class_system=class_system.ClassSystemData(rank_info=class_system.ClassRankInfoData()),  # TODO
         new_achievement_cnt=0,
         museum_info=await museum.get_museum_info_data(context, current_user),
-        server_timestamp=util.time(),
         present_cnt=0,
     )
 

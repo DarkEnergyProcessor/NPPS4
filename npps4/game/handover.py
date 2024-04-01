@@ -1,7 +1,8 @@
+import pydantic
+
 from .. import idol
 from .. import util
-
-import pydantic
+from ..system import common
 
 
 class HandoverExecRequest(pydantic.BaseModel):
@@ -9,14 +10,12 @@ class HandoverExecRequest(pydantic.BaseModel):
     handover_id: str
 
 
-class KIDInfoResponse(pydantic.BaseModel):
+class KIDInfoResponse(common.TimestampMixin):
     auth_url: str
-    server_timestamp: int
 
 
-class KIDStatusResponse(pydantic.BaseModel):
+class KIDStatusResponse(common.TimestampMixin):
     has_klab_id: bool
-    server_timestamp: int
 
 
 @idol.register("handover", "exec", batchable=False)
@@ -31,11 +30,11 @@ async def handover_kidinfo(context: idol.SchoolIdolUserParams) -> KIDInfoRespons
     # TODO
     util.stub("handover", "kidInfo", context.raw_request_data)
     raise idol.error.by_code(idol.error.ERROR_KLAB_ID_SERVICE_MAINTENANCE)
-    # return KIDInfoResponse(auth_url=str(context.request.url), server_timestamp=util.time())
+    # return KIDInfoResponse(auth_url=str(context.request.url))
 
 
 @idol.register("handover", "kidStatus")
 async def handover_kidstatus(context: idol.SchoolIdolUserParams) -> KIDStatusResponse:
     # TODO
     util.stub("handover", "kidStatus", context.raw_request_data)
-    return KIDStatusResponse(has_klab_id=False, server_timestamp=util.time())
+    return KIDStatusResponse(has_klab_id=False)

@@ -2,6 +2,7 @@ import pydantic
 
 from .. import idol
 from .. import util
+from ..system import common
 
 
 class EventTargetList(pydantic.BaseModel):
@@ -9,9 +10,8 @@ class EventTargetList(pydantic.BaseModel):
     is_displayable: bool = True
 
 
-class EventListResponse(pydantic.BaseModel):
+class EventListResponse(common.TimestampMixin):
     target_list: list[EventTargetList]
-    server_timestamp: int = pydantic.Field(default_factory=util.time)
 
 
 @idol.register("event", "eventList")

@@ -7,6 +7,7 @@ from ..system import achievement
 from ..system import ad_model
 from ..system import advanced
 from ..system import class_system as class_system_module
+from ..system import common
 from ..system import effort
 from ..system import item
 from ..system import item_model
@@ -35,7 +36,7 @@ class LoginBonusTotalLogin(pydantic.BaseModel):
     reward: list[item_model.Item] | None = None
 
 
-class LoginBonusResponse(achievement.AchievementMixin):
+class LoginBonusResponse(achievement.AchievementMixin, common.TimestampMixin):
     sheets: list = pydantic.Field(default_factory=list)
     calendar_info: LoginBonusCalendarInfo
     ad_info: ad_model.AdInfo
@@ -49,7 +50,6 @@ class LoginBonusResponse(achievement.AchievementMixin):
     limited_effort_box: list  # TODO
     after_user_info: user.UserInfoData
     museum_info: museum.MuseumInfoData
-    server_timestamp: int
     present_cnt: int
 
 
@@ -150,6 +150,5 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
         ),
         new_achievement_cnt=len(achievement_list.new),
         museum_info=await museum.get_museum_info_data(context, current_user),
-        server_timestamp=server_timestamp,
         present_cnt=present_count,
     )

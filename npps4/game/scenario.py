@@ -1,8 +1,8 @@
 from .. import idol
-from .. import util
 from ..system import achievement
 from ..system import advanced
 from ..system import class_system as class_system_module
+from ..system import common
 from ..system import museum
 from ..system import reward
 from ..system import scenario
@@ -31,7 +31,7 @@ class ScenarioRewardRequest(ScenarioStartupRequest):
     is_skipped: bool
 
 
-class ScenarioRewardResponse(achievement.AchievementMixin):
+class ScenarioRewardResponse(achievement.AchievementMixin, common.TimestampMixin):
     clear_scenario: ScenarioStartupRequest
     before_user_info: user.UserInfoData
     after_user_info: user.UserInfoData
@@ -42,7 +42,6 @@ class ScenarioRewardResponse(achievement.AchievementMixin):
     )  # TODO
     new_achievement_cnt: int = 0
     museum_info: museum.MuseumInfoData
-    server_timestamp: int = pydantic.Field(default_factory=util.time)
     present_cnt: int
 
 

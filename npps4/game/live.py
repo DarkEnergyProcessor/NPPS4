@@ -89,11 +89,10 @@ class LivePartyListRequest(pydantic.BaseModel):
     lp_factor: int
 
 
-class LivePartyListResponse(pydantic.BaseModel):
+class LivePartyListResponse(common.TimestampMixin):
     party_list: list[advanced.PartyInfo]
     training_energy: int
     training_energy_max: int
-    server_timestamp: int = pydantic.Field(default_factory=util.time)
 
 
 class LivePlayRequest(pydantic.BaseModel):
@@ -115,7 +114,7 @@ class LivePlayRankInfo(pydantic.BaseModel):
     rank_max: int
 
 
-class LivePlayResponse(pydantic.BaseModel):
+class LivePlayResponse(common.TimestampMixin):
     rank_info: list[LivePlayRankInfo]
     energy_full_time: str
     over_max_energy: int
@@ -125,7 +124,6 @@ class LivePlayResponse(pydantic.BaseModel):
     marathon_event_id: int | None = None
     no_skill: bool = False
     can_activate_effect: bool = True
-    server_timestamp: int = pydantic.Field(default_factory=util.time)
 
 
 class LiveRewardPreciseList(pydantic.BaseModel):
@@ -163,12 +161,11 @@ class LivePreciseScoreData(pydantic.BaseModel):
     trigger_log: list[LiveRewardTriggerLog] | None = None
 
 
-class LivePreciseScoreResponse(pydantic.BaseModel):
+class LivePreciseScoreResponse(common.TimestampMixin):
     rank_info: list[LivePlayRankInfo]
     on: LivePreciseScoreData
     off: LivePreciseScoreData
     can_activate_Effect: bool = False
-    server_timestamp: int = pydantic.Field(default_factory=util.time)
 
 
 class LiveRewardLiveSettingIcon(pydantic.BaseModel):
@@ -276,7 +273,7 @@ class LiveRewardGoalAccomplishedInfo(pydantic.BaseModel):
     rewards: list[common.AnyItem]
 
 
-class LiveRewardResponse(achievement.AchievementMixin):
+class LiveRewardResponse(achievement.AchievementMixin, common.TimestampMixin):
     live_info: list[live_model.LiveInfo]
     rank: int
     combo_rank: int
@@ -304,7 +301,6 @@ class LiveRewardResponse(achievement.AchievementMixin):
         default_factory=class_system_module.ClassSystemData
     )  # TODO
     museum_info: museum.MuseumInfoData
-    server_timestamp: int = pydantic.Field(default_factory=util.time)
     present_cnt: int
 
 

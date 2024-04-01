@@ -1,17 +1,15 @@
 from .. import idol
-from .. import util
-from ..idol import error
+from ..system import common
 from ..system import tos
 from ..system import user
 
 import pydantic
 
 
-class TOSCheckResponse(pydantic.BaseModel):
+class TOSCheckResponse(common.TimestampMixin):
     tos_id: int
     tos_type: int
     is_agreed: bool
-    server_timestamp: int
 
 
 class TOSAgreeRequest(pydantic.BaseModel):
@@ -22,7 +20,7 @@ class TOSAgreeRequest(pydantic.BaseModel):
 async def tos_toscheck(context: idol.SchoolIdolUserParams) -> TOSCheckResponse:
     current_user = await user.get_current(context)
     agree = await tos.is_agreed(context, current_user, 1)
-    return TOSCheckResponse(tos_id=1, tos_type=1, is_agreed=agree, server_timestamp=util.time())
+    return TOSCheckResponse(tos_id=1, tos_type=1, is_agreed=agree)
 
 
 @idol.register("tos", "tosAgree", batchable=False)
@@ -33,4 +31,4 @@ async def tos_tosagree(context: idol.SchoolIdolUserParams, request: TOSAgreeRequ
             await tos.agree(context, current_user, 1)
             return
 
-    raise error.IdolError(detail="Invalid ToS agreement")
+    raise idol.error.IdolError(detail="Invalid ToS agreement")

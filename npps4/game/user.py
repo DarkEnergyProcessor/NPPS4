@@ -1,7 +1,7 @@
 from .. import idol
 from .. import util
-from ..idol import error
 from ..system import advanced
+from ..system import common
 from ..system import unit
 from ..system import user
 
@@ -13,11 +13,10 @@ class BirthdayUserInfoResponse(pydantic.BaseModel):
     birth_day: int
 
 
-class UserInfoResponse(pydantic.BaseModel):
+class UserInfoResponse(common.TimestampMixin):
     user: user.UserInfoData
     birth: BirthdayUserInfoResponse | None = None
     ad_status: bool | None = None
-    server_timestamp: int
 
 
 class ChangeNameRequest(pydantic.BaseModel):
@@ -34,9 +33,8 @@ class UserNavi(pydantic.BaseModel):
     unit_owning_user_id: int
 
 
-class UserGetNaviResponse(pydantic.BaseModel):
+class UserGetNaviResponse(common.TimestampMixin):
     user: UserNavi
-    server_timestamp: int
 
 
 class UserNotificationTokenRequest(pydantic.BaseModel):
@@ -62,7 +60,6 @@ async def user_getnavi(context: idol.SchoolIdolUserParams) -> UserGetNaviRespons
     center = await unit.get_unit_center(context, current_user)
     return UserGetNaviResponse(
         user=UserNavi(user_id=current_user.id, unit_owning_user_id=center),
-        server_timestamp=util.time(),
     )
 
 
@@ -70,11 +67,10 @@ async def user_getnavi(context: idol.SchoolIdolUserParams) -> UserGetNaviRespons
 async def user_userinfo(context: idol.SchoolIdolUserParams) -> UserInfoResponse:
     u = await user.get_current(context)
     if u is None:
-        raise error.IdolError(error.ERROR_CODE_LIB_ERROR, 500, "User is not known", http_code=500)
+        raise idol.error.IdolError(idol.error.ERROR_CODE_LIB_ERROR, 500, "User is not known", http_code=500)
     return UserInfoResponse(
         user=await user.get_user_info(context, u),
         ad_status=False,
-        server_timestamp=util.time(),
     )
 
 

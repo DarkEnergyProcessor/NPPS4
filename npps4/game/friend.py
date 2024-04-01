@@ -2,6 +2,7 @@ import pydantic
 
 from .. import idol
 from .. import util
+from ..system import common
 from ..system import unit
 from ..system import unit_model
 from ..system import user
@@ -13,11 +14,10 @@ class FriendListRequest(pydantic.BaseModel):
     page: int
 
 
-class FriendListResponse(pydantic.BaseModel):
+class FriendListResponse(common.TimestampMixin):
     item_count: int
     friend_list: list
     new_friend_list: list
-    server_timestamp: int = pydantic.Field(default_factory=util.time)
 
 
 class FriendSearchRequest(pydantic.BaseModel):
@@ -46,13 +46,12 @@ class FriendSearchUnitInfo(unit_model.UnitInfoData):
     removable_skill_ids: list[int]
 
 
-class FriendSearchResponse(pydantic.BaseModel):
+class FriendSearchResponse(common.TimestampMixin):
     user_info: FriendSearchUserInfo
     center_unit_info: FriendSearchUnitInfo
     setting_award_id: int
     is_alliance: bool
     friend_status: int
-    server_timestamp: int = pydantic.Field(default_factory=util.time)
 
 
 @idol.register("friend", "list")

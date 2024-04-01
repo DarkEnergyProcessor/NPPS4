@@ -3,6 +3,7 @@ from .. import util
 from ..system import achievement
 from ..system import advanced
 from ..system import album
+from ..system import common
 from ..system import museum
 from ..system import reward
 from ..system import unit
@@ -97,7 +98,7 @@ class UnitGetExchangePoint(pydantic.BaseModel):
     exchange_point: int
 
 
-class UnitRankUpResponse(achievement.AchievementMixin):
+class UnitRankUpResponse(achievement.AchievementMixin, common.TimestampMixin):
     before: unit_model.UnitInfoData
     after: unit_model.UnitInfoData
     before_user_info: user.UserInfoData
@@ -107,7 +108,6 @@ class UnitRankUpResponse(achievement.AchievementMixin):
     get_exchange_point_list: list[UnitGetExchangePoint]
     unit_removable_skill: unit_model.RemovableSkillOwningInfo
     museum_info: museum.MuseumInfoData
-    server_timestamp: int = pydantic.Field(default_factory=util.time)
     present_cnt: int
 
 

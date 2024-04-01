@@ -3,6 +3,7 @@ import base64
 from .. import idol
 from .. import util
 from ..db import main
+from ..system import common
 from ..system import unit
 from ..system import user
 from ..idol import cache
@@ -19,11 +20,10 @@ class LoginRequest(pydantic.BaseModel):
     devtoken: str | None = None
 
 
-class LoginResponse(pydantic.BaseModel):
+class LoginResponse(common.TimestampMixin):
     authorize_token: str
     user_id: int
     review_version: str = ""
-    server_timestamp: int
     idfa_enabled: bool = False
     skip_login_news: bool = False
 
@@ -49,7 +49,7 @@ class LicenseInfo(pydantic.BaseModel):
     badge_flag: bool
 
 
-class TopInfoResponse(pydantic.BaseModel):
+class TopInfoResponse(common.TimestampMixin):
     friend_action_cnt: int
     friend_greet_cnt: int
     friend_variety_cnt: int
@@ -57,7 +57,6 @@ class TopInfoResponse(pydantic.BaseModel):
     present_cnt: int
     secret_box_badge_flag: bool
     server_datetime: str
-    server_timestamp: int
     notice_friend_datetime: str
     notice_mail_datetime: str
     friends_approval_wait_cnt: int
@@ -151,7 +150,7 @@ async def login_login(context: idol.SchoolIdolAuthParams, request: LoginRequest)
     token = await session.encapsulate_token(context, context.token.server_key, context.token.client_key, u.id)
     await session.invalidate_current(context)
     await cache.clear(context, u.id)
-    return LoginResponse(authorize_token=token, user_id=u.id, server_timestamp=util.time())
+    return LoginResponse(authorize_token=token, user_id=u.id)
 
 
 @idol.register("login", "authkey", check_version=False, batchable=False, xmc_verify=idol.XMCVerifyMode.NONE)
@@ -210,7 +209,6 @@ async def login_topinfo(context: idol.SchoolIdolUserParams) -> TopInfoResponse:
         present_cnt=0,
         secret_box_badge_flag=False,
         server_datetime=util.timestamp_to_datetime(),
-        server_timestamp=util.time(),
         notice_friend_datetime=util.timestamp_to_datetime(86400),
         notice_mail_datetime=util.timestamp_to_datetime(86400),
         friends_approval_wait_cnt=0,
