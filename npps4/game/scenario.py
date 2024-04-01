@@ -31,10 +31,8 @@ class ScenarioRewardRequest(ScenarioStartupRequest):
     is_skipped: bool
 
 
-class ScenarioRewardResponse(achievement.AchievementMixin, common.TimestampMixin):
+class ScenarioRewardResponse(achievement.AchievementMixin, common.TimestampMixin, user.UserDiffMixin):
     clear_scenario: ScenarioStartupRequest
-    before_user_info: user.UserInfoData
-    after_user_info: user.UserInfoData
     next_level_info: list[user.NextLevelInfo]
     unlock_random_live: bool = False  # TODO
     class_system: class_system_module.ClassSystemData = pydantic.Field(

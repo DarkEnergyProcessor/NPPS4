@@ -52,6 +52,11 @@ class NextLevelInfo(pydantic.BaseModel):
     from_exp: int
 
 
+class UserDiffMixin(pydantic.BaseModel):
+    before_user_info: UserInfoData
+    after_user_info: UserInfoData
+
+
 async def get(context: idol.BasicSchoolIdolContext, id: int | None = None):
     return await context.db.main.get(main.User, id)
 

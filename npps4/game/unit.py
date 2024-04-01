@@ -98,11 +98,9 @@ class UnitGetExchangePoint(pydantic.BaseModel):
     exchange_point: int
 
 
-class UnitRankUpResponse(achievement.AchievementMixin, common.TimestampMixin):
+class UnitRankUpResponse(achievement.AchievementMixin, common.TimestampMixin, user.UserDiffMixin):
     before: unit_model.UnitInfoData
     after: unit_model.UnitInfoData
-    before_user_info: user.UserInfoData
-    after_user_info: user.UserInfoData
     use_game_coin: int
     unlocked_subscenario_ids: list[int]
     get_exchange_point_list: list[UnitGetExchangePoint]

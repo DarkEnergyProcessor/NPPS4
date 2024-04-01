@@ -57,15 +57,13 @@ class RewardIncentiveItem(item_model.Item, RewardOpenRequest):
     pass
 
 
-class RewardOpenAllResponse(common.TimestampMixin):
+class RewardOpenAllResponse(common.TimestampMixin, user.UserDiffMixin):
     reward_num: int
     opened_num: int
     total_num: int
     order: int
     upper_limit: bool
     reward_item_list: list[RewardIncentiveItem]
-    before_user_info: user.UserInfoData
-    after_user_info: user.UserInfoData
     class_system: class_system.ClassSystemData
     new_achievement_cnt: int
     museum_info: museum.MuseumInfoData

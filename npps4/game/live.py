@@ -273,7 +273,7 @@ class LiveRewardGoalAccomplishedInfo(pydantic.BaseModel):
     rewards: list[common.AnyItem]
 
 
-class LiveRewardResponse(achievement.AchievementMixin, common.TimestampMixin):
+class LiveRewardResponse(achievement.AchievementMixin, common.TimestampMixin, user.UserDiffMixin):
     live_info: list[live_model.LiveInfo]
     rank: int
     combo_rank: int
@@ -288,8 +288,6 @@ class LiveRewardResponse(achievement.AchievementMixin, common.TimestampMixin):
     is_effort_point_visible: bool = True
     limited_effort_box: list = pydantic.Field(default_factory=list)  # TODO
     unit_list: list[LiveRewardResponseUnitList]
-    before_user_info: user.UserInfoData
-    after_user_info: user.UserInfoData
     next_level_info: list[user.NextLevelInfo]
     goal_accomp_info: LiveRewardGoalAccomplishedInfo
     special_reward_info: list[common.AnyItem]

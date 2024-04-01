@@ -39,15 +39,13 @@ class SecretboxItems(pydantic.BaseModel):
     item: list[common.AnyItem]
 
 
-class SecretboxPonResponse(achievement.AchievementMixin, common.TimestampMixin):
+class SecretboxPonResponse(achievement.AchievementMixin, common.TimestampMixin, user.UserDiffMixin):
     is_unit_max: bool
     item_list: list[common.ItemCount]
     gauge_info: SecretboxAddedGaugeInfo = pydantic.Field(default_factory=SecretboxAddedGaugeInfo)  # TODO
     button_list: list[secretbox_model.AnySecretboxButton]
     secret_box_info: secretbox_model.AnySecretboxInfo
     secret_box_items: SecretboxItems
-    before_user_info: user.UserInfoData
-    after_user_info: user.UserInfoData
     secret_box_badge_flag: bool = False
     lowest_rarity: int = 1
     promotion_performance_rate: int = 0
