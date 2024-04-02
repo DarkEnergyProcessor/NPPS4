@@ -31,8 +31,8 @@ def encode_cost_id(secretbox_id: int, button_index: int, cost_index: int, /):
 
 def decode_cost_id(cost_id: int):
     secretbox_id = cost_id & 0xFFFFFFFF
-    button_index = (cost_id >> 32) & 0xF
-    cost_index = cost_id >> 36
+    cost_index = (cost_id >> 32) & 0xF
+    button_index = cost_id >> 36
     return secretbox_id, button_index, cost_index
 
 
@@ -119,12 +119,19 @@ def get_secretbox_data(secretbox_id: int):
     return server_data.secretbox_data[secretbox_id]
 
 
-def roll_units(secretbox_id: int, amount: int, /, *, guarantee_rarity: int = 0, guarantee_amount: int = 0):
+def roll_units(
+    secretbox_id: int,
+    amount: int,
+    /,
+    *,
+    guarantee_rarity: int = 0,
+    guarantee_amount: int = 0,
+    rate_modifier: list[int] | None = None,
+):
     secretbox_data = get_secretbox_data(secretbox_id)
     # Calculate weighted probabilities
-    picked_rarity_index = util.SYSRAND.choices(
-        range(len(secretbox_data.rarity_rates)), secretbox_data.rarity_rates, k=amount
-    )
+    rates = rate_modifier if rate_modifier is not None else secretbox_data.rarity_rates
+    picked_rarity_index = util.SYSRAND.choices(range(len(secretbox_data.rarity_rates)), rates, k=amount)
 
     if guarantee_rarity > 0 and guarantee_amount > 0:
         rindex = guarantee_rarity - 1

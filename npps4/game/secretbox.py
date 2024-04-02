@@ -95,11 +95,19 @@ else:
 
 
 @idol.register("secretbox", "pon", batchable=False, log_response_data=True)
-async def secretbox_pon(context: idol.SchoolIdolUserParams, request: SecretboxPonRequest):
+@idol.register("secretbox", "multi", batchable=False, log_response_data=True, allow_retry_on_unhandled_exception=True)
+async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: SecretboxPonRequest) -> SecretboxPonResponse:
     current_user = await user.get_current(context)
     secretbox_id, button_index, cost_index = secretbox.decode_cost_id(request.id)
     secretbox_data = secretbox.get_secretbox_data(secretbox_id)
-    unit_roll = secretbox.roll_units(secretbox_id, 1)
+    secretbox_button = secretbox.get_secretbox_button(secretbox_id, button_index)
+    unit_roll = secretbox.roll_units(
+        secretbox_id,
+        secretbox_button.unit_count,
+        guarantee_rarity=secretbox_button.guaranteed_rarity,
+        guarantee_amount=secretbox_button.guarantee_specific_rarity_amount,
+        rate_modifier=secretbox_button.rate_modifier,
+    )
     unit_data_list: list[unit_model.AnyUnitItem] = []
     current_unit_count = await unit.count_units(context, current_user, True)
     before_user = await user.get_user_info(context, current_user)
@@ -159,4 +167,6 @@ async def secretbox_pon(context: idol.SchoolIdolUserParams, request: SecretboxPo
         secret_box_items=SecretboxItems(unit=unit_data_list, item=[]),
         museum_info=await museum.get_museum_info_data(context, current_user),
         present_cnt=await reward.count_presentbox(context, current_user),
+        promotion_performance_rate=10,
+        lowest_rarity=1,
     )
