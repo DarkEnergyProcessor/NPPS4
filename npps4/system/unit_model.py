@@ -11,7 +11,8 @@ class UnitSupportItem(item_model.Item):
     new_unit_flag: bool = False
     is_support_member: bool = False
     is_hit: Any | None = None
-    item_id: int = pydantic.Field(exclude=True)
+    item_id: int
+    unit_rarity_id: int
 
     @pydantic.computed_field
     @property
@@ -21,6 +22,7 @@ class UnitSupportItem(item_model.Item):
 
 class UnitInfoBase(pydantic.BaseModel):
     unit_owning_user_id: int
+    unit_rarity_id: int
     exp: int
     next_exp: int
     level: int

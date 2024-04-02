@@ -1,17 +1,18 @@
-# import pickle
+import pydantic
 
 from .. import idol
 from .. import util
 from ..system import achievement
+from ..system import advanced
+from ..system import album
 from ..system import common
 from ..system import museum
+from ..system import reward
 from ..system import secretbox
 from ..system import secretbox_model
 from ..system import unit
 from ..system import unit_model
 from ..system import user
-
-import pydantic
 
 
 class SecretboxAllResponse(pydantic.BaseModel):
@@ -93,9 +94,69 @@ else:
         )
 
 
-# @idol.register("secretbox", "pon", batchable=False)
+@idol.register("secretbox", "pon", batchable=False, log_response_data=True)
 async def secretbox_pon(context: idol.SchoolIdolUserParams, request: SecretboxPonRequest):
     current_user = await user.get_current(context)
     secretbox_id, button_index, cost_index = secretbox.decode_cost_id(request.id)
-    secretbox_button = secretbox.get_secretbox_button(secretbox_id, button_index)
+    secretbox_data = secretbox.get_secretbox_data(secretbox_id)
     unit_roll = secretbox.roll_units(secretbox_id, 1)
+    unit_data_list: list[unit_model.AnyUnitItem] = []
+    current_unit_count = await unit.count_units(context, current_user, True)
+    before_user = await user.get_user_info(context, current_user)
+    # TODO: Subtract currency
+
+    for unit_id in unit_roll:
+        reward_data = await unit.quick_create_by_unit_add(context, current_user, unit_id)
+        if current_unit_count >= current_user.unit_max:
+            # Move to present box
+            reward_data.as_item_reward.reward_box_flag = True
+            await reward.add_item(
+                context,
+                current_user,
+                reward_data.as_item_reward,
+                "FIXME scouting JP Text",
+                "Scouting",
+            )
+        else:
+            # Add directly
+            if reward_data.unit_data:
+                assert reward_data.full_info is not None
+                await unit.add_unit_by_object(context, current_user, reward_data.unit_data)
+                # Update unit_owning_user_id
+                reward_data.update_unit_owning_user_id()
+                current_unit_count = current_unit_count + 1
+            else:
+                await unit.add_supporter_unit(context, current_user, reward_data.unit_id)
+        unit_data_list.append(reward_data.as_item_reward)
+
+    # Trigger achievement
+    achievement_list = await album.trigger_achievement(context, current_user, idolized=True)
+    accomplished_rewards = [
+        await achievement.get_achievement_rewards(context, ach) for ach in achievement_list.accomplished
+    ]
+    unaccomplished_rewards = [await achievement.get_achievement_rewards(context, ach) for ach in achievement_list.new]
+    await advanced.fixup_achievement_reward(context, current_user, accomplished_rewards)
+    await advanced.fixup_achievement_reward(context, current_user, unaccomplished_rewards)
+    await advanced.process_achievement_reward(
+        context, current_user, achievement_list.accomplished, accomplished_rewards
+    )
+
+    return SecretboxPonResponse(
+        before_user_info=before_user,
+        after_user_info=await user.get_user_info(context, current_user),
+        accomplished_achievement_list=await achievement.to_game_representation(
+            context, achievement_list.accomplished, accomplished_rewards
+        ),
+        unaccomplished_achievement_cnt=await achievement.get_achievement_count(context, current_user, False),
+        added_achievement_list=await achievement.to_game_representation(
+            context, achievement_list.new, unaccomplished_rewards
+        ),
+        new_achievement_cnt=len(achievement_list.new),
+        is_unit_max=current_unit_count >= current_user.unit_max,
+        item_list=[],  # TODO
+        button_list=await secretbox.get_secretbox_button_response(context, current_user, secretbox_data),
+        secret_box_info=await secretbox.get_secretbox_info_response(context, current_user, secretbox_data),
+        secret_box_items=SecretboxItems(unit=unit_data_list, item=[]),
+        museum_info=await museum.get_museum_info_data(context, current_user),
+        present_cnt=await reward.count_presentbox(context, current_user),
+    )

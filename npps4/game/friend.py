@@ -97,6 +97,7 @@ async def friend_search(context: idol.SchoolIdolUserParams, request: FriendSearc
         center_unit_info=FriendSearchUnitInfo(
             unit_owning_user_id=unit_data_full_info.unit_owning_user_id,
             unit_id=unit_data_full_info.unit_id,
+            unit_rarity_id=unit_data_full_info.unit_rarity_id,
             exp=unit_data_full_info.exp,
             next_exp=unit_data_full_info.next_exp,
             level=unit_data_full_info.level,

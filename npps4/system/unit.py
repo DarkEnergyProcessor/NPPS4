@@ -565,6 +565,7 @@ async def get_unit_data_full_info(context: idol.BasicSchoolIdolContext, unit_dat
         unit_model.UnitInfoData(
             unit_owning_user_id=unit_data.id or 0,
             unit_id=unit_data.unit_id,
+            unit_rarity_id=unit_info.rarity,
             exp=unit_data.exp,
             next_exp=real_max_exp,
             level=stats.level,
@@ -777,9 +778,13 @@ async def quick_create_by_unit_add(
 ):
     new_unit_flag = not await album.has_ever_got_unit(context, user, unit_id)
     if await is_support_member(context, unit_id):
+        unit_info = await get_unit_info(context, unit_id)
+        assert unit_info is not None
         return QuickAddResult(
             unit_id,
-            unit_model.UnitSupportItem(item_id=unit_id, is_support_member=True, new_unit_flag=new_unit_flag),
+            unit_model.UnitSupportItem(
+                item_id=unit_id, is_support_member=True, new_unit_flag=new_unit_flag, unit_rarity_id=unit_info.rarity
+            ),
         )
     else:
         unit_data = await create_unit(context, user, unit_id, True, level=level)

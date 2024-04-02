@@ -36,6 +36,45 @@ def decode_cost_id(cost_id: int):
     return secretbox_id, button_index, cost_index
 
 
+async def get_secretbox_button_response(
+    context: idol.BasicSchoolIdolContext, user: main.User, secretbox: data.schema.SecretboxData
+):
+    return [
+        # TODO: Free once a day scouting
+        secretbox_model.SecretboxAllButton(
+            secret_box_button_type=button.button_type,
+            cost_list=[
+                secretbox_model.SecretboxAllCost(
+                    id=encode_cost_id(secretbox.secretbox_id, i, j),
+                    payable=False,
+                    unit_count=button.unit_count,
+                    type=cost.cost_type,
+                    item_id=cost.cost_item_id,
+                    amount=cost.cost_amount,
+                )
+                for j, cost in enumerate(button.costs, 1)
+            ],
+            secret_box_name=_determine_en(context, secretbox.name, secretbox.name_en),
+        )
+        for i, button in enumerate(secretbox.buttons, 1)
+    ]
+
+
+async def get_secretbox_info_response(
+    context: idol.BasicSchoolIdolContext, user: main.User, secretbox: data.schema.SecretboxData
+):
+    return secretbox_model.SecretboxAllSecretboxInfo(
+        secret_box_id=secretbox.secretbox_id,
+        secret_box_type=secretbox.secretbox_type,
+        name=_determine_en(context, secretbox.name, secretbox.name_en),
+        start_date=util.timestamp_to_datetime(secretbox.start_time),
+        end_date=util.timestamp_to_datetime(secretbox.end_time),
+        add_gauge=0,  # TODO
+        always_display_flag=1,
+        pon_count=0,  # TODO
+    )
+
+
 async def get_all_secretbox_data_response(context: idol.BasicSchoolIdolContext, user: main.User):
     server_data = data.get()
     member_category_list: dict[int, list[secretbox_model.SecretboxAllPage]] = {}
@@ -61,35 +100,8 @@ async def get_all_secretbox_data_response(context: idol.BasicSchoolIdolContext, 
                     context, secretbox.animation_asset_layout[3], secretbox.animation_asset_layout_en[3]
                 ),
             ),
-            button_list=[
-                # TODO: Free once a day scouting
-                secretbox_model.SecretboxAllButton(
-                    secret_box_button_type=button.button_type,
-                    cost_list=[
-                        secretbox_model.SecretboxAllCost(
-                            id=encode_cost_id(secretbox_id, i, j),
-                            payable=False,
-                            unit_count=button.unit_count,
-                            type=cost.cost_type,
-                            item_id=cost.cost_item_id,
-                            amount=cost.cost_amount,
-                        )
-                        for j, cost in enumerate(button.costs, 1)
-                    ],
-                    secret_box_name=_determine_en(context, secretbox.name, secretbox.name_en),
-                )
-                for i, button in enumerate(secretbox.buttons, 1)
-            ],
-            secret_box_info=secretbox_model.SecretboxAllSecretboxInfo(
-                secret_box_id=secretbox.secretbox_id,
-                secret_box_type=secretbox.secretbox_type,
-                name=_determine_en(context, secretbox.name, secretbox.name_en),
-                start_date=util.timestamp_to_datetime(secretbox.start_time),
-                end_date=util.timestamp_to_datetime(secretbox.end_time),
-                add_gauge=0,  # TODO
-                always_display_flag=1,
-                pon_count=0,  # TODO
-            ),
+            button_list=await get_secretbox_button_response(context, user, secretbox),
+            secret_box_info=await get_secretbox_info_response(context, user, secretbox),
         )
         member_category_list.setdefault(secretbox.member_category, []).append(page)
 
