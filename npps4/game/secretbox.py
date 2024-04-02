@@ -94,6 +94,9 @@ else:
         )
 
 
+HIDDEN_UR_UMI_RARE = False
+
+
 @idol.register("secretbox", "pon", batchable=False, log_response_data=True)
 @idol.register("secretbox", "multi", batchable=False, log_response_data=True, allow_retry_on_unhandled_exception=True)
 async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: SecretboxPonRequest) -> SecretboxPonResponse:
@@ -112,6 +115,12 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
     current_unit_count = await unit.count_units(context, current_user, True)
     before_user = await user.get_user_info(context, current_user)
     # TODO: Subtract currency
+
+    umi_rare_mode = False
+    if HIDDEN_UR_UMI_RARE and len(unit_roll) == 1:
+        unit_info = await unit.get_unit_info(context, unit_roll[0])
+        if unit_info is not None and unit_info.rarity == 2 and unit_info.unit_type_id in (4, 94):
+            umi_rare_mode = True
 
     for unit_id in unit_roll:
         reward_data = await unit.quick_create_by_unit_add(context, current_user, unit_id)
@@ -149,6 +158,9 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
         context, current_user, achievement_list.accomplished, accomplished_rewards
     )
 
+    if umi_rare_mode:
+        unit_data_list[0].unit_rarity_id = 4
+
     return SecretboxPonResponse(
         before_user_info=before_user,
         after_user_info=await user.get_user_info(context, current_user),
@@ -167,6 +179,6 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
         secret_box_items=SecretboxItems(unit=unit_data_list, item=[]),
         museum_info=await museum.get_museum_info_data(context, current_user),
         present_cnt=await reward.count_presentbox(context, current_user),
-        promotion_performance_rate=10,
+        promotion_performance_rate=100 if umi_rare_mode else 10,
         lowest_rarity=1,
     )
