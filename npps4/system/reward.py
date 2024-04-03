@@ -1,5 +1,7 @@
+import enum
 import json
 
+import pydantic
 import sqlalchemy
 
 from . import item_model
@@ -7,6 +9,21 @@ from .. import idol
 from .. import util
 from ..const import ADD_TYPE
 from ..db import main
+
+
+class RewardCategory(enum.IntEnum):
+    ALL = 0
+    MEMBERS = 1
+    ITEMS = 2
+
+
+class FilterConfig(pydantic.BaseModel):
+    # filter depends on the category:
+    # 0. [unused]
+    # 1. [rarity, attribute, show not in album?]
+    # 2. [list of add types]
+    filter: list[int]
+    category: RewardCategory
 
 
 async def add_item(
@@ -35,7 +52,7 @@ async def add_item(
 async def get_presentbox(
     context: idol.BasicSchoolIdolContext,
     user: main.User,
-    add_type_filter: list[int] | None = None,
+    filter_config: FilterConfig,
     offset: int = 0,
     limit: int = 1000,
     order_ascending: bool = False,
@@ -47,8 +64,13 @@ async def get_presentbox(
     q = sqlalchemy.select(main.Incentive).where(
         main.Incentive.user_id == user.id, (main.Incentive.expire_date == 0) | (main.Incentive.expire_date >= t)
     )
-    if add_type_filter:
-        q = q.where(main.Incentive.add_type.in_(add_type_filter))
+    match filter_config.category:
+        case RewardCategory.MEMBERS:
+            # TODO: More sophisticated filter.
+            q = q.where(main.Incentive.add_type == ADD_TYPE.UNIT)
+        case RewardCategory.ITEMS:
+            q = q.where(main.Incentive.add_type.in_(filter_config.filter))
+
     if order_expiry_date:
         if order_ascending:
             # When ordering by expiry date ascending, show no expiration last

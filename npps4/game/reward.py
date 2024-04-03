@@ -1,3 +1,5 @@
+import enum
+
 import pydantic
 
 from .. import idol
@@ -8,6 +10,7 @@ from ..system import class_system
 from ..system import common
 from ..system import item_model
 from ..system import museum
+from ..system import reward
 from ..system import user
 
 from typing import Any
@@ -27,25 +30,21 @@ class IncentiveItem(pydantic.BaseModel):
     item_option: str | None = None  # FIXME: What is this?
 
 
+class RewardOrder(enum.IntFlag):
+    ORDER_ASCENDING = enum.auto()
+    BY_EXPIRE_DATE = enum.auto()
+
+
 class RewardListResponse(pydantic.BaseModel):
     item_count: int
     limit: int = 20
-    order: int
-    items: list[IncentiveItem]
+    order: RewardOrder
+    items: list[pydantic.SerializeAsAny[IncentiveItem]]
     ad_info: ad_model.AdInfo
 
 
-class RewardListRequest(pydantic.BaseModel):
-    # order values bitwise:
-    # bit 0 - Set = ascending; Unset = descending.
-    # bit 1 - Set = Display order by expiry. Unset = Display order by received.
-    order: int
-    # filter depends on the category:
-    # 0. [unused]
-    # 1. [rarity, attribute, show not in album?]
-    # 2. [list of add types]
-    filter: list[int]
-    category: int  # 0 = All, 1 = Members, 2 = Items
+class RewardListRequest(reward.FilterConfig):
+    order: RewardOrder
     offset: int = 0
 
 
@@ -54,7 +53,7 @@ class RewardOpenRequest(pydantic.BaseModel):
 
 
 class RewardIncentiveItem(item_model.Item, RewardOpenRequest):
-    pass
+    model_config = pydantic.ConfigDict(extra="allow")
 
 
 class RewardOpenAllResponse(common.TimestampMixin, user.UserDiffMixin):
@@ -63,17 +62,15 @@ class RewardOpenAllResponse(common.TimestampMixin, user.UserDiffMixin):
     total_num: int
     order: int
     upper_limit: bool
-    reward_item_list: list[RewardIncentiveItem]
+    reward_item_list: list[pydantic.SerializeAsAny[RewardIncentiveItem]]
     class_system: class_system.ClassSystemData
     new_achievement_cnt: int
     museum_info: museum.MuseumInfoData
     present_cnt: int
 
 
-class RewardHistoryRequest(pydantic.BaseModel):
+class RewardHistoryRequest(reward.FilterConfig):
     incentive_history_id: Any | None = None
-    filter: list[int]
-    category: int
 
 
 class RewardHistoryResponse(pydantic.BaseModel):
@@ -85,12 +82,38 @@ class RewardHistoryResponse(pydantic.BaseModel):
 
 @idol.register("reward", "rewardList")
 async def reward_rewardlist(context: idol.SchoolIdolUserParams, request: RewardListRequest) -> RewardListResponse:
-    # TODO
-    util.stub("reward", "rewardList", request)
-    return RewardListResponse(item_count=0, order=request.order, items=[], ad_info=ad_model.AdInfo())
+    current_user = await user.get_current(context)
+    incentive = await reward.get_presentbox(
+        context,
+        current_user,
+        request,
+        request.offset,
+        20,
+        RewardOrder.ORDER_ASCENDING in request.order,
+        RewardOrder.BY_EXPIRE_DATE in request.order,
+    )
+
+    return RewardListResponse(
+        item_count=len(incentive),
+        order=request.order,
+        items=[
+            IncentiveItem(
+                incentive_id=i.id,
+                incentive_item_id=i.item_id,
+                add_type=i.add_type,
+                amount=i.amount,
+                item_category_id=0,
+                incentive_message=i.get_message(context.lang),
+                insert_date=util.timestamp_to_datetime(i.insert_date),
+                remaining_time="Forever" if i.expire_date == 0 else util.timestamp_to_datetime(i.expire_date),
+            )
+            for i in incentive
+        ],
+        ad_info=ad_model.AdInfo(),
+    )
 
 
-@idol.register("reward", "open")
+# @idol.register("reward", "open")
 async def reward_open(context: idol.SchoolIdolUserParams, request: RewardOpenRequest):
     # TODO
     util.stub("reward", "open", context.raw_request_data)
@@ -103,10 +126,11 @@ async def reward_openall(context: idol.SchoolIdolUserParams, request: RewardList
     util.stub("reward", "openAll", context.raw_request_data)
     current_user = await user.get_current(context)
     user_info = await user.get_user_info(context, current_user)
+    reward_count = min(await reward.count_presentbox(context, current_user), 1000)
     return RewardOpenAllResponse(
-        reward_num=0,
+        reward_num=reward_count,
         opened_num=0,
-        total_num=0,
+        total_num=reward_count,
         order=request.order,
         upper_limit=False,
         reward_item_list=[],
