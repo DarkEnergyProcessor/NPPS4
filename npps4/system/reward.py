@@ -32,13 +32,38 @@ async def add_item(
     return incentive
 
 
-async def get_presentbox(context: idol.BasicSchoolIdolContext, user: main.User):
+async def get_presentbox(
+    context: idol.BasicSchoolIdolContext,
+    user: main.User,
+    add_type_filter: list[int] | None = None,
+    offset: int = 0,
+    limit: int = 1000,
+    order_ascending: bool = False,
+    order_expiry_date: bool = False,
+):
     t = util.time()
 
     # Query non-expire incentives.
     q = sqlalchemy.select(main.Incentive).where(
         main.Incentive.user_id == user.id, (main.Incentive.expire_date == 0) | (main.Incentive.expire_date >= t)
     )
+    if add_type_filter:
+        q = q.where(main.Incentive.add_type.in_(add_type_filter))
+    if order_expiry_date:
+        if order_ascending:
+            # When ordering by expiry date ascending, show no expiration last
+            q = q.order_by(
+                sqlalchemy.case((main.Incentive.expire_date == 0, 1), else_=0), main.Incentive.expire_date.asc()
+            )
+        else:
+            # When ordering by expiry date descending, show no expiration first
+            q = q.order_by(
+                sqlalchemy.case((main.Incentive.expire_date == 0, 0), else_=1), main.Incentive.expire_date.desc()
+            )
+    else:
+        q = q.order_by(main.Incentive.insert_date.asc() if order_ascending else main.Incentive.insert_date.desc())
+
+    q = q.offset(offset).limit(limit)
     result = await context.db.main.execute(q)
     return list(result.scalars())
 
