@@ -2,15 +2,21 @@ import enum
 
 import pydantic
 
+from .. import const
 from .. import idol
 from .. import util
 
+from ..system import achievement
+from ..system import album
 from ..system import ad_model
-from ..system import class_system
+from ..system import advanced
+from ..system import class_system as class_system_module
 from ..system import common
 from ..system import item_model
 from ..system import museum
 from ..system import reward
+from ..system import unit
+from ..system import unit_model
 from ..system import user
 
 from typing import Any
@@ -56,6 +62,14 @@ class RewardIncentiveItem(item_model.Item, RewardOpenRequest):
     model_config = pydantic.ConfigDict(extra="allow")
 
 
+class RewardOpenResponse(achievement.AchievementMixin, user.UserDiffMixin, unit_model.SupporterListInfoResponse):
+    opened_num: int
+    success: list[pydantic.SerializeAsAny[RewardIncentiveItem]]
+    class_system: class_system_module.ClassSystemData = pydantic.Field(
+        default_factory=class_system_module.ClassSystemData
+    )  # TODO
+
+
 class RewardOpenAllResponse(common.TimestampMixin, user.UserDiffMixin):
     reward_num: int
     opened_num: int
@@ -63,7 +77,9 @@ class RewardOpenAllResponse(common.TimestampMixin, user.UserDiffMixin):
     order: int
     upper_limit: bool
     reward_item_list: list[pydantic.SerializeAsAny[RewardIncentiveItem]]
-    class_system: class_system.ClassSystemData
+    class_system: class_system_module.ClassSystemData = pydantic.Field(
+        default_factory=class_system_module.ClassSystemData
+    )  # TODO
     new_achievement_cnt: int
     museum_info: museum.MuseumInfoData
     present_cnt: int
@@ -113,11 +129,59 @@ async def reward_rewardlist(context: idol.SchoolIdolUserParams, request: RewardL
     )
 
 
-# @idol.register("reward", "open")
-async def reward_open(context: idol.SchoolIdolUserParams, request: RewardOpenRequest):
-    # TODO
-    util.stub("reward", "open", context.raw_request_data)
-    return idol.core.DummyModel()
+@idol.register("reward", "open")
+async def reward_open(context: idol.SchoolIdolUserParams, request: RewardOpenRequest) -> RewardOpenResponse:
+    # https://github.com/Salaron/alay/blob/master/src/modules/api/reward/open.ts
+    current_user = await user.get_current(context)
+    incentive = await reward.get_incentive(context, current_user, request.incentive_id)
+    if incentive is None:
+        raise idol.error.by_code(idol.error.ERROR_CODE_INCENTIVE_NONE)
+
+    before_user = await user.get_user_info(context, current_user)
+    item_data = await reward.resolve_incentive(context, current_user, incentive)
+    add_result = await advanced.add_item(context, current_user, item_data)
+    supp_units = await unit.get_all_supporter_unit(context, current_user)
+    success = bool(add_result)
+
+    achievement_list = achievement.AchievementContext()
+    if success:
+        await reward.remove_incentive(context, incentive)
+        if item_data.add_type == const.ADD_TYPE.UNIT:
+            # Trigger achievement
+            achievement_list = await album.trigger_achievement(
+                context, current_user, obtained=True, idolized=True, max_love=True, max_level=True
+            ) + await achievement.check_type_53_recursive(context, current_user)
+
+    # Give achievement rewards
+    accomplished_rewards = [
+        await achievement.get_achievement_rewards(context, ach) for ach in achievement_list.accomplished
+    ]
+    unaccomplished_rewards = [await achievement.get_achievement_rewards(context, ach) for ach in achievement_list.new]
+    await advanced.fixup_achievement_reward(context, current_user, accomplished_rewards)
+    await advanced.fixup_achievement_reward(context, current_user, unaccomplished_rewards)
+    await advanced.process_achievement_reward(
+        context, current_user, achievement_list.accomplished, accomplished_rewards
+    )
+
+    return RewardOpenResponse(
+        unit_support_list=[unit_model.SupporterInfoResponse(unit_id=supp[0], amount=supp[1]) for supp in supp_units],
+        before_user_info=before_user,
+        after_user_info=await user.get_user_info(context, current_user),
+        accomplished_achievement_list=await achievement.to_game_representation(
+            context, achievement_list.accomplished, accomplished_rewards
+        ),
+        unaccomplished_achievement_cnt=await achievement.get_achievement_count(context, current_user, False),
+        added_achievement_list=await achievement.to_game_representation(
+            context, achievement_list.new, unaccomplished_rewards
+        ),
+        new_achievement_cnt=len(achievement_list.new),
+        opened_num=success,
+        success=(
+            [RewardIncentiveItem.model_validate({"incentive_id": request.incentive_id} | item_data.model_dump())]
+            if success
+            else []
+        ),
+    )
 
 
 @idol.register("reward", "openAll")
@@ -136,7 +200,6 @@ async def reward_openall(context: idol.SchoolIdolUserParams, request: RewardList
         reward_item_list=[],
         before_user_info=user_info,
         after_user_info=user_info,
-        class_system=class_system.ClassSystemData(rank_info=class_system.ClassRankInfoData()),  # TODO
         new_achievement_cnt=0,
         museum_info=await museum.get_museum_info_data(context, current_user),
         present_cnt=0,

@@ -81,3 +81,12 @@ class RemovableSkillOwningInfo(pydantic.BaseModel):
 
 class RemovableSkillInfoResponse(RemovableSkillOwningInfo):
     equipment_info: dict[str, EquipRemovableSkillInfo]
+
+
+class SupporterInfoResponse(pydantic.BaseModel):
+    unit_id: int
+    amount: int
+
+
+class SupporterListInfoResponse(pydantic.BaseModel):
+    unit_support_list: list[SupporterInfoResponse]

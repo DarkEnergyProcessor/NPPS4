@@ -5,6 +5,10 @@ import pydantic
 import sqlalchemy
 
 from . import item_model
+from . import live
+from . import live_model
+from . import scenario_model
+from . import unit_model
 from .. import idol
 from .. import util
 from ..const import ADD_TYPE
@@ -99,3 +103,40 @@ async def count_presentbox(context: idol.BasicSchoolIdolContext, user: main.User
     )
     qc = await context.db.main.execute(q)
     return qc.scalar() or 0
+
+
+async def resolve_incentive(context: idol.BasicSchoolIdolContext, user: main.User, incentive: main.Incentive):
+    match incentive.add_type:
+        case ADD_TYPE.UNIT:
+            assert incentive.extra_data is not None
+            extra_data = json.loads(incentive.extra_data)
+            base_info = {"item_id": incentive.item_id, "amount": incentive.amount}
+            if extra_data["is_support_member"]:
+                item_data = unit_model.UnitSupportItem.model_validate(base_info | extra_data)
+            else:
+                item_data = unit_model.UnitItem.model_validate(base_info | extra_data)
+        case ADD_TYPE.LIVE:
+            item_data = live_model.LiveItem(
+                item_id=incentive.item_id,
+                amount=incentive.amount,
+                additional_normal_live_status_list=await live.get_normal_live_clear_status_of_track(
+                    context, user, incentive.item_id
+                ),
+            )
+        case ADD_TYPE.SCENARIO:
+            item_data = scenario_model.ScenarioItem(item_id=incentive.item_id, amount=incentive.amount)
+        case _:
+            item_data = item_model.Item(add_type=incentive.add_type, item_id=incentive.item_id, amount=incentive.amount)
+    return item_data
+
+
+async def get_incentive(context: idol.BasicSchoolIdolContext, user: main.User, incentive_id: int):
+    q = sqlalchemy.select(main.Incentive).where(main.Incentive.user_id == user.id, main.Incentive.id == incentive_id)
+    result = await context.db.main.execute(q)
+    return result.scalar()
+
+
+async def remove_incentive(context: idol.BasicSchoolIdolContext, incentive: main.Incentive):
+    # TODO: Move to incentive history
+    await context.db.main.delete(incentive)
+    await context.db.main.flush()

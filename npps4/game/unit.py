@@ -13,15 +13,6 @@ from ..system import user
 import pydantic
 
 
-class SupporterInfoResponse(pydantic.BaseModel):
-    unit_id: int
-    amount: int
-
-
-class SupporterListInfoResponse(pydantic.BaseModel):
-    unit_support_list: list[SupporterInfoResponse]
-
-
 class UnitAccessoryInfoResponse(pydantic.BaseModel):
     accessory_list: list
     wearing_info: list
@@ -148,12 +139,12 @@ async def unit_removableskillinfo(context: idol.SchoolIdolUserParams) -> unit_mo
 
 
 @idol.register("unit", "supporterAll")
-async def unit_supporterall(context: idol.SchoolIdolUserParams) -> SupporterListInfoResponse:
+async def unit_supporterall(context: idol.SchoolIdolUserParams) -> unit_model.SupporterListInfoResponse:
     current_user = await user.get_current(context)
     units = await unit.get_all_supporter_unit(context, current_user)
 
-    return SupporterListInfoResponse(
-        unit_support_list=[SupporterInfoResponse(unit_id=supp[0], amount=supp[1]) for supp in units]
+    return unit_model.SupporterListInfoResponse(
+        unit_support_list=[unit_model.SupporterInfoResponse(unit_id=supp[0], amount=supp[1]) for supp in units]
     )
 
 

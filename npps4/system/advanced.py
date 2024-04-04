@@ -12,22 +12,31 @@ from . import museum
 from . import reward
 from . import scenario
 from . import unit
+from . import unit_model
 from .. import idol
 from .. import leader_skill
 from ..config import config
 from ..const import ADD_TYPE
 from ..db import main
 
-from typing import Awaitable, Callable
+from typing import Any, Awaitable, Callable
 
 
 @dataclasses.dataclass
 class AddResult:
     success: bool
     reason_unit_full: bool = False
+    extra_data: Any | None = None
 
-    def __nonzero__(self):
+    def __bool__(self):
         return self.success
+
+    @property
+    def unit_data(self) -> main.Unit:
+        """Get underlying unit data (for unit addition only)"""
+        if isinstance(self.extra_data, main.Unit):
+            return self.extra_data
+        raise TypeError("cannot get unit_data")
 
 
 class PartyCenterUnitInfo(pydantic.BaseModel):
@@ -109,8 +118,13 @@ async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, item: 
         case ADD_TYPE.UNIT:
             unit_cnt = await unit.count_units(context, user, True)
             if unit_cnt < user.unit_max:
-                await unit.add_unit(context, user, item.item_id, True)
-                return AddResult(True)
+                unit_level = 1
+                if isinstance(item, unit_model.UnitItem):
+                    unit_level = item.level
+                unit_data = await unit.add_unit(context, user, item.item_id, True)
+                if isinstance(item, unit_model.UnitItem):
+                    item.unit_owning_user_id = unit_data.id
+                return AddResult(True, extra_data=unit_data)
             else:
                 return AddResult(False, reason_unit_full=True)
         case ADD_TYPE.GAME_COIN:
