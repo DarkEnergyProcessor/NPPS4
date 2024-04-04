@@ -13,10 +13,10 @@ from . import reward
 from . import scenario
 from . import unit
 from . import unit_model
+from .. import const
 from .. import idol
 from .. import leader_skill
 from ..config import config
-from ..const import ADD_TYPE
 from ..db import main
 
 from typing import Any, Awaitable, Callable
@@ -102,7 +102,7 @@ class LiveDeckInfo(pydantic.BaseModel):
 
 async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, item: common.AnyItem):
     match item.add_type:
-        case ADD_TYPE.ITEM:
+        case const.ADD_TYPE.ITEM:
             match item.item_id:
                 case 2:
                     user.social_point = user.social_point + item.amount
@@ -113,49 +113,46 @@ async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, item: 
                 case 4:
                     user.free_sns_coin = user.free_sns_coin + item.amount
                     return AddResult(True)
-                case _:
-                    return AddResult(False)  # TODO
-        case ADD_TYPE.UNIT:
+        case const.ADD_TYPE.UNIT:
             unit_cnt = await unit.count_units(context, user, True)
             if unit_cnt < user.unit_max:
                 unit_level = 1
                 if isinstance(item, unit_model.UnitItem):
                     unit_level = item.level
-                unit_data = await unit.add_unit(context, user, item.item_id, True)
+                unit_data = await unit.add_unit(context, user, item.item_id, True, level=unit_level)
                 if isinstance(item, unit_model.UnitItem):
                     item.unit_owning_user_id = unit_data.id
                 return AddResult(True, extra_data=unit_data)
             else:
                 return AddResult(False, reason_unit_full=True)
-        case ADD_TYPE.GAME_COIN:
+        case const.ADD_TYPE.GAME_COIN:
             user.game_coin = user.game_coin + item.amount
             return AddResult(True)
-        case ADD_TYPE.LOVECA:
+        case const.ADD_TYPE.LOVECA:
             user.free_sns_coin = user.free_sns_coin + item.amount
             return AddResult(True)
-        case ADD_TYPE.SOCIAL_POINT:
+        case const.ADD_TYPE.SOCIAL_POINT:
             user.social_point = user.social_point + item.amount
             return AddResult(True)
         # FIXME: Actually check for their return values of these unlocks.
-        case ADD_TYPE.LIVE:
+        case const.ADD_TYPE.LIVE:
             await live.unlock_normal_live(context, user, item.item_id)
             item.additional_normal_live_status_list = await live.get_normal_live_clear_status_of_track(
                 context, user, item.item_id
             )
             return AddResult(True)
-        case ADD_TYPE.AWARD:
+        case const.ADD_TYPE.AWARD:
             return AddResult(await award.unlock_award(context, user, item.item_id))
-        case ADD_TYPE.BACKGROUND:
+        case const.ADD_TYPE.BACKGROUND:
             return AddResult(await background.unlock_background(context, user, item.item_id))
-        case ADD_TYPE.SCENARIO:
+        case const.ADD_TYPE.SCENARIO:
             return AddResult(await scenario.unlock(context, user, item.item_id))
-        case ADD_TYPE.SCHOOL_IDOL_SKILL:
+        case const.ADD_TYPE.SCHOOL_IDOL_SKILL:
             await unit.add_unit_removable_skill(context, user, item.item_id, item.amount)
             return AddResult(True)
-        case ADD_TYPE.MUSEUM:
+        case const.ADD_TYPE.MUSEUM:
             return AddResult(await museum.unlock(context, user, item.item_id))
-        case _:
-            return AddResult(False)  # TODO
+    return AddResult(False)  # TODO
 
 
 async def get_user_guest_party_info(context: idol.BasicSchoolIdolContext, user: main.User) -> PartyInfo:
@@ -223,18 +220,18 @@ async def test_name(context: idol.BasicSchoolIdolContext, name: str):
 
 def _replace_to_loveca(r: item_model.Item):
     r.item_id = 4
-    r.add_type = ADD_TYPE.LOVECA
+    r.add_type = const.ADD_TYPE.LOVECA
     r.amount = 1
 
 
 _ACHIEVEMENT_REWARD_REPLACE_CRITERIA: dict[
     int, Callable[[idol.BasicSchoolIdolContext, main.User, int], Awaitable[bool]]
 ] = {
-    ADD_TYPE.LIVE: live.has_live_unlock,
-    ADD_TYPE.AWARD: award.has_award,
-    ADD_TYPE.BACKGROUND: background.has_background,
-    ADD_TYPE.SCENARIO: scenario.is_unlocked,
-    ADD_TYPE.MUSEUM: museum.has,
+    const.ADD_TYPE.LIVE: live.has_live_unlock,
+    const.ADD_TYPE.AWARD: award.has_award,
+    const.ADD_TYPE.BACKGROUND: background.has_background,
+    const.ADD_TYPE.SCENARIO: scenario.is_unlocked,
+    const.ADD_TYPE.MUSEUM: museum.has,
 }
 
 
@@ -249,7 +246,7 @@ async def fixup_achievement_reward(
                     _replace_to_loveca(ach_reward)
 
             match ach_reward.add_type:
-                case ADD_TYPE.UNIT:
+                case const.ADD_TYPE.UNIT:
                     # Always put unit to present box
                     ach_reward.reward_box_flag = True
 
