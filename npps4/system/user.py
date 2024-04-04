@@ -3,14 +3,15 @@ import math
 import pydantic
 import sqlalchemy
 
+from . import achievement
+from . import award
+from . import background
+from . import common
 from . import core
+from . import live
+from . import scenario
 from .. import idol
 from .. import util
-from ..system import achievement
-from ..system import award
-from ..system import background
-from ..system import live
-from ..system import scenario
 from ..db import main
 from ..db import game_mater
 
@@ -42,7 +43,7 @@ class UserInfoData(pydantic.BaseModel):
     insert_date: str
     update_date: str
     tutorial_state: int
-    lp_recovery_item: list = []  # TODO
+    lp_recovery_item: list[common.ItemCount]
     unlock_random_live_muse: int = 0
     unlock_random_live_aqours: int = 0
 
@@ -99,6 +100,7 @@ async def get_user_info(context: idol.BasicSchoolIdolContext, user: main.User):
         insert_date=util.timestamp_to_datetime(user.insert_date),
         update_date=util.timestamp_to_datetime(user.update_date),
         tutorial_state=user.tutorial_state,
+        lp_recovery_item=await get_recovery_items(context, user),
     )
 
 
@@ -169,3 +171,9 @@ async def add_exp(context: idol.BasicSchoolIdolContext, user: main.User, exp: in
 
     await context.db.main.flush()
     return next_level_info
+
+
+async def get_recovery_items(context: idol.BasicSchoolIdolContext, user: main.User):
+    q = sqlalchemy.select(main.RecoveryItem).where(main.RecoveryItem.user_id == user.id, main.RecoveryItem.amount > 0)
+    result = await context.db.main.execute(q)
+    return [common.ItemCount(item_id=i.item_id, amount=i.amount) for i in result.scalars()]
