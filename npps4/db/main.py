@@ -336,6 +336,26 @@ class LiveInProgress(common.Base, kw_only=True):
     unit_deck_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
+class Item(common.Base, kw_only=True):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
+    user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True, unique=True
+    )
+    item_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
+    amount: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
+
+
+class RecoveryItem(common.Base, kw_only=True):
+    """LP Recovery item"""
+
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
+    user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True, unique=True
+    )
+    item_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
+    amount: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
+
+
 engine = sqlalchemy.ext.asyncio.create_async_engine(config.get_database_url())
 sessionmaker = sqlalchemy.ext.asyncio.async_sessionmaker(engine)
 
