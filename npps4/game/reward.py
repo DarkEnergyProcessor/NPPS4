@@ -70,7 +70,7 @@ class RewardOpenResponse(achievement.AchievementMixin, user.UserDiffMixin, unit_
     )  # TODO
 
 
-class RewardOpenAllResponse(common.TimestampMixin, user.UserDiffMixin):
+class RewardOpenAllResponse(achievement.AchievementMixin, common.TimestampMixin, user.UserDiffMixin):
     reward_num: int
     opened_num: int
     total_num: int
@@ -186,23 +186,70 @@ async def reward_open(context: idol.SchoolIdolUserParams, request: RewardOpenReq
 
 @idol.register("reward", "openAll")
 async def reward_openall(context: idol.SchoolIdolUserParams, request: RewardListRequest) -> RewardOpenAllResponse:
-    # TODO
-    util.stub("reward", "openAll", context.raw_request_data)
     current_user = await user.get_current(context)
-    user_info = await user.get_user_info(context, current_user)
-    reward_count = min(await reward.count_presentbox(context, current_user), 1000)
+    before_user = await user.get_user_info(context, current_user)
+    incentives = await reward.get_presentbox(
+        context,
+        current_user,
+        request,
+        0,
+        1000,
+        RewardOrder.ORDER_ASCENDING in request.order,
+        RewardOrder.BY_EXPIRE_DATE in request.order,
+    )
+    reward_count = len(incentives)
+    reward_item_list: list[RewardIncentiveItem] = []
+    need_check_unit_ach = False
+
+    for incentive in incentives:
+        item_data = await reward.resolve_incentive(context, current_user, incentive)
+        add_result = await advanced.add_item(context, current_user, item_data)
+        success = bool(add_result)
+
+        if success:
+            reward_item_list.append(
+                RewardIncentiveItem.model_validate(item_data.model_dump() | {"incentive_id": incentive.id})
+            )
+            await reward.remove_incentive(context, incentive)
+            if item_data.add_type == const.ADD_TYPE.UNIT:
+                need_check_unit_ach = True
+
+    achievement_list = achievement.AchievementContext()
+    if need_check_unit_ach:
+        # Trigger achievement
+        achievement_list = await album.trigger_achievement(
+            context, current_user, obtained=True, idolized=True, max_love=True, max_level=True
+        ) + await achievement.check_type_53_recursive(context, current_user)
+    # Give achievement rewards
+    accomplished_rewards = [
+        await achievement.get_achievement_rewards(context, ach) for ach in achievement_list.accomplished
+    ]
+    unaccomplished_rewards = [await achievement.get_achievement_rewards(context, ach) for ach in achievement_list.new]
+    await advanced.fixup_achievement_reward(context, current_user, accomplished_rewards)
+    await advanced.fixup_achievement_reward(context, current_user, unaccomplished_rewards)
+    await advanced.process_achievement_reward(
+        context, current_user, achievement_list.accomplished, accomplished_rewards
+    )
+
     return RewardOpenAllResponse(
+        accomplished_achievement_list=await achievement.to_game_representation(
+            context, achievement_list.accomplished, accomplished_rewards
+        ),
+        unaccomplished_achievement_cnt=await achievement.get_achievement_count(context, current_user, False),
+        added_achievement_list=await achievement.to_game_representation(
+            context, achievement_list.new, unaccomplished_rewards
+        ),
+        new_achievement_cnt=len(achievement_list.new),
         reward_num=reward_count,
-        opened_num=0,
+        opened_num=len(reward_item_list),
         total_num=reward_count,
         order=request.order,
         upper_limit=False,
-        reward_item_list=[],
-        before_user_info=user_info,
-        after_user_info=user_info,
-        new_achievement_cnt=0,
+        reward_item_list=reward_item_list,
+        before_user_info=before_user,
+        after_user_info=await user.get_user_info(context, current_user),
         museum_info=await museum.get_museum_info_data(context, current_user),
-        present_cnt=0,
+        present_cnt=await reward.count_presentbox(context, current_user),
     )
 
 
