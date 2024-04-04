@@ -4,6 +4,7 @@ from .. import idol
 from .. import util
 from ..db import main
 from ..system import common
+from ..system import reward
 from ..system import unit
 from ..system import user
 from ..idol import cache
@@ -201,12 +202,13 @@ async def login_startup(context: idol.SchoolIdolAuthParams, request: LoginReques
 async def login_topinfo(context: idol.SchoolIdolUserParams) -> TopInfoResponse:
     # TODO
     util.stub("login", "topInfo", context.raw_request_data)
+    current_user = await user.get_current(context)
     return TopInfoResponse(
         friend_action_cnt=0,
         friend_greet_cnt=0,
         friend_variety_cnt=0,
         friend_new_cnt=0,
-        present_cnt=0,
+        present_cnt=await reward.count_presentbox(context, current_user),
         secret_box_badge_flag=False,
         server_datetime=util.timestamp_to_datetime(),
         notice_friend_datetime=util.timestamp_to_datetime(86400),
