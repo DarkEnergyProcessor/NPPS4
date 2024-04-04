@@ -1,7 +1,11 @@
+import sqlalchemy
+
+from . import common
 from . import item_model
 from .. import idol
 from ..const import ADD_TYPE
 from ..db import item
+from ..db import main
 
 
 async def get_item_category_for_type_1000(context: idol.BasicSchoolIdolContext, item_id: int):
@@ -38,3 +42,38 @@ def game_coin(amount: int, /):
 
 def social_point(amount: int, /):
     return item_model.Item(add_type=ADD_TYPE.SOCIAL_POINT, item_id=2, amount=amount, item_category_id=2)
+
+
+async def get_buff_item_ids(context: idol.BasicSchoolIdolContext):
+    q = sqlalchemy.select(item.BuffItem.item_id)
+    result = await context.db.item.execute(q)
+    return list(result.scalars())
+
+
+async def get_reinforce_item_ids(context: idol.BasicSchoolIdolContext):
+    q = sqlalchemy.select(item.UnitReinforceItem.item_id)
+    result = await context.db.item.execute(q)
+    return list(result.scalars())
+
+
+async def get_item_list(context: idol.BasicSchoolIdolContext, user: main.User):
+    buff_items = set(await get_buff_item_ids(context))
+    reinforce_items = set(await get_reinforce_item_ids(context))
+
+    general_item_list: list[common.ItemCount] = []
+    buff_item_list: list[common.ItemCount] = []
+    reinforce_item_list: list[common.ItemCount] = []
+
+    q = sqlalchemy.select(main.Item).where(main.Item.user_id == user.id, main.Item.amount > 0)
+    result = await context.db.main.execute(q)
+    for i in result.scalars():
+        item_count = common.ItemCount(item_id=i.item_id, amount=i.amount)
+
+        if i.item_id in reinforce_items:
+            reinforce_item_list.append(item_count)
+        elif i.item_id in buff_items:
+            buff_item_list.append(item_count)
+        else:
+            general_item_list.append(item_count)
+
+    return general_item_list, buff_item_list, reinforce_item_list
