@@ -3,6 +3,7 @@ import sqlalchemy.ext.asyncio
 
 from ..db import achievement
 from ..db import effort
+from ..db import exchange
 from ..db import game_mater
 from ..db import item
 from ..db import live
@@ -14,6 +15,20 @@ from ..db import unit
 
 
 class Database:
+    __slots__ = (
+        "_mainsession",
+        "_gmsession",
+        "_itemsession",
+        "_livesession",
+        "_unitsession",
+        "_achievementsession",
+        "_effortsession",
+        "_subscenariosession",
+        "_museumsession",
+        "_scenariosession",
+        "_exchangesession",
+    )
+
     def __init__(self) -> None:
         self._mainsession: sqlalchemy.ext.asyncio.AsyncSession | None = None
         self._gmsession: sqlalchemy.ext.asyncio.AsyncSession | None = None
@@ -25,6 +40,7 @@ class Database:
         self._subscenariosession: sqlalchemy.ext.asyncio.AsyncSession | None = None
         self._museumsession: sqlalchemy.ext.asyncio.AsyncSession | None = None
         self._scenariosession: sqlalchemy.ext.asyncio.AsyncSession | None = None
+        self._exchangesession: sqlalchemy.ext.asyncio.AsyncSession | None = None
 
     @property
     def main(self):
@@ -86,6 +102,12 @@ class Database:
         if self._scenariosession is None:
             self._scenariosession = scenario.get_session()
         return self._scenariosession
+
+    @property
+    def exchange(self):
+        if self._exchangesession is None:
+            self._exchangesession = exchange.get_session()
+        return self._exchangesession
 
     async def cleanup(self):
         if self._mainsession is not None:

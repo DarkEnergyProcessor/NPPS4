@@ -356,6 +356,19 @@ class RecoveryItem(common.Base, kw_only=True):
     amount: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
 
 
+class ExchangePointItem(common.Base, kw_only=True):
+    """LP Recovery item"""
+
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
+    user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
+    )
+    exchange_point_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
+    amount: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
+
+    __table_args__ = (sqlalchemy.UniqueConstraint(user_id, exchange_point_id),)
+
+
 engine = sqlalchemy.ext.asyncio.create_async_engine(config.get_database_url())
 sessionmaker = sqlalchemy.ext.asyncio.async_sessionmaker(engine)
 
