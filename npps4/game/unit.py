@@ -100,6 +100,26 @@ class UnitRankUpResponse(achievement.AchievementMixin, common.TimestampMixin, us
     present_cnt: int
 
 
+class UnitSaleRequest(pydantic.BaseModel):
+    unit_owning_user_id: list[int]
+    unit_support_list: list[unit_model.SupporterInfoResponse]
+
+
+class UnitSaleDetail(pydantic.BaseModel):
+    unit_owning_user_id: int
+    unit_id: int
+    is_signed: bool
+    price: int
+
+
+class UnitSaleResponse(common.TimestampMixin, user.UserDiffMixin):
+    total: int
+    detail: list[UnitSaleDetail]
+    reward_box_flag: bool
+    get_exchange_point_list: list[UnitGetExchangePoint]
+    unit_removable_skill: unit_model.RemovableSkillOwningInfo
+
+
 @idol.register("unit", "accessoryAll")
 async def unit_accessoryall(context: idol.SchoolIdolUserParams) -> UnitAccessoryInfoResponse:
     # TODO
@@ -392,3 +412,8 @@ async def unit_rankup(context: idol.SchoolIdolUserParams, request: UnitRankUpReq
         museum_info=await museum.get_museum_info_data(context, current_user),
         present_cnt=await reward.count_presentbox(context, current_user),
     )
+
+
+# @idol.register("unit", "sale")
+async def unit_sale(context: idol.SchoolIdolUserParams, request: UnitSaleRequest):
+    pass
