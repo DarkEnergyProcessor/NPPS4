@@ -339,10 +339,12 @@ class LiveInProgress(common.Base, kw_only=True):
 class Item(common.Base, kw_only=True):
     id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
-        common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True, unique=True
+        common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
     )
     item_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
     amount: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
+
+    __table_args__ = (sqlalchemy.UniqueConstraint(user_id, item_id),)
 
 
 class RecoveryItem(common.Base, kw_only=True):
@@ -350,10 +352,12 @@ class RecoveryItem(common.Base, kw_only=True):
 
     id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
-        common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True, unique=True
+        common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
     )
     item_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
     amount: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
+
+    __table_args__ = (sqlalchemy.UniqueConstraint(user_id, item_id),)
 
 
 class ExchangePointItem(common.Base, kw_only=True):
