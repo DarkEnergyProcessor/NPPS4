@@ -6,6 +6,7 @@ from ..system import achievement
 from ..system import advanced
 from ..system import album
 from ..system import common
+from ..system import item
 from ..system import museum
 from ..system import reward
 from ..system import secretbox
@@ -68,12 +69,11 @@ if USE_STUB_DATA:
         item_list: list[common.ItemCount]
         gauge_info: secretbox_model.SecretboxGaugeInfo = pydantic.Field(
             default_factory=secretbox_model.SecretboxGaugeInfo
-        )  # TODO
+        )
         member_category_list: list[dict[str, Any]]
 
     @idol.register("secretbox", "all")
     async def secretbox_all_stub(context: idol.SchoolIdolUserParams) -> CustomSecretBoxResponse:
-        # TODO
         util.stub("secretbox", "all")
         with open("secretbox.json", "r", encoding="utf-8") as f:
             return CustomSecretBoxResponse(
@@ -84,12 +84,12 @@ else:
 
     @idol.register("secretbox", "all")
     async def secretbox_all(context: idol.SchoolIdolUserParams) -> SecretboxAllResponse:
-        util.stub("secretbox", "all")
         current_user = await user.get_current(context)
+        item_list = await item.get_item_list(context, current_user)
         return SecretboxAllResponse(
             use_cache=0,
             is_unit_max=await unit.is_unit_max(context, current_user),
-            item_list=[],  # TODO
+            item_list=item_list[0],
             member_category_list=await secretbox.get_all_secretbox_data_response(context, current_user),
         )
 
@@ -161,6 +161,8 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
     if umi_rare_mode:
         unit_data_list[0].unit_rarity_id = 4
 
+    item_list = await item.get_item_list(context, current_user)
+
     return SecretboxPonResponse(
         before_user_info=before_user,
         after_user_info=await user.get_user_info(context, current_user),
@@ -173,7 +175,7 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
         ),
         new_achievement_cnt=len(achievement_list.new),
         is_unit_max=current_unit_count >= current_user.unit_max,
-        item_list=[],  # TODO
+        item_list=item_list[0],
         button_list=await secretbox.get_secretbox_button_response(context, current_user, secretbox_data),
         secret_box_info=await secretbox.get_secretbox_info_response(context, current_user, secretbox_data),
         secret_box_items=SecretboxItems(unit=unit_data_list, item=[]),

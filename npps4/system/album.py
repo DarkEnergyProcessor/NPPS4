@@ -23,16 +23,7 @@ async def update(
     album = result.scalar()
 
     if album is None:
-        album = main.Album(
-            user_id=user.id,
-            unit_id=unit_id,
-            rank_max_flag=False,
-            love_max_flag=False,
-            rank_level_max_flag=False,
-            highest_love_per_unit=0,  # TODO
-            favorite_point=0,  # TODO
-            sign_flag=False,
-        )
+        album = main.Album(user_id=user.id, unit_id=unit_id)
         context.db.main.add(album)
 
     album.rank_max_flag = rank_max or album.rank_max_flag

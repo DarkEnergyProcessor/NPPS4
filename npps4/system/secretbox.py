@@ -80,7 +80,6 @@ async def get_all_secretbox_data_response(context: idol.BasicSchoolIdolContext, 
     member_category_list: dict[int, list[secretbox_model.SecretboxAllPage]] = {}
 
     for secretbox in server_data.secretbox_data.values():
-        secretbox_id = secretbox.secretbox_id
         page = secretbox_model.SecretboxAllPage(
             menu_asset=_determine_en_path(context, secretbox.menu_asset, secretbox.menu_asset_en),
             page_order=secretbox.order,

@@ -86,17 +86,12 @@ class UnitRankUpRequest(pydantic.BaseModel):
     unit_owning_user_ids: list[int]
 
 
-class UnitGetExchangePoint(pydantic.BaseModel):
-    rarity: int
-    exchange_point: int
-
-
 class UnitRankUpResponse(achievement.AchievementMixin, common.TimestampMixin, user.UserDiffMixin):
     before: unit_model.UnitInfoData
     after: unit_model.UnitInfoData
     use_game_coin: int
     unlocked_subscenario_ids: list[int]
-    get_exchange_point_list: list[UnitGetExchangePoint]
+    get_exchange_point_list: list[exchange.ExchangePointInfo]
     unit_removable_skill: unit_model.RemovableSkillOwningInfo
     museum_info: museum.MuseumInfoData
     present_cnt: int
@@ -119,7 +114,7 @@ class UnitSaleResponse(common.TimestampMixin, user.UserDiffMixin):
     total: int
     detail: list[UnitSaleDetail]
     reward_box_flag: bool
-    get_exchange_point_list: list[UnitGetExchangePoint]
+    get_exchange_point_list: list[exchange.ExchangePointInfo]
     unit_removable_skill: unit_model.RemovableSkillOwningInfo
 
 
@@ -474,10 +469,10 @@ async def unit_sale(context: idol.SchoolIdolUserParams, request: UnitSaleRequest
                 raise idol.error.IdolError(detail="invalid unit amount")
 
     # Give stickers
-    get_exchange_point_list: list[UnitGetExchangePoint] = []
+    get_exchange_point_list: list[exchange.ExchangePointInfo] = []
     for exchange_point_id, amount in exchange_point.items():
         await exchange.add_exchange_point(context, current_user, exchange_point_id, amount)
-        get_exchange_point_list.append(UnitGetExchangePoint(rarity=exchange_point_id, exchange_point=amount))
+        get_exchange_point_list.append(exchange.ExchangePointInfo(rarity=exchange_point_id, exchange_point=amount))
 
     # Give coin
     reward_box_flag = not bool(await advanced.add_item(context, current_user, item.game_coin(total)))
