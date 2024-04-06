@@ -6,6 +6,7 @@ from . import achievement
 from . import award
 from . import background
 from . import common
+from . import exchange
 from . import item_model
 from . import live
 from . import museum
@@ -133,6 +134,12 @@ async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, item: 
             return AddResult(True)
         case const.ADD_TYPE.SOCIAL_POINT:
             user.social_point = user.social_point + item.amount
+            return AddResult(True)
+        case const.ADD_TYPE.EXCHANGE_POINT:
+            return AddResult(await exchange.add_exchange_point(context, user, item.item_id, item.amount))
+        case const.ADD_TYPE.UNIT_MAX:
+            # TODO: Limit max units
+            user.unit_max = user.unit_max + item.amount
             return AddResult(True)
         # FIXME: Actually check for their return values of these unlocks.
         case const.ADD_TYPE.LIVE:
