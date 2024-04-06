@@ -4,6 +4,8 @@ from ..system import achievement
 from ..system import advanced
 from ..system import album
 from ..system import common
+from ..system import exchange
+from ..system import item
 from ..system import museum
 from ..system import reward
 from ..system import unit
@@ -109,6 +111,7 @@ class UnitSaleDetail(pydantic.BaseModel):
     unit_owning_user_id: int
     unit_id: int
     is_signed: bool
+    amount: int
     price: int
 
 
@@ -416,4 +419,75 @@ async def unit_rankup(context: idol.SchoolIdolUserParams, request: UnitRankUpReq
 
 # @idol.register("unit", "sale")
 async def unit_sale(context: idol.SchoolIdolUserParams, request: UnitSaleRequest):
-    pass
+    current_user = await user.get_current(context)
+    total = 0
+    detail: list[UnitSaleDetail] = []
+    exchange_point: dict[int, int] = {}
+    before_user = await user.get_user_info(context, current_user)
+
+    # Remove regular unit
+    for unit_owning_user_id in request.unit_owning_user_id:
+        unit_data = await unit.get_unit(context, unit_owning_user_id)
+        unit.validate_unit(current_user, unit_data)
+
+        # Get sale price
+        _, unit_stats = await unit.get_unit_data_full_info(context, unit_data)
+        detail.append(
+            UnitSaleDetail(
+                unit_owning_user_id=unit_owning_user_id,
+                unit_id=unit_data.unit_id,
+                is_signed=unit_data.is_signed,
+                amount=1,
+                price=unit_stats.sale_price,
+            )
+        )
+        total = total + unit_stats.sale_price
+        await unit.remove_unit(context, current_user, unit_data)
+
+        # Give sticker
+        if exchange.should_give_sticker(context, unit_data.unit_id):
+            exchange_point_id = await unit.get_exchange_point_id_by_unit_id(context, unit_data.unit_id)
+            if exchange_point_id > 0:
+                exchange_point[exchange_point_id] = exchange_point.get(exchange_point_id, 0) + 1
+
+    # Remove support unit
+    for supp_unit in request.unit_support_list:
+        if supp_unit.amount > 0:
+            unit_info = await unit.get_unit_info(context, supp_unit.unit_id)
+            if unit_info is None:
+                raise idol.error.IdolError(detail="invalid unit id")
+
+            if await unit.sub_supporter_unit(context, current_user, supp_unit.unit_id):
+                unit_level_up_pattern = await unit.get_unit_level_up_pattern(context, unit_info)
+                unit_stats = unit_level_up_pattern[0]
+                detail.append(
+                    UnitSaleDetail(
+                        unit_owning_user_id=0,
+                        unit_id=supp_unit.unit_id,
+                        is_signed=False,
+                        amount=supp_unit.amount,
+                        price=unit_stats.sale_price * supp_unit.amount,
+                    )
+                )
+                total = total + unit_stats.sale_price * supp_unit.amount
+            else:
+                raise idol.error.IdolError(detail="invalid unit amount")
+
+    # Give stickers
+    get_exchange_point_list: list[UnitGetExchangePoint] = []
+    for exchange_point_id, amount in exchange_point.items():
+        await exchange.add_exchange_point(context, current_user, exchange_point_id, amount)
+        get_exchange_point_list.append(UnitGetExchangePoint(rarity=exchange_point_id, exchange_point=amount))
+
+    # Give coin
+    reward_box_flag = bool(await advanced.add_item(context, current_user, item.game_coin(total)))
+
+    return UnitSaleResponse(
+        before_user_info=before_user,
+        after_user_info=await user.get_user_info(context, current_user),
+        total=total,
+        detail=detail,
+        reward_box_flag=reward_box_flag,
+        get_exchange_point_list=get_exchange_point_list,
+        unit_removable_skill=await unit.get_removable_skill_info_request(context, current_user),
+    )

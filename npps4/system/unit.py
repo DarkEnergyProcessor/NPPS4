@@ -6,6 +6,7 @@ import sqlalchemy
 
 from . import album
 from . import common
+from . import exchange
 from . import unit_model
 from .. import db
 from .. import idol
@@ -463,6 +464,7 @@ class UnitStatsResult:
     cool: int
     hp: int
     next_exp: int
+    sale_price: int
 
 
 def calculate_unit_stats(
@@ -476,6 +478,7 @@ def calculate_unit_stats(
         cool=unit_info.cool_max,
         hp=unit_info.hp_max,
         next_exp=0,
+        sale_price=pattern[0].sale_price,
     )
 
     for diff in pattern:
@@ -486,6 +489,7 @@ def calculate_unit_stats(
             result.cool = result.cool - diff.cool_diff
             result.hp = result.hp - diff.hp_diff
             result.next_exp = diff.next_exp
+            result.sale_price = diff.sale_price
             break
 
     return result
@@ -808,3 +812,23 @@ async def has_signed_variant(context: idol.BasicSchoolIdolContext, unit_id: int)
 async def is_unit_max(context: idol.BasicSchoolIdolContext, user: main.User):
     unit_count = await count_units(context, user, True)
     return unit_count >= user.unit_max
+
+
+async def get_exchange_point_id_by_unit_id(context: idol.BasicSchoolIdolContext, /, unit_id: int):
+    # TODO: Probably allow this to be configurable?
+    if await exchange.is_festival_unit(context, unit_id):
+        return 6
+
+    unit_info = await get_unit_info(context, unit_id)
+    assert unit_info is not None
+    match unit_info.rarity:
+        case 2:
+            return 2
+        case 3:
+            return 3
+        case 4:
+            return 4
+        case 5:
+            return 5
+        case _:
+            return 0

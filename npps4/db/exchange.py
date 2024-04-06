@@ -6,6 +6,18 @@ from . import common
 from ..download import download
 
 
+class ExchangeFestivalPointUnit(common.GameDBBase):
+    """```sql
+    CREATE TABLE `exchange_festival_point_unit_m` (
+        `unit_id` INTEGER NOT NULL,
+        PRIMARY KEY (`unit_id`)
+    )
+    ```"""
+
+    __tablename__ = "exchange_festival_point_unit_m"
+    unit_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+
+
 class ExchangeNoPointUnit(common.GameDBBase):
     """```sql
     CREATE TABLE `exchange_nopoint_unit_m` (
@@ -14,6 +26,7 @@ class ExchangeNoPointUnit(common.GameDBBase):
     )
     ```"""
 
+    __tablename__ = "exchange_nopoint_unit_m"
     unit_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
 
 
@@ -41,6 +54,7 @@ class ExchangePoint(common.GameDBBase, common.MaybeEncrypted):
     )
     ```"""
 
+    __tablename__ = "exchange_point_m"
     exchange_point_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
     name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
     name_en: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column()
