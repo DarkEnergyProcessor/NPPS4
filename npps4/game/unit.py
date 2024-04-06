@@ -417,7 +417,7 @@ async def unit_rankup(context: idol.SchoolIdolUserParams, request: UnitRankUpReq
     )
 
 
-# @idol.register("unit", "sale")
+@idol.register("unit", "sale")
 async def unit_sale(context: idol.SchoolIdolUserParams, request: UnitSaleRequest):
     current_user = await user.get_current(context)
     total = 0
@@ -445,7 +445,7 @@ async def unit_sale(context: idol.SchoolIdolUserParams, request: UnitSaleRequest
         await unit.remove_unit(context, current_user, unit_data)
 
         # Give sticker
-        if exchange.should_give_sticker(context, unit_data.unit_id):
+        if await exchange.should_give_sticker(context, unit_data.unit_id):
             exchange_point_id = await unit.get_exchange_point_id_by_unit_id(context, unit_data.unit_id)
             if exchange_point_id > 0:
                 exchange_point[exchange_point_id] = exchange_point.get(exchange_point_id, 0) + 1
@@ -480,7 +480,7 @@ async def unit_sale(context: idol.SchoolIdolUserParams, request: UnitSaleRequest
         get_exchange_point_list.append(UnitGetExchangePoint(rarity=exchange_point_id, exchange_point=amount))
 
     # Give coin
-    reward_box_flag = bool(await advanced.add_item(context, current_user, item.game_coin(total)))
+    reward_box_flag = not bool(await advanced.add_item(context, current_user, item.game_coin(total)))
 
     return UnitSaleResponse(
         before_user_info=before_user,
