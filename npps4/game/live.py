@@ -7,7 +7,6 @@ from .. import const
 from .. import idol
 from .. import util
 from ..config import config
-from ..const import ADD_TYPE
 from ..system import achievement
 from ..system import advanced
 from ..system import album
@@ -620,7 +619,7 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
     unlocked_scenario = await scenario.count(context, current_user)
     for reward_list in accomplished_achievement_rewards:
         for reward_data in reward_list:
-            if reward_data.add_type == ADD_TYPE.SCENARIO:
+            if reward_data.add_type == const.ADD_TYPE.SCENARIO:
                 unlocked_scenario = unlocked_scenario + 1
     accomplished_achievement.extend(await achievement.check_type_59(context, current_user, unlocked_scenario))
 

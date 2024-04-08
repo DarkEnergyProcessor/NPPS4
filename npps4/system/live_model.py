@@ -1,7 +1,7 @@
 import pydantic
 
 from . import item_model
-from ..const import ADD_TYPE
+from .. import const
 
 from typing import Literal
 
@@ -38,6 +38,6 @@ class LiveStatus(pydantic.BaseModel):
 
 
 class LiveItem(item_model.Item):
-    add_type: int = ADD_TYPE.LIVE
+    add_type: const.ADD_TYPE = const.ADD_TYPE.LIVE
     additional_normal_live_status_list: list[LiveStatus] = pydantic.Field(default_factory=list)
     additional_training_live_status_list: list[LiveStatus] = pydantic.Field(default_factory=list)  # TODO: Maybe

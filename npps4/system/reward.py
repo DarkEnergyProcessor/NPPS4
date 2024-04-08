@@ -9,9 +9,9 @@ from . import live
 from . import live_model
 from . import scenario_model
 from . import unit_model
+from .. import const
 from .. import idol
 from .. import util
-from ..const import ADD_TYPE
 from ..db import main
 
 
@@ -71,7 +71,7 @@ async def get_presentbox(
     match filter_config.category:
         case RewardCategory.MEMBERS:
             # TODO: More sophisticated filter.
-            q = q.where(main.Incentive.add_type == ADD_TYPE.UNIT)
+            q = q.where(main.Incentive.add_type == const.ADD_TYPE.UNIT)
         case RewardCategory.ITEMS:
             q = q.where(main.Incentive.add_type.in_(filter_config.filter))
 
@@ -107,7 +107,7 @@ async def count_presentbox(context: idol.BasicSchoolIdolContext, user: main.User
 
 async def resolve_incentive(context: idol.BasicSchoolIdolContext, user: main.User, incentive: main.Incentive):
     match incentive.add_type:
-        case ADD_TYPE.UNIT:
+        case const.ADD_TYPE.UNIT:
             assert incentive.extra_data is not None
             extra_data = json.loads(incentive.extra_data)
             base_info = {"item_id": incentive.item_id, "amount": incentive.amount}
@@ -115,7 +115,7 @@ async def resolve_incentive(context: idol.BasicSchoolIdolContext, user: main.Use
                 item_data = unit_model.UnitSupportItem.model_validate(base_info | extra_data)
             else:
                 item_data = unit_model.UnitItem.model_validate(base_info | extra_data)
-        case ADD_TYPE.LIVE:
+        case const.ADD_TYPE.LIVE:
             item_data = live_model.LiveItem(
                 item_id=incentive.item_id,
                 amount=incentive.amount,
@@ -123,10 +123,12 @@ async def resolve_incentive(context: idol.BasicSchoolIdolContext, user: main.Use
                     context, user, incentive.item_id
                 ),
             )
-        case ADD_TYPE.SCENARIO:
+        case const.ADD_TYPE.SCENARIO:
             item_data = scenario_model.ScenarioItem(item_id=incentive.item_id, amount=incentive.amount)
         case _:
-            item_data = item_model.Item(add_type=incentive.add_type, item_id=incentive.item_id, amount=incentive.amount)
+            item_data = item_model.Item(
+                add_type=const.ADD_TYPE(incentive.add_type), item_id=incentive.item_id, amount=incentive.amount
+            )
     return item_data
 
 

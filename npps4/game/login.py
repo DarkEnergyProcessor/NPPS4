@@ -3,6 +3,7 @@ import base64
 from .. import idol
 from .. import util
 from ..db import main
+from ..system import achievement
 from ..system import common
 from ..system import reward
 from ..system import unit
@@ -234,7 +235,7 @@ async def login_topinfoonce(context: idol.SchoolIdolUserParams) -> TopInfoOnceRe
     util.stub("login", "topInfoOnce", context.raw_request_data)
     return TopInfoOnceResponse(
         new_achievement_cnt=0,
-        unaccomplished_achievement_cnt=0,
+        unaccomplished_achievement_cnt=await achievement.get_achievement_count(context, current_user, False),
         live_daily_reward_exist=False,
         training_energy=current_user.training_energy,
         training_energy_max=current_user.training_energy_max,

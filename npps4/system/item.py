@@ -2,8 +2,8 @@ import sqlalchemy
 
 from . import common
 from . import item_model
+from .. import const
 from .. import idol
-from ..const import ADD_TYPE
 from ..db import item
 from ..db import main
 
@@ -15,13 +15,13 @@ async def get_item_category_for_type_1000(context: idol.BasicSchoolIdolContext, 
 
 async def get_item_category(context: idol.BasicSchoolIdolContext, item_data: item_model.Item):
     match item_data.add_type:
-        case ADD_TYPE.ITEM:
+        case const.ADD_TYPE.ITEM:
             return await get_item_category_for_type_1000(context, item_data.item_id)
-        case ADD_TYPE.GAME_COIN:
+        case const.ADD_TYPE.GAME_COIN:
             return await get_item_category_for_type_1000(context, 3)
-        case ADD_TYPE.LOVECA:
+        case const.ADD_TYPE.LOVECA:
             return await get_item_category_for_type_1000(context, 4)
-        case ADD_TYPE.SOCIAL_POINT:
+        case const.ADD_TYPE.SOCIAL_POINT:
             return await get_item_category_for_type_1000(context, 5)
         case _:
             return 0
@@ -33,15 +33,15 @@ async def update_item_category_id(context: idol.BasicSchoolIdolContext, item_dat
 
 
 def loveca(amount: int, /):
-    return item_model.Item(add_type=ADD_TYPE.LOVECA, item_id=4, amount=amount, item_category_id=4)
+    return item_model.Item(add_type=const.ADD_TYPE.LOVECA, item_id=4, amount=amount, item_category_id=4)
 
 
 def game_coin(amount: int, /):
-    return item_model.Item(add_type=ADD_TYPE.GAME_COIN, item_id=3, amount=amount, item_category_id=3)
+    return item_model.Item(add_type=const.ADD_TYPE.GAME_COIN, item_id=3, amount=amount, item_category_id=3)
 
 
 def social_point(amount: int, /):
-    return item_model.Item(add_type=ADD_TYPE.SOCIAL_POINT, item_id=2, amount=amount, item_category_id=2)
+    return item_model.Item(add_type=const.ADD_TYPE.SOCIAL_POINT, item_id=2, amount=amount, item_category_id=2)
 
 
 async def get_buff_item_ids(context: idol.BasicSchoolIdolContext):

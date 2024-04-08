@@ -1,15 +1,11 @@
-import random
-
-import pydantic
 import sqlalchemy
-
 
 from . import item
 from . import live_model
+from .. import const
 from .. import db
 from .. import idol
 from ..config import config
-from ..const import LIVE_GOAL_TYPE
 from ..db import main
 from ..db import live
 
@@ -184,19 +180,19 @@ MAX_INT = 2147483647
 def make_rank_range(live_info: live.CommonLive, live_setting: live.LiveSetting):
     return {
         # Note: The ranges are in reverse order
-        LIVE_GOAL_TYPE.SCORE: [
+        const.LIVE_GOAL_TYPE.SCORE: [
             range(live_setting.s_rank_score, MAX_INT),
             range(live_setting.a_rank_score, live_setting.s_rank_score),
             range(live_setting.b_rank_score, live_setting.a_rank_score),
             range(live_setting.c_rank_score, live_setting.b_rank_score),
         ],
-        LIVE_GOAL_TYPE.COMBO: [
+        const.LIVE_GOAL_TYPE.COMBO: [
             range(live_setting.s_rank_combo, MAX_INT),
             range(live_setting.a_rank_combo, live_setting.s_rank_combo),
             range(live_setting.b_rank_combo, live_setting.a_rank_combo),
             range(live_setting.c_rank_combo, live_setting.b_rank_combo),
         ],
-        LIVE_GOAL_TYPE.CLEAR: [
+        const.LIVE_GOAL_TYPE.CLEAR: [
             range(live_info.s_rank_complete, MAX_INT),
             range(live_info.a_rank_complete, live_info.s_rank_complete),
             range(live_info.b_rank_complete, live_info.a_rank_complete),
@@ -213,14 +209,14 @@ def get_index_of_range(value: int, seq: Iterable[Sequence[int]], start: int = 0,
     return default
 
 
-LIVE_GOAL_TYPES = (LIVE_GOAL_TYPE.SCORE, LIVE_GOAL_TYPE.COMBO, LIVE_GOAL_TYPE.CLEAR)
+LIVE_GOAL_TYPES = (const.LIVE_GOAL_TYPE.SCORE, const.LIVE_GOAL_TYPE.COMBO, const.LIVE_GOAL_TYPE.CLEAR)
 
 
 def get_live_ranks(live_info: live.CommonLive, live_setting: live.LiveSetting, score: int, combo: int, clears: int):
     rank_ranges = make_rank_range(live_info, live_setting)
-    score_rank = get_index_of_range(score, rank_ranges[LIVE_GOAL_TYPE.SCORE], 1, 5)
-    combo_rank = get_index_of_range(combo, rank_ranges[LIVE_GOAL_TYPE.COMBO], 1, 5)
-    clear_rank = get_index_of_range(clears, rank_ranges[LIVE_GOAL_TYPE.CLEAR], 1, 5)
+    score_rank = get_index_of_range(score, rank_ranges[const.LIVE_GOAL_TYPE.SCORE], 1, 5)
+    combo_rank = get_index_of_range(combo, rank_ranges[const.LIVE_GOAL_TYPE.COMBO], 1, 5)
+    clear_rank = get_index_of_range(clears, rank_ranges[const.LIVE_GOAL_TYPE.CLEAR], 1, 5)
     return score_rank, combo_rank, clear_rank
 
 
@@ -240,19 +236,19 @@ async def get_achieved_goal_id_list(context: idol.BasicSchoolIdolContext, clear_
                         key=lambda g: g.rank,
                     ),
                 )
-                for i in LIVE_GOAL_TYPES
+                for i in const.LIVE_GOAL_TYPE
             )
             score_rank, combo_rank, clear_rank = get_live_ranks(
                 live_info, live_setting, clear_info.hi_score, clear_info.hi_combo_cnt, clear_info.clear_cnt
             )
             result.extend(
-                g.live_goal_reward_id for g in goal_list_by_type[LIVE_GOAL_TYPE.SCORE] if score_rank <= g.rank
+                g.live_goal_reward_id for g in goal_list_by_type[const.LIVE_GOAL_TYPE.SCORE] if score_rank <= g.rank
             )
             result.extend(
-                g.live_goal_reward_id for g in goal_list_by_type[LIVE_GOAL_TYPE.COMBO] if combo_rank <= g.rank
+                g.live_goal_reward_id for g in goal_list_by_type[const.LIVE_GOAL_TYPE.COMBO] if combo_rank <= g.rank
             )
             result.extend(
-                g.live_goal_reward_id for g in goal_list_by_type[LIVE_GOAL_TYPE.CLEAR] if clear_rank <= g.rank
+                g.live_goal_reward_id for g in goal_list_by_type[const.LIVE_GOAL_TYPE.CLEAR] if clear_rank <= g.rank
             )
 
     return result
@@ -263,7 +259,7 @@ async def get_goal_rewards(context: idol.BasicSchoolIdolContext, goal_ids: list[
     result = await context.db.live.execute(q)
     return [
         item.item_model.Item(
-            add_type=k.add_type,
+            add_type=const.ADD_TYPE(k.add_type),
             item_id=k.item_id,
             amount=k.amount,
             item_category_id=k.item_category_id or 0,

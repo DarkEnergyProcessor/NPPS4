@@ -1,12 +1,14 @@
 import pydantic
 
+from .. import const
+
 from typing import Any
 
 
 class Item(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="allow")
 
-    add_type: int
+    add_type: const.ADD_TYPE
     item_id: int
     amount: int = 1
     item_category_id: int = 0

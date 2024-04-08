@@ -8,11 +8,11 @@ from . import album
 from . import common
 from . import exchange
 from . import unit_model
+from .. import const
 from .. import db
 from .. import idol
 from .. import idoltype
 from .. import util
-from ..const import ADD_TYPE
 from ..db import main
 from ..db import unit
 
@@ -750,7 +750,7 @@ async def unit_to_item[
 ](context: idol.BasicSchoolIdolContext, unit_data: main.Unit, *, cls: type[_T] = unit_model.UnitItem):
     unit_info_data = await get_unit_data_full_info(context, unit_data)
     return cls.model_validate(
-        unit_info_data[0].model_dump() | {"add_type": ADD_TYPE.UNIT, "item_id": unit_data.unit_id, "amount": 1}
+        unit_info_data[0].model_dump() | {"add_type": const.ADD_TYPE.UNIT, "item_id": unit_data.unit_id, "amount": 1}
     )
 
 

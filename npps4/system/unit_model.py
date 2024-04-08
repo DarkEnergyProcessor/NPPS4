@@ -1,13 +1,13 @@
 import pydantic
 
 from . import item_model
-from ..const import ADD_TYPE
+from .. import const
 
 from typing import Any
 
 
 class UnitSupportItem(item_model.Item):
-    add_type: int = ADD_TYPE.UNIT
+    add_type: const.ADD_TYPE = const.ADD_TYPE.UNIT
     new_unit_flag: bool = False
     is_support_member: bool = False
     is_hit: Any | None = None

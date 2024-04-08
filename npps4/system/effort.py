@@ -3,6 +3,7 @@ import pydantic
 from . import common
 from . import item
 from . import item_model
+from .. import const
 from .. import idol
 from ..config import config
 from ..db import main
@@ -52,7 +53,7 @@ async def add_effort(context: idol.BasicSchoolIdolContext, user: main.User, amou
 
             reward_list: list[item_model.Item] = []
             for add_type, item_id, item_count, additional_data in drop_box_result.rewards:
-                reward_data = item_model.Item(add_type=add_type, item_id=item_id, amount=item_count)
+                reward_data = item_model.Item(add_type=const.ADD_TYPE(add_type), item_id=item_id, amount=item_count)
                 if additional_data:
                     for k, v in additional_data.items():
                         setattr(reward_data, k, v)

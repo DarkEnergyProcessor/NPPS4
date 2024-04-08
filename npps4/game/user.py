@@ -75,10 +75,12 @@ async def user_userinfo(context: idol.SchoolIdolUserParams) -> UserInfoResponse:
 
 
 @idol.register("user", "setNotificationToken", batchable=False)
-async def user_setnotificationtoken(context: idol.SchoolIdolUserParams, request: UserNotificationTokenRequest):
+async def user_setnotificationtoken(
+    context: idol.SchoolIdolUserParams, request: UserNotificationTokenRequest
+) -> UserNotificationTokenRequest:
     # TODO
     util.stub("user", "setNotificationToken", request)
-    return idol.core.DummyModel()
+    return request
 
 
 @idol.register("user", "changeNavi")

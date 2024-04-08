@@ -1,7 +1,7 @@
 import pydantic
 
 from . import item_model
-from ..const import ADD_TYPE
+from .. import const
 
 
 class AdditionalScenarioStatus(pydantic.BaseModel):
@@ -10,7 +10,7 @@ class AdditionalScenarioStatus(pydantic.BaseModel):
 
 
 class ScenarioItem(item_model.Item):
-    add_type: int = ADD_TYPE.SCENARIO
+    add_type: const.ADD_TYPE = const.ADD_TYPE.SCENARIO
     amount: int = 1
 
     @pydantic.computed_field

@@ -27,7 +27,7 @@ class IncentiveItem(pydantic.BaseModel):
 
     incentive_id: int
     incentive_item_id: int
-    add_type: int
+    add_type: const.ADD_TYPE
     amount: int
     item_category_id: int
     incentive_message: str
@@ -116,7 +116,7 @@ async def reward_rewardlist(context: idol.SchoolIdolUserParams, request: RewardL
             IncentiveItem(
                 incentive_id=i.id,
                 incentive_item_id=i.item_id,
-                add_type=i.add_type,
+                add_type=const.ADD_TYPE(i.add_type),
                 amount=i.amount,
                 item_category_id=0,
                 incentive_message=i.get_message(context.lang),
