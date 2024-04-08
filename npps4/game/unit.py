@@ -358,7 +358,10 @@ async def unit_rankup(context: idol.SchoolIdolUserParams, request: UnitRankUpReq
     use_game_coin = 0
 
     for unit_owning_user_id in request.unit_owning_user_ids:
-        if source_unit.unit_removable_skill_capacity >= source_unit_info.max_removable_skill_capacity:
+        if (
+            source_unit.rank >= source_unit_info.rank_max
+            and source_unit.unit_removable_skill_capacity >= source_unit_info.max_removable_skill_capacity
+        ):
             raise idol.error.IdolError(detail="max SIS reached")
 
         target_unit = await unit.get_unit(context, unit_owning_user_id)
