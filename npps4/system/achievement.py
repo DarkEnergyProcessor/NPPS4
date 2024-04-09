@@ -1,3 +1,4 @@
+import collections.abc
 import dataclasses
 
 import pydantic
@@ -12,7 +13,7 @@ from .. import util
 from ..db import achievement
 from ..db import main
 
-from typing import Awaitable, Callable, Concatenate, Iterable, Sequence, ParamSpec
+from typing import Awaitable, Callable, Concatenate
 
 
 class AchievementData(pydantic.BaseModel):
@@ -204,7 +205,7 @@ async def get_achievement_count(
     return result.scalar() or 0
 
 
-def test_params(ach_info: achievement.Achievement, args: Sequence[int | None]):
+def test_params(ach_info: achievement.Achievement, args: collections.abc.Sequence[int | None]):
     if args:
         for i in range(min(len(args), 11)):
             if args[i] is not None:
@@ -307,13 +308,10 @@ async def check_type_increment(
     return AchievementContext(accomplished=achieved, new=new)
 
 
-_P = ParamSpec("_P")
-
-
 def recursive_achievement(achievement_type: int, /):
-    def wrapper0(
-        func: Callable[Concatenate[idol.BasicSchoolIdolContext, main.User, _P], Awaitable[AchievementContext]]
-    ):
+    def wrapper0[
+        **_P
+    ](func: Callable[Concatenate[idol.BasicSchoolIdolContext, main.User, _P], Awaitable[AchievementContext]]):
         async def wrapper1(
             context: idol.BasicSchoolIdolContext, user: main.User, *args: _P.args, **kwargs: _P.kwargs
         ) -> AchievementContext:
