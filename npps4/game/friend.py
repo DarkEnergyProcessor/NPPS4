@@ -108,7 +108,6 @@ async def friend_search(context: idol.SchoolIdolUserParams, request: FriendSearc
             love=unit_data_full_info.love,
             max_love=unit_data_full_info.max_love,
             unit_skill_level=unit_data_full_info.unit_skill_level,
-            skill_level=unit_data_full_info.unit_skill_level,
             max_hp=unit_data_full_info.max_hp,
             favorite_flag=unit_data_full_info.favorite_flag,
             display_rank=unit_data_full_info.display_rank,

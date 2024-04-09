@@ -1,3 +1,8 @@
+import math
+
+import pydantic
+
+from .. import const
 from .. import idol
 from .. import util
 from ..system import achievement
@@ -11,8 +16,6 @@ from ..system import reward
 from ..system import unit
 from ..system import unit_model
 from ..system import user
-
-import pydantic
 
 
 class UnitAccessoryInfoResponse(pydantic.BaseModel):
@@ -81,9 +84,8 @@ class UnitDeckRequest(pydantic.BaseModel):
     unit_deck_list: list[UnitDeckList]
 
 
-class UnitRankUpRequest(pydantic.BaseModel):
+class UnitRankUpRequest(UnitWaitOrActivateRequest):
     base_owning_unit_user_id: int
-    unit_owning_user_ids: list[int]
 
 
 class UnitRankUpResponse(achievement.AchievementMixin, common.TimestampMixin, user.UserDiffMixin):
@@ -116,6 +118,25 @@ class UnitSaleResponse(common.TimestampMixin, user.UserDiffMixin):
     reward_box_flag: bool
     get_exchange_point_list: list[exchange.ExchangePointInfo]
     unit_removable_skill: unit_model.RemovableSkillOwningInfo
+
+
+class UnitMergeRequest(UnitWaitOrActivateRequest):
+    base_owning_unit_user_id: int
+    unit_support_list: list[unit_model.SupporterInfoResponse]
+
+
+class UnitMergeResponse(achievement.AchievementMixin, common.TimestampMixin, user.UserDiffMixin):
+    before: unit_model.UnitInfoData
+    after: unit_model.UnitInfoData
+    use_game_coin: int
+    evolution_bonus_type: const.EVOLUTION_BONUS_TYPE
+    bonus_value: float
+    unlocked_subscenario_ids: list[int] = pydantic.Field(default_factory=list)
+    unlocked_multi_unit_scenario_ids: list[int] = pydantic.Field(default_factory=list)  # TODO
+    get_exchange_point_list: list[exchange.ExchangePointInfo]
+    unit_removable_skill: unit_model.RemovableSkillOwningInfo
+    museum_info: museum.MuseumInfoData
+    present_cnt: int
 
 
 @idol.register("unit", "accessoryAll")
@@ -488,4 +509,138 @@ async def unit_sale(context: idol.SchoolIdolUserParams, request: UnitSaleRequest
         reward_box_flag=reward_box_flag,
         get_exchange_point_list=get_exchange_point_list,
         unit_removable_skill=await unit.get_removable_skill_info_request(context, current_user),
+    )
+
+
+async def unit_merge(context: idol.SchoolIdolUserParams, request: UnitMergeRequest):
+    current_user = await user.get_current(context)
+    before_user = await user.get_user_info(context, current_user)
+    source_unit = await unit.get_unit(context, request.base_owning_unit_user_id)
+    unit.validate_unit(current_user, source_unit)
+
+    before_unit, _ = await unit.get_unit_data_full_info(context, source_unit)
+    source_unit_info = await unit.get_unit_info(context, source_unit.unit_id)
+    assert source_unit_info is not None
+    source_unit_attribute = source_unit_info.attribute_id
+    source_unit_skill = source_unit_info.default_unit_skill_id
+
+    # Calculate total EXP and the cost
+    exchange_point: dict[int, int] = {}
+    total_exp = 0
+    merge_cost = 0
+    skill_exp = 0
+    for unit_owning_user_id in request.unit_owning_user_ids:
+        unit_data = await unit.get_unit(context, unit_owning_user_id)
+        unit.validate_unit(current_user, unit_data)
+        unit_info = await unit.get_unit_info(context, unit_data.unit_id)
+        assert unit_info is not None
+        unit_full_info, unit_stats = await unit.get_unit_data_full_info(context, unit_data)
+        multipler = (source_unit_attribute == unit_info.attribute_id) * 0.2
+        merge_cost = merge_cost + unit_stats.merge_cost
+        # Note: Flooring is correct behavior.
+        total_exp = total_exp + math.floor(unit_stats.merge_exp * (1 + multipler))
+        await unit.remove_unit(context, current_user, unit_data)
+
+        # Give skill EXP
+        if source_unit_skill is not None and source_unit_skill == unit_info.default_unit_skill_id:
+            skill_level_data = await unit.get_unit_skill_level_data(
+                context, source_unit_skill, unit_full_info.unit_skill_level
+            )
+            if skill_level_data:
+                skill_exp = skill_exp + skill_level_data.grant_exp
+
+        # Give sticker
+        if await exchange.should_give_sticker(context, unit_data.unit_id):
+            exchange_point_id = await unit.get_exchange_point_id_by_unit_id(context, unit_data.unit_id)
+            if exchange_point_id > 0:
+                exchange_point[exchange_point_id] = exchange_point.get(exchange_point_id, 0) + 1
+
+    for supp_unit in request.unit_support_list:
+        if supp_unit.amount > 0:
+            unit_info = await unit.get_unit_info(context, supp_unit.unit_id)
+            if unit_info is None:
+                raise idol.error.IdolError(detail="invalid unit id")
+
+            if await unit.sub_supporter_unit(context, current_user, supp_unit.unit_id):
+                unit_level_up_pattern = await unit.get_unit_level_up_pattern(context, unit_info)
+                unit_stats = unit_level_up_pattern[0]
+                multipler = (source_unit_attribute == unit_info.attribute_id) * 0.2
+                merge_cost = merge_cost + unit_stats.merge_cost * supp_unit.amount
+                total_exp = total_exp + math.floor(unit_stats.merge_exp * (1 + multipler)) * supp_unit.amount
+
+                # Give skill EXP
+                if source_unit_skill is not None and source_unit_skill == unit_info.default_unit_skill_id:
+                    skill_level_data = await unit.get_unit_skill_level_data(context, source_unit_skill, 1)
+                    if skill_level_data:
+                        skill_exp = skill_exp + skill_level_data.grant_exp * supp_unit.amount
+            else:
+                raise idol.error.IdolError(detail="invalid unit amount")
+
+    if merge_cost > current_user.game_coin:
+        raise idol.error.IdolError(detail="not enough game coin")
+
+    # Determine evolution type
+    evolution_type = util.SYSRAND.choices(
+        (
+            const.EVOLUTION_BONUS_TYPE.NORMAL,
+            const.EVOLUTION_BONUS_TYPE.SUPER_SUCCESS,
+            const.EVOLUTION_BONUS_TYPE.ULTRA_SUCCESS,
+        ),
+        (94, 5, 1),
+    )[0]
+    evolution_bonus = unit.get_exp_multiplier(evolution_type)
+    # FIXME: Rectify if it rounds down or up
+    total_exp = math.ceil(total_exp * evolution_bonus)
+
+    # Get unit max EXP and skill EXP
+    max_exp = await unit.get_max_exp(context, source_unit, source_unit_info)
+    max_skill_exp = await unit.get_max_skill_exp(context, source_unit_info)
+
+    # Update unit
+    source_unit.exp = min(source_unit.exp + total_exp, max_exp)
+    source_unit.skill_exp = min(source_unit.skill_exp + skill_exp, max_skill_exp)
+
+    # Subtract game coin
+    current_user.game_coin = current_user.game_coin - merge_cost
+
+    # Give stickers
+    get_exchange_point_list: list[exchange.ExchangePointInfo] = []
+    for exchange_point_id, amount in exchange_point.items():
+        await exchange.add_exchange_point(context, current_user, exchange_point_id, amount)
+        get_exchange_point_list.append(exchange.ExchangePointInfo(rarity=exchange_point_id, exchange_point=amount))
+
+    # Update album and trigger achievement
+    after_unit, _ = await unit.get_unit_data_full_info(context, source_unit)
+    await album.update(context, current_user, source_unit.unit_id, rank_level_max=after_unit.is_level_max)
+    achievement_list = await album.trigger_achievement(context, current_user, idolized=True)
+    accomplished_rewards = [
+        await achievement.get_achievement_rewards(context, ach) for ach in achievement_list.accomplished
+    ]
+    unaccomplished_rewards = [await achievement.get_achievement_rewards(context, ach) for ach in achievement_list.new]
+    await advanced.fixup_achievement_reward(context, current_user, accomplished_rewards)
+    await advanced.fixup_achievement_reward(context, current_user, unaccomplished_rewards)
+    await advanced.process_achievement_reward(
+        context, current_user, achievement_list.accomplished, accomplished_rewards
+    )
+
+    return UnitMergeResponse(
+        before_user_info=before_user,
+        after_user_info=await user.get_user_info(context, current_user),
+        accomplished_achievement_list=await achievement.to_game_representation(
+            context, achievement_list.accomplished, accomplished_rewards
+        ),
+        unaccomplished_achievement_cnt=await achievement.get_achievement_count(context, current_user, False),
+        added_achievement_list=await achievement.to_game_representation(
+            context, achievement_list.new, unaccomplished_rewards
+        ),
+        new_achievement_cnt=len(achievement_list.new),
+        before=before_unit,
+        after=after_unit,
+        use_game_coin=merge_cost,
+        evolution_bonus_type=evolution_type,
+        bonus_value=evolution_bonus,
+        get_exchange_point_list=get_exchange_point_list,
+        unit_removable_skill=await unit.get_removable_skill_info_request(context, current_user),
+        museum_info=await museum.get_museum_info_data(context, current_user),
+        present_cnt=await reward.count_presentbox(context, current_user),
     )

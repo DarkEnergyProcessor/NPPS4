@@ -218,12 +218,11 @@ async def get_unit_skill(context: idol.BasicSchoolIdolContext, unit_data: unit.U
     return await db.get_decrypted_row(context.db.unit, unit.UnitSkill, unit_data.default_unit_skill_id)
 
 
-async def get_unit_skill_level_up_pattern(context: idol.BasicSchoolIdolContext, unit_skill: unit.UnitSkill | None):
-    if unit_skill is None:
-        return None
-
-    q = sqlalchemy.select(unit.UnitSkillLevelUpPattern).where(
-        unit.UnitSkillLevelUpPattern.unit_skill_level_up_pattern_id == unit_skill.unit_skill_level_up_pattern_id
+async def get_unit_skill_level_up_pattern(context: idol.BasicSchoolIdolContext, unit_skill: unit.UnitSkill):
+    q = (
+        sqlalchemy.select(unit.UnitSkillLevelUpPattern)
+        .where(unit.UnitSkillLevelUpPattern.unit_skill_level_up_pattern_id == unit_skill.unit_skill_level_up_pattern_id)
+        .order_by(unit.UnitSkillLevelUpPattern.skill_level)
     )
     result = await context.db.unit.execute(q)
     return list(result.scalars())
@@ -464,6 +463,8 @@ class UnitStatsResult:
     cool: int
     hp: int
     next_exp: int
+    merge_exp: int
+    merge_cost: int
     sale_price: int
 
 
@@ -478,6 +479,8 @@ def calculate_unit_stats(
         cool=unit_info.cool_max,
         hp=unit_info.hp_max,
         next_exp=0,
+        merge_exp=pattern[0].merge_exp,
+        merge_cost=pattern[0].merge_cost,
         sale_price=pattern[0].sale_price,
     )
 
@@ -489,6 +492,8 @@ def calculate_unit_stats(
             result.cool = result.cool - diff.cool_diff
             result.hp = result.hp - diff.hp_diff
             result.next_exp = diff.next_exp
+            result.merge_exp = diff.merge_exp
+            result.merge_cost = diff.merge_cost
             result.sale_price = diff.sale_price
             break
 
@@ -523,8 +528,18 @@ def calculate_unit_skill_stats(
 
 
 async def get_unit_stats_from_unit_data(
-    context: idol.BasicSchoolIdolContext, unit_data: main.Unit, unit_info: unit.Unit, unit_rarity: unit.Rarity
+    context: idol.BasicSchoolIdolContext,
+    unit_data: main.Unit,
+    unit_info: unit.Unit | None = None,
+    unit_rarity: unit.Rarity | None = None,
 ):
+    if unit_info is None:
+        unit_info = await get_unit_info(context, unit_data.unit_id)
+        assert unit_info is not None
+    if unit_rarity is None:
+        unit_rarity = await get_unit_rarity(context, unit_info.rarity)
+        assert unit_rarity is not None
+
     levelup_pattern = await get_unit_level_up_pattern(context, unit_info)
     stats = calculate_unit_stats(unit_info, levelup_pattern, unit_data.exp)
 
@@ -554,12 +569,16 @@ async def get_unit_data_full_info(context: idol.BasicSchoolIdolContext, unit_dat
 
     # Calculate unit skill level
     skill = await get_unit_skill(context, unit_info)
-    skill_levels = await get_unit_skill_level_up_pattern(context, skill)
-    skill_stats = calculate_unit_skill_stats(skill, skill_levels, unit_data.skill_exp)
+    if skill is not None:
+        skill_levels = await get_unit_skill_level_up_pattern(context, skill)
+        skill_stats = calculate_unit_skill_stats(skill, skill_levels, unit_data.skill_exp)
+        skill_max = skill_stats[0] == skill.max_level
+        skill_level = skill_stats[0]
+    else:
+        skill_max = True
+        skill_level = 1
 
     idolized = unit_data.rank == unit_info.rank_max
-    skill_max = skill is None or skill_stats[0] == skill.max_level
-
     max_level = unit_rarity.after_level_max if idolized else unit_rarity.before_level_max
     max_love = unit_rarity.after_love_max if idolized else unit_rarity.before_love_max
     real_max_exp = 0 if stats.level == unit_rarity.before_level_max and not idolized else stats.next_exp
@@ -580,8 +599,7 @@ async def get_unit_data_full_info(context: idol.BasicSchoolIdolContext, unit_dat
             love=unit_data.love,
             max_love=max_love,
             unit_skill_exp=unit_data.skill_exp,
-            unit_skill_level=skill_stats[0],
-            skill_level=skill_stats[0],
+            unit_skill_level=skill_level,
             max_hp=stats.hp,
             unit_removable_skill_capacity=unit_data.unit_removable_skill_capacity,
             favorite_flag=unit_data.favorite_flag,
@@ -832,3 +850,59 @@ async def get_exchange_point_id_by_unit_id(context: idol.BasicSchoolIdolContext,
             return 5
         case _:
             return 0
+
+
+def get_exp_multiplier(evolution_type: const.EVOLUTION_BONUS_TYPE):
+    match evolution_type:
+        case const.EVOLUTION_BONUS_TYPE.SUPER_SUCCESS:
+            return 1.5
+        case const.EVOLUTION_BONUS_TYPE.ULTRA_SUCCESS:
+            return 2.0
+        case _:
+            return 1.0
+
+
+async def get_max_exp(
+    context: idol.BasicSchoolIdolContext,
+    /,
+    unit_data: main.Unit,
+    unit_info: unit.Unit | None = None,
+    unit_rarity: unit.Rarity | None = None,
+):
+    if unit_info is None:
+        unit_info = await get_unit_info(context, unit_data.unit_id)
+        assert unit_info is not None
+    if unit_rarity is None:
+        unit_rarity = await get_unit_rarity(context, unit_info.rarity)
+        assert unit_rarity is not None
+
+    idolized = unit_data.rank >= unit_info.rank_max
+    use_user_rank = unit_data.max_level > unit_rarity.after_love_max and unit_data.level_limit_id > 0
+    normal_target_level = unit_rarity.after_level_max if idolized else unit_rarity.before_level_max
+    target_level = min(unit_data.max_level, 500) if use_user_rank else normal_target_level
+
+    if use_user_rank:
+        levelup_pattern = await get_unit_level_limit_pattern(context, unit_data.level_limit_id)
+        target_level = target_level - 100
+    else:
+        levelup_pattern = await get_unit_level_up_pattern(context, unit_info)
+
+    return levelup_pattern[target_level - 1].next_exp
+
+
+async def get_unit_skill_level_data(context: idol.BasicSchoolIdolContext, /, unit_skill_id: int, level: int):
+    q = sqlalchemy.select(unit.UnitSkillLevel).where(
+        unit.UnitSkillLevel.unit_skill_id == unit_skill_id, unit.UnitSkillLevel.skill_level == level
+    )
+    result = await context.db.unit.execute(q)
+    return db.decrypt_row(context.db.unit, result.scalar())
+
+
+async def get_max_skill_exp(context: idol.BasicSchoolIdolContext, /, unit_info: unit.Unit):
+    skill = await get_unit_skill(context, unit_info)
+    if skill is not None:
+        skill_levels = await get_unit_skill_level_up_pattern(context, skill)
+        if len(skill_levels) > 1:
+            return skill_levels[-2].next_exp
+
+    return 0

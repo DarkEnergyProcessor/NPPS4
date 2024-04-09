@@ -482,6 +482,39 @@ class UnitSkillLevelUpPattern(common.GameDBBase):
     next_exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
+class UnitSkillLevel(common.GameDBBase, common.MaybeEncrypted):
+    """```sql
+    CREATE TABLE `unit_skill_level_m` (
+        `unit_skill_id` INTEGER NOT NULL,
+        `skill_level` INTEGER NOT NULL,
+        `effect_range` INTEGER,
+        `effect_value` REAL NOT NULL,
+        `discharge_time` REAL NOT NULL,
+        `trigger_value` INTEGER NOT NULL,
+        `trigger_limit` INTEGER,
+        `activation_rate` INTEGER NOT NULL,
+        `unit_skill_combo_pattern_id` INTEGER,
+        `spark_count_limit` INTEGER,
+        `grant_exp` INTEGER NOT NULL,
+        `release_tag` TEXT, `_encryption_release_id` INTEGER NULL,
+        PRIMARY KEY (`unit_skill_id`,`skill_level`)
+    )
+    ```"""
+
+    __tablename__ = "unit_skill_level_m"
+    unit_skill_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    skill_level: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    effect_range: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
+    effect_value: sqlalchemy.orm.Mapped[float] = sqlalchemy.orm.mapped_column()
+    discharge_time: sqlalchemy.orm.Mapped[float] = sqlalchemy.orm.mapped_column()
+    trigger_value: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    trigger_limit: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
+    activation_rate: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    unit_skill_combo_pattern_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
+    spark_count_limit: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column()
+    grant_exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+
+
 class AlbumSeries(common.GameDBBase, common.MaybeEncrypted):
     """```sql
     CREATE TABLE `album_series_m` (

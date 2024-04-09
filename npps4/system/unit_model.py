@@ -33,7 +33,6 @@ class UnitInfoBase(pydantic.BaseModel):
     love: int
     max_love: int
     unit_skill_level: int
-    skill_level: int
     max_hp: int
     favorite_flag: bool
     display_rank: int
@@ -46,6 +45,11 @@ class UnitInfoBase(pydantic.BaseModel):
     is_skill_level_max: bool
     is_removable_skill_capacity_max: bool
     insert_date: str = ""
+
+    @pydantic.computed_field
+    @property
+    def skill_level(self) -> int:
+        return self.unit_skill_level
 
 
 class UnitInfoData(UnitInfoBase):
