@@ -51,7 +51,7 @@ class SecretboxPonResponse(achievement.AchievementMixin, common.TimestampMixin, 
     secret_box_badge_flag: bool = False
     lowest_rarity: int = 1
     promotion_performance_rate: int = 0
-    secret_box_parcel_type: int = 1
+    secret_box_parcel_type: int
     museum_info: museum.MuseumInfoData
     present_cnt: int
 
@@ -97,7 +97,7 @@ else:
 HIDDEN_UR_UMI_RARE = False
 
 
-@idol.register("secretbox", "pon", batchable=False, log_response_data=True)
+@idol.register("secretbox", "pon", batchable=False, log_response_data=True, allow_retry_on_unhandled_exception=True)
 @idol.register("secretbox", "multi", batchable=False, log_response_data=True, allow_retry_on_unhandled_exception=True)
 async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: SecretboxPonRequest) -> SecretboxPonResponse:
     current_user = await user.get_current(context)
@@ -182,5 +182,6 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
         museum_info=await museum.get_museum_info_data(context, current_user),
         present_cnt=await reward.count_presentbox(context, current_user),
         promotion_performance_rate=100 if umi_rare_mode else 10,
+        secret_box_parcel_type=secretbox_data.parcel_type,
         lowest_rarity=1,
     )

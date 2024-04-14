@@ -52,6 +52,7 @@ class SecretboxData(pydantic.BaseModel):
     name_en: str | None
     member_category: int
     secretbox_type: const.SECRETBOX_LAYOUT_TYPE
+    parcel_type: int  # 1 for regular, 2 for honor
     order: int
     start_time: int
     end_time: int
