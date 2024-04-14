@@ -8,6 +8,7 @@ from ..config import config
 if not config.is_script_mode():
     from . import announce
     from . import helper
+    from . import static
     from . import tos
 
 from .. import errhand

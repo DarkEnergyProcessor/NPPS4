@@ -149,8 +149,11 @@ async def login_login(context: idol.SchoolIdolAuthParams, request: LoginRequest)
         raise error.IdolError(error_code=407, status_code=600, detail="Login not found")
 
     # Login
-    token = await session.encapsulate_token(context, context.token.server_key, context.token.client_key, u.id)
     await session.invalidate_current(context)
+    if u.locked:
+        raise idol.error.locked()
+
+    token = await session.encapsulate_token(context, context.token.server_key, context.token.client_key, u.id)
     await cache.clear(context, u.id)
     return LoginResponse(authorize_token=token, user_id=u.id)
 

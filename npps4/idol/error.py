@@ -265,3 +265,7 @@ class IdolError(Exception):
 
 def by_code(code: int):
     return IdolError(code, 600)
+
+
+def locked():
+    return IdolError(423, 600, "F", http_code=423)

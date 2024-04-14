@@ -69,6 +69,10 @@ async def get_current(context: idol.SchoolIdolUserParams):
     result = await context.db.main.get(main.User, context.token.user_id)
     if result is None:
         raise ValueError("logic error, user is None")
+
+    if result.locked:
+        raise idol.error.locked()
+
     return result
 
 
