@@ -512,7 +512,8 @@ async def unit_sale(context: idol.SchoolIdolUserParams, request: UnitSaleRequest
     )
 
 
-async def unit_merge(context: idol.SchoolIdolUserParams, request: UnitMergeRequest):
+@idol.register("unit", "merge", batchable=False)
+async def unit_merge(context: idol.SchoolIdolUserParams, request: UnitMergeRequest) -> UnitMergeResponse:
     current_user = await user.get_current(context)
     before_user = await user.get_user_info(context, current_user)
     source_unit = await unit.get_unit(context, request.base_owning_unit_user_id)
