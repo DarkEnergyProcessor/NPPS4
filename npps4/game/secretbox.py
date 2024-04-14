@@ -95,6 +95,7 @@ else:
 
 
 HIDDEN_UR_UMI_RARE = False
+LOWEST_RARITY_SORT_ORDER = (1, 2, 3, 5, 4)
 
 
 @idol.register("secretbox", "pon", batchable=False, log_response_data=True, allow_retry_on_unhandled_exception=True)
@@ -117,6 +118,7 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
     # TODO: Subtract currency
 
     umi_rare_mode = False
+    lowest_rarity = 5  # sort order
     if HIDDEN_UR_UMI_RARE and len(unit_roll) == 1:
         unit_info = await unit.get_unit_info(context, unit_roll[0])
         if unit_info is not None and unit_info.rarity == 2 and unit_info.unit_type_id in (4, 94):
@@ -145,6 +147,7 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
             else:
                 await unit.add_supporter_unit(context, current_user, reward_data.unit_id)
         unit_data_list.append(reward_data.as_item_reward)
+        lowest_rarity = min(lowest_rarity, LOWEST_RARITY_SORT_ORDER[reward_data.as_item_reward.unit_rarity_id - 1])
 
     # Trigger achievement
     achievement_list = await album.trigger_achievement(context, current_user, idolized=True)
@@ -183,5 +186,5 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
         present_cnt=await reward.count_presentbox(context, current_user),
         promotion_performance_rate=100 if umi_rare_mode else 10,
         secret_box_parcel_type=secretbox_data.parcel_type,
-        lowest_rarity=1,
+        lowest_rarity=LOWEST_RARITY_SORT_ORDER[lowest_rarity - 1],
     )
