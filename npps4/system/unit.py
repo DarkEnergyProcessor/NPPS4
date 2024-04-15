@@ -883,11 +883,10 @@ async def get_max_exp(
 
     if use_user_rank:
         levelup_pattern = await get_unit_level_limit_pattern(context, unit_data.level_limit_id)
-        target_level = target_level - 100
+        return levelup_pattern[target_level - 100].next_exp
     else:
         levelup_pattern = await get_unit_level_up_pattern(context, unit_info)
-
-    return levelup_pattern[target_level - 1].next_exp
+        return levelup_pattern[target_level - 2].next_exp
 
 
 async def get_unit_skill_level_data(context: idol.BasicSchoolIdolContext, /, unit_skill_id: int, level: int):
