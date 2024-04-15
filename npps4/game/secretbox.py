@@ -98,8 +98,8 @@ HIDDEN_UR_UMI_RARE = False
 LOWEST_RARITY_SORT_ORDER = (1, 2, 3, 5, 4)
 
 
-@idol.register("secretbox", "pon", batchable=False, log_response_data=True, allow_retry_on_unhandled_exception=True)
-@idol.register("secretbox", "multi", batchable=False, log_response_data=True, allow_retry_on_unhandled_exception=True)
+@idol.register("secretbox", "pon", batchable=False)
+@idol.register("secretbox", "multi", batchable=False)
 async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: SecretboxPonRequest) -> SecretboxPonResponse:
     current_user = await user.get_current(context)
     secretbox_id, button_index, cost_index = secretbox.decode_cost_id(request.id)
