@@ -189,6 +189,11 @@ async def get_all_supporter_unit(context: idol.BasicSchoolIdolContext, user: mai
     return supporters
 
 
+async def get_unit_support_list_response(context: idol.BasicSchoolIdolContext, /, user: main.User):
+    supp_units = await get_all_supporter_unit(context, user)
+    return [unit_model.SupporterInfoResponse(unit_id=supp[0], amount=supp[1]) for supp in supp_units]
+
+
 def get_unit_info(context: idol.BasicSchoolIdolContext, unit_id: int):
     return db.get_decrypted_row(context.db.unit, unit.Unit, unit_id)
 

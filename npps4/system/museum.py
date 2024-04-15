@@ -17,6 +17,10 @@ class MuseumInfoData(pydantic.BaseModel):
     contents_id_list: list[int]
 
 
+class MuseumMixin(pydantic.BaseModel):
+    museum_info: MuseumInfoData
+
+
 async def unlock(context: idol.BasicSchoolIdolContext, user: main.User, museum_contents_id: int):
     if (await context.db.museum.get(museum.MuseumContents, museum_contents_id)) is None:
         raise ValueError("invalid museum contents id")

@@ -5,6 +5,11 @@ from .. import idol
 from .. import util
 from ..system import achievement
 from ..system import advanced
+from ..system import common
+from ..system import museum
+from ..system import reward
+from ..system import unit
+from ..system import unit_model
 from ..system import user
 
 
@@ -17,6 +22,23 @@ class AchievementUnaccomplishedFilter(pydantic.BaseModel):
 
 class AchievementUnaccomplishedResponse(pydantic.RootModel[list[AchievementUnaccomplishedFilter]]):
     pass
+
+
+class AchievementRewardOpenRequest(pydantic.BaseModel):
+    accomplish_id: int
+
+
+class AchievementRewardOpenResponse(
+    achievement.AchievementMixin, common.TimestampMixin, user.UserDiffMixin, unit_model.SupporterListInfoResponse
+):
+    reward_item_list: list[pydantic.SerializeAsAny[common.AnyItem]]
+    unit_support_list: list[unit_model.SupporterInfoResponse]
+    present_cnt: int
+
+
+class AchievementRewardOpenAllResponse(AchievementRewardOpenResponse):
+    is_last: bool
+    opened_num: int
 
 
 @idol.register("achievement", "unaccomplishList")
@@ -52,3 +74,93 @@ async def achievement_initialaccomplishlist(context: idol.SchoolIdolUserParams) 
         )
 
     return AchievementUnaccomplishedResponse.model_validate(result)
+
+
+@idol.register("achievement", "rewardOpen")
+async def achievement_rewardopen(
+    context: idol.SchoolIdolUserParams, request: AchievementRewardOpenRequest
+) -> AchievementRewardOpenResponse:
+    current_user = await user.get_current(context)
+    achievement_id = int(request.accomplish_id)
+    ach = await achievement.get_achievement(context, current_user, achievement_id)
+    ach_info = await achievement.get_achievement_info(context, ach.achievement_id)
+    rewards = await achievement.get_achievement_rewards(context, ach)
+    await advanced.fixup_achievement_reward(context, current_user, [rewards])
+
+    before_user = await user.get_user_info(context, current_user)
+
+    for reward_item in rewards:
+        success = await advanced.add_item(context, current_user, reward_item)
+        if not bool(success):
+            reward_item.reward_box_flag = True
+            fallback_name = f"Achievement #{ach.achievement_id}"
+            await reward.add_item(
+                context,
+                current_user,
+                reward_item,
+                ach_info.title or fallback_name,
+                ach_info.title_en or ach_info.title or fallback_name,
+            )
+
+    # Mark claimed
+    ach.is_reward_claimed = True
+    await context.db.main.flush()
+    achievement_count = await achievement.get_achievement_count(context, current_user, False)
+
+    return AchievementRewardOpenResponse(
+        accomplished_achievement_list=[],
+        unaccomplished_achievement_cnt=achievement_count,
+        added_achievement_list=[],
+        new_achievement_cnt=achievement_count,
+        before_user_info=before_user,
+        after_user_info=await user.get_user_info(context, current_user),
+        reward_item_list=rewards,
+        unit_support_list=await unit.get_unit_support_list_response(context, current_user),
+        present_cnt=await reward.count_presentbox(context, current_user),
+    )
+
+
+@idol.register("achievement", "rewardOpenAll")
+async def achievement_rewardopenall(context: idol.SchoolIdolUserParams) -> AchievementRewardOpenAllResponse:
+    current_user = await user.get_current(context)
+    achievements = await achievement.get_unclaimed_achievements(context, current_user, True)
+    opened_count = 0
+    reward_item_list: list[common.AnyItem] = []
+    before_user = await user.get_user_info(context, current_user)
+
+    for ach in achievements:
+        ach_info = await achievement.get_achievement_info(context, ach.achievement_id)
+        rewards = await achievement.get_achievement_rewards(context, ach)
+        await advanced.fixup_achievement_reward(context, current_user, [rewards])
+
+        for reward_item in rewards:
+            success = await advanced.add_item(context, current_user, reward_item)
+            if not bool(success):
+                reward_item.reward_box_flag = True
+                fallback_name = f"Achievement #{ach.achievement_id}"
+                await reward.add_item(
+                    context,
+                    current_user,
+                    reward_item,
+                    ach_info.title or fallback_name,
+                    ach_info.title_en or ach_info.title or fallback_name,
+                )
+            reward_item_list.append(reward_item)
+
+        ach.is_reward_claimed = True
+        opened_count = opened_count + 1
+
+    achievement_count = await achievement.get_achievement_count(context, current_user, False)
+    return AchievementRewardOpenAllResponse(
+        accomplished_achievement_list=[],
+        unaccomplished_achievement_cnt=achievement_count,
+        added_achievement_list=[],
+        new_achievement_cnt=achievement_count,
+        before_user_info=before_user,
+        after_user_info=await user.get_user_info(context, current_user),
+        reward_item_list=reward_item_list,
+        unit_support_list=await unit.get_unit_support_list_response(context, current_user),
+        present_cnt=await reward.count_presentbox(context, current_user),
+        is_last=True,
+        opened_num=opened_count,
+    )

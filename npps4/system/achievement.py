@@ -42,6 +42,7 @@ class AchievementData(pydantic.BaseModel):
             is_new=ach.is_new,
             for_display=bool(info.display_flag),
             is_locked=False,
+            accomplish_id=str(ach.id) if ach.is_accomplished and (not ach.is_reward_claimed) else "",
             reward_list=rewards,
         )
 
@@ -138,6 +139,14 @@ async def init(context: idol.BasicSchoolIdolContext, user: main.User):
     await context.db.main.flush()
 
 
+async def get_achievement(context: idol.BasicSchoolIdolContext, /, user: main.User, ach_id: int):
+    ach = await context.db.main.get(main.Achievement, ach_id)
+    if ach is None or ach.user_id != user.id:
+        raise idol.error.IdolError(detail=f"invalid achievement id {ach_id}")
+
+    return ach
+
+
 async def get_achievements(context: idol.BasicSchoolIdolContext, user: main.User, accomplished: bool | None = None):
     if accomplished is not None:
         q = sqlalchemy.select(main.Achievement).where(
@@ -149,11 +158,15 @@ async def get_achievements(context: idol.BasicSchoolIdolContext, user: main.User
     return list(result.scalars())
 
 
-async def get_unclaimed_achievements(context: idol.BasicSchoolIdolContext, user: main.User):
-    q = sqlalchemy.select(main.Achievement).where(
-        main.Achievement.user_id == user.id,
-        (main.Achievement.is_accomplished == False) | (main.Achievement.is_reward_claimed == False),
-    )
+async def get_unclaimed_achievements(
+    context: idol.BasicSchoolIdolContext, /, user: main.User, accomplished_but_unclaimed_only: bool = False
+):
+    q = sqlalchemy.select(main.Achievement).where(main.Achievement.user_id == user.id)
+
+    if accomplished_but_unclaimed_only:
+        q = q.where(main.Achievement.is_accomplished == True, main.Achievement.is_reward_claimed == False)
+    else:
+        q = q.where((main.Achievement.is_accomplished == False) | (main.Achievement.is_reward_claimed == False))
     result = await context.db.main.execute(q)
     return list(result.scalars())
 

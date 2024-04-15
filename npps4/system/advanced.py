@@ -116,17 +116,20 @@ async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, item: 
                     user.free_sns_coin = user.free_sns_coin + item.amount
                     return AddResult(True)
         case const.ADD_TYPE.UNIT:
-            unit_cnt = await unit.count_units(context, user, True)
-            if unit_cnt < user.unit_max:
-                unit_level = 1
-                if isinstance(item, unit_model.UnitItem):
-                    unit_level = item.level
-                unit_data = await unit.add_unit(context, user, item.item_id, True, level=unit_level)
-                if isinstance(item, unit_model.UnitItem):
-                    item.unit_owning_user_id = unit_data.id
-                return AddResult(True, extra_data=unit_data)
+            if await unit.is_support_member(context, item.item_id):
+                return AddResult(await unit.add_supporter_unit(context, user, item.item_id, item.amount))
             else:
-                return AddResult(False, reason_unit_full=True)
+                unit_cnt = await unit.count_units(context, user, True)
+                if unit_cnt < user.unit_max:
+                    unit_level = 1
+                    if isinstance(item, unit_model.UnitItem):
+                        unit_level = item.level
+                    unit_data = await unit.add_unit(context, user, item.item_id, True, level=unit_level)
+                    if isinstance(item, unit_model.UnitItem):
+                        item.unit_owning_user_id = unit_data.id
+                    return AddResult(True, extra_data=unit_data)
+                else:
+                    return AddResult(False, reason_unit_full=True)
         case const.ADD_TYPE.GAME_COIN:
             user.game_coin = user.game_coin + item.amount
             return AddResult(True)
