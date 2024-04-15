@@ -359,8 +359,8 @@ async def unit_deck(context: idol.SchoolIdolUserParams, request: UnitDeckRequest
             await unit.save_unit_deck(context, current_user, unit_deck[0], [0] * 9)
 
 
-@idol.register("unit", "rankUp")
-async def unit_rankup(context: idol.SchoolIdolUserParams, request: UnitRankUpRequest):
+@idol.register("unit", "rankUp", batchable=False)
+async def unit_rankup(context: idol.SchoolIdolUserParams, request: UnitRankUpRequest) -> UnitRankUpResponse:
     current_user = await user.get_current(context)
     source_unit = await unit.get_unit(context, request.base_owning_unit_user_id)
     unit.validate_unit(current_user, source_unit)
@@ -436,8 +436,8 @@ async def unit_rankup(context: idol.SchoolIdolUserParams, request: UnitRankUpReq
     )
 
 
-@idol.register("unit", "sale")
-async def unit_sale(context: idol.SchoolIdolUserParams, request: UnitSaleRequest):
+@idol.register("unit", "sale", batchable=False)
+async def unit_sale(context: idol.SchoolIdolUserParams, request: UnitSaleRequest) -> UnitSaleResponse:
     current_user = await user.get_current(context)
     total = 0
     detail: list[UnitSaleDetail] = []

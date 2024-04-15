@@ -69,7 +69,7 @@ async def scenario_startup(
 
 
 @idol.register("scenario", "reward")
-async def scenario_reward(context: idol.SchoolIdolUserParams, request: ScenarioRewardRequest):
+async def scenario_reward(context: idol.SchoolIdolUserParams, request: ScenarioRewardRequest) -> ScenarioRewardResponse:
     # Sanity check
     if not await scenario.valid(context, request.scenario_id):
         raise idol.error.by_code(idol.error.ERROR_CODE_SCENARIO_NOT_FOUND)
