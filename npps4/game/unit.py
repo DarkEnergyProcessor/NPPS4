@@ -139,6 +139,19 @@ class UnitMergeResponse(achievement.AchievementMixin, common.TimestampMixin, use
     present_cnt: int
 
 
+class UnitExchangePointRankUpRequest(pydantic.BaseModel):
+    base_owning_unit_user_id: int
+    exchange_point_id: int
+
+
+class UnitExchangeRankUpResponse(achievement.AchievementMixin, common.TimestampMixin, user.UserDiffMixin):
+    before: unit_model.UnitInfoData
+    after: unit_model.UnitInfoData
+    after_exchange_point: int
+    museum_info: museum.MuseumInfoData
+    present_cnt: int
+
+
 @idol.register("unit", "accessoryAll")
 async def unit_accessoryall(context: idol.SchoolIdolUserParams) -> UnitAccessoryInfoResponse:
     # TODO
@@ -642,6 +655,87 @@ async def unit_merge(context: idol.SchoolIdolUserParams, request: UnitMergeReque
         bonus_value=evolution_bonus,
         get_exchange_point_list=get_exchange_point_list,
         unit_removable_skill=await unit.get_removable_skill_info_request(context, current_user),
+        museum_info=await museum.get_museum_info_data(context, current_user),
+        present_cnt=await reward.count_presentbox(context, current_user),
+    )
+
+
+@idol.register("unit", "exchangePointRankUp", batchable=False)
+async def unit_exchangepointrankup(
+    context: idol.SchoolIdolUserParams, request: UnitExchangePointRankUpRequest
+) -> UnitExchangeRankUpResponse:
+    current_user = await user.get_current(context)
+    source_unit = await unit.get_unit(context, request.base_owning_unit_user_id)
+    unit.validate_unit(current_user, source_unit)
+
+    # Get needed data
+    source_unit_info = await unit.get_unit_info(context, source_unit.unit_id)
+    assert source_unit_info is not None
+    if source_unit_info.disable_rank_up > 0:
+        raise idol.error.IdolError(detail="cannot idolize this unit")
+
+    source_unit_rarity = await unit.get_unit_rarity(context, source_unit_info.rarity)
+    assert source_unit_rarity is not None
+
+    if current_user.game_coin < source_unit_rarity.exchange_point_rank_up_cost:
+        raise idol.error.IdolError(detail="not enough game coin")
+
+    # Check sticker eglibility
+    need_amount = await exchange.get_exchange_needed_to_idolize(
+        context, request.exchange_point_id, source_unit_info.rarity
+    )
+    if need_amount == 0:
+        # Can can but can't
+        raise idol.error.IdolError(detail="cannot idolize with this sticker-rarity combination")
+
+    before = await unit.get_unit_data_full_info(context, source_unit)
+    before_user = await user.get_user_info(context, current_user)
+
+    if not await exchange.sub_exchange_point(context, current_user, request.exchange_point_id, need_amount):
+        raise idol.error.IdolError(detail="not enough sticker")
+
+    # It's paid, now hit it.
+    if source_unit.rank < source_unit_info.rank_max:
+        # Idolize
+        await unit.idolize(context, current_user, source_unit)
+    elif source_unit.unit_removable_skill_capacity < source_unit_info.max_removable_skill_capacity:
+        # Unlock SIS slot
+        source_unit.unit_removable_skill_capacity = source_unit.unit_removable_skill_capacity + 1
+    else:
+        raise idol.error.IdolError(detail="max SIS reached")
+
+    await album.update(context, current_user, source_unit.unit_id, rank_max=True)
+    achievement_list = await album.trigger_achievement(context, current_user, idolized=True)
+    accomplished_rewards = [
+        await achievement.get_achievement_rewards(context, ach) for ach in achievement_list.accomplished
+    ]
+    unaccomplished_rewards = [await achievement.get_achievement_rewards(context, ach) for ach in achievement_list.new]
+    await advanced.fixup_achievement_reward(context, current_user, accomplished_rewards)
+    await advanced.fixup_achievement_reward(context, current_user, unaccomplished_rewards)
+    await advanced.process_achievement_reward(
+        context, current_user, achievement_list.accomplished, accomplished_rewards
+    )
+
+    # Subtract game coin
+    current_user.game_coin = current_user.game_coin - source_unit_rarity.exchange_point_rank_up_cost
+
+    after = await unit.get_unit_data_full_info(context, source_unit)
+    after_user = await user.get_user_info(context, current_user)
+
+    return UnitExchangeRankUpResponse(
+        accomplished_achievement_list=await achievement.to_game_representation(
+            context, achievement_list.accomplished, accomplished_rewards
+        ),
+        unaccomplished_achievement_cnt=await achievement.get_achievement_count(context, current_user, False),
+        added_achievement_list=await achievement.to_game_representation(
+            context, achievement_list.new, unaccomplished_rewards
+        ),
+        new_achievement_cnt=len(achievement_list.new),
+        before=before[0],
+        after=after[0],
+        before_user_info=before_user,
+        after_user_info=after_user,
+        after_exchange_point=await exchange.get_exchange_point_amount(context, current_user, request.exchange_point_id),
         museum_info=await museum.get_museum_info_data(context, current_user),
         present_cnt=await reward.count_presentbox(context, current_user),
     )

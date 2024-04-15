@@ -38,6 +38,14 @@ async def get_exchange_point(
     return exchange_point
 
 
+async def get_exchange_point_amount(context: idol.BasicSchoolIdolContext, /, user: main.User, exchange_point_id: int):
+    exchange_point = await get_exchange_point(context, user, exchange_point_id, True)
+    if exchange_point is None:
+        return 0
+
+    return exchange_point.amount
+
+
 async def add_exchange_point(
     context: idol.BasicSchoolIdolContext, /, user: main.User, exchange_point_id: int, quantity: int
 ):
@@ -74,3 +82,23 @@ async def get_exchange_points_response(context: idol.BasicSchoolIdolContext, /, 
     )
     result = await context.db.main.execute(q)
     return [ExchangePointInfo(rarity=e.exchange_point_id, exchange_point=e.amount) for e in result.scalars()]
+
+
+async def get_exchange_needed_to_idolize(
+    context: idol.BasicSchoolIdolContext, /, exchange_point_id: int, unit_rarity_id: int
+) -> int:
+    if unit_rarity_id < 2 or unit_rarity_id > 5:
+        # Cannot use any sticker to idolize N cards
+        return 0
+
+    q = sqlalchemy.select(
+        exchange.ExchangePoint.r_rank_up_point,
+        exchange.ExchangePoint.sr_rank_up_point,
+        exchange.ExchangePoint.ur_rank_up_point,
+        exchange.ExchangePoint.ssr_rank_up_point,
+    ).where(exchange.ExchangePoint.exchange_point_id == exchange_point_id)
+    result = await context.db.exchange.execute(q)
+    points = result.first()
+    if points is None:
+        return 0
+    return points[unit_rarity_id - 2] or 0
