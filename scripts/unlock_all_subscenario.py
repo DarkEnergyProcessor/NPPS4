@@ -27,3 +27,9 @@ async def run_script(arg: list[str]):
                 context.db.main.add(subsc)
 
             subsc.completed = not args.unread
+
+
+if __name__ == "__main__":
+    import npps4.scriptutils.boot
+
+    npps4.scriptutils.boot.start(run_script)

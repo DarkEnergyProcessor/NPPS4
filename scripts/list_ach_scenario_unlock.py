@@ -41,3 +41,9 @@ async def run_script(args: list[str]):
             print(
                 f"{ach_id.achievement_id}: [item.Reward(add_type=ADD_TYPE.SCENARIO, item_id={scenario_id})],  # Reward: {scenario_chapter_name} - {scenario_name}"
             )
+
+
+if __name__ == "__main__":
+    import npps4.scriptutils.boot
+
+    npps4.scriptutils.boot.start(run_script)

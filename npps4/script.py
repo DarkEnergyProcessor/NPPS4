@@ -24,5 +24,9 @@ async def main():
     await script.run_script(unk_args)
 
 
-if __name__ == "__main__":
+def entry():
     asyncio.run(main())
+
+
+if __name__ == "__main__":
+    entry()

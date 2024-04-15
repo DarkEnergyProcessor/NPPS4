@@ -111,3 +111,9 @@ async def run_script(arg: list[str]):
                     unit_info.max_removable_skill_capacity,
                 )
                 await npps4.system.unit.add_unit_by_object(context, target_user, unit_data)
+
+
+if __name__ == "__main__":
+    import npps4.scriptutils.boot
+
+    npps4.scriptutils.boot.start(run_script)

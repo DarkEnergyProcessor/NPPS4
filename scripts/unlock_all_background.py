@@ -22,3 +22,9 @@ async def run_script(arg: list[str]):
         for game_bg in result.scalars():
             if not await npps4.system.background.has_background(context, target_user, game_bg.background_id):
                 await npps4.system.background.unlock_background(context, target_user, game_bg.background_id)
+
+
+if __name__ == "__main__":
+    import npps4.scriptutils.boot
+
+    npps4.scriptutils.boot.start(run_script)

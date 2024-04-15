@@ -12,3 +12,9 @@ async def run_script(args: list[str]):
         result = await context.db.main.execute(q)
         for user in result.scalars():
             print(f"{user.id}|{user.name}|{user.invite_code}")
+
+
+if __name__ == "__main__":
+    import npps4.scriptutils.boot
+
+    npps4.scriptutils.boot.start(run_script)

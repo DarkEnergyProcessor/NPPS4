@@ -1,10 +1,10 @@
-.vscode/
-/data/
-download-temp/
-util/sampledata/
-venv/
+/.vscode
+/data
+/npps4.egg-info
+/util/sampledata
+/venv
 
 *.pyc
 /*.ipynb
-config.toml
-maintenance.txt
+/config.toml
+/maintenance.txt
