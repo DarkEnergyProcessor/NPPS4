@@ -3,6 +3,12 @@
 
 <head>
 	<meta charset="UTF-8">
+	<style>
+		textarea[readonly] {
+			min-height: 300px;
+			width: calc(100% - 1em);
+		}
+	</style>
 </head>
 
 <body>
@@ -29,6 +35,10 @@
 			</tr>
 			{% endfor %}
 		</table>
+	</section>
+	<section>
+		<h2>Reward Data</h2>
+		<textarea readonly>{{ reward }}</textarea>
 	</section>
 	<section>
 		<h2>Opens</h2>

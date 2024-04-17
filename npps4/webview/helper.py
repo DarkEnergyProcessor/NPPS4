@@ -1,13 +1,16 @@
 import dataclasses
 import html
-from typing import Annotated
+import json
 
 import fastapi
 import sqlalchemy
 
+from .. import achievement_reward
 from .. import idol
 from ..app import app
 from ..db import achievement
+
+from typing import Annotated
 
 ACHIEVEMENT_PARAMS = (
     "title",
@@ -42,11 +45,11 @@ ACHIEVEMENT_PARAMS = (
 )
 
 
-def autoescape_null(s: int | str | None):
+def autoescape_null(s: int | str | None, quote: bool = True):
     if s is None:
         return "<i>null</i>"
     else:
-        return html.escape(str(s))
+        return html.escape(str(s), quote)
 
 
 def get_achievement_name(ach: achievement.Achievement):
@@ -124,9 +127,15 @@ async def helper_achievement(request: fastapi.Request, achievement_id: Annotated
                     )
                 )
 
+            rewards = achievement_reward.get(achievement_id)
+            rewards_json = json.dumps([r.model_dump() for r in rewards], ensure_ascii=False, indent="\t")
             return app.templates.TemplateResponse(
                 "helper_achievement_info.html",
-                {"request": request, "achievement": AchievementData(achievement_id, params, needs, opens)},
+                {
+                    "request": request,
+                    "achievement": AchievementData(achievement_id, params, needs, opens),
+                    "reward": autoescape_null(rewards_json, False),
+                },
             )
 
 
