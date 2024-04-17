@@ -152,6 +152,11 @@ class UnitExchangeRankUpResponse(achievement.AchievementMixin, common.TimestampM
     present_cnt: int
 
 
+class UnitFavoriteRequest(pydantic.BaseModel):
+    unit_owning_user_id: int
+    favorite_flag: int
+
+
 @idol.register("unit", "accessoryAll")
 async def unit_accessoryall(context: idol.SchoolIdolUserParams) -> UnitAccessoryInfoResponse:
     # TODO
@@ -739,3 +744,11 @@ async def unit_exchangepointrankup(
         museum_info=await museum.get_museum_info_data(context, current_user),
         present_cnt=await reward.count_presentbox(context, current_user),
     )
+
+
+@idol.register("unit", "favorite")
+async def unit_favorite(context: idol.SchoolIdolUserParams, request: UnitFavoriteRequest) -> None:
+    current_user = await user.get_current(context)
+    source_unit = await unit.get_unit(context, request.unit_owning_user_id)
+    unit.validate_unit(current_user, source_unit)
+    source_unit.favorite_flag = request.favorite_flag > 0
