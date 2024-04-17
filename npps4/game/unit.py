@@ -232,10 +232,7 @@ async def unit_setdisplayrank(context: idol.SchoolIdolUserParams, request: UnitS
 @idol.register("unit", "deckName")
 async def unit_deckname(context: idol.SchoolIdolUserParams, request: UnitDeckNameRequest) -> None:
     current_user = await user.get_current(context)
-    deck_data = await unit.load_unit_deck(context, current_user, request.unit_deck_id)
-    if deck_data is None:
-        raise idol.error.IdolError(detail="Invalid target deck")
-
+    deck_data = await unit.load_unit_deck(context, current_user, request.unit_deck_id, True)
     await advanced.test_name(context, request.deck_name)
 
     deck_data[0].name = request.deck_name
