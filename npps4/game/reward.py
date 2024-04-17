@@ -68,6 +68,7 @@ class RewardOpenResponse(achievement.AchievementMixin, user.UserDiffMixin, unit_
     class_system: class_system_module.ClassSystemData = pydantic.Field(
         default_factory=class_system_module.ClassSystemData
     )  # TODO
+    present_cnt: int
 
 
 class RewardOpenAllResponse(achievement.AchievementMixin, common.TimestampMixin, user.UserDiffMixin):
@@ -181,6 +182,7 @@ async def reward_open(context: idol.SchoolIdolUserParams, request: RewardOpenReq
             if success
             else []
         ),
+        present_cnt=await reward.count_presentbox(context, current_user),
     )
 
 
