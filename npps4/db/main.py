@@ -20,6 +20,7 @@ class User(common.Base, kw_only=True):
     key: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(default=None, index=True)
     passwd: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(default=None)
     locked: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False)
+    transfer_sha1: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(default=None, index=True)
 
     name: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(default="Kemp")
     bio: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(default="Hello!")
