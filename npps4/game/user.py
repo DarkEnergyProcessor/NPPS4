@@ -1,3 +1,4 @@
+from typing import Literal
 from .. import idol
 from .. import util
 from ..system import advanced
@@ -43,6 +44,11 @@ class UserNotificationTokenRequest(pydantic.BaseModel):
 
 class UserChangeNaviRequest(pydantic.BaseModel):
     unit_owning_user_id: int
+
+
+class UserSetBirthdayRequest(pydantic.BaseModel):
+    birth_month: int
+    birth_day: int
 
 
 @idol.register("user", "changeName", batchable=False)

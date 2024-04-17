@@ -2,7 +2,10 @@ import pydantic
 
 from .. import idol
 from .. import util
+from ..idol import session
 from ..system import common
+from ..system import handover
+from ..system import user
 
 
 class HandoverExecRequest(pydantic.BaseModel):
@@ -18,11 +21,44 @@ class KIDStatusResponse(common.TimestampMixin):
     has_klab_id: bool
 
 
+class HandoverReserveTransferResponse(pydantic.BaseModel):
+    invite_code: str
+    code: str
+    insert_date: str = pydantic.Field(default_factory=util.timestamp_to_datetime)
+
+
+# TODO: ADd into config.toml?
+REROLL_TRANSFER_ID = "nil"
+REROLL_TRANSFER_PASSCODE = "nil"
+_REROLL_PASSCODE = handover.generate_passcode_sha1(REROLL_TRANSFER_ID, REROLL_TRANSFER_PASSCODE)
+
+
 @idol.register("handover", "exec", batchable=False)
 async def handover_exec(context: idol.SchoolIdolUserParams, request: HandoverExecRequest) -> None:
-    # TODO
-    util.stub("handover", "exec", request)
-    raise idol.error.by_code(idol.error.ERROR_HANDOVER_INVALID_ID_OR_CODE)
+    # Special case for "nil", "nil":
+    current_user = await user.get_current(context)
+
+    if request.handover_id == REROLL_TRANSFER_ID and request.handover_code == _REROLL_PASSCODE:
+        if current_user.level == 1:
+            # Really?
+            raise idol.error.by_code(idol.error.ERROR_HANDOVER_EXPIRE)
+
+        # Reroll
+        assert current_user.key is not None and current_user.passwd is not None
+        target_user = await user.create(context, current_user.key, current_user.passwd)
+    else:
+        target_user = await handover.find_user_by_passcode(context, request.handover_code)
+        if target_user is None:
+            raise idol.error.by_code(idol.error.ERROR_HANDOVER_INVALID_ID_OR_CODE)
+        # Sanity checks
+        if target_user.locked:
+            raise idol.error.by_code(idol.error.ERROR_HANDOVER_LOCKED_USER)
+        if target_user.id == current_user.id:
+            raise idol.error.by_code(idol.error.ERROR_HANDOVER_SELF)
+
+    handover.swap_credentials(current_user, target_user)
+    target_user.transfer_sha1 = None
+    await session.invalidate_current(context)
 
 
 @idol.register("handover", "kidInfo")
@@ -38,3 +74,18 @@ async def handover_kidstatus(context: idol.SchoolIdolUserParams) -> KIDStatusRes
     # TODO
     util.stub("handover", "kidStatus", context.raw_request_data)
     return KIDStatusResponse(has_klab_id=False)
+
+
+@idol.register("handover", "reserveTransfer")
+async def handover_reservetransfer(context: idol.SchoolIdolUserParams) -> HandoverReserveTransferResponse:
+    current_user = await user.get_current(context)
+    transfer_code = handover.generate_transfer_code()
+    current_user.transfer_sha1 = handover.generate_passcode_sha1(current_user.invite_code, transfer_code)
+
+    return HandoverReserveTransferResponse(invite_code=current_user.invite_code, code=transfer_code)
+
+
+@idol.register("handover", "abortTransfer")
+async def handover_aborttransfer(context: idol.SchoolIdolUserParams) -> None:
+    current_user = await user.get_current(context)
+    current_user.transfer_sha1 = None

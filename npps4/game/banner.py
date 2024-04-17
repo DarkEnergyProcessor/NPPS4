@@ -1,7 +1,8 @@
+import pydantic
+
 from .. import idol
 from .. import util
-
-import pydantic
+from ..system import user
 
 
 class BannerInfo(pydantic.BaseModel):
@@ -24,6 +25,7 @@ class BannerListResponse(pydantic.BaseModel):
 
 @idol.register("banner", "bannerList", exclude_none=True)
 async def banner_bannerlist(context: idol.SchoolIdolUserParams) -> BannerListResponse:
+    current_user = await user.get_current(context)
     # TODO
     util.stub("banner", "bannerList", context.raw_request_data)
     url = context.request.url
@@ -41,7 +43,7 @@ async def banner_bannerlist(context: idol.SchoolIdolUserParams) -> BannerListRes
                     if context.lang == idol.Language.en
                     else "assets/image/handover/banner/banner_01.png"
                 ),
-                is_registered=False,
+                is_registered=current_user.transfer_sha1 is not None,
                 fixed_flag=False,
                 back_side=False,
                 banner_id=1800002,
