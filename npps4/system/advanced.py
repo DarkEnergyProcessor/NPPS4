@@ -103,68 +103,74 @@ class LiveDeckInfo(pydantic.BaseModel):
     unit_list: list[LiveDeckUnitAttribute]
 
 
-async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, item: common.AnyItem):
-    match item.add_type:
+async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, i: common.AnyItem):
+    match i.add_type:
         case const.ADD_TYPE.ITEM:
-            match item.item_id:
+            match i.item_id:
                 case 2:
-                    user.social_point = user.social_point + item.amount
+                    user.social_point = user.social_point + i.amount
                     return AddResult(True)
                 case 3:
-                    user.game_coin = user.game_coin + item.amount
+                    user.game_coin = user.game_coin + i.amount
                     return AddResult(True)
                 case 4:
-                    user.free_sns_coin = user.free_sns_coin + item.amount
+                    user.free_sns_coin = user.free_sns_coin + i.amount
+                    return AddResult(True)
+                case _:
+                    await item.add_item(context, user, i.item_id, i.amount)
                     return AddResult(True)
         case const.ADD_TYPE.UNIT:
-            if await unit.is_support_member(context, item.item_id):
-                return AddResult(await unit.add_supporter_unit(context, user, item.item_id, item.amount))
+            if await unit.is_support_member(context, i.item_id):
+                return AddResult(await unit.add_supporter_unit(context, user, i.item_id, i.amount))
             else:
                 unit_cnt = await unit.count_units(context, user, True)
                 if unit_cnt < user.unit_max:
                     unit_level = 1
-                    if isinstance(item, unit_model.UnitItem):
-                        unit_level = item.level
-                    unit_data = await unit.add_unit(context, user, item.item_id, True, level=unit_level)
-                    if isinstance(item, unit_model.UnitItem):
-                        item.unit_owning_user_id = unit_data.id
+                    if isinstance(i, unit_model.UnitItem):
+                        unit_level = i.level
+                    unit_data = await unit.add_unit(context, user, i.item_id, True, level=unit_level)
+                    if isinstance(i, unit_model.UnitItem):
+                        i.unit_owning_user_id = unit_data.id
                     return AddResult(True, extra_data=unit_data)
                 else:
                     return AddResult(False, reason_unit_full=True)
         case const.ADD_TYPE.GAME_COIN:
-            user.game_coin = user.game_coin + item.amount
+            user.game_coin = user.game_coin + i.amount
             return AddResult(True)
         case const.ADD_TYPE.LOVECA:
-            user.free_sns_coin = user.free_sns_coin + item.amount
+            user.free_sns_coin = user.free_sns_coin + i.amount
             return AddResult(True)
         case const.ADD_TYPE.SOCIAL_POINT:
-            user.social_point = user.social_point + item.amount
+            user.social_point = user.social_point + i.amount
             return AddResult(True)
         case const.ADD_TYPE.EXCHANGE_POINT:
-            return AddResult(await exchange.add_exchange_point(context, user, item.item_id, item.amount))
+            return AddResult(await exchange.add_exchange_point(context, user, i.item_id, i.amount))
         case const.ADD_TYPE.UNIT_MAX:
             # TODO: Limit max units
-            user.unit_max = user.unit_max + item.amount
+            user.unit_max = user.unit_max + i.amount
             return AddResult(True)
         # FIXME: Actually check for their return values of these unlocks.
         case const.ADD_TYPE.LIVE:
-            live_item = cast(live_model.LiveItem, item)
-            await live.unlock_normal_live(context, user, item.item_id)
+            live_item = cast(live_model.LiveItem, i)
+            await live.unlock_normal_live(context, user, i.item_id)
             live_item.additional_normal_live_status_list = await live.get_normal_live_clear_status_of_track(
-                context, user, item.item_id
+                context, user, i.item_id
             )
             return AddResult(True)
         case const.ADD_TYPE.AWARD:
-            return AddResult(await award.unlock_award(context, user, item.item_id))
+            return AddResult(await award.unlock_award(context, user, i.item_id))
         case const.ADD_TYPE.BACKGROUND:
-            return AddResult(await background.unlock_background(context, user, item.item_id))
+            return AddResult(await background.unlock_background(context, user, i.item_id))
         case const.ADD_TYPE.SCENARIO:
-            return AddResult(await scenario.unlock(context, user, item.item_id))
+            return AddResult(await scenario.unlock(context, user, i.item_id))
         case const.ADD_TYPE.SCHOOL_IDOL_SKILL:
-            await unit.add_unit_removable_skill(context, user, item.item_id, item.amount)
+            await unit.add_unit_removable_skill(context, user, i.item_id, i.amount)
+            return AddResult(True)
+        case const.ADD_TYPE.RECOVER_LP_ITEM:
+            await item.add_recovery_item(context, user, i.item_id, i.amount)
             return AddResult(True)
         case const.ADD_TYPE.MUSEUM:
-            return AddResult(await museum.unlock(context, user, item.item_id))
+            return AddResult(await museum.unlock(context, user, i.item_id))
     return AddResult(False)  # TODO
 
 

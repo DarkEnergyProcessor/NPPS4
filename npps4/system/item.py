@@ -77,3 +77,53 @@ async def get_item_list(context: idol.BasicSchoolIdolContext, user: main.User):
             general_item_list.append(item_count)
 
     return general_item_list, buff_item_list, reinforce_item_list
+
+
+async def get_item_data(context: idol.BasicSchoolIdolContext, /, user: main.User, item_id: int):
+    q = sqlalchemy.select(main.Item).where(main.Item.user_id == user.id, main.Item.item_id == item_id)
+    result = await context.db.main.execute(q)
+    return result.scalar()
+
+
+async def get_item_data_guaranteed(context: idol.BasicSchoolIdolContext, /, user: main.User, item_id: int):
+    item_data = await get_item_data(context, user, item_id)
+    if item_data is None:
+        item_data = main.Item(user_id=user.id, item_id=item_id)
+        context.db.main.add(item_data)
+    return item_data
+
+
+async def add_item(context: idol.BasicSchoolIdolContext, /, user: main.User, item_id: int, amount: int):
+    item_data = await get_item_data_guaranteed(context, user, item_id)
+    item_data.amount = item_data.amount + amount
+
+
+async def get_recovery_item_data(context: idol.BasicSchoolIdolContext, /, user: main.User, recovery_item_id: int):
+    q = sqlalchemy.select(main.RecoveryItem).where(
+        main.RecoveryItem.user_id == user.id, main.RecoveryItem.item_id == recovery_item_id
+    )
+    result = await context.db.main.execute(q)
+    return result.scalar()
+
+
+async def get_recovery_item_data_guaranteed(
+    context: idol.BasicSchoolIdolContext, /, user: main.User, recovery_item_id: int
+):
+    item_data = await get_recovery_item_data(context, user, recovery_item_id)
+    if item_data is None:
+        item_data = main.RecoveryItem(user_id=user.id, item_id=recovery_item_id)
+        context.db.main.add(item_data)
+    return item_data
+
+
+async def add_recovery_item(
+    context: idol.BasicSchoolIdolContext, /, user: main.User, recovery_item_id: int, amount: int
+):
+    item_data = await get_recovery_item_data_guaranteed(context, user, recovery_item_id)
+    item_data.amount = item_data.amount + amount
+
+
+async def get_recovery_items(context: idol.BasicSchoolIdolContext, /, user: main.User):
+    q = sqlalchemy.select(main.RecoveryItem).where(main.RecoveryItem.user_id == user.id, main.RecoveryItem.amount > 0)
+    result = await context.db.main.execute(q)
+    return [common.ItemCount(item_id=i.item_id, amount=i.amount) for i in result.scalars()]

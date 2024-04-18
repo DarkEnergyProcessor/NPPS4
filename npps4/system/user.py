@@ -8,6 +8,7 @@ from . import award
 from . import background
 from . import common
 from . import core
+from . import item
 from . import live
 from . import scenario
 from .. import idol
@@ -104,7 +105,7 @@ async def get_user_info(context: idol.BasicSchoolIdolContext, user: main.User):
         insert_date=util.timestamp_to_datetime(user.insert_date),
         update_date=util.timestamp_to_datetime(user.update_date),
         tutorial_state=user.tutorial_state,
-        lp_recovery_item=await get_recovery_items(context, user),
+        lp_recovery_item=await item.get_recovery_items(context, user),
     )
 
 
@@ -175,9 +176,3 @@ async def add_exp(context: idol.BasicSchoolIdolContext, user: main.User, exp: in
 
     await context.db.main.flush()
     return next_level_info
-
-
-async def get_recovery_items(context: idol.BasicSchoolIdolContext, user: main.User):
-    q = sqlalchemy.select(main.RecoveryItem).where(main.RecoveryItem.user_id == user.id, main.RecoveryItem.amount > 0)
-    result = await context.db.main.execute(q)
-    return [common.ItemCount(item_id=i.item_id, amount=i.amount) for i in result.scalars()]
