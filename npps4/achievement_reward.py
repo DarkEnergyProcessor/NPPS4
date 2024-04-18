@@ -1,3 +1,5 @@
+import copy
+
 from . import const
 from .system import common
 from .system import item
@@ -5,7 +7,7 @@ from .system import item_model
 from .system import live_model
 from .system import scenario_model
 
-ACHIEVEMENT_REWARD_DEFAULT = item.loveca(1)
+ACHIEVEMENT_REWARD_DEFAULT = [item.loveca(1)]
 
 # TODO: Get achievement present?
 ACHIEVEMENT_REWARDS: dict[int, list[common.AnyItem]] = {
@@ -836,7 +838,5 @@ ACHIEVEMENT_REWARDS: dict[int, list[common.AnyItem]] = {
 
 
 def get(achievement_id: int) -> list[common.AnyItem]:
-    reward = ACHIEVEMENT_REWARDS.get(achievement_id)
-    if reward is None:
-        reward = [ACHIEVEMENT_REWARD_DEFAULT]
-    return reward
+    reward = ACHIEVEMENT_REWARDS.get(achievement_id, ACHIEVEMENT_REWARD_DEFAULT)
+    return copy.deepcopy(reward)
