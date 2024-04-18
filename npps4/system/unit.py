@@ -660,6 +660,10 @@ async def get_removable_skill_info(context: idol.BasicSchoolIdolContext, user: m
     return result.scalar()
 
 
+async def get_removable_skill_game_info(context: idol.BasicSchoolIdolContext, /, removable_skill_id: int):
+    return await db.get_decrypted_row(context.db.unit, unit.RemovableSkill, removable_skill_id)
+
+
 async def get_unit_removable_skill_count(
     context: idol.BasicSchoolIdolContext, user: main.User, removable_skill_id: int
 ):
@@ -707,6 +711,19 @@ async def add_unit_removable_skill(
 
     removable_skill.amount = removable_skill.amount + amount
     await context.db.main.flush()
+    return removable_skill.amount
+
+
+async def sub_unit_removable_skill(
+    context: idol.BasicSchoolIdolContext, /, user: main.User, removable_skill_id: int, amount: int = 1
+):
+    removable_skill = await get_removable_skill_info(context, user, removable_skill_id)
+    if removable_skill is None:
+        return -amount
+
+    removable_skill.amount = removable_skill.amount - amount
+    if removable_skill.amount >= 0:
+        await context.db.main.flush()
     return removable_skill.amount
 
 

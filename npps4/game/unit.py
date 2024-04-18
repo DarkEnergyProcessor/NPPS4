@@ -157,6 +157,20 @@ class UnitFavoriteRequest(pydantic.BaseModel):
     favorite_flag: int
 
 
+class UnitRemovableSkillSellData(unit_model.EquipRemovableSkillInfoDetail):
+    amount: int
+
+
+class UnitRemovableSkillSellRequest(pydantic.BaseModel):
+    selling_list: list[UnitRemovableSkillSellData]
+
+
+class UnitRemovableSkillSellResponse(pydantic.BaseModel):
+    after_user_info: user.UserInfoData
+    total: int
+    reward_box_flag: bool
+
+
 @idol.register("unit", "accessoryAll")
 async def unit_accessoryall(context: idol.SchoolIdolUserParams) -> UnitAccessoryInfoResponse:
     # TODO
@@ -749,3 +763,30 @@ async def unit_favorite(context: idol.SchoolIdolUserParams, request: UnitFavorit
     source_unit = await unit.get_unit(context, request.unit_owning_user_id)
     unit.validate_unit(current_user, source_unit)
     source_unit.favorite_flag = request.favorite_flag > 0
+
+
+@idol.register("unit", "removableSkillSell")
+async def unit_removableskillsell(
+    context: idol.SchoolIdolUserParams, request: UnitRemovableSkillSellRequest
+) -> UnitRemovableSkillSellResponse:
+    current_user = await user.get_current(context)
+    total = 0
+
+    for info in request.selling_list:
+        sis = await unit.get_removable_skill_game_info(context, info.unit_removable_skill_id)
+        if sis is not None:
+            # FIXME: Check if amount is sensible across units and their assigned SIS
+            new_amount = await unit.sub_unit_removable_skill(
+                context, current_user, info.unit_removable_skill_id, info.amount
+            )
+            if new_amount < 0:
+                raise idol.error.IdolError(
+                    detail=f"cannot sell SIS {info.unit_removable_skill_id} amount {-new_amount}"
+                )
+
+            total = sis.selling_price * info.amount
+
+    success_add = bool(await advanced.add_item(context, current_user, item.game_coin(total)))
+    return UnitRemovableSkillSellResponse(
+        after_user_info=await user.get_user_info(context, current_user), total=total, reward_box_flag=not success_add
+    )
