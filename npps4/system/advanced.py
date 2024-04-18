@@ -237,12 +237,6 @@ async def test_name(context: idol.BasicSchoolIdolContext, name: str):
         raise idol.error.by_code(idol.error.ERROR_CODE_NG_WORDS)
 
 
-def _replace_to_loveca(r: item_model.Item):
-    r.item_id = 4
-    r.add_type = const.ADD_TYPE.LOVECA
-    r.amount = 1
-
-
 _ACHIEVEMENT_REWARD_REPLACE_CRITERIA: dict[
     int, Callable[[idol.BasicSchoolIdolContext, main.User, int], Awaitable[bool]]
 ] = {
@@ -264,12 +258,13 @@ async def fixup_achievement_reward(
         new_reward_list: list[common.AnyItem] = []
 
         for ach_reward in reward_list:
-            if ach_reward.add_type in _ACHIEVEMENT_REWARD_REPLACE_CRITERIA:
-                if await _ACHIEVEMENT_REWARD_REPLACE_CRITERIA[ach_reward.add_type](context, user, ach_reward.item_id):
-                    _replace_to_loveca(ach_reward)
-                    new_reward_list.append(item.loveca(1))
-                else:
-                    new_reward_list.append(ach_reward)
+            if (
+                ach_reward.add_type in _ACHIEVEMENT_REWARD_REPLACE_CRITERIA
+                and await _ACHIEVEMENT_REWARD_REPLACE_CRITERIA[ach_reward.add_type](context, user, ach_reward.item_id)
+            ):
+                new_reward_list.append(item.loveca(1))
+            else:
+                new_reward_list.append(ach_reward)
 
         result.append(new_reward_list)
 
