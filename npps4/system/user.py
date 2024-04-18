@@ -176,3 +176,25 @@ async def add_exp(context: idol.BasicSchoolIdolContext, user: main.User, exp: in
 
     await context.db.main.flush()
     return next_level_info
+
+
+def get_loveca(user: main.User, /, *, include_free: bool = True, include_paid: bool = True):
+    return user.free_sns_coin * include_free + user.paid_sns_coin * include_paid
+
+
+def sub_loveca(user: main.User, /, amount: int, *, sub_paid_only: bool = False):
+    if sub_paid_only:
+        if user.paid_sns_coin < amount:
+            return False
+
+        user.paid_sns_coin = user.paid_sns_coin - amount
+        return True
+    else:
+        if get_loveca(user) < amount:
+            return False
+
+        amount1 = min(user.free_sns_coin, amount)
+        amount2 = amount - amount1
+        user.free_sns_coin = user.free_sns_coin - amount1
+        user.paid_sns_coin = user.paid_sns_coin - amount2
+        return True

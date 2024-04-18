@@ -51,6 +51,15 @@ class UserSetBirthdayRequest(pydantic.BaseModel):
     birth_day: int
 
 
+class UserAddUnitMaxRequest(pydantic.BaseModel):
+    amount: int
+
+
+class UserAddUnitResponse(pydantic.BaseModel):
+    used_loveca: int
+    after_unit_max: int
+
+
 @idol.register("user", "changeName", batchable=False)
 async def user_changename(context: idol.SchoolIdolUserParams, request: ChangeNameRequest) -> ChangeNameResponse:
     await advanced.test_name(context, request.name)
@@ -95,3 +104,18 @@ async def user_changenavi(context: idol.SchoolIdolUserParams, request: UserChang
     unit_data = await unit.get_unit(context, request.unit_owning_user_id)
     unit.validate_unit(current_user, unit_data)
     await unit.set_unit_center(context, current_user, unit_data)
+
+
+@idol.register("user", "addUnitMax")
+async def user_addunitmax(context: idol.SchoolIdolUserParams, request: UserAddUnitMaxRequest) -> UserAddUnitResponse:
+    current_user = await user.get_current(context)
+    current_loveca = user.get_loveca(current_user)
+    if current_loveca < request.amount:
+        raise idol.error.IdolError(detail="not enough loveca")
+
+    # FIXME: Add limit
+    user.sub_loveca(current_user, request.amount)
+    current_user.unit_max = current_user.unit_max + request.amount * 4
+    return UserAddUnitResponse(
+        used_loveca=current_loveca - user.get_loveca(current_user), after_unit_max=current_user.unit_max
+    )
