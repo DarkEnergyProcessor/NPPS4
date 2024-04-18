@@ -104,7 +104,7 @@ async def achievement_rewardopen(
             )
 
     # Mark claimed
-    ach.is_reward_claimed = True
+    await achievement.mark_achievement_reward_claimed(context, ach)
     await context.db.main.flush()
     achievement_count = await achievement.get_achievement_count(context, current_user, False)
 
@@ -148,7 +148,7 @@ async def achievement_rewardopenall(context: idol.SchoolIdolUserParams) -> Achie
                 )
             reward_item_list.append(reward_item)
 
-        ach.is_reward_claimed = True
+        await achievement.mark_achievement_reward_claimed(context, ach)
         opened_count = opened_count + 1
 
     achievement_count = await achievement.get_achievement_count(context, current_user, False)
