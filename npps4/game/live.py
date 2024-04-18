@@ -613,11 +613,13 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
     accomplished_achievement_rewards = [
         await achievement.get_achievement_rewards(context, ach) for ach in accomplished_achievement.accomplished
     ]
-    await advanced.fixup_achievement_reward(context, current_user, accomplished_achievement_rewards)
+    temp_achievement_rewards = await advanced.fixup_achievement_reward(
+        context, current_user, accomplished_achievement_rewards
+    )
 
     # Check achievement part 2
     unlocked_scenario = await scenario.count(context, current_user)
-    for reward_list in accomplished_achievement_rewards:
+    for reward_list in temp_achievement_rewards:
         for reward_data in reward_list:
             if reward_data.add_type == const.ADD_TYPE.SCENARIO:
                 unlocked_scenario = unlocked_scenario + 1
@@ -630,8 +632,10 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
     new_achievement_rewards = [
         await achievement.get_achievement_rewards(context, ach) for ach in accomplished_achievement.new
     ]
-    await advanced.fixup_achievement_reward(context, current_user, accomplished_achievement_rewards)
-    await advanced.fixup_achievement_reward(context, current_user, new_achievement_rewards)
+    accomplished_achievement_rewards = await advanced.fixup_achievement_reward(
+        context, current_user, accomplished_achievement_rewards
+    )
+    new_achievement_rewards = await advanced.fixup_achievement_reward(context, current_user, new_achievement_rewards)
 
     # Give achievement rewards
     await advanced.process_achievement_reward(

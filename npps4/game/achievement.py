@@ -67,7 +67,7 @@ async def achievement_initialaccomplishlist(context: idol.SchoolIdolUserParams) 
     for fcat in filter_ids:
         accomplished = await achievement.get_accomplished_achievements_by_filter_id(context, current_user, fcat)
         accomplished_rewards = [await achievement.get_achievement_rewards(context, ach) for ach in accomplished]
-        await advanced.fixup_achievement_reward(context, current_user, accomplished_rewards)
+        accomplished_rewards = await advanced.fixup_achievement_reward(context, current_user, accomplished_rewards)
         ach_list = await achievement.to_game_representation(context, accomplished, accomplished_rewards)
         result.append(
             AchievementUnaccomplishedFilter(filter_category_id=fcat, achievement_list=ach_list, count=len(ach_list))
@@ -85,7 +85,8 @@ async def achievement_rewardopen(
     ach = await achievement.get_achievement(context, current_user, achievement_id)
     ach_info = await achievement.get_achievement_info(context, ach.achievement_id)
     rewards = await achievement.get_achievement_rewards(context, ach)
-    await advanced.fixup_achievement_reward(context, current_user, [rewards])
+    new_rewards = await advanced.fixup_achievement_reward(context, current_user, [rewards])
+    rewards = new_rewards[0]
 
     before_user = await user.get_user_info(context, current_user)
 
@@ -131,9 +132,9 @@ async def achievement_rewardopenall(context: idol.SchoolIdolUserParams) -> Achie
     for ach in achievements:
         ach_info = await achievement.get_achievement_info(context, ach.achievement_id)
         rewards = await achievement.get_achievement_rewards(context, ach)
-        await advanced.fixup_achievement_reward(context, current_user, [rewards])
+        new_rewards = await advanced.fixup_achievement_reward(context, current_user, [rewards])
 
-        for reward_item in rewards:
+        for reward_item in new_rewards[0]:
             success = await advanced.add_item(context, current_user, reward_item)
             if not bool(success):
                 reward_item.reward_box_flag = True

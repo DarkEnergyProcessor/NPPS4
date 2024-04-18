@@ -7,6 +7,7 @@ from . import award
 from . import background
 from . import common
 from . import exchange
+from . import item
 from . import item_model
 from . import live
 from . import live_model
@@ -249,18 +250,24 @@ _ACHIEVEMENT_REWARD_REPLACE_CRITERIA: dict[
 
 # Certain reward can only be given once. This function replaces them to give 1 loveca instead.
 async def fixup_achievement_reward(
-    context: idol.BasicSchoolIdolContext, user: main.User, rewardss: list[list[item_model.Item]]
+    context: idol.BasicSchoolIdolContext, user: main.User, rewardss: list[list[common.AnyItem]]
 ):
+    result: list[list[common.AnyItem]] = []
+
     for reward_list in rewardss:
+        new_reward_list: list[common.AnyItem] = []
+
         for ach_reward in reward_list:
             if ach_reward.add_type in _ACHIEVEMENT_REWARD_REPLACE_CRITERIA:
                 if await _ACHIEVEMENT_REWARD_REPLACE_CRITERIA[ach_reward.add_type](context, user, ach_reward.item_id):
                     _replace_to_loveca(ach_reward)
+                    new_reward_list.append(item.loveca(1))
+                else:
+                    new_reward_list.append(ach_reward)
 
-            match ach_reward.add_type:
-                case const.ADD_TYPE.UNIT:
-                    # Always put unit to present box
-                    ach_reward.reward_box_flag = True
+        result.append(new_reward_list)
+
+    return result
 
 
 async def give_achievement_reward(
@@ -302,6 +309,7 @@ async def process_achievement_reward(
         if ach_info is not None and ach_info.auto_reward_flag:
             await give_achievement_reward(context, user, ach_info, reward_list)
             await achievement.mark_achievement_reward_claimed(context, ach)
+    await context.db.main.flush()
 
 
 class TeamStatCalculator:
