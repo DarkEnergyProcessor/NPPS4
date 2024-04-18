@@ -52,67 +52,107 @@ class Database:
     @property
     def game_mater(self):
         if self._gmsession is None:
-            self._gmsession = game_mater.get_session()
+            sessionmaker = game_mater.get_sessionmaker()
+            self._gmsession = sessionmaker()
         return self._gmsession
 
     @property
     def item(self):
         if self._itemsession is None:
-            self._itemsession = item.get_session()
+            sessionmaker = item.get_sessionmaker()
+            self._itemsession = sessionmaker()
         return self._itemsession
 
     @property
     def live(self):
         if self._livesession is None:
-            self._livesession = live.get_session()
+            sessionmaker = live.get_sessionmaker()
+            self._livesession = sessionmaker()
         return self._livesession
 
     @property
     def unit(self):
         if self._unitsession is None:
-            self._unitsession = unit.get_session()
+            sessionmaker = unit.get_sessionmaker()
+            self._unitsession = sessionmaker()
         return self._unitsession
 
     @property
     def achievement(self):
         if self._achievementsession is None:
-            self._achievementsession = achievement.get_session()
+            sessionmaker = achievement.get_sessionmaker()
+            self._achievementsession = sessionmaker()
         return self._achievementsession
 
     @property
     def effort(self):
         if self._effortsession is None:
-            self._effortsession = effort.get_session()
+            sessionmaker = effort.get_sessionmaker()
+            self._effortsession = sessionmaker()
         return self._effortsession
 
     @property
     def subscenario(self):
         if self._subscenariosession is None:
-            self._subscenariosession = subscenario.get_session()
+            sessionmaker = subscenario.get_sessionmaker()
+            self._subscenariosession = sessionmaker()
         return self._subscenariosession
 
     @property
     def museum(self):
         if self._museumsession is None:
-            self._museumsession = museum.get_session()
+            sessionmaker = museum.get_sessionmaker()
+            self._museumsession = sessionmaker()
         return self._museumsession
 
     @property
     def scenario(self):
         if self._scenariosession is None:
-            self._scenariosession = scenario.get_session()
+            sessionmaker = scenario.get_sessionmaker()
+            self._scenariosession = sessionmaker()
         return self._scenariosession
 
     @property
     def exchange(self):
         if self._exchangesession is None:
-            self._exchangesession = exchange.get_session()
+            sessionmaker = exchange.get_sessionmaker()
+            self._exchangesession = sessionmaker()
         return self._exchangesession
 
     async def cleanup(self):
         if self._mainsession is not None:
             await self._mainsession.close()
             self._mainsession = None
+        if self._gmsession is not None:
+            await self._gmsession.close()
+            self._gmsession = None
+        if self._itemsession is not None:
+            await self._itemsession.close()
+            self._itemsession = None
+        if self._livesession is not None:
+            await self._livesession.close()
+            self._livesession = None
+        if self._unitsession is not None:
+            await self._unitsession.close()
+            self._unitsession = None
+        if self._achievementsession is not None:
+            await self._achievementsession.close()
+            self._achievementsession = None
+        if self._effortsession is not None:
+            await self._effortsession.close()
+            self._effortsession = None
+        if self._subscenariosession is not None:
+            await self._subscenariosession.close()
+            self._subscenariosession = None
+        if self._museumsession is not None:
+            await self._museumsession.close()
+            self._museumsession = None
+        if self._scenariosession is not None:
+            await self._scenariosession.close()
+            self._scenariosession = None
+        if self._exchangesession is not None:
+            await self._exchangesession.close()
+            self._exchangesession = None
 
     async def commit(self):
         if self._mainsession is not None:

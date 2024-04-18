@@ -72,9 +72,8 @@ engine = sqlalchemy.ext.asyncio.create_async_engine(
     f"sqlite+aiosqlite:///file:{download.get_db_path('scenario')}?mode=ro&uri=true",
 )
 sessionmaker = sqlalchemy.ext.asyncio.async_sessionmaker(engine)
-session = sessionmaker()
 
 
-def get_session():
-    global session
-    return session
+def get_sessionmaker():
+    global sessionmaker
+    return sessionmaker
