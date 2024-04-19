@@ -320,6 +320,7 @@ async def unit_wait(context: idol.SchoolIdolUserParams, request: UnitWaitOrActiv
             for removable_skill_id in unit_sis:
                 await unit.detach_unit_removable_skill(context, unit_data, removable_skill_id)
 
+            await unit.detach_from_all_deck(context, current_user, unit_data)
             # Move to waiting room
             unit_data.active = False
 

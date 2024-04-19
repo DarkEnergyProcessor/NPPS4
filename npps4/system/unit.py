@@ -233,6 +233,49 @@ async def get_unit_skill_level_up_pattern(context: idol.BasicSchoolIdolContext, 
     return list(result.scalars())
 
 
+def detach_from_deck_2(unit_owning_user_id: int, deck: main.UnitDeck):
+    has = False
+    if deck.unit_owning_user_id_1 == unit_owning_user_id:
+        deck.unit_owning_user_id_1 = 0
+        has = True
+    elif deck.unit_owning_user_id_2 == unit_owning_user_id:
+        deck.unit_owning_user_id_2 = 0
+        has = True
+    elif deck.unit_owning_user_id_3 == unit_owning_user_id:
+        deck.unit_owning_user_id_3 = 0
+        has = True
+    elif deck.unit_owning_user_id_4 == unit_owning_user_id:
+        deck.unit_owning_user_id_4 = 0
+        has = True
+    elif deck.unit_owning_user_id_5 == unit_owning_user_id:
+        deck.unit_owning_user_id_5 = 0
+        has = True
+    elif deck.unit_owning_user_id_6 == unit_owning_user_id:
+        deck.unit_owning_user_id_6 = 0
+        has = True
+    elif deck.unit_owning_user_id_7 == unit_owning_user_id:
+        deck.unit_owning_user_id_7 = 0
+        has = True
+    elif deck.unit_owning_user_id_8 == unit_owning_user_id:
+        deck.unit_owning_user_id_8 = 0
+        has = True
+    elif deck.unit_owning_user_id_9 == unit_owning_user_id:
+        deck.unit_owning_user_id_9 = 0
+        has = True
+
+    return has
+
+
+async def detach_from_all_deck(context: idol.SchoolIdolParams, /, user: main.User, unit_data: main.Unit):
+    # Remove from deck first
+    q = sqlalchemy.select(main.UnitDeck).where(main.UnitDeck.user_id == user.id)
+    result = await context.db.main.execute(q)
+
+    for deck in result.scalars():
+        if detach_from_deck_2(unit_data.id, deck) and user.active_deck_index == deck.deck_number:
+            raise idol.error.by_code(idol.error.ERROR_CODE_IGNORE_MAIN_DECK_UNIT)
+
+
 async def remove_unit(context: idol.SchoolIdolParams, user: main.User, unit_data: main.Unit):
     validate_unit(user, unit_data)
 
@@ -240,33 +283,7 @@ async def remove_unit(context: idol.SchoolIdolParams, user: main.User, unit_data
         raise idol.error.by_code(idol.error.ERROR_CODE_UNIT_NOT_DISPOSE)
 
     # Remove from deck first
-    q = sqlalchemy.select(main.UnitDeck).where(main.UnitDeck.user_id == user.id)
-    result = await context.db.main.execute(q)
-
-    for deck in result.scalars():
-        if deck.unit_owning_user_id_1 == unit_data.id:
-            deck.unit_owning_user_id_1 = 0
-        elif deck.unit_owning_user_id_2 == unit_data.id:
-            deck.unit_owning_user_id_2 = 0
-        elif deck.unit_owning_user_id_3 == unit_data.id:
-            deck.unit_owning_user_id_3 = 0
-        elif deck.unit_owning_user_id_4 == unit_data.id:
-            deck.unit_owning_user_id_4 = 0
-        elif deck.unit_owning_user_id_5 == unit_data.id:
-            deck.unit_owning_user_id_5 = 0
-        elif deck.unit_owning_user_id_6 == unit_data.id:
-            deck.unit_owning_user_id_6 = 0
-        elif deck.unit_owning_user_id_7 == unit_data.id:
-            deck.unit_owning_user_id_7 = 0
-        elif deck.unit_owning_user_id_8 == unit_data.id:
-            deck.unit_owning_user_id_8 = 0
-        elif deck.unit_owning_user_id_9 == unit_data.id:
-            deck.unit_owning_user_id_9 = 0
-        else:
-            continue
-
-        if user.active_deck_index == deck.deck_number:
-            raise idol.error.by_code(idol.error.ERROR_CODE_IGNORE_MAIN_DECK_UNIT)
+    await detach_from_all_deck(context, user, unit_data)
 
     # Remove SIS
     unit_sis = await get_unit_removable_skills(context, unit_data)
