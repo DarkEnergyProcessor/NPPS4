@@ -1,6 +1,7 @@
 import dataclasses
 
 import pydantic
+import sqlalchemy
 
 from . import achievement
 from . import award
@@ -226,6 +227,22 @@ async def get_user_guest_party_info(context: idol.BasicSchoolIdolContext, user: 
         available_social_point=5,
         friend_status=0,
     )
+
+
+async def get_random_user_for_partylist(
+    context: idol.BasicSchoolIdolContext, /, user: main.User, *, include_current: bool = True, limit: int = 3
+):
+    q = (
+        sqlalchemy.select(main.User)
+        .where(main.User.tutorial_state == -1)
+        .order_by(sqlalchemy.func.random())
+        .limit(limit)
+    )
+    result = await context.db.main.execute(q)
+    userlist = list(result.scalars())
+    if include_current:
+        userlist.insert(0, user)
+    return userlist
 
 
 async def test_name(context: idol.BasicSchoolIdolContext, name: str):

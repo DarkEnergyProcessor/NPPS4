@@ -338,7 +338,7 @@ async def live_schedule(context: idol.SchoolIdolUserParams) -> LiveScheduleRespo
     )
 
 
-DEBUG_SERVER_SCORE_CALCULATE = True
+DEBUG_SERVER_SCORE_CALCULATE = False
 
 
 @idol.register("live", "partyList")
@@ -348,7 +348,10 @@ async def live_partylist(context: idol.SchoolIdolUserParams, request: LivePartyL
 
     # TODO: Check LP/token
 
-    party_list = [await advanced.get_user_guest_party_info(context, current_user)]
+    party_list = [
+        await advanced.get_user_guest_party_info(context, u)
+        for u in await advanced.get_random_user_for_partylist(context, current_user)
+    ]
 
     # DEBUG live score
     if DEBUG_SERVER_SCORE_CALCULATE:
