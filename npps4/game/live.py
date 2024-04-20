@@ -457,7 +457,7 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
     current_user = await user.get_current(context)
     live_in_progress = await live.get_live_in_progress(context, current_user)
     if live_in_progress is None:
-        raise idol.error.IdolError(detail="attempt to finish live show without playing")
+        raise idol.error.IdolError(detail="attempt to finish live show without playing", http_code=403)
 
     live_difficulty_info = await live.get_live_info_table(context, request.live_difficulty_id)
     if live_difficulty_info is None:
