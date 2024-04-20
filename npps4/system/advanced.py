@@ -234,7 +234,7 @@ async def get_random_user_for_partylist(
 ):
     q = (
         sqlalchemy.select(main.User)
-        .where(main.User.tutorial_state == -1)
+        .where(main.User.tutorial_state == -1, main.User.id != user.id)
         .order_by(sqlalchemy.func.random())
         .limit(limit)
     )
