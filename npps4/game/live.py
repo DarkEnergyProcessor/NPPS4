@@ -519,7 +519,8 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
         given_exp = math.ceil(given_exp / 2)
 
     # Add user EXP
-    next_level_info = await user.add_exp(context, current_user, given_exp * live_in_progress.lp_factor)
+    given_exp = given_exp * live_in_progress.lp_factor
+    next_level_info = await user.add_exp(context, current_user, given_exp)
     current_user.game_coin = current_user.game_coin + given_g
 
     # Add units
