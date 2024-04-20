@@ -71,7 +71,7 @@ async def get_secretbox_info_response(
         end_date=util.timestamp_to_datetime(secretbox.end_time),
         add_gauge=0,  # TODO
         always_display_flag=1,
-        pon_count=0,  # TODO
+        pon_count=100,  # TODO
     )
 
 
