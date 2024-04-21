@@ -345,7 +345,7 @@ async def load_unit_deck(context: idol.BasicSchoolIdolContext, user: main.User, 
 
 
 async def save_unit_deck(
-    context: idol.SchoolIdolParams, user: main.User, deck: main.UnitDeck, unit_owning_user_ids: list[int]
+    context: idol.BasicSchoolIdolContext, user: main.User, deck: main.UnitDeck, unit_owning_user_ids: list[int]
 ):
     if deck.user_id != user.id:
         raise ValueError("invalid deck")

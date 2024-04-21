@@ -10,7 +10,7 @@ async def is_agreed(context: idol.SchoolIdolParams, user: main.User, tos_id: int
     return result.scalar() is not None
 
 
-async def agree(context: idol.SchoolIdolParams, user: main.User, tos_id: int):
+async def agree(context: idol.BasicSchoolIdolContext, user: main.User, tos_id: int):
     agree = main.TOSAgree(user_id=user.id, tos_id=tos_id)
     context.db.main.add(agree)
     await context.db.main.flush()

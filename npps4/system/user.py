@@ -109,9 +109,10 @@ async def get_user_info(context: idol.BasicSchoolIdolContext, user: main.User):
     )
 
 
-async def create(context: idol.SchoolIdolParams, key: str, passwd: str):
+async def create(context: idol.BasicSchoolIdolContext, key: str | None, passwd: str | None):
     user = main.User(key=key)
-    user.set_passwd(passwd)
+    if passwd is not None:
+        user.set_passwd(passwd)
     context.db.main.add(user)
     await context.db.main.flush()
     user.invite_code = f"{core.get_invite_code(user.id):09d}"
