@@ -24,6 +24,7 @@ ACHIEVEMENT_REWARDS: dict[int, list[common.AnyItem]] = {
     115: [scenario_model.ScenarioItem(item_id=11)],  # Reward: 3 - A Bigger Rehearsal Space! - Story 2
     116: [live_model.LiveItem(item_id=5)],  # Reward: Natsuiro Egao de 1, 2, Jump!
     117: [scenario_model.ScenarioItem(item_id=12)],  # Reward: 3 - A Bigger Rehearsal Space! - Story 3
+    118: [item_model.Item(add_type=const.ADD_TYPE.BACKGROUND, item_id=2)],  # Reward: Otonokizaka Gate
     119: [scenario_model.ScenarioItem(item_id=13)],  # Reward: 4 - μ's Gets Interviewed?! - Story 1
     121: [scenario_model.ScenarioItem(item_id=14)],  # Reward: 4 - μ's Gets Interviewed?! - Story 2
     122: [live_model.LiveItem(item_id=7)],  # Reward: Mogyutto "Love" de Sekkinchu!
@@ -36,6 +37,7 @@ ACHIEVEMENT_REWARDS: dict[int, list[common.AnyItem]] = {
     133: [scenario_model.ScenarioItem(item_id=20)],  # Reward: 6 - Hanayo's Grand Diet Plan! - Story 2
     134: [live_model.LiveItem(item_id=14)],  # Reward: WILD STARS
     135: [scenario_model.ScenarioItem(item_id=21)],  # Reward: 6 - Hanayo's Grand Diet Plan! - Story 3
+    136: [item_model.Item(add_type=const.ADD_TYPE.BACKGROUND, item_id=3)],  # Reward: Otonokizaka Corridor
     137: [scenario_model.ScenarioItem(item_id=22)],  # Reward: 7 - μ's Without Umi - Story 1
     139: [scenario_model.ScenarioItem(item_id=23)],  # Reward: 7 - μ's Without Umi - Story 2
     140: [live_model.LiveItem(item_id=21)],  # Reward: Kaguya no Shiro de Odoritai
@@ -50,6 +52,7 @@ ACHIEVEMENT_REWARDS: dict[int, list[common.AnyItem]] = {
     153: [scenario_model.ScenarioItem(item_id=30)],  # Reward: 9 - We Can't Practice Today - Story 3
     154: [live_model.LiveItem(item_id=23)],  # Reward: Love Novels
     155: [scenario_model.ScenarioItem(item_id=31)],  # Reward: 9 - We Can't Practice Today - Story 4
+    156: [item_model.Item(add_type=const.ADD_TYPE.BACKGROUND, item_id=4)],  # Reward: Otonokizaka Rooftop
     157: [scenario_model.ScenarioItem(item_id=32)],  # Reward: 10 - Summer Festival Fortunes - Story 1
     158: [live_model.LiveItem(item_id=40)],  # Reward: Korekara no Someday
     159: [scenario_model.ScenarioItem(item_id=33)],  # Reward: 10 - Summer Festival Fortunes - Story 2
@@ -68,6 +71,7 @@ ACHIEVEMENT_REWARDS: dict[int, list[common.AnyItem]] = {
     177: [scenario_model.ScenarioItem(item_id=42)],  # Reward: 12 - The Festival Begins! - Story 3
     178: [live_model.LiveItem(item_id=35)],  # Reward: Diamond Princess no Yuutsu
     179: [scenario_model.ScenarioItem(item_id=43)],  # Reward: 12 - The Festival Begins! - Story 4
+    180: [item_model.Item(add_type=const.ADD_TYPE.BACKGROUND, item_id=5)],  # Reward: Otonokizaka Street
     181: [scenario_model.ScenarioItem(item_id=44)],  # Reward: 13 - School Idol Festival - Story 1
     182: [live_model.LiveItem(item_id=11)],  # Reward: Love Marginal
     183: [scenario_model.ScenarioItem(item_id=45)],  # Reward: 13 - School Idol Festival - Story 2
@@ -86,6 +90,7 @@ ACHIEVEMENT_REWARDS: dict[int, list[common.AnyItem]] = {
     201: [scenario_model.ScenarioItem(item_id=54)],  # Reward: 15 - Winter Wonderland - Story 3
     202: [live_model.LiveItem(item_id=45)],  # Reward: Anone Ganbare!
     203: [scenario_model.ScenarioItem(item_id=55)],  # Reward: 15 - Winter Wonderland - Story 4
+    204: [item_model.Item(add_type=const.ADD_TYPE.BACKGROUND, item_id=6)],  # Reward: School Idol Festival Stage
     205: [scenario_model.ScenarioItem(item_id=56)],  # Reward: 16 - Mountain Hike/Scary Test - Story 1
     206: [live_model.LiveItem(item_id=186)],  # Reward: LOVELESS WORLD
     207: [scenario_model.ScenarioItem(item_id=57)],  # Reward: 16 - Mountain Hike/Scary Test - Story 2
@@ -104,6 +109,7 @@ ACHIEVEMENT_REWARDS: dict[int, list[common.AnyItem]] = {
     225: [scenario_model.ScenarioItem(item_id=66)],  # Reward: 18 - Alpaca Escape!/Nine Paths - Story 3
     226: [live_model.LiveItem(item_id=123)],  # Reward: Pure Girls Project
     227: [scenario_model.ScenarioItem(item_id=67)],  # Reward: 18 - Alpaca Escape!/Nine Paths - Story 4
+    228: [item_model.Item(add_type=const.ADD_TYPE.BACKGROUND, item_id=7)],  # Reward: Idol Study Club
     229: [scenario_model.ScenarioItem(item_id=68)],  # Reward: 19 - Rain, Rain, Go Away - Story 1
     230: [live_model.LiveItem(item_id=230)],  # Reward: Donna Tokimo Zutto
     231: [scenario_model.ScenarioItem(item_id=69)],  # Reward: 19 - Rain, Rain, Go Away - Story 2
@@ -122,6 +128,7 @@ ACHIEVEMENT_REWARDS: dict[int, list[common.AnyItem]] = {
     249: [scenario_model.ScenarioItem(item_id=78)],  # Reward: 21 - Fun at the Pool! - Story 3
     250: [live_model.LiveItem(item_id=193)],  # Reward: UNBALANCED LOVE
     251: [scenario_model.ScenarioItem(item_id=79)],  # Reward: 21 - Fun at the Pool! - Story 4
+    252: [item_model.Item(add_type=const.ADD_TYPE.BACKGROUND, item_id=8)],  # Reward: Homura Exterior
     253: [scenario_model.ScenarioItem(item_id=80)],  # Reward: 22 - Otonokizaka's Open Campus - Story 1
     254: [live_model.LiveItem(item_id=272)],  # Reward: Dancing Stars on Me!
     255: [scenario_model.ScenarioItem(item_id=81)],  # Reward: 22 - Otonokizaka's Open Campus - Story 2
@@ -140,6 +147,7 @@ ACHIEVEMENT_REWARDS: dict[int, list[common.AnyItem]] = {
     273: [scenario_model.ScenarioItem(item_id=90)],  # Reward: 24 - Let's Cheer for Umi! - Story 3
     274: [live_model.LiveItem(item_id=207)],  # Reward: Kodoku na Heaven
     275: [scenario_model.ScenarioItem(item_id=91)],  # Reward: 24 - Let's Cheer for Umi! - Story 4
+    276: [item_model.Item(add_type=const.ADD_TYPE.BACKGROUND, item_id=9)],  # Reward: Student Council Room
     277: [scenario_model.ScenarioItem(item_id=92)],  # Reward: 25 - Merry Christmas - Story 1
     278: [live_model.LiveItem(item_id=313)],  # Reward: Datte Datte Aa Mujo
     279: [scenario_model.ScenarioItem(item_id=93)],  # Reward: 25 - Merry Christmas - Story 2
@@ -158,6 +166,7 @@ ACHIEVEMENT_REWARDS: dict[int, list[common.AnyItem]] = {
     297: [scenario_model.ScenarioItem(item_id=102)],  # Reward: 27 - Chocolates are Trouble! - Story 3
     298: [live_model.LiveItem(item_id=268)],  # Reward: Daring!!
     299: [scenario_model.ScenarioItem(item_id=103)],  # Reward: 27 - Chocolates are Trouble! - Story 4
+    300: [item_model.Item(add_type=const.ADD_TYPE.BACKGROUND, item_id=10)],  # Reward: Fast Food Shop
     301: [scenario_model.ScenarioItem(item_id=104)],  # Reward: 28 - Yazawa Girls' Festival - Story 1
     302: [live_model.LiveItem(item_id=365)],  # Reward: Mo Hitori jyanaiyo
     303: [scenario_model.ScenarioItem(item_id=105)],  # Reward: 28 - Yazawa Girls' Festival - Story 2
@@ -176,6 +185,7 @@ ACHIEVEMENT_REWARDS: dict[int, list[common.AnyItem]] = {
     321: [scenario_model.ScenarioItem(item_id=114)],  # Reward: 30 - Worried About Maki?! - Story 3
     322: [live_model.LiveItem(item_id=322)],  # Reward: Mahotsukai Hajimemashita!
     323: [scenario_model.ScenarioItem(item_id=115)],  # Reward: 30 - Worried About Maki?! - Story 4
+    324: [item_model.Item(add_type=const.ADD_TYPE.BACKGROUND, item_id=11)],  # Reward: Otonokizaka Music Room
     325: [scenario_model.ScenarioItem(item_id=116)],  # Reward: 31 - Unsung Heroes - Story 1
     326: [live_model.LiveItem(item_id=309)],  # Reward: Junai Lens
     327: [scenario_model.ScenarioItem(item_id=117)],  # Reward: 31 - Unsung Heroes - Story 2
@@ -194,6 +204,7 @@ ACHIEVEMENT_REWARDS: dict[int, list[common.AnyItem]] = {
     345: [scenario_model.ScenarioItem(item_id=126)],  # Reward: 33 - The Sister Swap - Story 3
     346: [live_model.LiveItem(item_id=396)],  # Reward: Trouble Busters
     347: [scenario_model.ScenarioItem(item_id=127)],  # Reward: 33 - The Sister Swap - Story 4
+    348: [item_model.Item(add_type=const.ADD_TYPE.BACKGROUND, item_id=12)],  # Reward: UTX High Cafeteria
     349: [scenario_model.ScenarioItem(item_id=128)],  # Reward: 34 - Homura Bakery! - Story 1
     350: [live_model.LiveItem(item_id=444)],  # Reward: Bokutachi wa Hitotsu no Hikari
     351: [scenario_model.ScenarioItem(item_id=129)],  # Reward: 34 - Homura Bakery! - Story 2
@@ -212,6 +223,7 @@ ACHIEVEMENT_REWARDS: dict[int, list[common.AnyItem]] = {
     369: [scenario_model.ScenarioItem(item_id=138)],  # Reward: 36 - Hanayo's Disciple! - Story 3
     370: [live_model.LiveItem(item_id=443)],  # Reward: Moshimo Kara Kitto
     371: [scenario_model.ScenarioItem(item_id=139)],  # Reward: 36 - Hanayo's Disciple! - Story 4
+    372: [item_model.Item(add_type=const.ADD_TYPE.BACKGROUND, item_id=13)],  # Reward: Alpaca Stable
     373: [scenario_model.ScenarioItem(item_id=140)],  # Reward: 37 - Big Cleanup! - Story 1
     374: [live_model.LiveItem(item_id=451)],  # Reward: Shocking Party
     375: [scenario_model.ScenarioItem(item_id=141)],  # Reward: 37 - Big Cleanup! - Story 2
@@ -230,6 +242,7 @@ ACHIEVEMENT_REWARDS: dict[int, list[common.AnyItem]] = {
     393: [scenario_model.ScenarioItem(item_id=150)],  # Reward: 39 - School Idol Trip 2 - Story 3
     394: [live_model.LiveItem(item_id=454)],  # Reward: Kururin MIRACLE
     395: [scenario_model.ScenarioItem(item_id=151)],  # Reward: 39 - School Idol Trip 2 - Story 4
+    396: [item_model.Item(add_type=const.ADD_TYPE.BACKGROUND, item_id=14)],  # Reward: Idol Study Club Practice Area
     397: [scenario_model.ScenarioItem(item_id=152)],  # Reward: 40 - Chouchou the Cat - Story 1
     398: [live_model.LiveItem(item_id=460)],  # Reward: MOMENT RING
     399: [scenario_model.ScenarioItem(item_id=153)],  # Reward: 40 - Chouchou the Cat - Story 2
@@ -248,6 +261,7 @@ ACHIEVEMENT_REWARDS: dict[int, list[common.AnyItem]] = {
     417: [scenario_model.ScenarioItem(item_id=162)],  # Reward: 42 - Field Day Fury! - Story 3
     418: [live_model.LiveItem(item_id=466)],  # Reward: Shunjo Romantic
     419: [scenario_model.ScenarioItem(item_id=163)],  # Reward: 42 - Field Day Fury! - Story 4
+    420: [item_model.Item(add_type=const.ADD_TYPE.BACKGROUND, item_id=15)],  # Reward: Otonokizaka Schoolyard
     421: [scenario_model.ScenarioItem(item_id=164)],  # Reward: 43 - Shopping on a Rainy Day - Story 1
     422: [live_model.LiveItem(item_id=469)],  # Reward: Ruteshi Kisuki Shiteru
     423: [scenario_model.ScenarioItem(item_id=165)],  # Reward: 43 - Shopping on a Rainy Day - Story 2
@@ -273,6 +287,7 @@ ACHIEVEMENT_REWARDS: dict[int, list[common.AnyItem]] = {
     453: [scenario_model.ScenarioItem(item_id=174)],  # Reward: 45 - Let's Go Farming! - Story 3
     454: [live_model.LiveItem(item_id=482)],  # Reward: Hello, Hoshiwo Kazoete
     455: [scenario_model.ScenarioItem(item_id=175)],  # Reward: 45 - Let's Go Farming! - Story 4
+    456: [item_model.Item(add_type=const.ADD_TYPE.BACKGROUND, item_id=16)],  # Reward: Farm Experience - River
     457: [scenario_model.ScenarioItem(item_id=195)],  # Reward: 2 - What's a School Idol? - Story 3
     459: [scenario_model.ScenarioItem(item_id=196)],  # Reward: 2 - What's a School Idol? - Story 4
     461: [scenario_model.ScenarioItem(item_id=176)],  # Reward: 46 - Nozomi's Secret - Story 1
@@ -293,6 +308,7 @@ ACHIEVEMENT_REWARDS: dict[int, list[common.AnyItem]] = {
     485: [scenario_model.ScenarioItem(item_id=182)],  # Reward: 47 - The Miracle Nine - Story 3
     486: [live_model.LiveItem(item_id=489)],  # Reward: Future Style
     487: [scenario_model.ScenarioItem(item_id=183)],  # Reward: 47 - The Miracle Nine - Story 4
+    488: [item_model.Item(add_type=const.ADD_TYPE.BACKGROUND, item_id=19)],  # Reward: Street Stage [SUNNY DAY SONG]
     489: [scenario_model.ScenarioItem(item_id=203)],  # Reward: 4 -  A New Kind of Autumn - Story 3
     491: [scenario_model.ScenarioItem(item_id=204)],  # Reward: 4 -  A New Kind of Autumn - Story 4
     494: [scenario_model.ScenarioItem(item_id=205)],  # Reward: 5 -  An Aqours Christmas 1 - Story 1
