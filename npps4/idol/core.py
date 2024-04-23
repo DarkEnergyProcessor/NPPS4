@@ -1,6 +1,7 @@
 import cProfile
 import dataclasses
 import enum
+import gzip
 import json
 import os
 import os.path
@@ -150,14 +151,22 @@ async def build_response(
         jsondatastr = json.dumps(response_data)
         response = jsondatastr.encode("UTF-8")
 
+    response_headers = {
+        "Server-Version": util.sif_version_string(config.get_latest_version()),
+        "X-Message-Sign": util.sign_message(response, context.x_message_code),
+        "status_code": str(status_code),
+    }
+
+    allow_compress = "gzip" in context.request.headers.get("accept-encoding", "identity").lower()
+    if allow_compress and len(response) >= 65536:
+        # GZip compress
+        response = gzip.compress(response)
+        response_headers["Content-Encoding"] = "gzip"
+
     return fastapi.responses.Response(
         response,
         http_code,
-        {
-            "Server-Version": util.sif_version_string(config.get_latest_version()),
-            "X-Message-Sign": util.sign_message(response, context.x_message_code),
-            "status_code": str(status_code),
-        },
+        response_headers,
         "application/json",
     )
 
