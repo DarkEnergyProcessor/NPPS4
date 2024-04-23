@@ -20,9 +20,23 @@ from typing import Awaitable, Callable, Literal, overload
 
 
 @dataclasses.dataclass
+class UnitStatsResult:
+    level: int
+    smile: int
+    pure: int
+    cool: int
+    hp: int
+    next_exp: int
+    merge_exp: int
+    merge_cost: int
+    sale_price: int
+
+
+@dataclasses.dataclass
 class StatsCache:
     unit_level_up_pattern: dict[int, list[unit.UnitLevelUpPattern]] = dataclasses.field(default_factory=dict)
     unit_level_limit_pattern: dict[int, list[unit.LevelLimitPattern]] = dataclasses.field(default_factory=dict)
+    result_cache: dict[tuple[int, int], UnitStatsResult] = dataclasses.field(default_factory=dict)
 
 
 @dataclasses.dataclass
@@ -514,19 +528,6 @@ async def add_love_by_deck(context: idol.BasicSchoolIdolContext, user: main.User
     return common.BeforeAfter[list[int]](before=before_love, after=loves)
 
 
-@dataclasses.dataclass
-class UnitStatsResult:
-    level: int
-    smile: int
-    pure: int
-    cool: int
-    hp: int
-    next_exp: int
-    merge_exp: int
-    merge_cost: int
-    sale_price: int
-
-
 def calculate_unit_stats(
     unit_info: unit.Unit, pattern: list[unit.UnitLevelUpPattern] | list[unit.LevelLimitPattern], exp: int
 ):
@@ -596,30 +597,36 @@ async def get_unit_stats_from_unit_data(
 ):
     if cache is None:
         cache = StatsCache()
-    if unit_info is None:
-        unit_info = await get_unit_info(context, unit_data.unit_id)
-        assert unit_info is not None
-    if unit_rarity is None:
-        unit_rarity = await get_unit_rarity(context, unit_info.rarity)
-        assert unit_rarity is not None
 
-    levelup_pattern = await _get_cached(
-        get_unit_level_up_pattern, cache.unit_level_up_pattern, context, unit_info.unit_level_up_pattern_id
-    )
-    assert levelup_pattern is not None
-    stats = calculate_unit_stats(unit_info, levelup_pattern, unit_data.exp)
+    identifier = (unit_data.unit_id, unit_data.exp)
+    if identifier not in cache.result_cache:
+        if unit_info is None:
+            unit_info = await get_unit_info(context, unit_data.unit_id)
+            assert unit_info is not None
+        if unit_rarity is None:
+            unit_rarity = await get_unit_rarity(context, unit_info.rarity)
+            assert unit_rarity is not None
 
-    if (
-        unit_data.level_limit_id > 0
-        and stats.level >= unit_rarity.after_level_max
-        and unit_data.max_level > unit_rarity.after_level_max
-    ):
-        # Use level_limit pattern
         levelup_pattern = await _get_cached(
-            get_unit_level_limit_pattern, cache.unit_level_limit_pattern, context, unit_data.level_limit_id
+            get_unit_level_up_pattern, cache.unit_level_up_pattern, context, unit_info.unit_level_up_pattern_id
         )
         assert levelup_pattern is not None
         stats = calculate_unit_stats(unit_info, levelup_pattern, unit_data.exp)
+
+        if (
+            unit_data.level_limit_id > 0
+            and stats.level >= unit_rarity.after_level_max
+            and unit_data.max_level > unit_rarity.after_level_max
+        ):
+            # Use level_limit pattern
+            levelup_pattern = await _get_cached(
+                get_unit_level_limit_pattern, cache.unit_level_limit_pattern, context, unit_data.level_limit_id
+            )
+            assert levelup_pattern is not None
+            stats = calculate_unit_stats(unit_info, levelup_pattern, unit_data.exp)
+        cache.result_cache[identifier] = stats
+    else:
+        stats = cache.result_cache[identifier]
 
     return stats
 
