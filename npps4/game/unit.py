@@ -225,9 +225,10 @@ async def unit_unitall(context: idol.SchoolIdolUserParams) -> UnitAllInfoRespons
     units = await unit.get_all_units(context, current_user)
 
     unit_result: dict[bool, list[unit_model.UnitInfoData]] = {False: [], True: []}
+    cache = unit.UnitDataFullInfoCache()
 
     for unit_data in units:
-        unit_serialized_data, _ = await unit.get_unit_data_full_info(context, unit_data)
+        unit_serialized_data, _ = await unit.get_unit_data_full_info(context, unit_data, cache=cache)
         unit_result[unit_data.active].append(unit_serialized_data)
 
     return UnitAllInfoResponse(active=unit_result[True], waiting=unit_result[False])

@@ -16,7 +16,39 @@ from .. import util
 from ..db import main
 from ..db import unit
 
-from typing import Literal, overload
+from typing import Awaitable, Callable, Literal, overload
+
+
+@dataclasses.dataclass
+class StatsCache:
+    unit_level_up_pattern: dict[int, list[unit.UnitLevelUpPattern]] = dataclasses.field(default_factory=dict)
+    unit_level_limit_pattern: dict[int, list[unit.LevelLimitPattern]] = dataclasses.field(default_factory=dict)
+
+
+@dataclasses.dataclass
+class UnitDataFullInfoCache:
+    unit_info: dict[int, unit.Unit] = dataclasses.field(default_factory=dict)
+    unit_rarity: dict[int, unit.Rarity] = dataclasses.field(default_factory=dict)
+    unit_skill: dict[int, unit.UnitSkill] = dataclasses.field(default_factory=dict)
+    unit_skill_level_up_pattern: dict[int, list[unit.UnitSkillLevelUpPattern]] = dataclasses.field(default_factory=dict)
+    stats_cache: StatsCache = dataclasses.field(default_factory=StatsCache)
+
+
+async def _get_cached[
+    _T, _U
+](
+    f: Callable[[idol.BasicSchoolIdolContext, _U], Awaitable[_T | None]],
+    dict_cache: dict[_U, _T],
+    context: idol.BasicSchoolIdolContext,
+    value: _U,
+):
+    if value not in dict_cache:
+        result = await f(context, value)
+        if result is not None:
+            dict_cache[value] = result
+    else:
+        result = dict_cache[value]
+    return result
 
 
 async def count_units(context: idol.BasicSchoolIdolContext, user: main.User, active: bool):
@@ -202,10 +234,10 @@ def get_unit_rarity(context: idol.BasicSchoolIdolContext, rarity: int):
     return context.db.unit.get(unit.Rarity, rarity)
 
 
-async def get_unit_level_up_pattern(context: idol.BasicSchoolIdolContext, unit_info: unit.Unit):
-    q = sqlalchemy.select(unit.UnitLevelUpPattern).where(
-        unit.UnitLevelUpPattern.unit_level_up_pattern_id == unit_info.unit_level_up_pattern_id
-    )
+async def get_unit_level_up_pattern(context: idol.BasicSchoolIdolContext, unit_info: unit.Unit | int):
+    if isinstance(unit_info, unit.Unit):
+        unit_info = unit_info.unit_level_up_pattern_id
+    q = sqlalchemy.select(unit.UnitLevelUpPattern).where(unit.UnitLevelUpPattern.unit_level_up_pattern_id == unit_info)
     result = await context.db.unit.execute(q)
     return list(result.scalars())
 
@@ -216,17 +248,22 @@ async def get_unit_level_limit_pattern(context: idol.BasicSchoolIdolContext, lev
     return list(result.scalars())
 
 
-async def get_unit_skill(context: idol.BasicSchoolIdolContext, unit_data: unit.Unit):
-    if unit_data.default_unit_skill_id is None:
+async def get_unit_skill(context: idol.BasicSchoolIdolContext, /, unit_info_or_default_unit_skill_id: unit.Unit | int):
+    if isinstance(unit_info_or_default_unit_skill_id, unit.Unit):
+        unit_info_or_default_unit_skill_id = unit_info_or_default_unit_skill_id.default_unit_skill_id or 0
+    if unit_info_or_default_unit_skill_id == 0:
         return None
 
-    return await db.get_decrypted_row(context.db.unit, unit.UnitSkill, unit_data.default_unit_skill_id)
+    return await db.get_decrypted_row(context.db.unit, unit.UnitSkill, unit_info_or_default_unit_skill_id)
 
 
-async def get_unit_skill_level_up_pattern(context: idol.BasicSchoolIdolContext, unit_skill: unit.UnitSkill):
+async def get_unit_skill_level_up_pattern(context: idol.BasicSchoolIdolContext, /, unit_skill: unit.UnitSkill | int):
+    if isinstance(unit_skill, unit.UnitSkill):
+        unit_skill = unit_skill.unit_skill_level_up_pattern_id
+
     q = (
         sqlalchemy.select(unit.UnitSkillLevelUpPattern)
-        .where(unit.UnitSkillLevelUpPattern.unit_skill_level_up_pattern_id == unit_skill.unit_skill_level_up_pattern_id)
+        .where(unit.UnitSkillLevelUpPattern.unit_skill_level_up_pattern_id == unit_skill)
         .order_by(unit.UnitSkillLevelUpPattern.skill_level)
     )
     result = await context.db.unit.execute(q)
@@ -554,7 +591,11 @@ async def get_unit_stats_from_unit_data(
     unit_data: main.Unit,
     unit_info: unit.Unit | None = None,
     unit_rarity: unit.Rarity | None = None,
+    *,
+    cache: StatsCache | None = None,
 ):
+    if cache is None:
+        cache = StatsCache()
     if unit_info is None:
         unit_info = await get_unit_info(context, unit_data.unit_id)
         assert unit_info is not None
@@ -562,7 +603,10 @@ async def get_unit_stats_from_unit_data(
         unit_rarity = await get_unit_rarity(context, unit_info.rarity)
         assert unit_rarity is not None
 
-    levelup_pattern = await get_unit_level_up_pattern(context, unit_info)
+    levelup_pattern = await _get_cached(
+        get_unit_level_up_pattern, cache.unit_level_up_pattern, context, unit_info.unit_level_up_pattern_id
+    )
+    assert levelup_pattern is not None
     stats = calculate_unit_stats(unit_info, levelup_pattern, unit_data.exp)
 
     if (
@@ -571,26 +615,34 @@ async def get_unit_stats_from_unit_data(
         and unit_data.max_level > unit_rarity.after_level_max
     ):
         # Use level_limit pattern
-        levelup_pattern = await get_unit_level_limit_pattern(context, unit_data.level_limit_id)
+        levelup_pattern = await _get_cached(
+            get_unit_level_limit_pattern, cache.unit_level_limit_pattern, context, unit_data.level_limit_id
+        )
+        assert levelup_pattern is not None
         stats = calculate_unit_stats(unit_info, levelup_pattern, unit_data.exp)
 
     return stats
 
 
-async def get_unit_data_full_info(context: idol.BasicSchoolIdolContext, unit_data: main.Unit):
-    unit_info = await get_unit_info(context, unit_data.unit_id)
+async def get_unit_data_full_info(
+    context: idol.BasicSchoolIdolContext, unit_data: main.Unit, *, cache: UnitDataFullInfoCache | None = None
+):
+    if cache is None:
+        cache = UnitDataFullInfoCache()
+
+    unit_info = await _get_cached(get_unit_info, cache.unit_info, context, unit_data.unit_id)
     if unit_info is None:
         raise ValueError("unit_info is none")
 
     # Calculate unit level
-    unit_rarity = await get_unit_rarity(context, unit_info.rarity)
+    unit_rarity = await _get_cached(get_unit_rarity, cache.unit_rarity, context, unit_info.rarity)
     if unit_rarity is None:
         raise RuntimeError("unit_rarity is none")
 
-    stats = await get_unit_stats_from_unit_data(context, unit_data, unit_info, unit_rarity)
+    stats = await get_unit_stats_from_unit_data(context, unit_data, unit_info, unit_rarity, cache=cache.stats_cache)
 
     # Calculate unit skill level
-    skill = await get_unit_skill(context, unit_info)
+    skill = await _get_cached(get_unit_skill, cache.unit_skill, context, unit_info.default_unit_skill_id or 0)
     if skill is not None:
         skill_levels = await get_unit_skill_level_up_pattern(context, skill)
         skill_stats = calculate_unit_skill_stats(skill, skill_levels, unit_data.skill_exp)
