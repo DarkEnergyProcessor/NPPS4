@@ -3,6 +3,7 @@ import pydantic
 from . import common
 from . import item
 from . import item_model
+from . import unit
 from .. import const
 from .. import idol
 from ..config import config
@@ -13,7 +14,7 @@ from ..db import effort
 class EffortPointInfo(common.BeforeAfter[int]):
     live_effort_point_box_spec_id: int
     capacity: int
-    rewards: list[item_model.Item]
+    rewards: list[pydantic.SerializeAsAny[common.AnyItem]]
 
 
 async def get_effort_spec(context: idol.BasicSchoolIdolContext, live_effort_point_box_spec_id: int):
@@ -51,9 +52,19 @@ async def add_effort(context: idol.BasicSchoolIdolContext, user: main.User, amou
                 context, user.live_effort_point_box_spec_id, user.limited_effort_event_id, amount
             )
 
-            reward_list: list[item_model.Item] = []
+            reward_list: list[common.AnyItem] = []
             for add_type, item_id, item_count, additional_data in drop_box_result.rewards:
-                reward_data = item_model.Item(add_type=const.ADD_TYPE(add_type), item_id=item_id, amount=item_count)
+                add_type_enum = const.ADD_TYPE(add_type)
+                match add_type_enum:
+                    case const.ADD_TYPE.UNIT:
+                        quick_add = await unit.quick_create_by_unit_add(context, user, item_id)
+                        await unit.process_quick_add(context, user, quick_add)
+                        reward_data = quick_add.as_item_reward
+                    case _:
+                        reward_data = item_model.Item(
+                            add_type=const.ADD_TYPE(add_type), item_id=item_id, amount=item_count
+                        )
+
                 if additional_data:
                     for k, v in additional_data.items():
                         setattr(reward_data, k, v)

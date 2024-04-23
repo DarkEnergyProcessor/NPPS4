@@ -527,26 +527,14 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
     current_unit_count = await unit.count_units(context, current_user, True)
     for reward_data in (live_clear_drop, live_combo_drop, live_score_drop):
         if reward_data is not None:
-            if current_unit_count >= current_user.unit_max:
-                # Move to present box
-                reward_data.as_item_reward.reward_box_flag = True
-                await reward.add_item(
-                    context,
-                    current_user,
-                    reward_data.as_item_reward,
-                    "FIXME live show reward JP text",
-                    "Live Show! Reward",
-                )
-            else:
-                # Add directly
-                if reward_data.unit_data:
-                    assert reward_data.full_info is not None
-                    await unit.add_unit_by_object(context, current_user, reward_data.unit_data)
-                    # Update unit_owning_user_id
-                    reward_data.update_unit_owning_user_id()
-                    current_unit_count = current_unit_count + 1
-                else:
-                    await unit.add_supporter_unit(context, current_user, reward_data.unit_id)
+            current_unit_count = await unit.process_quick_add(
+                context,
+                current_user,
+                reward_data,
+                current_unit_count=current_unit_count,
+                reason_jp="FIXME live show reward JP text",
+                reason_en="Live Show! Reward",
+            )
 
     # Add bond
     love_count = request.love_cnt * live_in_progress.lp_factor

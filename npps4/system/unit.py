@@ -1,12 +1,12 @@
 import dataclasses
 import math
-import queue
 
 import sqlalchemy
 
 from . import album
 from . import common
 from . import exchange
+from . import reward
 from . import unit_model
 from .. import const
 from .. import db
@@ -860,6 +860,43 @@ async def quick_create_by_unit_add(
             full_info=unit_full_info[0],
             stats=unit_full_info[1],
         )
+
+
+async def process_quick_add(
+    context: idol.BasicSchoolIdolContext,
+    /,
+    user: main.User,
+    quick_add_result: QuickAddResult,
+    *,
+    current_unit_count: int | None = None,
+    reason_jp: str = "Reward",
+    reason_en: str = "Reward",
+):
+    if current_unit_count is None:
+        current_unit_count = await count_units(context, user, True)
+    else:
+        # Add directly
+        if quick_add_result.unit_data:
+            if current_unit_count >= user.unit_max:
+                # Move to present box
+                quick_add_result.as_item_reward.reward_box_flag = True
+                await reward.add_item(
+                    context,
+                    user,
+                    quick_add_result.as_item_reward,
+                    reason_jp,
+                    reason_en,
+                )
+            else:
+                assert quick_add_result.full_info is not None
+                await add_unit_by_object(context, user, quick_add_result.unit_data)
+                # Update unit_owning_user_id
+                quick_add_result.update_unit_owning_user_id()
+                current_unit_count = current_unit_count + 1
+        else:
+            # Add directly
+            await add_supporter_unit(context, user, quick_add_result.unit_id)
+    return current_unit_count
 
 
 async def has_signed_variant(context: idol.BasicSchoolIdolContext, unit_id: int):
