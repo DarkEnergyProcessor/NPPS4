@@ -10,7 +10,7 @@ from ..system import tutorial
 from ..system import unit
 
 
-async def from_invite(context: idol.BasicSchoolIdolContext, invite_code: int):
+async def from_invite(context: idol.BasicSchoolIdolContext, invite_code: str):
     q = sqlalchemy.select(main.User).where(main.User.invite_code == invite_code)
     result = await context.db.main.execute(q)
     return result.scalar()
@@ -22,7 +22,7 @@ async def from_id(context: idol.BasicSchoolIdolContext, uid: int):
 
 def register_args(parser):
     parser.add_argument("-u", "--user-id", type=int, help="User ID.")
-    parser.add_argument("-i", "--invite-code", type=int, help="Invite Code.")
+    parser.add_argument("-i", "--invite-code", type=str, help="Invite Code.")
 
 
 async def from_args(context: idol.BasicSchoolIdolContext, args: argparse.Namespace):
