@@ -123,6 +123,7 @@ class LivePlayResponse(common.TimestampMixin):
     marathon_event_id: int | None = None
     no_skill: bool = False
     can_activate_effect: bool = True
+    auto_play: bool = False
 
 
 class LiveRewardPreciseList(pydantic.BaseModel):
