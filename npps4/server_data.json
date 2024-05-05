@@ -1,4 +1,5 @@
 {
+	"$schema": "https://raw.githubusercontent.com/DarkEnergyProcessor/NPPS4/master/npps4/server_data_schema.json",
 	"badwords": [],
 	"live_unit_drop_chance": {
 		"common": 9,
@@ -35675,5 +35676,6 @@
 				]
 			]
 		}
-	]
+	],
+	"serial_codes": []
 }

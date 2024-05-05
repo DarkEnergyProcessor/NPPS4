@@ -1,0 +1,699 @@
+{
+	"$defs": {
+		"ADD_TYPE": {
+			"enum": [
+				0,
+				1000,
+				1001,
+				1002,
+				3000,
+				3001,
+				3002,
+				3003,
+				3004,
+				3005,
+				3006,
+				3007,
+				3008,
+				3009,
+				5000,
+				5100,
+				5200,
+				5300,
+				5330,
+				5340,
+				5400,
+				5410,
+				5500,
+				5600,
+				6100,
+				6200,
+				6300,
+				7000,
+				7500,
+				8000,
+				10000,
+				11000,
+				12000,
+				14000,
+				50000
+			],
+			"title": "ADD_TYPE",
+			"type": "integer"
+		},
+		"Item": {
+			"additionalProperties": true,
+			"properties": {
+				"add_type": {
+					"$ref": "#/$defs/ADD_TYPE"
+				},
+				"item_id": {
+					"title": "Item Id",
+					"type": "integer"
+				},
+				"amount": {
+					"default": 1,
+					"title": "Amount",
+					"type": "integer"
+				},
+				"item_category_id": {
+					"default": 0,
+					"title": "Item Category Id",
+					"type": "integer"
+				},
+				"reward_box_flag": {
+					"default": false,
+					"title": "Reward Box Flag",
+					"type": "boolean"
+				},
+				"comment": {
+					"default": "",
+					"title": "Comment",
+					"type": "string"
+				}
+			},
+			"required": [
+				"add_type",
+				"item_id"
+			],
+			"title": "Item",
+			"type": "object"
+		},
+		"ItemWithWeight": {
+			"additionalProperties": true,
+			"properties": {
+				"add_type": {
+					"$ref": "#/$defs/ADD_TYPE"
+				},
+				"item_id": {
+					"title": "Item Id",
+					"type": "integer"
+				},
+				"amount": {
+					"default": 1,
+					"title": "Amount",
+					"type": "integer"
+				},
+				"item_category_id": {
+					"default": 0,
+					"title": "Item Category Id",
+					"type": "integer"
+				},
+				"reward_box_flag": {
+					"default": false,
+					"title": "Reward Box Flag",
+					"type": "boolean"
+				},
+				"comment": {
+					"default": "",
+					"title": "Comment",
+					"type": "string"
+				},
+				"weight": {
+					"title": "Weight",
+					"type": "integer"
+				}
+			},
+			"required": [
+				"add_type",
+				"item_id",
+				"weight"
+			],
+			"title": "ItemWithWeight",
+			"type": "object"
+		},
+		"LiveEffortRewardDrops": {
+			"properties": {
+				"live_effort_point_box_spec_id": {
+					"title": "Live Effort Point Box Spec Id",
+					"type": "integer"
+				},
+				"drops": {
+					"items": {
+						"$ref": "#/$defs/ItemWithWeight"
+					},
+					"title": "Drops",
+					"type": "array"
+				}
+			},
+			"required": [
+				"live_effort_point_box_spec_id",
+				"drops"
+			],
+			"title": "LiveEffortRewardDrops",
+			"type": "object"
+		},
+		"LiveSpecificLiveUnitDrop": {
+			"properties": {
+				"live_setting_id": {
+					"title": "Live Setting Id",
+					"type": "integer"
+				},
+				"drops": {
+					"items": {
+						"$ref": "#/$defs/LiveUnitDrop"
+					},
+					"title": "Drops",
+					"type": "array"
+				}
+			},
+			"required": [
+				"live_setting_id",
+				"drops"
+			],
+			"title": "LiveSpecificLiveUnitDrop",
+			"type": "object"
+		},
+		"LiveUnitDrop": {
+			"properties": {
+				"unit_id": {
+					"title": "Unit Id",
+					"type": "integer"
+				},
+				"weight": {
+					"title": "Weight",
+					"type": "integer"
+				}
+			},
+			"required": [
+				"unit_id",
+				"weight"
+			],
+			"title": "LiveUnitDrop",
+			"type": "object"
+		},
+		"LiveUnitDropChance": {
+			"properties": {
+				"common": {
+					"title": "Common",
+					"type": "integer"
+				},
+				"live_specific": {
+					"title": "Live Specific",
+					"type": "integer"
+				}
+			},
+			"required": [
+				"common",
+				"live_specific"
+			],
+			"title": "LiveUnitDropChance",
+			"type": "object"
+		},
+		"SECRETBOX_ANIMATION_TYPE": {
+			"enum": [
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7
+			],
+			"title": "SECRETBOX_ANIMATION_TYPE",
+			"type": "integer"
+		},
+		"SECRETBOX_BUTTON_TYPE": {
+			"enum": [
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15,
+				16,
+				17,
+				18,
+				19
+			],
+			"title": "SECRETBOX_BUTTON_TYPE",
+			"type": "integer"
+		},
+		"SECRETBOX_COST_TYPE": {
+			"enum": [
+				0,
+				3001,
+				1000,
+				3002,
+				100,
+				3000
+			],
+			"title": "SECRETBOX_COST_TYPE",
+			"type": "integer"
+		},
+		"SECRETBOX_LAYOUT_TYPE": {
+			"enum": [
+				0,
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				8,
+				9,
+				10
+			],
+			"title": "SECRETBOX_LAYOUT_TYPE",
+			"type": "integer"
+		},
+		"SecretboxButton": {
+			"properties": {
+				"name": {
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "null"
+						}
+					],
+					"default": null,
+					"title": "Name"
+				},
+				"name_en": {
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "null"
+						}
+					],
+					"default": null,
+					"title": "Name En"
+				},
+				"button_type": {
+					"$ref": "#/$defs/SECRETBOX_BUTTON_TYPE"
+				},
+				"costs": {
+					"items": {
+						"$ref": "#/$defs/SecretboxCost"
+					},
+					"title": "Costs",
+					"type": "array"
+				},
+				"unit_count": {
+					"title": "Unit Count",
+					"type": "integer"
+				},
+				"guarantee_specific_rarity_amount": {
+					"default": 0,
+					"title": "Guarantee Specific Rarity Amount",
+					"type": "integer"
+				},
+				"guaranteed_rarity": {
+					"default": 0,
+					"title": "Guaranteed Rarity",
+					"type": "integer"
+				},
+				"rate_modifier": {
+					"anyOf": [
+						{
+							"items": {
+								"type": "integer"
+							},
+							"type": "array"
+						},
+						{
+							"type": "null"
+						}
+					],
+					"default": null,
+					"title": "Rate Modifier"
+				}
+			},
+			"required": [
+				"button_type",
+				"costs",
+				"unit_count"
+			],
+			"title": "SecretboxButton",
+			"type": "object"
+		},
+		"SecretboxCost": {
+			"properties": {
+				"cost_type": {
+					"$ref": "#/$defs/SECRETBOX_COST_TYPE"
+				},
+				"cost_item_id": {
+					"anyOf": [
+						{
+							"type": "integer"
+						},
+						{
+							"type": "null"
+						}
+					],
+					"default": null,
+					"title": "Cost Item Id"
+				},
+				"cost_amount": {
+					"title": "Cost Amount",
+					"type": "integer"
+				}
+			},
+			"required": [
+				"cost_type",
+				"cost_amount"
+			],
+			"title": "SecretboxCost",
+			"type": "object"
+		},
+		"SecretboxData": {
+			"properties": {
+				"id_string": {
+					"title": "Id String",
+					"type": "string"
+				},
+				"name": {
+					"title": "Name",
+					"type": "string"
+				},
+				"name_en": {
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "null"
+						}
+					],
+					"title": "Name En"
+				},
+				"member_category": {
+					"title": "Member Category",
+					"type": "integer"
+				},
+				"secretbox_type": {
+					"$ref": "#/$defs/SECRETBOX_LAYOUT_TYPE"
+				},
+				"parcel_type": {
+					"title": "Parcel Type",
+					"type": "integer"
+				},
+				"order": {
+					"title": "Order",
+					"type": "integer"
+				},
+				"start_time": {
+					"title": "Start Time",
+					"type": "integer"
+				},
+				"end_time": {
+					"title": "End Time",
+					"type": "integer"
+				},
+				"add_gauge": {
+					"title": "Add Gauge",
+					"type": "integer"
+				},
+				"free_once_a_day_display": {
+					"anyOf": [
+						{
+							"$ref": "#/$defs/SecretboxCost"
+						},
+						{
+							"type": "null"
+						}
+					],
+					"default": null
+				},
+				"buttons": {
+					"items": {
+						"$ref": "#/$defs/SecretboxButton"
+					},
+					"title": "Buttons",
+					"type": "array"
+				},
+				"animation_layout_type": {
+					"$ref": "#/$defs/SECRETBOX_ANIMATION_TYPE"
+				},
+				"animation_asset_layout": {
+					"items": {
+						"type": "string"
+					},
+					"title": "Animation Asset Layout",
+					"type": "array"
+				},
+				"animation_asset_layout_en": {
+					"items": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"title": "Animation Asset Layout En",
+					"type": "array"
+				},
+				"menu_asset": {
+					"title": "Menu Asset",
+					"type": "string"
+				},
+				"menu_asset_en": {
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "null"
+						}
+					],
+					"title": "Menu Asset En"
+				},
+				"rarity_names": {
+					"items": {
+						"type": "string"
+					},
+					"title": "Rarity Names",
+					"type": "array"
+				},
+				"rarity_rates": {
+					"items": {
+						"type": "integer"
+					},
+					"title": "Rarity Rates",
+					"type": "array"
+				},
+				"rarity_pools": {
+					"items": {
+						"items": {
+							"type": "integer"
+						},
+						"type": "array"
+					},
+					"title": "Rarity Pools",
+					"type": "array"
+				}
+			},
+			"required": [
+				"id_string",
+				"name",
+				"name_en",
+				"member_category",
+				"secretbox_type",
+				"parcel_type",
+				"order",
+				"start_time",
+				"end_time",
+				"add_gauge",
+				"buttons",
+				"animation_layout_type",
+				"animation_asset_layout",
+				"animation_asset_layout_en",
+				"menu_asset",
+				"menu_asset_en",
+				"rarity_names",
+				"rarity_rates",
+				"rarity_pools"
+			],
+			"title": "SecretboxData",
+			"type": "object"
+		},
+		"SerialCode": {
+			"properties": {
+				"serial_code": {
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"$ref": "#/$defs/SerialCodeHashed"
+						}
+					],
+					"title": "Serial Code"
+				},
+				"usage_limit": {
+					"default": 0,
+					"title": "Usage Limit",
+					"type": "integer"
+				},
+				"start_time": {
+					"default": 0,
+					"title": "Start Time",
+					"type": "integer"
+				},
+				"end_time": {
+					"default": 2147483647,
+					"title": "End Time",
+					"type": "integer"
+				},
+				"action": {
+					"anyOf": [
+						{
+							"$ref": "#/$defs/SerialCodeGiveItem"
+						},
+						{
+							"$ref": "#/$defs/SerialCodeRunFunction"
+						}
+					],
+					"title": "Action"
+				}
+			},
+			"required": [
+				"serial_code",
+				"action"
+			],
+			"title": "SerialCode",
+			"type": "object"
+		},
+		"SerialCodeGiveItem": {
+			"properties": {
+				"type": {
+					"const": "item",
+					"default": "item",
+					"title": "Type"
+				},
+				"message_en": {
+					"default": "Serial Code Reward",
+					"title": "Message En",
+					"type": "string"
+				},
+				"message_jp": {
+					"default": "Serial Code Reward",
+					"title": "Message Jp",
+					"type": "string"
+				},
+				"items": {
+					"items": {
+						"$ref": "#/$defs/Item"
+					},
+					"title": "Items",
+					"type": "array"
+				}
+			},
+			"required": [
+				"items"
+			],
+			"title": "SerialCodeGiveItem",
+			"type": "object"
+		},
+		"SerialCodeHashed": {
+			"properties": {
+				"salt": {
+					"format": "base64url",
+					"title": "Salt",
+					"type": "string"
+				},
+				"hash": {
+					"title": "Hash",
+					"type": "string"
+				}
+			},
+			"required": [
+				"salt",
+				"hash"
+			],
+			"title": "SerialCodeHashed",
+			"type": "object"
+		},
+		"SerialCodeRunFunction": {
+			"properties": {
+				"type": {
+					"const": "run",
+					"default": "run",
+					"title": "Type"
+				},
+				"function": {
+					"title": "Function",
+					"type": "string"
+				}
+			},
+			"required": [
+				"function"
+			],
+			"title": "SerialCodeRunFunction",
+			"type": "object"
+		}
+	},
+	"properties": {
+		"badwords": {
+			"items": {
+				"type": "string"
+			},
+			"title": "Badwords",
+			"type": "array"
+		},
+		"live_unit_drop_chance": {
+			"$ref": "#/$defs/LiveUnitDropChance"
+		},
+		"common_live_unit_drops": {
+			"items": {
+				"$ref": "#/$defs/LiveUnitDrop"
+			},
+			"title": "Common Live Unit Drops",
+			"type": "array"
+		},
+		"live_specific_live_unit_drops": {
+			"items": {
+				"$ref": "#/$defs/LiveSpecificLiveUnitDrop"
+			},
+			"title": "Live Specific Live Unit Drops",
+			"type": "array"
+		},
+		"live_effort_drops": {
+			"items": {
+				"$ref": "#/$defs/LiveEffortRewardDrops"
+			},
+			"title": "Live Effort Drops",
+			"type": "array"
+		},
+		"secretbox_data": {
+			"items": {
+				"$ref": "#/$defs/SecretboxData"
+			},
+			"title": "Secretbox Data",
+			"type": "array"
+		},
+		"serial_codes": {
+			"items": {
+				"$ref": "#/$defs/SerialCode"
+			},
+			"title": "Serial Codes",
+			"type": "array"
+		}
+	},
+	"required": [
+		"badwords",
+		"live_unit_drop_chance",
+		"common_live_unit_drops",
+		"live_specific_live_unit_drops",
+		"live_effort_drops"
+	],
+	"title": "SerializedServerData",
+	"type": "object",
+	"$schema": "https://json-schema.org/draft/2020-12/schema"
+}

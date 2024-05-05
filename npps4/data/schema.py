@@ -1,8 +1,13 @@
+import hashlib
+
 import pydantic
+import pydantic.json_schema
 
 from .. import const
 from .. import util
-from ..system import item
+from ..system import item_model
+
+from typing import Literal
 
 
 class LiveUnitDrop(pydantic.BaseModel):
@@ -20,7 +25,7 @@ class LiveUnitDropChance(pydantic.BaseModel):
     live_specific: int
 
 
-class ItemWithWeight(item.item_model.Item):
+class ItemWithWeight(item_model.Item):
     weight: int
 
 
@@ -76,10 +81,48 @@ class SecretboxData(pydantic.BaseModel):
         return util.java_hash_code(self.id_string)
 
 
+class SerialCodeHashed(pydantic.BaseModel):
+    salt: pydantic.Base64UrlBytes
+    hash: str
+
+
+class SerialCodeGiveItem(pydantic.BaseModel):
+    type: Literal["item"] = "item"
+    message_en: str = "Serial Code Reward"
+    message_jp: str = "Serial Code Reward"
+    items: list[pydantic.SerializeAsAny[item_model.Item]]
+
+
+class SerialCodeRunFunction(pydantic.BaseModel):
+    type: Literal["run"] = "run"
+    function: str  # Must be registered in npps4.serialcode:functions
+
+
+class SerialCode(pydantic.BaseModel):
+    serial_code: str | SerialCodeHashed
+    usage_limit: int = 0  # Limit per user, 0 = no limit
+    start_time: int = 0  # Code valid start time
+    end_time: int = 2147483647  # Code valid end time
+    action: SerialCodeGiveItem | SerialCodeRunFunction
+
+    def check_serial_code(self, input_code: str):
+        match self.serial_code:
+            case str():
+                return self.serial_code == input_code
+            case SerialCodeHashed():
+                input_bytes = input_code.encode("utf-8")
+                digest = hashlib.sha256(self.serial_code.salt + input_bytes, usedforsecurity=False)
+                return digest.hexdigest().lower() == self.serial_code.hash.lower()
+            case _:
+                raise ValueError("invalid serial code type")
+
+
 class SerializedServerData(pydantic.BaseModel):
+    json_schema_link: pydantic.json_schema.SkipJsonSchema[str | None] = pydantic.Field(default=None, alias="$schema")
     badwords: list[str]  # Note: Badwords are Base64-encoded in the JSON file!
     live_unit_drop_chance: LiveUnitDropChance
     common_live_unit_drops: list[LiveUnitDrop]
     live_specific_live_unit_drops: list[LiveSpecificLiveUnitDrop]
     live_effort_drops: list[LiveEffortRewardDrops]
-    secretbox_data: list[SecretboxData] = pydantic.Field(default_factory=list)
+    secretbox_data: list[SecretboxData]
+    serial_codes: list[SerialCode]

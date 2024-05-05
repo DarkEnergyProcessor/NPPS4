@@ -18,6 +18,7 @@ class ServerData:
     live_specific_live_unit_drops: dict[int, list[schema.LiveUnitDrop]]
     live_effort_drops: dict[int, list[schema.ItemWithWeight]]
     secretbox_data: dict[int, schema.SecretboxData]
+    serial_codes: list[schema.SerialCode]
 
 
 SERVER_DATA_PATH = config.get_server_data_path()
@@ -45,6 +46,7 @@ def get():
                         (d.live_effort_point_box_spec_id, d.drops) for d in serialized_data.live_effort_drops
                     ),
                     secretbox_data={sb.secretbox_id: sb for sb in serialized_data.secretbox_data},
+                    serial_codes=serialized_data.serial_codes,
                 )
                 last_server_data_timestamp = stat.st_mtime_ns
         except json.JSONDecodeError as e:
@@ -57,6 +59,7 @@ def get():
 
 
 def update():
+    global last_server_data_timestamp
     server_data = get()  # ensure not None
     serialized_data = schema.SerializedServerData(
         badwords=[str(base64.urlsafe_b64encode(s.encode("utf-8")), "utf-8") for s in server_data.badwords],
@@ -71,6 +74,7 @@ def update():
             for live_effort_point_box_spec_id, drops in server_data.live_effort_drops.items()
         ],
         secretbox_data=list(server_data.secretbox_data.values()),
+        serial_codes=server_data.serial_codes,
     )
     json_dict = serialized_data.model_dump(mode="json", exclude_defaults=True)
     json_encoded = json.dumps(json_dict, ensure_ascii=False, indent="\t")
