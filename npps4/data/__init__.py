@@ -4,14 +4,13 @@ import json
 import os
 import time
 
-import pydantic
-
 from . import schema
 from ..config import config
 
 
 @dataclasses.dataclass
 class ServerData:
+    json_schema_link: str | None
     badwords: list[str]
     live_unit_drop_chance: schema.LiveUnitDropChance
     common_live_unit_drops: list[schema.LiveUnitDrop]
@@ -36,6 +35,7 @@ def get():
                 serialized_data = schema.SerializedServerData.model_validate(json.load(f))
 
                 server_data = ServerData(
+                    json_schema_link=serialized_data.json_schema_link,
                     badwords=[str(base64.urlsafe_b64decode(s), "utf-8") for s in serialized_data.badwords],
                     live_unit_drop_chance=serialized_data.live_unit_drop_chance,
                     common_live_unit_drops=serialized_data.common_live_unit_drops,
@@ -76,7 +76,9 @@ def update():
         secretbox_data=list(server_data.secretbox_data.values()),
         serial_codes=server_data.serial_codes,
     )
-    json_dict = serialized_data.model_dump(mode="json", exclude_defaults=True)
+    serialized_data.json_schema_link = server_data.json_schema_link
+
+    json_dict = serialized_data.model_dump(mode="json", exclude_defaults=True, by_alias=True)
     json_encoded = json.dumps(json_dict, ensure_ascii=False, indent="\t")
 
     t = time.time_ns()
