@@ -21,11 +21,13 @@ if CURRENT_BACKEND is None:
 
 def get_server_version():
     global CURRENT_BACKEND
+    assert CURRENT_BACKEND is not None
     return CURRENT_BACKEND.get_server_version()
 
 
 def get_db_path(name: str):
     global CURRENT_BACKEND
+    assert CURRENT_BACKEND is not None
     return CURRENT_BACKEND.get_db_path(name)
 
 
@@ -33,6 +35,7 @@ async def get_update_files(
     request: fastapi.Request, platform: idoltype.PlatformType, from_client_version: tuple[int, int]
 ):
     global CURRENT_BACKEND
+    assert CURRENT_BACKEND is not None
     return await CURRENT_BACKEND.get_update_files(request, platform, from_client_version)
 
 
@@ -40,6 +43,7 @@ async def get_batch_files(
     request: fastapi.Request, platform: idoltype.PlatformType, package_type: int, exclude: list[int]
 ):
     global CURRENT_BACKEND
+    assert CURRENT_BACKEND is not None
     return await CURRENT_BACKEND.get_batch_files(request, platform, package_type, exclude)
 
 
@@ -47,11 +51,13 @@ async def get_single_package(
     request: fastapi.Request, platform: idoltype.PlatformType, package_type: int, package_id: int
 ):
     global CURRENT_BACKEND
+    assert CURRENT_BACKEND is not None
     return await CURRENT_BACKEND.get_single_package(request, platform, package_type, package_id)
 
 
 async def get_raw_files(request: fastapi.Request, platform: idoltype.PlatformType, files: list[str]):
     global CURRENT_BACKEND
+    assert CURRENT_BACKEND is not None
     return await CURRENT_BACKEND.get_raw_files(request, platform, files)
 
 
