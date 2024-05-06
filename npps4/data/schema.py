@@ -107,6 +107,25 @@ SERIAL_CODE_ACTION_ADAPTER: pydantic.TypeAdapter[SerialCodeGiveItem | SerialCode
 )
 
 
+def derive_serial_code_action_key(input_code: str, salt: bytes):
+    return Cryptodome.Protocol.KDF.PBKDF2(
+        cast(str, input_code.encode("utf-8")),
+        salt,
+        16,
+        4,
+        hmac_hash_module=Cryptodome.Hash.SHA256,
+    )
+
+
+def initialize_aes_for_action_field(key: bytes, salt: bytes):
+    return Cryptodome.Cipher.AES.new(
+        key,
+        Cryptodome.Cipher.AES.MODE_CTR,
+        nonce=util.xorbytes(salt[:8], salt[8:]),
+        initial_value=0,
+    )
+
+
 class SerialCode(pydantic.BaseModel):
     serial_code: str | SerialCodeHashed
     usage_limit: int = 0  # Limit per user, 0 = no limit
@@ -131,16 +150,8 @@ class SerialCode(pydantic.BaseModel):
                 raise ValueError("cannot have secure action without secure serial code")
 
             # Need to decrypt
-            key = Cryptodome.Protocol.KDF.PBKDF2(
-                cast(str, input_code.encode("utf-8")),
-                self.serial_code.salt,
-                16,
-                4,
-                hmac_hash_module=Cryptodome.Hash.SHA256,
-            )
-            aes = Cryptodome.Cipher.AES.new(
-                key, Cryptodome.Cipher.AES.MODE_CTR, nonce=self.serial_code.salt, initial_value=0
-            )
+            key = derive_serial_code_action_key(input_code, self.serial_code.salt)
+            aes = initialize_aes_for_action_field(key, self.serial_code.salt)
             base64_data = base64.urlsafe_b64decode("".join(self.action))
             secure_action = aes.decrypt(base64_data)
             return SERIAL_CODE_ACTION_ADAPTER.validate_json(secure_action)
