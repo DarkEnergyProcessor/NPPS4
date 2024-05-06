@@ -35677,5 +35677,46 @@
 			]
 		}
 	],
-	"serial_codes": []
+	"serial_codes": [
+		{
+			"serial_code": "KMZWA8AWAA",
+			"usage_limit": 1,
+			"action": {
+				"items": [
+					{
+						"add_type": 1001,
+						"item_id": 3546,
+						"is_signed": true
+					},
+					{
+						"add_type": 1001,
+						"item_id": 3547,
+						"is_signed": true
+					},
+					{
+						"add_type": 1001,
+						"item_id": 3548,
+						"is_signed": true
+					},
+					{
+						"add_type": 1001,
+						"item_id": 3549,
+						"is_signed": true
+					}
+				]
+			}
+		},
+		{
+			"serial_code": {
+				"salt": "snmSVeQtKlveL6hN5AeYfA==",
+				"hash": "439ce0e3abe0b98db77312e06acfc1b7d786de611cfadd9b4162c38866791b2d"
+			},
+			"action": [
+				"iuq2Sbj3tAQEXrINolyos5AKWtwwa7ZCizh3hwfMlonslRzx2_oDmo4ePqtwZ16NDHvzS7rB3EdFx5yP",
+				"baQ4k7EIxJZggnv20kvZQCccmUiJu75ODufBpEfEu52pzm4fhh4-axJTctdLtJWMFX2smba3D16P54s1",
+				"dojnTyh5UptPPqm7nI2IUXEQlwEemX1QX-m2n9F2ZGCAgdTmCKGcMlboHI4CbWMdFsqxC8RHEm4qmnn7",
+				"rP3GZDrQGaIM8qydbJ2jvPPtC8MPKQVo"
+			]
+		}
+	]
 }
