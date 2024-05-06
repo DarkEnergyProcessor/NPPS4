@@ -1,5 +1,9 @@
+import base64
 import hashlib
 
+import Cryptodome.Cipher.AES
+import Cryptodome.Hash.SHA256
+import Cryptodome.Protocol.KDF
 import pydantic
 import pydantic.json_schema
 
@@ -7,7 +11,7 @@ from .. import const
 from .. import util
 from ..system import item_model
 
-from typing import Literal
+from typing import Literal, cast
 
 
 class LiveUnitDrop(pydantic.BaseModel):
@@ -98,12 +102,17 @@ class SerialCodeRunFunction(pydantic.BaseModel):
     function: str  # Must be registered in npps4.serialcode:functions
 
 
+SERIAL_CODE_ACTION_ADAPTER: pydantic.TypeAdapter[SerialCodeGiveItem | SerialCodeRunFunction] = pydantic.TypeAdapter(
+    SerialCodeGiveItem | SerialCodeRunFunction
+)
+
+
 class SerialCode(pydantic.BaseModel):
     serial_code: str | SerialCodeHashed
     usage_limit: int = 0  # Limit per user, 0 = no limit
     start_time: int = 0  # Code valid start time
     end_time: int = 2147483647  # Code valid end time
-    action: SerialCodeGiveItem | SerialCodeRunFunction
+    action: list[str] | SerialCodeGiveItem | SerialCodeRunFunction  # list of str means secure action
 
     def check_serial_code(self, input_code: str):
         match self.serial_code:
@@ -115,6 +124,28 @@ class SerialCode(pydantic.BaseModel):
                 return digest.hexdigest().lower() == self.serial_code.hash.lower()
             case _:
                 raise ValueError("invalid serial code type")
+
+    def get_action(self, input_code: str):
+        if isinstance(self.action, list):
+            if not isinstance(self.serial_code, SerialCodeHashed):
+                raise ValueError("cannot have secure action without secure serial code")
+
+            # Need to decrypt
+            key = Cryptodome.Protocol.KDF.PBKDF2(
+                cast(str, input_code.encode("utf-8")),
+                self.serial_code.salt,
+                16,
+                4,
+                hmac_hash_module=Cryptodome.Hash.SHA256,
+            )
+            aes = Cryptodome.Cipher.AES.new(
+                key, Cryptodome.Cipher.AES.MODE_CTR, nonce=self.serial_code.salt, initial_value=0
+            )
+            base64_data = base64.urlsafe_b64decode("".join(self.action))
+            secure_action = aes.decrypt(base64_data)
+            return SERIAL_CODE_ACTION_ADAPTER.validate_json(secure_action)
+
+        return self.action
 
 
 class SerializedServerData(pydantic.BaseModel):
