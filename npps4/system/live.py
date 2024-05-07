@@ -319,3 +319,7 @@ async def register_live_in_progress(
         live_in_progress.lp_factor = lp_factor
         live_in_progress.unit_deck_id = unit_deck_id
     await context.db.main.flush()
+
+
+async def get_live_track_info(context: idol.BasicSchoolIdolContext, /, live_track_id: int):
+    return await db.get_decrypted_row(context.db.live, live.LiveTrack, live_track_id)

@@ -14,7 +14,7 @@ from .. import util
 from ..config import config
 from ..db import main
 
-from typing import Annotated, cast, override
+from typing import Annotated, cast, overload, override
 
 
 class BasicSchoolIdolContext:
@@ -36,6 +36,18 @@ class BasicSchoolIdolContext:
 
     def is_lang_jp(self):
         return self.lang == idoltype.Language.jp
+
+    @overload
+    def get_text(self, text_jp: str, text_en: str | None) -> str: ...
+
+    @overload
+    def get_text(self, text_jp: str | None, text_en: str | None) -> str | None: ...
+
+    def get_text(self, text_jp: str | None, text_en: str | None):
+        if self.is_lang_jp():
+            return text_jp
+        else:
+            return text_en if text_en is not None else text_jp
 
     async def finalize(self):
         pass

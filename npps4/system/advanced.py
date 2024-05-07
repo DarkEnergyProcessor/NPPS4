@@ -18,12 +18,14 @@ from . import scenario
 from . import unit
 from . import unit_model
 from .. import const
+from .. import db
 from .. import idol
 from .. import leader_skill
 from ..config import config
+from ..db import game_mater
 from ..db import main
 
-from typing import Any, Awaitable, Callable, cast
+from typing import Any, Awaitable, Callable, cast, overload
 
 
 @dataclasses.dataclass
@@ -498,3 +500,85 @@ class TeamStatCalculator:
             self.cached_unit_tags[(unit_type_id, member_tag_id)] = result
 
         return result
+
+
+@overload
+async def get_item_name(context: idol.BasicSchoolIdolContext, item_data: item_model.Item, /) -> str: ...
+@overload
+async def get_item_name(context: idol.BasicSchoolIdolContext, add_type: const.ADD_TYPE, item_id: int, /) -> str: ...
+
+
+async def get_item_name(
+    context: idol.BasicSchoolIdolContext, add_type: const.ADD_TYPE | item_model.Item, item_id: int | None = None, /
+) -> str:
+    if isinstance(add_type, item_model.Item):
+        return await get_item_name(context, add_type.add_type, add_type.item_id)
+
+    if item_id is None:
+        raise TypeError("expected item id")
+
+    match add_type:
+        case const.ADD_TYPE.NONE:
+            return "None"
+        case const.ADD_TYPE.ITEM:
+            # Query kg_item_m
+            item_info = await db.get_decrypted_row(context.db.item, item.item.KGItem, item_id)
+            if item_info is not None:
+                return context.get_text(item_info.name, item_info.name_en) or f"Unknown Item #{item_id}"
+        case const.ADD_TYPE.UNIT:
+            # Query unit info
+            unit_info = await unit.get_unit_info(context, item_id)
+            if unit_info is not None:
+                eponym = context.get_text(unit_info.eponym, unit_info.eponym_en)
+                unit_name = context.get_text(unit_info.name, unit_info.name_en)
+                if eponym is None:
+                    return f"#{unit_info.unit_number} - {unit_name}"
+                else:
+                    return f'#{unit_info.unit_number} - "{eponym}" {unit_name}'
+        case const.ADD_TYPE.EXCHANGE_POINT:
+            # Query stickers
+            exchange_info = await db.get_decrypted_row(context.db.exchange, exchange.exchange.ExchangePoint, item_id)
+            if exchange_info is not None:
+                return context.get_text(exchange_info.name, exchange_info.name_en)
+        case const.ADD_TYPE.LIVE:
+            # Query live
+            live_track_info = await live.get_live_track_info(context, item_id)
+            if live_track_info is not None:
+                live_name = context.get_text(live_track_info.name, live_track_info.name_en)
+                return f"♪ {live_name} ♪"
+        case const.ADD_TYPE.AWARD:
+            # Query award_m
+            award_info = await db.get_decrypted_row(context.db.item, item.item.Award, item_id)
+            if award_info is not None:
+                return context.get_text(award_info.name, award_info.name_en)
+        case const.ADD_TYPE.BACKGROUND:
+            # Query background_m
+            bg_info = await db.get_decrypted_row(context.db.item, item.item.Background, item_id)
+            if bg_info is not None:
+                return context.get_text(bg_info.name, bg_info.name_en)
+        case const.ADD_TYPE.SCENARIO:
+            # Query scenario_m and scenario_chapter_m
+            scenario_info = await db.get_decrypted_row(context.db.scenario, scenario.scenario.Scenario, item_id)
+            if scenario_info is not None:
+                scenario_chapter_info = await db.get_decrypted_row(
+                    context.db.scenario, scenario.scenario.Chapter, scenario_info.scenario_chapter_id
+                )
+                if scenario_chapter_info is not None:
+                    scenario_chapter_name = context.get_text(scenario_chapter_info.name, scenario_chapter_info.name_en)
+                    scenario_name = context.get_text(scenario_info.title, scenario_info.title_en)
+                    return f"{scenario_chapter_name} - {scenario_name}"
+        case const.ADD_TYPE.SCHOOL_IDOL_SKILL:
+            # Query unit_removable_skill_m
+            unit_removable_skill_info = await unit.get_removable_skill_game_info(context, item_id)
+            if unit_removable_skill_info is not None:
+                return (
+                    context.get_text(unit_removable_skill_info.name, unit_removable_skill_info.name_en)
+                    or f"Unknown SIS #{item_id}"
+                )
+        case _:
+            # Query add_type_m
+            add_type_info = await context.db.game_mater.get(game_mater.AddType, int(add_type))
+            if add_type_info is not None:
+                return context.get_text(add_type_info.name, add_type_info.name_en)
+
+    return f"Unknown (add_type {int(add_type)}, item_id {item_id})"
