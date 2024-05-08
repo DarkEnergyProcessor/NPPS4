@@ -35680,7 +35680,11 @@
 	"serial_codes": [
 		{
 			"serial_code": "KMZWA8AWAA",
-			"usage_limit": 1,
+			"usage_limit": {
+				"id": "KMZWA8AWAA",
+				"global": false,
+				"amount": 1
+			},
 			"action": {
 				"items": [
 					{

@@ -537,9 +537,15 @@
 					"title": "Serial Code"
 				},
 				"usage_limit": {
-					"default": 0,
-					"title": "Usage Limit",
-					"type": "integer"
+					"anyOf": [
+						{
+							"$ref": "#/$defs/SerialCodeUsageLimit"
+						},
+						{
+							"type": "null"
+						}
+					],
+					"default": null
 				},
 				"start_time": {
 					"default": 0,
@@ -650,6 +656,29 @@
 				"function"
 			],
 			"title": "SerialCodeRunFunction",
+			"type": "object"
+		},
+		"SerialCodeUsageLimit": {
+			"properties": {
+				"id": {
+					"title": "Id",
+					"type": "string"
+				},
+				"global": {
+					"title": "Global",
+					"type": "boolean"
+				},
+				"amount": {
+					"title": "Amount",
+					"type": "integer"
+				}
+			},
+			"required": [
+				"id",
+				"global",
+				"amount"
+			],
+			"title": "SerialCodeUsageLimit",
 			"type": "object"
 		}
 	},

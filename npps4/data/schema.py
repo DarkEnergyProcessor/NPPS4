@@ -90,6 +90,12 @@ class SerialCodeHashed(pydantic.BaseModel):
     hash: str
 
 
+class SerialCodeUsageLimit(pydantic.BaseModel):
+    id: str
+    global_: bool = pydantic.Field(alias="global")
+    amount: int
+
+
 class SerialCodeGiveItem(pydantic.BaseModel):
     type: Literal["item"] = "item"
     message_en: str = "Serial Code Reward"
@@ -128,7 +134,7 @@ def initialize_aes_for_action_field(key: bytes, salt: bytes):
 
 class SerialCode(pydantic.BaseModel):
     serial_code: str | SerialCodeHashed
-    usage_limit: int = 0  # Limit per user, 0 = no limit
+    usage_limit: SerialCodeUsageLimit | None = None  # Limit per user
     start_time: int = 0  # Code valid start time
     end_time: int = 2147483647  # Code valid end time
     action: list[str] | SerialCodeGiveItem | SerialCodeRunFunction  # list of str means secure action
