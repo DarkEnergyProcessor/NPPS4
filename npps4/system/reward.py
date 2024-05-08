@@ -53,6 +53,24 @@ async def add_item(
     return incentive
 
 
+def apply_filter[T: sqlalchemy.Select](q: T, filter_config: FilterConfig, /) -> T:
+    match filter_config.category:
+        case RewardCategory.MEMBERS:
+            q = q.where(main.Incentive.add_type == const.ADD_TYPE.UNIT)
+            if filter_config.filter[0] > 0:
+                q = q.where(main.Incentive.unit_rarity == filter_config.filter[0])
+            if filter_config.filter[1] > 0:
+                q = q.where(main.Incentive.unit_attribute == filter_config.filter[1])
+            # TODO: Not in album filter
+        case RewardCategory.ITEMS:
+            if len(filter_config.filter) == 1 and filter_config.filter[0] == 0:
+                q = q.where(main.Incentive.add_type != const.ADD_TYPE.UNIT)
+            else:
+                q = q.where(main.Incentive.add_type.in_(filter_config.filter))
+
+    return q
+
+
 async def get_presentbox(
     context: idol.BasicSchoolIdolContext,
     user: main.User,
@@ -68,12 +86,7 @@ async def get_presentbox(
     q = sqlalchemy.select(main.Incentive).where(
         main.Incentive.user_id == user.id, (main.Incentive.expire_date == 0) | (main.Incentive.expire_date >= t)
     )
-    match filter_config.category:
-        case RewardCategory.MEMBERS:
-            # TODO: More sophisticated filter.
-            q = q.where(main.Incentive.add_type == const.ADD_TYPE.UNIT)
-        case RewardCategory.ITEMS:
-            q = q.where(main.Incentive.add_type.in_(filter_config.filter))
+    q = apply_filter(q, filter_config)
 
     if order_expiry_date:
         if order_ascending:
@@ -94,13 +107,18 @@ async def get_presentbox(
     return list(result.scalars())
 
 
-async def count_presentbox(context: idol.BasicSchoolIdolContext, user: main.User):
+async def count_presentbox(
+    context: idol.BasicSchoolIdolContext, /, user: main.User, filter_config: FilterConfig | None = None
+):
     t = util.time()
     q = (
         sqlalchemy.select(sqlalchemy.func.count())
         .select_from(main.Incentive)
         .where(main.Incentive.user_id == user.id, (main.Incentive.expire_date == 0) | (main.Incentive.expire_date >= t))
     )
+    if filter_config:
+        q = apply_filter(q, filter_config)
+
     qc = await context.db.main.execute(q)
     return qc.scalar() or 0
 

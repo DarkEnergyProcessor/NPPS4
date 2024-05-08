@@ -109,9 +109,11 @@ async def reward_rewardlist(context: idol.SchoolIdolUserParams, request: RewardL
         RewardOrder.ORDER_ASCENDING in request.order,
         RewardOrder.BY_EXPIRE_DATE in request.order,
     )
+    incentive_total_count = await reward.count_presentbox(context, current_user, request)
+    print(request)
 
     return RewardListResponse(
-        item_count=len(incentive),
+        item_count=incentive_total_count,
         order=request.order,
         items=[
             IncentiveItem(
@@ -152,6 +154,8 @@ async def reward_open(context: idol.SchoolIdolUserParams, request: RewardOpenReq
             achievement_list = await album.trigger_achievement(
                 context, current_user, obtained=True, idolized=True, max_love=True, max_level=True
             ) + await achievement.check_type_53_recursive(context, current_user)
+    else:
+        raise idol.error.by_code(idol.error.ERROR_CODE_LIMIT_OVER)
 
     # Give achievement rewards
     accomplished_rewards = [
