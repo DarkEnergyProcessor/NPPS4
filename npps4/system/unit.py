@@ -903,17 +903,26 @@ async def quick_create_by_unit_add(
         return QuickAddResult(
             unit_id,
             unit_model.UnitSupportItem(
-                item_id=unit_id, is_support_member=True, new_unit_flag=new_unit_flag, unit_rarity_id=unit_info.rarity
+                item_id=unit_id,
+                is_support_member=True,
+                new_unit_flag=new_unit_flag,
+                unit_rarity_id=unit_info.rarity,
+                attribute=unit_info.attribute_id,
             ),
         )
     else:
         unit_data = await create_unit(context, user, unit_id, True, level=level)
         assert unit_data is not None
+        unit_info = await get_unit_info(context, unit_id)
+        assert unit_info is not None
         unit_full_info = await get_unit_data_full_info(context, unit_data)
         return QuickAddResult(
             unit_id=unit_id,
             as_item_reward=unit_model.UnitItem(
-                item_id=unit_id, new_unit_flag=new_unit_flag, **util.shallow_dump(unit_full_info[0])
+                item_id=unit_id,
+                new_unit_flag=new_unit_flag,
+                attribute=unit_info.attribute_id,
+                **util.shallow_dump(unit_full_info[0]),
             ),
             unit_data=unit_data,
             full_info=unit_full_info[0],

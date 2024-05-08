@@ -48,6 +48,11 @@ async def add_item(
         extra_data=json.dumps(item_data.dump_extra_data()),
         expire_date=expire,
     )
+
+    if isinstance(item_data, unit_model.UnitSupportItem):
+        incentive.unit_attribute = item_data.attribute
+        incentive.unit_rarity = item_data.unit_rarity_id
+
     context.db.main.add(incentive)
     await context.db.main.flush()
     return incentive

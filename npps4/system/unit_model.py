@@ -13,6 +13,7 @@ class UnitSupportItem(item_model.Item):
     is_hit: Any | None = None
     item_id: int
     unit_rarity_id: int
+    attribute: int
 
     @pydantic.computed_field
     @property
