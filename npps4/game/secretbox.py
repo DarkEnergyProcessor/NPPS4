@@ -126,7 +126,22 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
 
     for unit_id in unit_roll:
         reward_data = await unit.quick_create_by_unit_add(context, current_user, unit_id)
-        if current_unit_count >= current_user.unit_max:
+        if not isinstance(reward_data.as_item_reward, unit_model.UnitItem):
+            await unit.add_supporter_unit(context, current_user, reward_data.unit_id)
+        elif current_unit_count < current_user.unit_max:
+            # Add directly
+            assert reward_data.unit_data is not None
+            assert reward_data.full_info is not None
+
+            if util.SYSRAND.randint(0, 1) == 1 and await unit.has_signed_variant(context, unit_id):
+                reward_data.unit_data.is_signed = True
+                reward_data.as_item_reward.is_signed = True
+
+            await unit.add_unit_by_object(context, current_user, reward_data.unit_data)
+            # Update unit_owning_user_id
+            reward_data.update_unit_owning_user_id()
+            current_unit_count = current_unit_count + 1
+        else:
             # Move to present box
             reward_data.as_item_reward.reward_box_flag = True
             await reward.add_item(
@@ -136,16 +151,6 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
                 "FIXME scouting JP Text",
                 "Scouting",
             )
-        else:
-            # Add directly
-            if reward_data.unit_data:
-                assert reward_data.full_info is not None
-                await unit.add_unit_by_object(context, current_user, reward_data.unit_data)
-                # Update unit_owning_user_id
-                reward_data.update_unit_owning_user_id()
-                current_unit_count = current_unit_count + 1
-            else:
-                await unit.add_supporter_unit(context, current_user, reward_data.unit_id)
         unit_data_list.append(reward_data.as_item_reward)
         lowest_rarity = min(lowest_rarity, LOWEST_RARITY_SORT_ORDER[reward_data.as_item_reward.unit_rarity_id - 1])
 
