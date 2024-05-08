@@ -247,6 +247,8 @@ class Incentive(common.Base, kw_only=True):
     expire_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0, index=True)
     extra_data: sqlalchemy.orm.Mapped[str | None] = sqlalchemy.orm.mapped_column(default=None)  # JSON-data
     claimed: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False)
+    unit_rarity: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column(default=None, index=True)
+    unit_attribute: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column(default=None, index=True)
 
     def get_message(self, language: idoltype.Language = idoltype.Language.en):
         if language == idoltype.Language.jp:
@@ -373,6 +375,25 @@ class ExchangePointItem(common.Base, kw_only=True):
     amount: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
 
     __table_args__ = (sqlalchemy.UniqueConstraint(user_id, exchange_point_id),)
+
+
+class LocalSerialCodeUsage(common.Base, kw_only=True):
+    """Per-user serial code issue"""
+
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
+    user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
+    )
+    serial_code_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, index=True)
+    count: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger)
+
+
+class GlobalSerialCodeUsage(common.Base, kw_only=True):
+    """Server-wide serial code issue"""
+
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
+    serial_code_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, index=True)
+    count: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger)
 
 
 engine = sqlalchemy.ext.asyncio.create_async_engine(config.get_database_url())
