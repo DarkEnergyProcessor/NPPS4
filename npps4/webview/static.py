@@ -8,7 +8,7 @@ from ..app import app
 from typing import Annotated
 
 
-@app.webview.get(path="/static/index")
+@app.webview.get("/static/index")
 async def static_index(id: Annotated[int, fastapi.Query()]):
     path = f"templates/static/{id}.html"
     if os.path.isfile(path):

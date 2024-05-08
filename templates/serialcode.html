@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8" />
+	<meta http-equiv="Content-Type" content="text/html" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+		}
+	</style>
+	<script>
+		function main() {
+			const tokenInput = document.getElementById("token")
+			const serialCodeInput = document.getElementById("serial_code")
+			const submitButtom = document.getElementById("submit")
+			const resultButton = document.getElementById("result")
+			const token = tokenInput.value
+			let inProgress = false
+
+			submitButtom.addEventListener("click", async () => {
+				const key = serialCodeInput.value
+				if (inProgress || key.length == 0) {
+					return
+				}
+
+				inProgress = true
+
+				try {
+					const ts = Math.floor(new Date() / 1000)
+					const response = await fetch("", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+							"Authorize": `consumerKey=lovelive_test&timestamp=${ts}&version=1.1&nonce=WV0&token=${token}`
+						},
+						body: JSON.stringify({
+							key: key,
+						})
+					})
+					if (response.status != 200) {
+						throw await response.text()
+					}
+					const result = await response.json()
+					resultButton.textContent = result.msg
+					resultButton.style.color = result.ok ? "green" : "red"
+
+					if (result.ok) {
+						serialCodeInput.value = ""
+					}
+				} catch (e) {
+					console.error(e)
+					resultButton.textContent = e.toString()
+					resultButton.style.color = "red"
+				}
+
+				inProgress = false
+			})
+		}
+
+		if (document.readyState !== "loading") {
+			main()
+		} else {
+			document.addEventListener("DOMContentLoaded", main)
+		}
+	</script>
+</head>
+
+<body style="padding:1rem;overflow:hidden;height:calc(100vh - 2rem)">
+	<div style="width:100%;display:grid;grid-template-columns:1fr;grid-template-rows:repeat(3,1fr);gap:0.5rem;text-align:center">
+		<h3>Input Serial Code</h3>
+		<input id="token" type="hidden" value="{{token}}">
+		<input id="serial_code" type="text" style="width:100%;text-align:center">
+		<button id="submit">Enter</button>
+		<p id="result"></p>
+	</div>
+</body>
+
+</html>
