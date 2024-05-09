@@ -1,11 +1,12 @@
 import enum
+import json
 
 import pydantic
 
 from .. import const
 from .. import idol
 from .. import util
-
+from ..db import main
 from ..system import achievement
 from ..system import album
 from ..system import ad_model
@@ -34,6 +35,24 @@ class IncentiveItem(pydantic.BaseModel):
     insert_date: str
     remaining_time: str
     item_option: str | None = None  # FIXME: What is this?
+
+    @staticmethod
+    def from_incentive(context: idol.BasicSchoolIdolContext, i: main.Incentive, /):
+        obj = IncentiveItem(
+            incentive_id=i.id,
+            incentive_item_id=i.item_id,
+            add_type=const.ADD_TYPE(i.add_type),
+            amount=i.amount,
+            item_category_id=0,
+            incentive_message=i.get_message(context.lang),
+            insert_date=util.timestamp_to_datetime(i.insert_date),
+            remaining_time="Forever" if i.expire_date == 0 else util.timestamp_to_datetime(i.expire_date),
+        )
+        # Add extra fields
+        if i.extra_data is not None:
+            for k, v in json.loads(i.extra_data).items():
+                setattr(obj, k, v)
+        return obj
 
 
 class RewardOrder(enum.IntFlag):
@@ -115,19 +134,7 @@ async def reward_rewardlist(context: idol.SchoolIdolUserParams, request: RewardL
     return RewardListResponse(
         item_count=incentive_total_count,
         order=request.order,
-        items=[
-            IncentiveItem(
-                incentive_id=i.id,
-                incentive_item_id=i.item_id,
-                add_type=const.ADD_TYPE(i.add_type),
-                amount=i.amount,
-                item_category_id=0,
-                incentive_message=i.get_message(context.lang),
-                insert_date=util.timestamp_to_datetime(i.insert_date),
-                remaining_time="Forever" if i.expire_date == 0 else util.timestamp_to_datetime(i.expire_date),
-            )
-            for i in incentive
-        ],
+        items=[IncentiveItem.from_incentive(context, i) for i in incentive],
         ad_info=ad_model.AdInfo(),
     )
 

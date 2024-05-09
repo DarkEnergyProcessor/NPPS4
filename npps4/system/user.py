@@ -15,6 +15,7 @@ from .. import idol
 from .. import util
 from ..db import main
 from ..db import game_mater
+from ..idol import session
 
 
 class UserInfoData(pydantic.BaseModel):
@@ -75,6 +76,13 @@ async def get_current(context: idol.SchoolIdolUserParams):
         raise idol.error.locked()
 
     return result
+
+
+async def get_from_token(context: idol.BasicSchoolIdolContext, token: str, /):
+    detoken = await session.decapsulate_token(context, token)
+    if detoken is not None:
+        return await context.db.main.get(main.User, detoken.user_id)
+    return None
 
 
 async def get_user_info(context: idol.BasicSchoolIdolContext, user: main.User):

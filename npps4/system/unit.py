@@ -86,7 +86,13 @@ async def get_all_units(context: idol.SchoolIdolParams, user: main.User, active:
 
 
 async def create_unit(
-    context: idol.BasicSchoolIdolContext, user: main.User, unit_id: int, active: bool, *, level: int = 1
+    context: idol.BasicSchoolIdolContext,
+    user: main.User | None,
+    unit_id: int,
+    active: bool,
+    *,
+    level: int = 1,
+    is_signed: bool = False,
 ):
     unit_info = await get_unit_info(context, unit_id)
     if unit_info is None:
@@ -101,11 +107,11 @@ async def create_unit(
     max_level = rarity.after_level_max if unit_info.rank_min == unit_info.rank_max else rarity.before_level_max
 
     unit_data = main.Unit(
-        user_id=user.id,
+        user_id=user.id if user is not None else 0,
         unit_id=unit_id,
         active=active,
         favorite_flag=False,
-        is_signed=False,
+        is_signed=is_signed,
         insert_date=util.time(),
         exp=0,
         skill_exp=0,

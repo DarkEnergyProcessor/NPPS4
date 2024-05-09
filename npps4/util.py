@@ -6,6 +6,7 @@ import itertools
 import logging
 import random
 import time as timelib
+import urllib.parse
 
 import Cryptodome.Cipher.PKCS1_v1_5
 import Cryptodome.Cipher.AES
@@ -144,8 +145,15 @@ def shallow_dump(model: pydantic.BaseModel, /):
     return {k: getattr(model, k) for k in keys}
 
 
-def java_hash_code(string: str):
+def java_hash_code(string: str, /, mask: int = 0xFFFFFFFF):
     h = 0
     for s in string:
-        h = (h * 31 + ord(s)) & 0xFFFFFFFF
+        h = (h * 31 + ord(s)) & mask
     return h
+
+
+def extract_token_from_authorize(authorize: str):
+    qs = urllib.parse.parse_qs(authorize)
+    if qs.get("token"):
+        return qs["token"][0]
+    return None

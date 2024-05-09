@@ -14,11 +14,11 @@
 	</style>
 	<script>
 		function main() {
-			const tokenInput = document.getElementById("token")
 			const serialCodeInput = document.getElementById("serial_code")
 			const submitButtom = document.getElementById("submit")
 			const resultButton = document.getElementById("result")
-			const token = tokenInput.value
+			const token = document.getElementById("token").value
+			const lang = document.getElementById("language").value
 			let inProgress = false
 
 			submitButtom.addEventListener("click", async () => {
@@ -28,14 +28,18 @@
 				}
 
 				inProgress = true
+				resultButton.textContent = "Entering..."
+				resultButton.style.color = "yellow"
 
 				try {
 					const ts = Math.floor(new Date() / 1000)
+
 					const response = await fetch("", {
 						method: "POST",
 						headers: {
 							"Content-Type": "application/json",
-							"Authorize": `consumerKey=lovelive_test&timestamp=${ts}&version=1.1&nonce=WV0&token=${token}`
+							"Authorize": `consumerKey=lovelive_test&timestamp=${ts}&version=1.1&nonce=WV0&token=${token}`,
+							"LANG": lang,
 						},
 						body: JSON.stringify({
 							key: key,
@@ -69,14 +73,13 @@
 	</script>
 </head>
 
-<body style="padding:1rem;overflow:hidden;height:calc(100vh - 2rem)">
-	<div style="width:100%;display:grid;grid-template-columns:1fr;grid-template-rows:repeat(3,1fr);gap:0.5rem;text-align:center">
-		<h3>Input Serial Code</h3>
-		<input id="token" type="hidden" value="{{token}}">
-		<input id="serial_code" type="text" style="width:100%;text-align:center">
-		<button id="submit">Enter</button>
-		<p id="result"></p>
-	</div>
+<body style="padding:1rem;text-align:center">
+	<h3>Input Serial Code</h3>
+	<input id="token" type="hidden" value="{{token}}">
+	<input id="language" type="hidden" value="{{lang}}">
+	<input id="serial_code" type="text" style="width:100%;text-align:center">
+	<button id="submit" style="width:100%;margin-top:0.25rem">Enter</button>
+	<p id="result" style="white-space:pre-line"></p>
 </body>
 
 </html>

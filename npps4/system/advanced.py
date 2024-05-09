@@ -1,3 +1,4 @@
+import copy
 import dataclasses
 
 import pydantic
@@ -15,12 +16,14 @@ from . import live_model
 from . import museum
 from . import reward
 from . import scenario
+from . import scenario_model
 from . import unit
 from . import unit_model
 from .. import const
 from .. import db
 from .. import idol
 from .. import leader_skill
+from .. import util
 from ..config import config
 from ..db import game_mater
 from ..db import main
@@ -582,3 +585,47 @@ async def get_item_name(
                 return context.get_text(add_type_info.name, add_type_info.name_en)
 
     return f"Unknown (add_type {int(add_type)}, item_id {item_id})"
+
+
+async def deserialize_item_data(context: idol.BasicSchoolIdolContext, /, item_data: item_model.Item):
+    match item_data.add_type:
+        case const.ADD_TYPE.UNIT:
+            if isinstance(item_data, unit_model.UnitSupportItem):
+                return copy.copy(item_data)
+
+            # Recreate unit
+            unit_info = await unit.get_unit_info(context, item_data.item_id)
+
+            if unit_info is None:
+                raise ValueError("invalid unit id")
+
+            if unit_info.disable_rank_up > 0:
+                # Support unit
+                return unit_model.UnitSupportItem(
+                    item_id=item_data.item_id,
+                    amount=item_data.amount,
+                    is_support_member=True,
+                    unit_rarity_id=unit_info.rarity,
+                    attribute=unit_info.attribute_id,
+                )
+
+            # Regular unit
+            unit_data = await unit.create_unit(
+                context, None, item_data.item_id, True, is_signed=bool(getattr(item_data, "is_signed", False))
+            )
+            if unit_data is None:
+                raise ValueError("cannot create unit")
+
+            unit_full_info = await unit.get_unit_data_full_info(context, unit_data)
+            return unit_model.UnitItem(
+                item_id=item_data.item_id,
+                new_unit_flag=False,
+                attribute=unit_info.attribute_id,
+                **util.shallow_dump(unit_full_info[0]),
+            )
+        case const.ADD_TYPE.SCENARIO:
+            return scenario_model.ScenarioItem(item_id=item_data.item_id, amount=item_data.amount)
+        case const.ADD_TYPE.LIVE:
+            return live_model.LiveItem(item_id=item_data.item_id, amount=item_data.amount)
+        case _:
+            return copy.copy(item_data)
