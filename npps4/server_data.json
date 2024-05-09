@@ -35721,6 +35721,31 @@
 				"dojnTyh5UptPPqm7nI2IUXEQlwEemX1QX-m2n9F2ZGCAgdTmCKGcMlboHI4CbWMdFsqxC8RHEm4qmnn7",
 				"rP3GZDrQGaIM8qydbJ2jvPPtC8MPKQVo"
 			]
+		},
+		{
+			"serial_code": "HESOYAM",
+			"action": {
+				"type": "item",
+				"message_jp": "健康、防具、お金 ($250,000)",
+				"message_en": "Health, Armour, and Money ($250,000)",
+				"items": [
+					{
+						"add_type": 3001,
+						"item_id": 4,
+						"amount": 50
+					},
+					{
+						"add_type": 3002,
+						"item_id": 2,
+						"amount": 1000
+					},
+					{
+						"add_type": 3000,
+						"item_id": 3,
+						"amount": 250000
+					}
+				]
+			}
 		}
 	]
 }
