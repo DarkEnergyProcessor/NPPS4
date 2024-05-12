@@ -659,7 +659,7 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
         combo_rank=combo_rank,
         total_love=love_count,
         is_high_score=live_clear_data.hi_score > old_live_clear_data.hi_score,
-        hi_score=old_live_clear_data.hi_score,
+        hi_score=live_clear_data.hi_score,
         base_reward_info=LiveRewardBaseInfo(
             player_exp=given_exp,
             player_exp_unit_max=common.BeforeAfter[int](before=old_user_info.unit_max, after=user_info.unit_max),
