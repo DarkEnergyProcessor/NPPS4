@@ -341,6 +341,22 @@ class LiveSkillIcon(common.GameDBBase, common.MaybeEncrypted):
     icon_order: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
 
 
+class SpecialLiveRotation(common.GameDBBase):
+    """```sql
+    CREATE TABLE `special_live_rotation_m` (
+        `rotation_group_id` INTEGER NOT NULL,
+        `live_difficulty_id` INTEGER NOT NULL,
+        `base_date` TEXT NOT NULL,
+        PRIMARY KEY (`rotation_group_id`,`base_date`)
+    )
+    ```"""
+
+    __tablename__ = "special_live_rotation_m"
+    rotation_group_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    live_difficulty_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(primary_key=True)
+    base_date: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column()
+
+
 engine = sqlalchemy.ext.asyncio.create_async_engine(
     f"sqlite+aiosqlite:///file:{download.get_db_path('live')}?mode=ro&uri=true",
     connect_args={"check_same_thread": False},

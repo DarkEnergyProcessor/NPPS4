@@ -5,11 +5,12 @@ from . import live_model
 from .. import const
 from .. import db
 from .. import idol
+from .. import util
 from ..config import config
 from ..db import main
 from ..db import live
 
-from typing import Iterable, Sequence
+from typing import Iterable, Literal, Sequence, overload
 
 
 async def unlock_normal_live(context: idol.BasicSchoolIdolContext, user: main.User, live_track_id: int):
@@ -51,12 +52,37 @@ async def init(context: idol.BasicSchoolIdolContext, user: main.User):
     await context.db.main.flush()
 
 
-async def get_live_clear_data(context: idol.BasicSchoolIdolContext, user: main.User, live_difficulty_id: int):
+@overload
+async def get_live_clear_data(
+    context: idol.BasicSchoolIdolContext, /, user: main.User, live_difficulty_id: int, ensure: Literal[False] = False
+) -> main.LiveClear | None: ...
+@overload
+async def get_live_clear_data(
+    context: idol.BasicSchoolIdolContext, /, user: main.User, live_difficulty_id: int, ensure: Literal[True]
+) -> main.LiveClear: ...
+
+
+async def get_live_clear_data(
+    context: idol.BasicSchoolIdolContext, /, user: main.User, live_difficulty_id: int, ensure: bool = False
+):
     q = sqlalchemy.select(main.LiveClear).where(
         main.LiveClear.user_id == user.id, main.LiveClear.live_difficulty_id == live_difficulty_id
     )
     result = await context.db.main.execute(q)
-    return result.scalar()
+    live_clear = result.scalar()
+
+    if ensure and live_clear is None:
+        live_setting_info = await get_live_setting_from_difficulty_id(context, live_difficulty_id)
+        if live_setting_info is None:
+            raise ValueError("invalid live_difficulty_id")
+
+        live_clear = main.LiveClear(
+            user_id=user.id, live_difficulty_id=live_difficulty_id, difficulty=live_setting_info.difficulty
+        )
+        context.db.main.add(live_clear)
+        await context.db.main.flush()
+
+    return live_clear
 
 
 async def get_normal_live_clear_status(context: idol.BasicSchoolIdolContext, user: main.User):
@@ -323,3 +349,52 @@ async def register_live_in_progress(
 
 async def get_live_track_info(context: idol.BasicSchoolIdolContext, /, live_track_id: int):
     return await db.get_decrypted_row(context.db.live, live.LiveTrack, live_track_id)
+
+
+async def get_special_live_rotation_time_modulo(context: idol.BasicSchoolIdolContext, /):
+    q = sqlalchemy.select(live.SpecialLiveRotation)
+    result = await context.db.live.execute(q)
+    rotation_group_time: dict[int, list[tuple[int, int]]] = {}
+
+    for row in result.scalars():
+        group = rotation_group_time.setdefault(row.rotation_group_id, [])
+        unix_timestamp = util.datetime_to_timestamp(row.base_date)
+        group.append((row.live_difficulty_id, unix_timestamp // 86400))
+
+    return rotation_group_time
+
+
+async def get_special_live_rotation_difficulty_id(context: idol.BasicSchoolIdolContext, /):
+    rotation_group_time = await get_special_live_rotation_time_modulo(context)
+    result: dict[int, int] = {}
+    current_day = util.time() // 86400
+
+    for group_id, live_list in rotation_group_time.items():
+        current_day_modulo = current_day % len(live_list)
+
+        for live_difficulty_id, day_time in live_list:
+            if day_time % len(live_list) == current_day_modulo:
+                result[group_id] = live_difficulty_id
+                break
+
+    return result
+
+
+async def get_special_live_status(context: idol.BasicSchoolIdolContext, /, user: main.User):
+    result: list[live_model.LiveStatus] = []
+    today_b_side_rotation = await get_special_live_rotation_difficulty_id(context)
+
+    for live_difficulty_id in today_b_side_rotation.values():
+        live_clear = await get_live_clear_data(context, user, live_difficulty_id, True)
+        result.append(
+            live_model.LiveStatus(
+                live_difficulty_id=live_difficulty_id,
+                status=1 + live_clear.clear_cnt > 0,
+                hi_score=live_clear.hi_score,
+                hi_combo_count=live_clear.hi_combo_cnt,
+                clear_cnt=live_clear.clear_cnt,
+                achieved_goal_id_list=await get_achieved_goal_id_list(context, live_clear),
+            )
+        )
+
+    return result

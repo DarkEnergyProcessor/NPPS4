@@ -76,8 +76,8 @@ class LiveScheduleResponse(pydantic.BaseModel):
 
 class LiveStatusResponse(pydantic.BaseModel):
     normal_live_status_list: list[live_model.LiveStatus]
-    special_live_status_list: list
-    training_live_status_list: list
+    special_live_status_list: list[live_model.LiveStatus]
+    training_live_status_list: list[live_model.LiveStatus]
     marathon_live_status_list: list
     free_live_status_list: list
     can_resume_live: bool
@@ -304,12 +304,10 @@ class LiveRewardResponse(achievement.AchievementMixin, common.TimestampMixin, us
 
 @idol.register("live", "liveStatus")
 async def live_livestatus(context: idol.SchoolIdolUserParams) -> LiveStatusResponse:
-    # TODO
-    util.stub("live", "liveStatus")
     current_user = await user.get_current(context)
     return LiveStatusResponse(
         normal_live_status_list=await live.get_normal_live_clear_status(context, current_user),
-        special_live_status_list=[],
+        special_live_status_list=await live.get_special_live_status(context, current_user),
         training_live_status_list=[],
         marathon_live_status_list=[],
         free_live_status_list=[],
@@ -319,11 +317,20 @@ async def live_livestatus(context: idol.SchoolIdolUserParams) -> LiveStatusRespo
 
 @idol.register("live", "schedule")
 async def live_schedule(context: idol.SchoolIdolUserParams) -> LiveScheduleResponse:
-    # TODO
-    util.stub("live", "schedule", context.raw_request_data)
+    ts = util.time()
+    special_live_rotation = await live.get_special_live_rotation_difficulty_id(context)
+
     return LiveScheduleResponse(
         event_list=[],
-        live_list=[],
+        live_list=[
+            LimitedLive(
+                live_difficulty_id=live_difficulty_id,
+                start_date=util.timestamp_to_datetime(util.get_next_day_timestamp(ts, ndays=0)),
+                end_date=util.timestamp_to_datetime(util.get_next_day_timestamp(ts)),
+                is_random=False,  # TODO
+            )
+            for live_difficulty_id in special_live_rotation.values()
+        ],
         limited_bonus_list=[],
         limited_bonus_common_list=[],
         random_live_list=[

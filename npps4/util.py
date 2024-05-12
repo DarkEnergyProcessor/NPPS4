@@ -157,3 +157,11 @@ def extract_token_from_authorize(authorize: str):
     if qs.get("token"):
         return qs["token"][0]
     return None
+
+
+def get_next_day_timestamp(ts: int | None = None, /, *, ndays: int = 1):
+    if ts is None:
+        ts = time()
+
+    day = ts // 86400
+    return (day + ndays) * 86400
