@@ -84,6 +84,7 @@ class LiveStatusResponse(pydantic.BaseModel):
 
 
 class LivePartyListRequest(pydantic.BaseModel):
+    live_difficulty_id: int
     is_training: bool
     lp_factor: int
 
@@ -308,7 +309,7 @@ async def live_livestatus(context: idol.SchoolIdolUserParams) -> LiveStatusRespo
     return LiveStatusResponse(
         normal_live_status_list=await live.get_normal_live_clear_status(context, current_user),
         special_live_status_list=await live.get_special_live_status(context, current_user),
-        training_live_status_list=[],
+        training_live_status_list=await live.get_training_live_status(context, current_user),
         marathon_live_status_list=[],
         free_live_status_list=[],
         can_resume_live=True,
@@ -352,7 +353,7 @@ DEBUG_SERVER_SCORE_CALCULATE = False
 @idol.register("live", "partyList")
 async def live_partylist(context: idol.SchoolIdolUserParams, request: LivePartyListRequest) -> LivePartyListResponse:
     current_user = await user.get_current(context)
-    util.stub("live", "partyList", request)
+    util.stub("live", "partyList", context.raw_request_data)
 
     # TODO: Check LP/token
 
@@ -471,15 +472,12 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
     if live_difficulty_info is None:
         raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_FOUND)
 
-    live_clear_data = await live.get_live_clear_data(context, current_user, request.live_difficulty_id)
-    if live_clear_data is None:
-        raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_FOUND)
-
     live_setting = await live.get_live_setting_from_difficulty_id(context, request.live_difficulty_id)
     if live_setting is None:
         raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_FOUND)
 
     # Get old data
+    live_clear_data = await live.get_live_clear_data(context, current_user, request.live_difficulty_id, True)
     old_live_clear_data = copy.copy(live_clear_data)
     old_user_info = await user.get_user_info(context, current_user)
 

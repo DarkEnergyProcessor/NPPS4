@@ -163,6 +163,9 @@ async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, i: com
                 live_item.additional_normal_live_status_list = await live.get_normal_live_clear_status_of_track(
                     context, user, i.item_id
                 )
+                live_item.additional_training_live_status_list = await live.get_training_live_clear_status_of_track(
+                    context, user, i.item_id
+                )
             return AddResult(success)
         case const.ADD_TYPE.AWARD:
             return AddResult(await award.unlock_award(context, user, i.item_id))
