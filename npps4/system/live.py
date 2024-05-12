@@ -409,7 +409,9 @@ async def get_training_live_difficulty_id_from_live_track_id(
     context: idol.BasicSchoolIdolContext, /, live_track_id: int
 ):
     q = sqlalchemy.select(live.LiveSetting.live_setting_id).where(
-        live.LiveSetting.live_track_id == live_track_id, live.LiveSetting.difficulty > 5
+        live.LiveSetting.live_track_id == live_track_id,
+        live.LiveSetting.difficulty > 5,
+        live.LiveSetting.ac_flag == 0,
     )
     result = await context.db.live.execute(q)
     live_setting_ids = list(result.scalars())
