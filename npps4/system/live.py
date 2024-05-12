@@ -408,16 +408,7 @@ async def get_special_live_status(context: idol.BasicSchoolIdolContext, /, user:
     today_b_side_rotation = await get_special_live_rotation_difficulty_id(context)
 
     for live_difficulty_id in today_b_side_rotation.values():
-        live_clear = await get_live_clear_data(context, user, live_difficulty_id, True)
-        result.append(
-            live_model.LiveStatus(
-                live_difficulty_id=live_difficulty_id,
-                status=1 + live_clear.clear_cnt > 0,
-                hi_score=live_clear.hi_score,
-                hi_combo_count=live_clear.hi_combo_cnt,
-                clear_cnt=live_clear.clear_cnt,
-                achieved_goal_id_list=await get_achieved_goal_id_list(context, live_clear),
-            )
-        )
+        live_clear = await get_live_clear_data(context, user, live_difficulty_id)
+        result.append(await live_status_from_live_clear(context, live_difficulty_id, live_clear))
 
     return result
