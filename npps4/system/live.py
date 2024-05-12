@@ -14,24 +14,15 @@ from typing import Iterable, Literal, Sequence, overload
 
 
 async def unlock_normal_live(context: idol.BasicSchoolIdolContext, user: main.User, live_track_id: int):
-    q = sqlalchemy.select(live.LiveSetting).where(live.LiveSetting.live_track_id == live_track_id)
-    result = await context.db.live.execute(q)
-
-    # Get live_setting_ids
-    for setting_data in result.scalars():
-        # Then query live_difficulty_ids
-        q = sqlalchemy.select(live.NormalLive).where(live.NormalLive.live_setting_id == setting_data.live_setting_id)
-        result = await context.db.live.execute(q)
-
-        # Add to live clear table
-        normallive = result.scalar()
-        if normallive is not None:
-            live_clear = main.LiveClear(
-                user_id=user.id, live_difficulty_id=normallive.live_difficulty_id, difficulty=setting_data.difficulty
-            )
-            context.db.main.add(live_clear)
-
-    await context.db.main.flush()
+    q = sqlalchemy.select(main.NormalLiveUnlock).where(
+        main.NormalLiveUnlock.user_id == user.id, main.NormalLiveUnlock.live_track_id == live_track_id
+    )
+    result = await context.db.main.execute(q)
+    if result.scalar() is None:
+        context.db.main.add(main.NormalLiveUnlock(user_id=user.id, live_track_id=live_track_id))
+        await context.db.main.flush()
+        return True
+    return False
 
 
 async def init(context: idol.BasicSchoolIdolContext, user: main.User):
@@ -85,20 +76,55 @@ async def get_live_clear_data(
     return live_clear
 
 
-async def get_normal_live_clear_status(context: idol.BasicSchoolIdolContext, user: main.User):
-    q = sqlalchemy.select(main.LiveClear).where(main.LiveClear.user_id == user.id)
-    result = await context.db.main.execute(q)
-    return [
-        live_model.LiveStatus(
-            live_difficulty_id=a.live_difficulty_id,
-            status=(a.clear_cnt > 0) + 1,
-            hi_score=a.hi_score,
-            hi_combo_count=a.hi_combo_cnt,
-            clear_cnt=a.clear_cnt,
-            achieved_goal_id_list=await get_achieved_goal_id_list(context, a),
+async def live_status_from_live_clear(
+    context: idol.BasicSchoolIdolContext,
+    live_difficulty_id: int,
+    /,
+    live_clear: main.LiveClear | None,
+    *,
+    missing_status: int = 1,
+):
+    if live_clear is None:
+        return live_model.LiveStatus(
+            live_difficulty_id=live_difficulty_id,
+            status=missing_status,
+            hi_score=0,
+            hi_combo_count=0,
+            clear_cnt=0,
+            achieved_goal_id_list=[],
         )
-        for a in result.scalars()
-    ]
+    else:
+        return live_model.LiveStatus(
+            live_difficulty_id=live_difficulty_id,
+            status=1 + (live_clear.clear_cnt > 0),
+            hi_score=live_clear.hi_score,
+            hi_combo_count=live_clear.hi_combo_cnt,
+            clear_cnt=live_clear.clear_cnt,
+            achieved_goal_id_list=await get_achieved_goal_id_list(context, live_clear),
+        )
+
+
+async def get_normal_live_clear_status(context: idol.BasicSchoolIdolContext, user: main.User):
+    q = sqlalchemy.select(main.NormalLiveUnlock.live_track_id).where(main.NormalLiveUnlock.user_id == user.id)
+    result = await context.db.main.execute(q)
+    live_status_result: list[live_model.LiveStatus] = []
+
+    for live_track_id in result.scalars():
+        live_setting_ids = await get_live_setting_ids_from_track_id(context, live_track_id)
+
+        q = sqlalchemy.select(live.NormalLive.live_difficulty_id).where(
+            live.NormalLive.live_setting_id.in_(live_setting_ids)
+        )
+        result = await context.db.live.execute(q)
+
+        for live_difficulty_id in result.scalars():
+            q = sqlalchemy.select(main.LiveClear).where(
+                main.LiveClear.user_id == user.id, main.LiveClear.live_difficulty_id == live_difficulty_id
+            )
+            result = await context.db.main.execute(q)
+            live_status_result.append(await live_status_from_live_clear(context, live_difficulty_id, result.scalar()))
+
+    return live_status_result
 
 
 async def get_normal_live_clear_status_of_track(
@@ -136,8 +162,9 @@ async def get_live_info_table(context: idol.BasicSchoolIdolContext, live_difficu
     return live_info
 
 
-async def get_live_setting(context: idol.BasicSchoolIdolContext, live_info: live.Live):
-    return await db.get_decrypted_row(context.db.live, live.LiveSetting, live_info.live_setting_id)
+async def get_live_setting(context: idol.BasicSchoolIdolContext, /, live_info: live.Live | int):
+    live_setting_id = live_info if isinstance(live_info, int) else live_info.live_setting_id
+    return await db.get_decrypted_row(context.db.live, live.LiveSetting, live_setting_id)
 
 
 async def get_live_lp(context: idol.BasicSchoolIdolContext, live_difficulty_id: int):
@@ -301,22 +328,18 @@ async def get_live_settings_from_track_id(context: idol.BasicSchoolIdolContext, 
     return list(result.scalars())
 
 
-async def has_live_unlock(context: idol.BasicSchoolIdolContext, user: main.User, live_track_id: int):
-    live_setting_ids = [
-        setting.live_setting_id for setting in await get_live_settings_from_track_id(context, live_track_id)
-    ]
-
-    q = sqlalchemy.select(live.NormalLive).where(live.NormalLive.live_setting_id.in_(live_setting_ids))
+async def get_live_setting_ids_from_track_id(context: idol.BasicSchoolIdolContext, live_track_id: int):
+    q = sqlalchemy.select(live.LiveSetting.live_setting_id).where(live.LiveSetting.live_track_id == live_track_id)
     result = await context.db.live.execute(q)
-    live_difficulty_ids = [l.live_difficulty_id for l in result.scalars()]
+    return list(result.scalars())
 
-    q = (
-        sqlalchemy.select(sqlalchemy.func.count())
-        .select_from(main.LiveClear)
-        .where(main.LiveClear.user_id == user.id, main.LiveClear.live_difficulty_id.in_(live_difficulty_ids))
+
+async def has_normal_live_unlock(context: idol.BasicSchoolIdolContext, user: main.User, live_track_id: int):
+    q = sqlalchemy.select(main.NormalLiveUnlock).where(
+        main.NormalLiveUnlock.user_id == user.id, main.NormalLiveUnlock.live_track_id == live_track_id
     )
-    result = await context.db.main.execute(q)
-    return (result.scalar() or 0) > 0
+    result = await context.db.live.execute(q)
+    return result.scalar() is not None
 
 
 async def get_live_in_progress(context: idol.BasicSchoolIdolContext, user: main.User):

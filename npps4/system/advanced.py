@@ -158,11 +158,12 @@ async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, i: com
         # FIXME: Actually check for their return values of these unlocks.
         case const.ADD_TYPE.LIVE:
             live_item = cast(live_model.LiveItem, i)
-            await live.unlock_normal_live(context, user, i.item_id)
-            live_item.additional_normal_live_status_list = await live.get_normal_live_clear_status_of_track(
-                context, user, i.item_id
-            )
-            return AddResult(True)
+            success = await live.unlock_normal_live(context, user, i.item_id)
+            if success:
+                live_item.additional_normal_live_status_list = await live.get_normal_live_clear_status_of_track(
+                    context, user, i.item_id
+                )
+            return AddResult(success)
         case const.ADD_TYPE.AWARD:
             return AddResult(await award.unlock_award(context, user, i.item_id))
         case const.ADD_TYPE.BACKGROUND:
@@ -262,7 +263,7 @@ async def test_name(context: idol.BasicSchoolIdolContext, name: str):
 _ACHIEVEMENT_REWARD_REPLACE_CRITERIA: dict[
     int, Callable[[idol.BasicSchoolIdolContext, main.User, int], Awaitable[bool]]
 ] = {
-    const.ADD_TYPE.LIVE: live.has_live_unlock,
+    const.ADD_TYPE.LIVE: live.has_normal_live_unlock,
     const.ADD_TYPE.AWARD: award.has_award,
     const.ADD_TYPE.BACKGROUND: background.has_background,
     const.ADD_TYPE.SCENARIO: scenario.is_unlocked,

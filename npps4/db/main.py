@@ -396,6 +396,18 @@ class GlobalSerialCodeUsage(common.Base, kw_only=True):
     count: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger)
 
 
+class NormalLiveUnlock(common.Base, kw_only=True):
+    """Normal live show unlocks"""
+
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
+    user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
+    )
+    live_track_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
+
+    __table_args__ = (sqlalchemy.UniqueConstraint(user_id, live_track_id),)
+
+
 engine = sqlalchemy.ext.asyncio.create_async_engine(config.get_database_url())
 sessionmaker = sqlalchemy.ext.asyncio.async_sessionmaker(engine)
 
