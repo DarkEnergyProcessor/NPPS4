@@ -329,7 +329,7 @@ async def has_normal_live_unlock(context: idol.BasicSchoolIdolContext, user: mai
     q = sqlalchemy.select(main.NormalLiveUnlock).where(
         main.NormalLiveUnlock.user_id == user.id, main.NormalLiveUnlock.live_track_id == live_track_id
     )
-    result = await context.db.live.execute(q)
+    result = await context.db.main.execute(q)
     return result.scalar() is not None
 
 
