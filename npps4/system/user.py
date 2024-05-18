@@ -153,12 +153,63 @@ def get_current_energy(user: main.User, t: int | None = None):
     return max(user.energy_max - used_lp, 0)
 
 
+def has_energy(user: main.User, energy: int, /, t: int | None = None):
+    return get_current_energy(user, t=t) >= energy
+
+
+def add_energy(user: main.User, /, amount: int, *, t: int | None = None, overflow: bool = True):
+    if amount < 0:
+        raise ValueError("to subtract use sub_energy")
+
+    if t is None:
+        t = util.time()
+
+    sub_time = amount * game_mater.GAME_SETTING.live_energy_recoverly_time
+    user.energy_full_time = max(user.energy_full_time - sub_time, t)
+
+    if overflow:
+        current_energy = get_current_energy(user, t)
+        overflow_energy = max(amount - current_energy, 0)
+        if overflow_energy > 0:
+            user.over_max_energy = overflow_energy
+        else:
+            user.over_max_energy = 0
+
+
+def sub_energy(user: main.User, /, amount: int, *, t: int | None = None):
+    if amount < 0:
+        raise ValueError("to add use add_energy")
+
+    if t is None:
+        t = util.time()
+
+    current_energy = get_current_energy(user, t)
+    overflow_energy = 0
+    if user.over_max_energy > 0:
+        overflow_energy = user.over_max_energy - current_energy
+
+    # Is overflow LP >= LP?
+    if overflow_energy > amount:
+        user.over_max_energy = user.over_max_energy - amount
+        return
+
+    # Overflow LP < LP.
+    consume_normal_energy = amount - overflow_energy
+    if current_energy >= consume_normal_energy:
+        user.energy_full_time = (
+            max(user.energy_full_time, t) + game_mater.GAME_SETTING.live_energy_recoverly_time * amount
+        )
+        return
+
+    raise ValueError("not enough energy")
+
+
 async def add_exp(context: idol.BasicSchoolIdolContext, user: main.User, exp: int):
     next_exp = core.get_next_exp_cumulative(user.level)
     level_up = False
-    over_energy = 0
     max_energy = 0
     next_level_info = [NextLevelInfo(level=user.level, from_exp=user.exp)]
+    t = util.time()
 
     user.exp = user.exp + exp
     while user.exp >= next_exp:
@@ -167,21 +218,13 @@ async def add_exp(context: idol.BasicSchoolIdolContext, user: main.User, exp: in
         next_level_info.append(NextLevelInfo(level=user.level, from_exp=next_exp))
         next_exp = core.get_next_exp_cumulative(user.level)
         max_energy = core.get_energy_by_rank(user.level)
-        over_energy = over_energy + max_energy
+        add_energy(user, max_energy, t=t)
 
     if level_up:
-        t = util.time()
         # Increase max friend
         user.friend_max = core.get_max_friend_by_rank(user.level)
         # Increase master ticket
         user.training_energy_max = core.get_training_energy_by_rank(user.level)
-        # Calculate current LP
-        current_energy = get_current_energy(user, t)
-        # Increase LP
-        user.energy_max = max_energy
-        # Overflow LP
-        user.energy_full_time = t
-        user.over_max_energy = current_energy + over_energy
 
     await context.db.main.flush()
     return next_level_info
