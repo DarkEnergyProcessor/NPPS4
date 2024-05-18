@@ -159,9 +159,14 @@ def extract_token_from_authorize(authorize: str):
     return None
 
 
-def get_next_day_timestamp(ts: int | None = None, /, *, ndays: int = 1, offset: int = -32400):
+def get_next_day_timestamp(ts: int | None = None, /, *, ndays: int = 1, offset: int = 32400):
     if ts is None:
         ts = time()
+    day = get_days_since_unix(ts, offset=offset)
+    return (day + ndays) * 86400 - offset
 
-    day = ts // 86400
-    return (day + ndays) * 86400 + offset
+
+def get_days_since_unix(ts: int | None = None, /, *, offset: int = 32400):
+    if ts is None:
+        ts = time()
+    return (ts + offset) // 86400

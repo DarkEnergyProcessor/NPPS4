@@ -381,7 +381,7 @@ async def get_special_live_rotation_time_modulo(context: idol.BasicSchoolIdolCon
 async def get_special_live_rotation_difficulty_id(context: idol.BasicSchoolIdolContext, /):
     rotation_group_time = await get_special_live_rotation_time_modulo(context)
     result: dict[int, int] = {}
-    current_day = util.time() // 86400
+    current_day = util.get_days_since_unix()
 
     for group_id, live_list in rotation_group_time.items():
         current_day_modulo = current_day % len(live_list)
@@ -420,7 +420,14 @@ async def get_training_live_difficulty_id_from_live_track_id(
         live.SpecialLive.live_setting_id.in_(live_setting_ids), live.SpecialLive.exclude_clear_count_flag == 0
     )
     result = await context.db.live.execute(q)
-    return list(result.scalars())
+    live_difficulty_ids = set(result.scalars())
+
+    # Make sure it's not in special_live_rotation_m
+    q = sqlalchemy.select(live.SpecialLiveRotation.live_difficulty_id).where(
+        live.SpecialLiveRotation.live_difficulty_id.in_(live_difficulty_ids)
+    )
+    result = await context.db.live.execute(q)
+    return sorted(live_difficulty_ids - set(result.scalars()))
 
 
 async def get_training_live_clear_status_of_track(
