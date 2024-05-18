@@ -353,9 +353,16 @@ DEBUG_SERVER_SCORE_CALCULATE = False
 @idol.register("live", "partyList")
 async def live_partylist(context: idol.SchoolIdolUserParams, request: LivePartyListRequest) -> LivePartyListResponse:
     current_user = await user.get_current(context)
-    util.stub("live", "partyList", context.raw_request_data)
 
     # TODO: Check LP/token
+
+    live_setting = await live.get_live_setting_from_difficulty_id(context, request.live_difficulty_id)
+    if live_setting is None:
+        raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_FOUND)
+
+    beatmap_data = await live.get_live_info(context, request.live_difficulty_id, live_setting)
+    if beatmap_data is None:
+        raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOTES_LIST_NOT_FOUND)
 
     party_list = [
         await advanced.get_user_guest_party_info(context, u)
