@@ -135,6 +135,7 @@ async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, i: com
                     if isinstance(i, unit_model.UnitItem):
                         unit_level = i.level
                     unit_data = await unit.add_unit(context, user, i.item_id, True, level=unit_level)
+                    unit_data.is_signed = getattr(i, "is_signed", False)
                     if isinstance(i, unit_model.UnitItem):
                         i.unit_owning_user_id = unit_data.id
                     return AddResult(True, extra_data=unit_data)
@@ -144,7 +145,10 @@ async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, i: com
             user.game_coin = user.game_coin + i.amount
             return AddResult(True)
         case const.ADD_TYPE.LOVECA:
-            user.free_sns_coin = user.free_sns_coin + i.amount
+            if i.item_id == 1:
+                user.paid_sns_coin = user.paid_sns_coin + i.amount
+            else:
+                user.free_sns_coin = user.free_sns_coin + i.amount
             return AddResult(True)
         case const.ADD_TYPE.SOCIAL_POINT:
             user.social_point = user.social_point + i.amount
