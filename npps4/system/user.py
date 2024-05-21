@@ -150,7 +150,7 @@ def get_current_energy(user: main.User, t: int | None = None):
         t = util.time()
     difftime = max(user.energy_full_time - t, 0)
     used_lp = math.ceil(difftime / game_mater.GAME_SETTING.live_energy_recoverly_time)
-    return max(user.energy_max - used_lp, 0)
+    return max(user.energy_max - used_lp, 0) + max(user.over_max_energy - user.energy_max, 0)
 
 
 def has_energy(user: main.User, energy: int, /, t: int | None = None):
@@ -164,14 +164,15 @@ def add_energy(user: main.User, /, amount: int, *, t: int | None = None, overflo
     if t is None:
         t = util.time()
 
+    before = get_current_energy(user, t)
     sub_time = amount * game_mater.GAME_SETTING.live_energy_recoverly_time
     user.energy_full_time = max(user.energy_full_time - sub_time, t)
 
     if overflow:
         current_energy = get_current_energy(user, t)
-        overflow_energy = max(amount - current_energy, 0)
-        if overflow_energy > 0:
-            user.over_max_energy = overflow_energy
+        amount = amount - (current_energy - before)
+        if amount > 0:
+            user.over_max_energy = user.energy_max + amount
         else:
             user.over_max_energy = 0
 
