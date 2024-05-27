@@ -29,16 +29,20 @@ async def init(context: idol.BasicSchoolIdolContext, user: main.User):
     await unlock_normal_live(context, user, 1)  # Bokura no LIVE Kimi to no LIFE
 
     # Unlock the rest of the live shows.
+    unlocked: set[int] = set()
     q = sqlalchemy.select(live.NormalLive).where(live.NormalLive.default_unlocked_flag == 1)
     result = await context.db.live.execute(q)
 
     for normallive in result.scalars():
         setting_data = await context.db.live.get(live.LiveSetting, normallive.live_setting_id)
         assert setting_data is not None
-        live_clear = main.LiveClear(
-            user_id=user.id, live_difficulty_id=normallive.live_difficulty_id, difficulty=setting_data.difficulty
-        )
-        context.db.main.add(live_clear)
+        # live_clear = main.LiveClear(
+        #     user_id=user.id, live_difficulty_id=normallive.live_difficulty_id, difficulty=setting_data.difficulty
+        # )
+        # context.db.main.add(live_clear)
+        if setting_data.live_track_id not in unlocked:
+            if await unlock_normal_live(context, user, setting_data.live_track_id):
+                unlocked.add(setting_data.live_track_id)
 
     await context.db.main.flush()
 
