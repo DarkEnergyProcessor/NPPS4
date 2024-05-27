@@ -12,4 +12,4 @@ class LiveSEInfoResponse(pydantic.BaseModel):
 async def livese_liveseinfo(context: idol.SchoolIdolUserParams) -> LiveSEInfoResponse:
     # TODO
     util.stub("livese", "liveseInfo", context.raw_request_data)
-    return LiveSEInfoResponse(live_se_list=[1, 2, 3, 99])
+    return LiveSEInfoResponse(live_se_list=[1, 2, 3, 4, 99])
