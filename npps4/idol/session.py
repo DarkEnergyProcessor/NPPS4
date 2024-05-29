@@ -14,7 +14,7 @@ from .. import util
 from ..config import config
 from ..db import main
 
-from typing import Annotated, cast, overload, override
+from typing import Annotated, Any, cast, overload, override
 
 
 class BasicSchoolIdolContext:
@@ -23,6 +23,7 @@ class BasicSchoolIdolContext:
     def __init__(self, lang: idoltype.Language):
         self.lang = lang
         self.db = database.Database()
+        self.cache: dict[str, dict[Any, Any]] = {}
 
     async def __aenter__(self):
         return self
@@ -33,6 +34,7 @@ class BasicSchoolIdolContext:
         else:
             await self.db.rollback()
         await self.db.cleanup()
+        self.cache = {}
 
     def is_lang_jp(self):
         return self.lang == idoltype.Language.jp
@@ -51,6 +53,19 @@ class BasicSchoolIdolContext:
 
     async def finalize(self):
         pass
+
+    def get_cache(self, key: str, id: Any):
+        if key in self.cache and id in self.cache[key]:
+            return self.cache[key][id]
+        return None
+
+    def set_cache(self, key: str, id: Any, value: Any):
+        if key in self.cache:
+            k: dict[Any, Any] = self.cache[key]
+        else:
+            k = {}
+            self.cache[key] = k
+        k[id] = value
 
 
 class SchoolIdolParams(BasicSchoolIdolContext):

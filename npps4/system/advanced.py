@@ -379,7 +379,9 @@ class TeamStatCalculator:
             unit_types.append(unit_info.unit_type_id)
 
             unit_rarity = await self.get_unit_rarity(unit_info.rarity)
-            stats = await unit.get_unit_stats_from_unit_data(self.context, unit_data, unit_info, unit_rarity)
+            stats = await unit.get_unit_stats_from_unit_data(
+                self.context, unit.UnitStatsCalculationID.from_unit_data(unit_data)
+            )
             base_stats.append(stats)
             max_hp = max_hp + stats.hp
 

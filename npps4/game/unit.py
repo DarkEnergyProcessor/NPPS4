@@ -225,10 +225,9 @@ async def unit_unitall(context: idol.SchoolIdolUserParams) -> UnitAllInfoRespons
     units = await unit.get_all_units(context, current_user)
 
     unit_result: dict[bool, list[unit_model.UnitInfoData]] = {False: [], True: []}
-    cache = unit.UnitDataFullInfoCache()
 
     for unit_data in units:
-        unit_serialized_data, _ = await unit.get_unit_data_full_info(context, unit_data, cache=cache)
+        unit_serialized_data, _ = await unit.get_unit_data_full_info(context, unit_data)
         unit_result[unit_data.active].append(unit_serialized_data)
 
     return UnitAllInfoResponse(active=unit_result[True], waiting=unit_result[False])
@@ -508,7 +507,9 @@ async def unit_sale(context: idol.SchoolIdolUserParams, request: UnitSaleRequest
                 raise idol.error.IdolError(detail="invalid unit id")
 
             if await unit.sub_supporter_unit(context, current_user, supp_unit.unit_id):
-                unit_level_up_pattern = await unit.get_unit_level_up_pattern(context, unit_info)
+                unit_level_up_pattern = await unit.get_unit_level_up_pattern(
+                    context, unit_info.unit_level_up_pattern_id
+                )
                 unit_stats = unit_level_up_pattern[0]
                 detail.append(
                     UnitSaleDetail(
@@ -594,7 +595,9 @@ async def unit_merge(context: idol.SchoolIdolUserParams, request: UnitMergeReque
                 raise idol.error.IdolError(detail="invalid unit id")
 
             if await unit.sub_supporter_unit(context, current_user, supp_unit.unit_id):
-                unit_level_up_pattern = await unit.get_unit_level_up_pattern(context, unit_info)
+                unit_level_up_pattern = await unit.get_unit_level_up_pattern(
+                    context, unit_info.unit_level_up_pattern_id
+                )
                 unit_stats = unit_level_up_pattern[0]
                 multipler = (source_unit_attribute == unit_info.attribute_id) * 0.2
                 merge_cost = merge_cost + unit_stats.merge_cost * supp_unit.amount

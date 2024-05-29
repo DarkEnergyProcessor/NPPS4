@@ -91,7 +91,9 @@ async def run_script(arg: list[str]):
             )
 
             # Get EXP needed
-            unit_level_up_pattern = await npps4.system.unit.get_unit_level_up_pattern(context, unit_info)
+            unit_level_up_pattern = await npps4.system.unit.get_unit_level_up_pattern(
+                context, unit_info.unit_level_up_pattern_id
+            )
             unit_exp = npps4.system.unit.get_exp_for_target_level(unit_info, unit_level_up_pattern, unit_level)
             unit_signed = bool(args.signed and await npps4.system.unit.has_signed_variant(context, unit_info.unit_id))
 
