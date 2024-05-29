@@ -13,7 +13,7 @@ from .. import util
 from ..db import achievement
 from ..db import main
 
-from typing import Awaitable, Callable, Concatenate
+from typing import Callable, Concatenate
 
 
 class AchievementData(pydantic.BaseModel):
@@ -324,7 +324,11 @@ async def check_type_increment(
 def recursive_achievement(achievement_type: int, /):
     def wrapper0[
         **_P
-    ](func: Callable[Concatenate[idol.BasicSchoolIdolContext, main.User, _P], Awaitable[AchievementContext]]):
+    ](
+        func: Callable[
+            Concatenate[idol.BasicSchoolIdolContext, main.User, _P], collections.abc.Awaitable[AchievementContext]
+        ]
+    ):
         async def wrapper1(
             context: idol.BasicSchoolIdolContext, user: main.User, *args: _P.args, **kwargs: _P.kwargs
         ) -> AchievementContext:

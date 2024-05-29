@@ -1,3 +1,5 @@
+import collections.abc
+
 import sqlalchemy
 
 from .. import idol
@@ -7,9 +9,9 @@ from ..db import main
 from ..system import advanced
 from ..system import reward
 
-from typing import Awaitable, Callable
+from typing import Callable
 
-functions: dict[str, Callable[[idol.BasicSchoolIdolContext, main.User], Awaitable[str | None]]] = {}
+functions: dict[str, Callable[[idol.BasicSchoolIdolContext, main.User], collections.abc.Awaitable[str | None]]] = {}
 
 
 async def execute(

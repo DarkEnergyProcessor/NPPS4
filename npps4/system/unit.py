@@ -1,3 +1,4 @@
+import collections.abc
 import dataclasses
 import math
 
@@ -16,7 +17,7 @@ from .. import util
 from ..db import main
 from ..db import unit
 
-from typing import Awaitable, Callable, Literal, overload
+from typing import Callable, Literal, overload
 
 
 @dataclasses.dataclass
@@ -51,7 +52,7 @@ class UnitDataFullInfoCache:
 async def _get_cached[
     _T, _U
 ](
-    f: Callable[[idol.BasicSchoolIdolContext, _U], Awaitable[_T | None]],
+    f: Callable[[idol.BasicSchoolIdolContext, _U], collections.abc.Awaitable[_T | None]],
     dict_cache: dict[_U, _T],
     context: idol.BasicSchoolIdolContext,
     value: _U,

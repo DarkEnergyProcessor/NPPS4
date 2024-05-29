@@ -1,3 +1,4 @@
+import collections.abc
 import copy
 import dataclasses
 
@@ -28,7 +29,7 @@ from ..config import config
 from ..db import game_mater
 from ..db import main
 
-from typing import Any, Awaitable, Callable, cast, overload
+from typing import Any, Callable, cast, overload
 
 
 @dataclasses.dataclass
@@ -268,7 +269,7 @@ async def test_name(context: idol.BasicSchoolIdolContext, name: str):
 
 
 _ACHIEVEMENT_REWARD_REPLACE_CRITERIA: dict[
-    int, Callable[[idol.BasicSchoolIdolContext, main.User, int], Awaitable[bool]]
+    int, Callable[[idol.BasicSchoolIdolContext, main.User, int], collections.abc.Awaitable[bool]]
 ] = {
     const.ADD_TYPE.LIVE: live.has_normal_live_unlock,
     const.ADD_TYPE.AWARD: award.has_award,
