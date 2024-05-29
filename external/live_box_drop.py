@@ -54,7 +54,7 @@ class ProcessResult:
 
 
 # Custom Live Show! Reward Box drop file must define "process_effort_box" async function with these parameters:
-# * "context" (npps4.idol.BasicSchoolIdolParams) to access the database.
+# * "context" (npps4.idol.BasicSchoolIdolContext) to access the database.
 # * "current_live_effort_point_box_spec_id" (int) current reward box.
 # * "current_limited_effort_event_id" (int) current limited reward box or 0 if not in limited box.
 # * "score" (int) Live Show! score (or increment amount), used to determine the next box.

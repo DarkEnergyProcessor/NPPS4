@@ -34,7 +34,7 @@ START_OF_EPOCH = datetime.date(1970, 1, 1)
 # * "day" (int)
 # * "month" (int)
 # * "year" (int)
-# * "context" (npps4.idol.BasicSchoolIdolParams) to access the database.
+# * "context" (npps4.idol.BasicSchoolIdolContext) to access the database.
 #
 # It then returns 4 values in a tuple in exactly this order:
 # * "add_type" (int), consult game_mater.db_ for details.

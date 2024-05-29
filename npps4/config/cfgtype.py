@@ -1,9 +1,11 @@
+import collections.abc
+
 import fastapi
 
 from .. import idoltype
 from ..download import dltype
 
-from typing import Iterable, Literal, Protocol, Any
+from typing import Literal, Protocol, Any
 
 
 class LoginBonusProtocol(Protocol):
@@ -28,11 +30,11 @@ class BeatmapData(Protocol):
 
 
 class BeatmapProviderProtocol(Protocol):
-    async def get_beatmap_data(self, livejson: str, context) -> Iterable[BeatmapData] | None: ...
+    async def get_beatmap_data(self, livejson: str, context) -> collections.abc.Iterable[BeatmapData] | None: ...
 
     async def randomize_beatmaps(
-        self, beatmap: Iterable[BeatmapData], seed: bytes, context
-    ) -> Iterable[BeatmapData]: ...
+        self, beatmap: collections.abc.Iterable[BeatmapData], seed: bytes, context
+    ) -> collections.abc.Iterable[BeatmapData]: ...
 
 
 class LiveUnitDropProtocol(Protocol):

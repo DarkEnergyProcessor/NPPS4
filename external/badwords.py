@@ -35,7 +35,7 @@ STRIP_WHITESPACE = re.compile(r"\s+")
 
 # Badwords Checker must define "has_badwords" function with these parameters:
 # * "text" (str)
-# * "context" (npps4.idol.BasicSchoolIdolParams) to access the database.
+# * "context" (npps4.idol.BasicSchoolIdolContext) to access the database.
 #
 # It then returns a boolean if the specified text contains badword.
 async def has_badwords(text: str, context: npps4.idol.BasicSchoolIdolContext) -> bool:

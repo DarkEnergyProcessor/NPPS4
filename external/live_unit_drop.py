@@ -83,7 +83,7 @@ def _get_drop_n(context: npps4.idol.BasicSchoolIdolContext, live_setting_id: int
 
 # Live Show! unit reward drop file must define "get_live_drop_unit" async function with these parameters:
 # * "live_setting_id" (int) of the played beatmap as in their `live_setting_m`.
-# * "context" (npps4.idol.BasicSchoolIdolParams) to access the database.
+# * "context" (npps4.idol.BasicSchoolIdolContext) to access the database.
 #
 # It then returns an integer `unit_id` to give to player.
 async def get_live_drop_unit(live_setting_id: int, context: npps4.idol.BasicSchoolIdolContext):

@@ -1,3 +1,5 @@
+import collections.abc
+
 import sqlalchemy
 
 from . import item
@@ -10,7 +12,7 @@ from ..config import config
 from ..db import main
 from ..db import live
 
-from typing import Iterable, Literal, Sequence, overload
+from typing import Literal, overload
 
 
 async def unlock_normal_live(context: idol.BasicSchoolIdolContext, user: main.User, live_track_id: int):
@@ -249,7 +251,9 @@ def make_rank_range(live_info: live.CommonLive, live_setting: live.LiveSetting):
     }
 
 
-def get_index_of_range(value: int, seq: Iterable[Sequence[int]], start: int = 0, default: int = -1):
+def get_index_of_range(
+    value: int, seq: collections.abc.Iterable[collections.abc.Sequence[int]], start: int = 0, default: int = -1
+):
     for i, r in enumerate(seq, start):
         if value in r:
             return i

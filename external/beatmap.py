@@ -24,6 +24,7 @@
 #
 # For more information, please refer to <http://unlicense.org/>
 
+import collections.abc
 import json
 import os
 
@@ -31,7 +32,7 @@ import pydantic
 
 import npps4.config.config
 
-from typing import Iterable, Literal
+from typing import Literal
 
 
 # Implementation must return an object that has these attributes in their classes.
@@ -48,10 +49,10 @@ class BeatmapData(pydantic.BaseModel):
 
 # Beatmap provider file must define "get_beatmap_data" async function with these parameters:
 # * "livejson" (str) of the beatmap as in their live_setting_m
-# * "context" (npps4.idol.BasicSchoolIdolParams) to access the database.
+# * "context" (npps4.idol.BasicSchoolIdolContext) to access the database.
 #
 # It then returns an iterable of BeatmapData above or None if the beatmap is not found:
-async def get_beatmap_data(livejson: str, context) -> Iterable[BeatmapData] | None:
+async def get_beatmap_data(livejson: str, context) -> collections.abc.Iterable[BeatmapData] | None:
     try:
         with open(os.path.join(npps4.config.config.ROOT_DIR, "beatmaps", livejson), "r", encoding="UTF-8") as f:
             jsondata = f.read()
@@ -77,8 +78,10 @@ async def get_beatmap_data(livejson: str, context) -> Iterable[BeatmapData] | No
 # Beatmap provider file must define "randomize_beatmaps" async function with these parameters:
 # * "beatmap" (iterable of BeatmapData)
 # * "seed" (bytes) with length of 16. It's up to implementation how to use this seed.
-# * "context" (npps4.idol.BasicSchoolIdolParams) to access the database.
+# * "context" (npps4.idol.BasicSchoolIdolContext) to access the database.
 # Note: The underlying beatmap data type of the iterable is same as the ones in "get_beatmap_data".
-async def randomize_beatmaps(beatmap: Iterable[BeatmapData], seed: bytes, context) -> Iterable[BeatmapData]:
+async def randomize_beatmaps(
+    beatmap: collections.abc.Iterable[BeatmapData], seed: bytes, context
+) -> collections.abc.Iterable[BeatmapData]:
     # TODO: https://github.com/DarkEnergyProcessor/livesim2_async/blob/over_the_rainbow/game/live/randomizer3.lua
     return beatmap
