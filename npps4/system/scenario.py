@@ -2,6 +2,7 @@ import itertools
 
 import sqlalchemy
 
+from . import common
 from .. import idol
 from ..db import main
 from ..db import scenario
@@ -39,6 +40,7 @@ async def get_all(context: idol.BasicSchoolIdolContext, user: main.User):
     return list(result.scalars())
 
 
+@common.context_cacheable("scenario_valid")
 async def valid(context: idol.BasicSchoolIdolContext, scenario_id: int):
     scenario_data = await context.db.scenario.get(scenario.Scenario, scenario_id)
     return scenario_data is not None

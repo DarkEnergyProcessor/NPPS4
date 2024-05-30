@@ -1,6 +1,7 @@
 import pydantic
 import sqlalchemy
 
+from . import common
 from .. import idol
 from ..db import exchange
 from ..db import main
@@ -11,12 +12,14 @@ class ExchangePointInfo(pydantic.BaseModel):
     exchange_point: int
 
 
-async def is_festival_unit(context: idol.BasicSchoolIdolContext, /, unit_id: int):
+@common.context_cacheable("exchange_festival_point_unit")
+async def is_festival_unit(context: idol.BasicSchoolIdolContext, unit_id: int, /):
     test = await context.db.exchange.get(exchange.ExchangeFestivalPointUnit, unit_id)
     return test is not None
 
 
-async def should_give_sticker(context: idol.BasicSchoolIdolContext, /, unit_id: int):
+@common.context_cacheable("exchange_no_point_unit")
+async def should_give_sticker(context: idol.BasicSchoolIdolContext, unit_id: int, /):
     test = await context.db.exchange.get(exchange.ExchangeNoPointUnit, unit_id)
     return test is None
 

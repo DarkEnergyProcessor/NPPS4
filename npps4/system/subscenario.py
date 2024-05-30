@@ -1,5 +1,6 @@
 import sqlalchemy
 
+from . import common
 from .. import db
 from .. import idol
 from ..db import main
@@ -30,6 +31,7 @@ async def get_all(context: idol.BasicSchoolIdolContext, user: main.User):
     return list(result.scalars())
 
 
+@common.context_cacheable("subscenario_valid")
 async def valid(context: idol.BasicSchoolIdolContext, subscenario_id: int):
     subscenario_data = await context.db.subscenario.get(subscenario.SubScenario, subscenario_id)
     return subscenario_data is not None

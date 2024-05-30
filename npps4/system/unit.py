@@ -679,19 +679,23 @@ def calculate_bonus_stat_of_removable_skill(removable_skill: unit.RemovableSkill
     return result[0], result[1], result[2]
 
 
-async def unit_type_has_tag(context: idol.BasicSchoolIdolContext, unit_type_id: int, member_tag_id: int):
+@common.context_cacheable("unit_type_member_tag")
+async def unit_type_has_tag(context: idol.BasicSchoolIdolContext, unit_type_member_tag_ids: tuple[int, int], /):
     q = sqlalchemy.select(unit.UnitTypeMemberTag).where(
-        unit.UnitTypeMemberTag.unit_type_id == unit_type_id, unit.UnitTypeMemberTag.member_tag_id == member_tag_id
+        unit.UnitTypeMemberTag.unit_type_id == unit_type_member_tag_ids[0],
+        unit.UnitTypeMemberTag.member_tag_id == unit_type_member_tag_ids[1],
     )
     result = await context.db.unit.execute(q)
     return result.scalar() is not None
 
 
-def get_leader_skill(context: idol.BasicSchoolIdolContext, leader_skill: int):
+@common.context_cacheable("unit_leader_skill")
+def get_leader_skill(context: idol.BasicSchoolIdolContext, leader_skill: int, /):
     return db.get_decrypted_row(context.db.unit, unit.LeaderSkill, leader_skill)
 
 
-def get_extra_leader_skill(context: idol.BasicSchoolIdolContext, leader_skill: int):
+@common.context_cacheable("unit_extra_leader_skill")
+def get_extra_leader_skill(context: idol.BasicSchoolIdolContext, leader_skill: int, /):
     return context.db.unit.get(unit.ExtraLeaderSkill, leader_skill)
 
 

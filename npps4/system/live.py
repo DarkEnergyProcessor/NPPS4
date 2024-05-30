@@ -2,6 +2,7 @@ import collections.abc
 
 import sqlalchemy
 
+from . import common
 from . import item
 from . import live_model
 from .. import const
@@ -152,19 +153,21 @@ async def get_normal_live_clear_status_of_track(
     return live_status_result
 
 
-async def get_live_info_table(context: idol.BasicSchoolIdolContext, live_difficulty_id: int):
+@common.context_cacheable("live_info")
+async def get_live_info_table(context: idol.BasicSchoolIdolContext, live_difficulty_id: int, /):
     live_info = await context.db.live.get(live.SpecialLive, live_difficulty_id)
     if live_info is None:
         live_info = await context.db.live.get(live.NormalLive, live_difficulty_id)
     return live_info
 
 
-async def get_live_setting(context: idol.BasicSchoolIdolContext, /, live_info: live.Live | int):
-    live_setting_id = live_info if isinstance(live_info, int) else live_info.live_setting_id
+@common.context_cacheable("live_setting")
+async def get_live_setting(context: idol.BasicSchoolIdolContext, live_setting_id: int, /):
     return await db.get_decrypted_row(context.db.live, live.LiveSetting, live_setting_id)
 
 
-async def get_live_lp(context: idol.BasicSchoolIdolContext, live_difficulty_id: int):
+@common.context_cacheable("live_capital_value")
+async def get_live_lp(context: idol.BasicSchoolIdolContext, live_difficulty_id: int, /):
     live_info = await get_live_info_table(context, live_difficulty_id)
     if live_info is None:
         return None
@@ -172,13 +175,13 @@ async def get_live_lp(context: idol.BasicSchoolIdolContext, live_difficulty_id: 
     return live_info.capital_value
 
 
-async def get_live_setting_from_difficulty_id(context: idol.BasicSchoolIdolContext, live_difficulty_id: int):
+@common.context_cacheable("live_setting_from_difficulty")
+async def get_live_setting_from_difficulty_id(context: idol.BasicSchoolIdolContext, live_difficulty_id: int, /):
     live_info = await get_live_info_table(context, live_difficulty_id)
     if live_info is None:
         return None
 
-    live_setting = await get_live_setting(context, live_info)
-    return live_setting
+    return await get_live_setting(context, live_info.live_setting_id)
 
 
 async def get_live_info(context: idol.BasicSchoolIdolContext, live_difficulty_id: int, live_setting: live.LiveSetting):
@@ -218,7 +221,8 @@ async def get_live_info_without_notes(
     )
 
 
-async def get_goal_list_by_live_difficulty_id(context: idol.BasicSchoolIdolContext, live_difficulty_id: int):
+@common.context_cacheable("live_goal_reward")
+async def get_goal_list_by_live_difficulty_id(context: idol.BasicSchoolIdolContext, live_difficulty_id: int, /):
     q = sqlalchemy.select(live.LiveGoalReward).where(live.LiveGoalReward.live_difficulty_id == live_difficulty_id)
     result = await context.db.live.execute(q)
     return list(result.scalars())
@@ -276,7 +280,7 @@ async def get_achieved_goal_id_list(context: idol.BasicSchoolIdolContext, clear_
     live_info = await get_live_info_table(context, clear_info.live_difficulty_id)
     result: list[int] = []
     if live_info is not None:
-        live_setting = await get_live_setting(context, live_info)
+        live_setting = await get_live_setting(context, live_info.live_setting_id)
         if live_setting is not None:
             # Sort out the goal rewards
             goal_list = await get_goal_list_by_live_difficulty_id(context, clear_info.live_difficulty_id)
@@ -321,13 +325,8 @@ async def get_goal_rewards(context: idol.BasicSchoolIdolContext, goal_ids: list[
     ]
 
 
-async def get_live_settings_from_track_id(context: idol.BasicSchoolIdolContext, live_track_id: int):
-    q = sqlalchemy.select(live.LiveSetting).where(live.LiveSetting.live_track_id == live_track_id)
-    result = await context.db.live.execute(q)
-    return list(result.scalars())
-
-
-async def get_live_setting_ids_from_track_id(context: idol.BasicSchoolIdolContext, live_track_id: int):
+@common.context_cacheable("live_setting_ids_from_track")
+async def get_live_setting_ids_from_track_id(context: idol.BasicSchoolIdolContext, live_track_id: int, /):
     q = sqlalchemy.select(live.LiveSetting.live_setting_id).where(live.LiveSetting.live_track_id == live_track_id)
     result = await context.db.live.execute(q)
     return list(result.scalars())
@@ -369,7 +368,7 @@ async def register_live_in_progress(
     await context.db.main.flush()
 
 
-async def get_live_track_info(context: idol.BasicSchoolIdolContext, /, live_track_id: int):
+async def get_live_track_info(context: idol.BasicSchoolIdolContext, live_track_id: int, /):
     return await db.get_decrypted_row(context.db.live, live.LiveTrack, live_track_id)
 
 
@@ -413,8 +412,9 @@ async def get_special_live_status(context: idol.BasicSchoolIdolContext, /, user:
     return result
 
 
+@common.context_cacheable("live_training_from_track_id")
 async def get_training_live_difficulty_id_from_live_track_id(
-    context: idol.BasicSchoolIdolContext, /, live_track_id: int
+    context: idol.BasicSchoolIdolContext, live_track_id: int, /
 ):
     q = sqlalchemy.select(live.LiveSetting.live_setting_id).where(
         live.LiveSetting.live_track_id == live_track_id,

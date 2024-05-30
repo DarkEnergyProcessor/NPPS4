@@ -8,13 +8,6 @@ from .. import util
 from ..db import main
 
 
-def _determine_en(context: idol.BasicSchoolIdolContext, text: str, text_en: str | None, /):
-    if context.is_lang_jp():
-        return text
-    else:
-        return text_en if text_en is not None else text
-
-
 def _determine_en_path(context: idol.BasicSchoolIdolContext, path: str, path_en: str | None, /):
     if path_en is None or context.is_lang_jp():
         return path
@@ -54,7 +47,7 @@ async def get_secretbox_button_response(
                 )
                 for j, cost in enumerate(button.costs, 1)
             ],
-            secret_box_name=_determine_en(context, secretbox.name, secretbox.name_en),
+            secret_box_name=context.get_text(secretbox.name, secretbox.name_en),
         )
         for i, button in enumerate(secretbox.buttons, 1)
     ]
@@ -66,7 +59,7 @@ async def get_secretbox_info_response(
     return secretbox_model.SecretboxAllSecretboxInfo(
         secret_box_id=secretbox.secretbox_id,
         secret_box_type=secretbox.secretbox_type,
-        name=_determine_en(context, secretbox.name, secretbox.name_en),
+        name=context.get_text(secretbox.name, secretbox.name_en),
         start_date=util.timestamp_to_datetime(secretbox.start_time),
         end_date=util.timestamp_to_datetime(secretbox.end_time),
         add_gauge=0,  # TODO

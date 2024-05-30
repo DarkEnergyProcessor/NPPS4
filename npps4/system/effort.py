@@ -17,6 +17,7 @@ class EffortPointInfo(common.BeforeAfter[int]):
     rewards: list[pydantic.SerializeAsAny[common.AnyItem]]
 
 
+@common.context_cacheable("effort_point_box_spec")
 async def get_effort_spec(context: idol.BasicSchoolIdolContext, live_effort_point_box_spec_id: int):
     effort_spec = await context.db.effort.get(effort.LiveEffortPointBoxSpec, live_effort_point_box_spec_id)
     if effort_spec is None:

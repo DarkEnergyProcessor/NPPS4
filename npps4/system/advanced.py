@@ -474,46 +474,28 @@ class TeamStatCalculator:
         return result
 
     async def get_unit_info(self, unit_id: int):
-        unit_info = self.cached_unit_info.get(unit_id)
+        unit_info = await unit.get_unit_info(self.context, unit_id)
         if unit_info is None:
-            unit_info = await unit.get_unit_info(self.context, unit_id)
-            if unit_info is None:
-                raise ValueError("invalid unit_id (info is None)")
-            self.cached_unit_info[unit_id] = unit_info
+            raise ValueError("invalid unit_id (info is None)")
         return unit_info
 
     async def get_unit_rarity(self, rarity: int):
-        unit_rarity = self.cached_unit_rarity.get(rarity)
+        unit_rarity = await unit.get_unit_rarity(self.context, rarity)
         if unit_rarity is None:
-            unit_rarity = await unit.get_unit_rarity(self.context, rarity)
-            if unit_rarity is None:
-                raise ValueError("invalid rarity (unit_rarity is None)")
-            self.cached_unit_rarity[rarity] = unit_rarity
+            raise ValueError("invalid rarity (unit_rarity is None)")
         return unit_rarity
 
     async def get_unit_leader_skill(self, leader_skill: int):
-        unit_leader_skill = self.cached_unit_leader_skill.get(leader_skill)
+        unit_leader_skill = await unit.get_leader_skill(self.context, leader_skill)
         if unit_leader_skill is None:
-            unit_leader_skill = await unit.get_leader_skill(self.context, leader_skill)
-            if unit_leader_skill is None:
-                raise ValueError("invalid leader_skill (unit_leader_skill is None)")
-            self.cached_unit_leader_skill[leader_skill] = unit_leader_skill
+            raise ValueError("invalid leader_skill (unit_leader_skill is None)")
         return unit_leader_skill
 
     async def get_unit_extra_leader_skill(self, leader_skill: int):
-        if leader_skill not in self.cached_extra_unit_leader_skill:
-            self.cached_extra_unit_leader_skill[leader_skill] = await unit.get_extra_leader_skill(
-                self.context, leader_skill
-            )
-        return self.cached_extra_unit_leader_skill[leader_skill]
+        return await unit.get_extra_leader_skill(self.context, leader_skill)
 
     async def has_member_tag(self, unit_type_id: int, member_tag_id: int):
-        result = self.cached_unit_tags.get((unit_type_id, member_tag_id))
-        if result is None:
-            result = await unit.unit_type_has_tag(self.context, unit_type_id, member_tag_id)
-            self.cached_unit_tags[(unit_type_id, member_tag_id)] = result
-
-        return result
+        return await unit.unit_type_has_tag(self.context, (unit_type_id, member_tag_id))
 
 
 @overload

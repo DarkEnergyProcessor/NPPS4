@@ -76,6 +76,7 @@ class AchievementContext:
         return len(self.accomplished) > 0 and len(self.new) > 0
 
 
+@common.context_cacheable("achievement")
 async def get_achievement_info(context: idol.BasicSchoolIdolContext, achievement_id: int):
     info = await db.get_decrypted_row(context.db.achievement, achievement.Achievement, achievement_id)
     if info is None:
@@ -84,6 +85,7 @@ async def get_achievement_info(context: idol.BasicSchoolIdolContext, achievement
     return info
 
 
+@common.context_cacheable("achievement_story")
 async def get_next_achievement_ids(context: idol.BasicSchoolIdolContext, achievement_id: int):
     q = sqlalchemy.select(achievement.Story).where(achievement.Story.achievement_id == achievement_id)
     result = await context.db.achievement.execute(q)
