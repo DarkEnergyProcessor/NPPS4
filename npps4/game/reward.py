@@ -201,6 +201,7 @@ async def reward_open(context: idol.SchoolIdolUserParams, request: RewardOpenReq
 async def reward_openall(context: idol.SchoolIdolUserParams, request: RewardListRequest) -> RewardOpenAllResponse:
     current_user = await user.get_current(context)
     before_user = await user.get_user_info(context, current_user)
+    total_presentbox = await reward.count_presentbox(context, current_user, request)
     incentives = await reward.get_presentbox(
         context,
         current_user,
@@ -244,6 +245,8 @@ async def reward_openall(context: idol.SchoolIdolUserParams, request: RewardList
         context, current_user, achievement_list.accomplished, accomplished_rewards
     )
 
+    opened = len(reward_item_list)
+
     return RewardOpenAllResponse(
         accomplished_achievement_list=await achievement.to_game_representation(
             context, achievement_list.accomplished, accomplished_rewards
@@ -254,8 +257,8 @@ async def reward_openall(context: idol.SchoolIdolUserParams, request: RewardList
         ),
         new_achievement_cnt=len(achievement_list.new),
         reward_num=reward_count,
-        opened_num=len(reward_item_list),
-        total_num=reward_count,
+        opened_num=opened,
+        total_num=max(total_presentbox - opened, 0),
         order=request.order,
         upper_limit=False,
         reward_item_list=reward_item_list,
