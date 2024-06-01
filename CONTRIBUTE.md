@@ -76,3 +76,57 @@ alembic revision --autogenerate -m "your message revision here"
 If your changes alter the database fields/tables, please state them in the Pull Request and don't send the alembic
 migration file. If by accident you sent the alembic migration file, then they'll be deleted or altered significantly
 on next commit.
+
+Typing-specific Code Style
+-----
+
+### Use 3.12-style for Generics
+
+OK
+
+```py
+def foo[T](a: T):
+    ...
+
+class Foo[T]:
+    val: T
+```
+
+Not OK
+
+```py
+from typing import Generics, TypeVar
+
+T = TypeVar("T")
+
+def foo(a: T):
+    ...
+
+class Foo(Generics[T]):
+    val: T
+```
+
+### Maximize Use of collections.abc
+
+This is true for `Iterable` and `Awaitable`. Since `collections.abc` is a standard library, then the standard `import`
+ordering rules apply.
+
+OK
+
+```py
+import collections.abc
+
+from typing import Callable
+
+async def foo(f: Callable[[collections.abc.Iterable[int]], collections.abc.Awaitable[int]]):
+    await f(...)
+```
+
+Not OK
+
+```py
+from typing import Awaitable, Callable, Iterable
+
+async def foo(f: Callable[[Iterable[int]], Awaitable[int]]):
+    await f(...)
+```

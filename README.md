@@ -135,6 +135,12 @@ uvicorn npps4.run.app:main --port 51376 --host <your lan IP or 0.0.0.0>
 
 **Caveat**: Currently, `--workers` option is not supported when using NPPS4-DLAPI download backend.
 
+Client App
+-----
+
+To get compatible client, please look at https://ethanaobrien.github.io/sif-patcher/. Both iOS and Android are
+supported.
+
 Contribute
 -----
 
