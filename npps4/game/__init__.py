@@ -41,3 +41,4 @@ if not config.is_script_mode():
     from . import tutorial
     from . import unit
     from . import user
+    from .. import sif2export  # HACK

@@ -9,7 +9,7 @@ async def run_script(arg: list[str]):
     parser = argparse.ArgumentParser(__file__)
     group = parser.add_mutually_exclusive_group(required=True)
     npps4.scriptutils.user.register_args(group)
-    parser.add_argument("passcode", default=None)
+    parser.add_argument("passcode", nargs="?", default=None)
     args = parser.parse_args(arg)
 
     transfer_code = args.passcode or npps4.system.handover.generate_transfer_code()

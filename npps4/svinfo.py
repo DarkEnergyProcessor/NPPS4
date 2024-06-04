@@ -4,15 +4,17 @@ import hashlib
 import io
 import json
 import os
-from typing import Annotated, Literal
 import zipfile
 
 import fastapi
 import honkypy
+import pydantic
 
 from . import util
 from .app import app
 from .config import config
+
+from typing import Annotated, Literal
 
 SERVERINFO_TEMPLATE = {
     "name": "server_information",
