@@ -122,7 +122,7 @@ class RewardHistoryResponse(pydantic.BaseModel):
     ad_info: ad_model.AdInfo
 
 
-@idol.register("reward", "rewardList", log_response_data=True)
+@idol.register("reward", "rewardList")
 async def reward_rewardlist(context: idol.SchoolIdolUserParams, request: RewardListRequest) -> RewardListResponse:
     current_user = await user.get_current(context)
     incentive = await reward.get_presentbox(
@@ -262,9 +262,9 @@ async def reward_openall(context: idol.SchoolIdolUserParams, request: RewardList
             context, achievement_list.new, unaccomplished_rewards
         ),
         new_achievement_cnt=len(achievement_list.new),
-        reward_num=reward_count,
+        reward_num=total_presentbox,
         opened_num=opened,
-        total_num=max(total_presentbox - opened, 0),
+        total_num=reward_count,
         order=request.order,
         upper_limit=False,
         reward_item_list=reward_item_list,
