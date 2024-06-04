@@ -170,3 +170,17 @@ def get_days_since_unix(ts: int | None = None, /, *, offset: int = 32400):
     if ts is None:
         ts = time()
     return (ts + offset) // 86400
+
+
+def clamp[T: int | float](v: T, minval: T, maxval: T, /):
+    return min(max(v, minval), maxval)
+
+
+def default[T](v: T | None, d: T, /):
+    return d if v is None else v
+
+
+def copy_attr(src: pydantic.BaseModel, dst: pydantic.BaseModel):
+    keys = itertools.chain(src.__class__.model_fields.keys(), src.model_computed_fields.keys())
+    for k in keys:
+        setattr(dst, k, getattr(src, k))

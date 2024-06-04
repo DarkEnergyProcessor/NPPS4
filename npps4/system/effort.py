@@ -1,9 +1,9 @@
 import pydantic
 
+from . import advanced
 from . import common
 from . import item
 from . import item_model
-from . import unit
 from .. import const
 from .. import idol
 from ..config import config
@@ -55,21 +55,15 @@ async def add_effort(context: idol.BasicSchoolIdolContext, user: main.User, amou
 
             reward_list: list[common.AnyItem] = []
             for add_type, item_id, item_count, additional_data in drop_box_result.rewards:
-                add_type_enum = const.ADD_TYPE(add_type)
-                match add_type_enum:
-                    case const.ADD_TYPE.UNIT:
-                        quick_add = await unit.quick_create_by_unit_add(context, user, item_id)
-                        await unit.process_quick_add(context, user, quick_add)
-                        reward_data = quick_add.as_item_reward
-                    case _:
-                        reward_data = item_model.Item(
-                            add_type=const.ADD_TYPE(add_type), item_id=item_id, amount=item_count
-                        )
-
-                if additional_data:
-                    for k, v in additional_data.items():
-                        setattr(reward_data, k, v)
-
+                reward_data = await advanced.deserialize_item_data(
+                    context,
+                    item_model.BaseItem(
+                        add_type=const.ADD_TYPE(add_type),
+                        item_id=item_id,
+                        amount=item_count,
+                        extra_data=additional_data,
+                    ),
+                )
                 await item.update_item_category_id(context, reward_data)
                 reward_list.append(reward_data)
 

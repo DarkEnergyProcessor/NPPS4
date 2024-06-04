@@ -1,11 +1,9 @@
 import collections.abc
-import copy
 import dataclasses
 
 import pydantic
 import sqlalchemy
 
-from . import achievement
 from . import award
 from . import background
 from . import common
@@ -15,7 +13,6 @@ from . import item_model
 from . import live
 from . import live_model
 from . import museum
-from . import reward
 from . import scenario
 from . import scenario_model
 from . import unit
@@ -132,13 +129,21 @@ async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, i: com
             else:
                 unit_cnt = await unit.count_units(context, user, True)
                 if unit_cnt < user.unit_max:
-                    unit_level = 1
+                    assert type(i) is not unit_model.UnitSupportItem
+
                     if isinstance(i, unit_model.UnitItem):
-                        unit_level = i.level
-                    unit_data = await unit.add_unit(context, user, i.item_id, True, level=unit_level)
-                    unit_data.is_signed = getattr(i, "is_signed", False)
-                    if isinstance(i, unit_model.UnitItem):
-                        i.unit_owning_user_id = unit_data.id
+                        unit_item = i
+                    else:
+                        unit_item = await unit.create_unit_item(context, i.item_id)
+                        assert isinstance(unit_item, unit_model.UnitItem)
+
+                    unit_data = await unit.create_unit_data(context, user, unit_item, True)
+                    await unit.add_unit_by_object(context, user, unit_data)
+
+                    unit_item.unit_owning_user_id = unit_data.id
+                    if not isinstance(i, unit_model.UnitItem):
+                        util.copy_attr(unit_item, i)
+
                     return AddResult(True, extra_data=unit_data)
                 else:
                     return AddResult(False, reason_unit_full=True)
@@ -300,48 +305,6 @@ async def fixup_achievement_reward(
         result.append(new_reward_list)
 
     return result
-
-
-async def give_achievement_reward(
-    context: idol.BasicSchoolIdolContext,
-    user: main.User,
-    ach_info: achievement.achievement.Achievement,
-    rewards: list[item_model.Item],
-):
-    for r in rewards:
-        # TODO: Proper message for reward insertion
-        if r.reward_box_flag:
-            await reward.add_item(
-                context,
-                user,
-                r,
-                ach_info.title or "FIXME",
-                ach_info.title_en or ach_info.title or "FIXME EN",
-            )
-        else:
-            add_result = await add_item(context, user, r)
-            if not add_result.success:
-                await reward.add_item(
-                    context,
-                    user,
-                    r,
-                    ach_info.title or "FIXME",
-                    ach_info.title_en or ach_info.title or "FIXME EN",
-                )
-
-
-async def process_achievement_reward(
-    context: idol.BasicSchoolIdolContext,
-    user: main.User,
-    achievements: list[main.Achievement],
-    rewardss: list[list[item_model.Item]],
-):
-    for ach, reward_list in zip(achievements, rewardss):
-        ach_info = await achievement.get_achievement_info(context, ach.achievement_id)
-        if ach_info is not None and ach_info.auto_reward_flag:
-            await give_achievement_reward(context, user, ach_info, reward_list)
-            await achievement.mark_achievement_reward_claimed(context, ach)
-    await context.db.main.flush()
 
 
 class TeamStatCalculator:
@@ -580,45 +543,25 @@ async def get_item_name(
     return f"Unknown (add_type {int(add_type)}, item_id {item_id})"
 
 
-async def deserialize_item_data(context: idol.BasicSchoolIdolContext, /, item_data: item_model.Item):
-    match item_data.add_type:
+async def deserialize_item_data(
+    context: idol.BasicSchoolIdolContext, item_base: item_model.BaseItem, /
+) -> common.AnyItem:
+    match item_base.add_type:
         case const.ADD_TYPE.UNIT:
-            if isinstance(item_data, unit_model.UnitSupportItem):
-                return copy.copy(item_data)
+            unit_extra_data = unit_model.UnitExtraData.EMPTY
 
-            # Recreate unit
-            unit_info = await unit.get_unit_info(context, item_data.item_id)
+            if item_base.extra_data:
+                try:
+                    unit_extra_data = unit_model.UnitExtraData.model_validate(item_base.extra_data)
+                except pydantic.ValidationError:
+                    pass
 
-            if unit_info is None:
-                raise ValueError("invalid unit id")
-
-            if unit_info.disable_rank_up > 0:
-                # Support unit
-                return unit_model.UnitSupportItem(
-                    item_id=item_data.item_id,
-                    amount=item_data.amount,
-                    is_support_member=True,
-                    unit_rarity_id=unit_info.rarity,
-                    attribute=unit_info.attribute_id,
-                )
-
-            # Regular unit
-            unit_data = await unit.create_unit(
-                context, None, item_data.item_id, True, is_signed=bool(getattr(item_data, "is_signed", False))
-            )
-            if unit_data is None:
-                raise ValueError("cannot create unit")
-
-            unit_full_info = await unit.get_unit_data_full_info(context, unit_data)
-            return unit_model.UnitItem(
-                item_id=item_data.item_id,
-                new_unit_flag=False,
-                attribute=unit_info.attribute_id,
-                **util.shallow_dump(unit_full_info[0]),
-            )
+            item_data = await unit.create_unit_item(context, item_base.item_id, unit_extra_data)
         case const.ADD_TYPE.SCENARIO:
-            return scenario_model.ScenarioItem(item_id=item_data.item_id, amount=item_data.amount)
+            item_data = scenario_model.ScenarioItem(item_id=item_base.item_id, amount=item_base.amount)
         case const.ADD_TYPE.LIVE:
-            return live_model.LiveItem(item_id=item_data.item_id, amount=item_data.amount)
+            item_data = live_model.LiveItem(item_id=item_base.item_id, amount=item_base.amount)
         case _:
-            return copy.copy(item_data)
+            item_data = item_model.Item(add_type=item_base.add_type, item_id=item_base.item_id, amount=item_base.amount)
+    item_data.item_category_id = await item.get_item_category(context, item_data)
+    return item_data

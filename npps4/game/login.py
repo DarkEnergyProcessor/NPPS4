@@ -319,7 +319,7 @@ async def login_unitselect(
 
     units: list[main.Unit] = []
     for uid in unit_ids:
-        unit_object = await unit.add_unit(context, current_user, uid, True)
+        unit_object = await unit.add_unit_simple(context, current_user, uid, True)
         if unit_object is None:
             raise RuntimeError("unable to add units")
 

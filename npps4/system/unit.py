@@ -1,11 +1,14 @@
 import dataclasses
+import itertools
 import math
 
+import pydantic
 import sqlalchemy
 
 from . import album
 from . import common
 from . import exchange
+from . import item_model
 from . import reward
 from . import unit_model
 from .. import const
@@ -139,12 +142,20 @@ async def add_unit_by_object(context: idol.BasicSchoolIdolContext, user: main.Us
     await context.db.main.flush()
 
 
-async def add_unit(
-    context: idol.BasicSchoolIdolContext, user: main.User, unit_id: int, active: bool, *, level: int = 1
+async def add_unit_simple(
+    context: idol.BasicSchoolIdolContext,
+    user: main.User,
+    unit_id: int,
+    /,
+    active: bool,
+    extra_data: unit_model.UnitExtraData = unit_model.UnitExtraData.EMPTY,
 ):
-    unit_data = await create_unit(context, user, unit_id, active, level=level)
-    if unit_data is None:
-        raise ValueError("cannot add support unit")
+    unit_item = await create_unit_item(context, unit_id, extra_data)
+    if isinstance(unit_item, unit_model.UnitSupportItem):
+        await add_supporter_unit(context, user, unit_id)
+        return None
+
+    unit_data = await create_unit_data(context, user, unit_item, active)
     await add_unit_by_object(context, user, unit_data)
     return unit_data
 
@@ -842,7 +853,8 @@ async def unit_to_item[
     )
 
 
-async def is_support_member(context: idol.BasicSchoolIdolContext, unit_id: int):
+@common.context_cacheable("unit_support_member")
+async def is_support_member(context: idol.BasicSchoolIdolContext, unit_id: int, /):
     unit_info = await context.db.unit.get(unit.Unit, unit_id)
     if unit_info is None:
         raise ValueError("invalid unit_id")
@@ -1021,3 +1033,179 @@ async def get_max_skill_exp(context: idol.BasicSchoolIdolContext, /, unit_info: 
             return skill_levels[-2].next_exp
 
     return 0
+
+
+async def create_unit_item(
+    context: idol.BasicSchoolIdolContext,
+    unit_id: int,
+    /,
+    extra_data: unit_model.UnitExtraData | None = unit_model.UnitExtraData.EMPTY,
+):
+    unit_info = await get_unit_info(context, unit_id)
+    if unit_info is None:
+        raise ValueError("invalid unit_id")
+
+    if unit_info.disable_rank_up > 0:
+        return unit_model.UnitSupportItem(
+            item_id=unit_id, unit_rarity_id=unit_info.rarity, attribute=unit_info.attribute_id
+        )
+
+    if extra_data is None:
+        extra_data = unit_model.UnitExtraData.EMPTY
+
+    # Calculate unit level
+    rarity_data = await get_unit_rarity(context, unit_info.rarity)
+    if rarity_data is None:
+        raise RuntimeError("unit_rarity is none")
+
+    max_level = (
+        rarity_data.after_level_max if unit_info.rank_min == unit_info.rank_max else rarity_data.before_level_max
+    )
+    # FIXME: Determine if it's promo card and set to 2 in that case
+    level_limit_id = int(unit_info.rarity == 4)
+    rank = util.clamp(extra_data.rank, unit_info.rank_min, unit_info.rank_max)
+    idolized = rank == unit_info.rank_max
+    max_level = rarity_data.after_level_max if idolized else rarity_data.before_level_max
+    max_love = rarity_data.after_love_max if idolized else rarity_data.before_love_max
+    love = util.clamp(extra_data.love, 0, max_love)
+    removable_skill_capacity = util.clamp(
+        util.default(extra_data.unit_removable_skill_capacity, unit_info.default_removable_skill_capacity),
+        0,
+        unit_info.max_removable_skill_capacity,
+    )
+    removable_skill_max = removable_skill_capacity == unit_info.max_removable_skill_capacity
+
+    if extra_data.level is not None:
+        unit_level_up_pattern = await get_unit_level_up_pattern(context, unit_info.unit_level_up_pattern_id)
+        exp = get_exp_for_target_level(unit_info, unit_level_up_pattern, extra_data.level)
+    else:
+        exp = extra_data.exp
+
+    # Get next EXP
+    stats = await get_unit_stats_from_unit_data(
+        context, UnitStatsCalculationID(unit_id=unit_id, exp=exp, max_level=max_level, level_limit_id=level_limit_id)
+    )
+    real_max_exp = 0 if stats.level == rarity_data.before_level_max and not idolized else stats.next_exp
+
+    # Calculate unit skill level
+    skill = await get_unit_skill(context, unit_info.default_unit_skill_id)
+    if skill is not None:
+        skill_levels = await get_unit_skill_level_up_pattern(
+            context,
+            skill.unit_skill_level_up_pattern_id,
+        )
+
+        skill_stats = calculate_unit_skill_stats(skill, skill_levels, extra_data.skill_exp)
+        skill_max = skill_stats[0] == skill.max_level
+        skill_level = skill_stats[0]
+    else:
+        skill_max = True
+        skill_level = 1
+
+    return unit_model.UnitItem(
+        item_id=unit_id,
+        unit_owning_user_id=0,
+        unit_rarity_id=unit_info.rarity,
+        exp=exp,
+        next_exp=real_max_exp,
+        level=stats.level,
+        max_level=max_level,
+        level_limit_id=level_limit_id,
+        rank=rank,
+        max_rank=unit_info.rank_max,
+        love=love,
+        max_love=max_love,
+        unit_skill_exp=extra_data.skill_exp,
+        unit_skill_level=skill_level,
+        max_hp=stats.hp,
+        unit_removable_skill_capacity=removable_skill_capacity,
+        favorite_flag=False,
+        display_rank=max(extra_data.display_rank, unit_info.rank_min),
+        is_rank_max=idolized,
+        is_love_max=love >= rarity_data.after_love_max,
+        is_level_max=stats.level >= rarity_data.after_level_max,
+        is_signed=extra_data.is_signed,
+        is_skill_level_max=skill_max,
+        is_removable_skill_capacity_max=removable_skill_max,
+        insert_date=util.timestamp_to_datetime(),
+        attribute=unit_info.attribute_id,
+    )
+
+
+async def create_unit_data(
+    context: idol.BasicSchoolIdolContext, user: main.User, unit_item: unit_model.UnitItem, /, active: bool = True
+):
+    return main.Unit(
+        user_id=user.id,
+        unit_id=unit_item.unit_id,
+        active=active,
+        favorite_flag=unit_item.favorite_flag,
+        is_signed=unit_item.is_signed,
+        insert_date=util.time(),
+        exp=unit_item.exp,
+        skill_exp=unit_item.unit_skill_exp,
+        max_level=unit_item.max_level,
+        love=unit_item.love,
+        rank=unit_item.rank,
+        display_rank=unit_item.display_rank,
+        level_limit_id=unit_item.level_limit_id,
+        unit_removable_skill_capacity=unit_item.unit_removable_skill_capacity,
+    )
+
+
+async def unit_info_data_to_unit_item(context: idol.BasicSchoolIdolContext, unit_info_data: unit_model.UnitInfoData, /):
+    unit_info = await get_unit_info(context, unit_info_data.unit_id)
+    if unit_info is None:
+        raise ValueError("cannot find unit info (db corrupt?)")
+
+    return unit_model.UnitItem(
+        item_id=unit_info_data.unit_id,
+        unit_owning_user_id=unit_info_data.unit_owning_user_id,
+        unit_rarity_id=unit_info_data.unit_rarity_id,
+        exp=unit_info_data.exp,
+        next_exp=unit_info_data.next_exp,
+        level=unit_info_data.level,
+        max_level=unit_info_data.max_level,
+        level_limit_id=unit_info_data.level_limit_id,
+        rank=unit_info_data.rank,
+        max_rank=unit_info_data.max_rank,
+        love=unit_info_data.love,
+        max_love=unit_info_data.max_love,
+        unit_skill_exp=unit_info_data.unit_skill_exp,
+        unit_skill_level=unit_info_data.skill_level,
+        max_hp=unit_info_data.max_hp,
+        unit_removable_skill_capacity=unit_info_data.unit_removable_skill_capacity,
+        favorite_flag=unit_info_data.favorite_flag,
+        display_rank=unit_info_data.display_rank,
+        is_rank_max=unit_info_data.is_rank_max,
+        is_love_max=unit_info_data.is_love_max,
+        is_level_max=unit_info_data.is_level_max,
+        is_signed=unit_info_data.is_signed,
+        is_skill_level_max=unit_info_data.is_skill_level_max,
+        is_removable_skill_capacity_max=unit_info_data.is_removable_skill_capacity_max,
+        insert_date=unit_info_data.insert_date,
+        attribute=unit_info.attribute_id,
+    )
+
+
+UNIT_FIELDS_TO_COPY = set(
+    itertools.chain(unit_model.UnitItem.model_fields.keys(), unit_model.UnitItem.model_computed_fields.keys())
+) - set(item_model.Item.model_fields.keys())
+UNIT_SUPPORT_FIELDS_TO_COPY = set(
+    itertools.chain(
+        unit_model.UnitSupportItem.model_fields.keys(), unit_model.UnitSupportItem.model_computed_fields.keys()
+    )
+) - set(item_model.Item.model_fields.keys())
+
+
+def populate_unit_item_to_other(unit_item: unit_model.UnitItem | unit_model.UnitSupportItem, other: pydantic.BaseModel):
+    match unit_item:
+        case unit_model.UnitItem():
+            target_set = UNIT_FIELDS_TO_COPY
+        case unit_model.UnitSupportItem():
+            target_set = UNIT_SUPPORT_FIELDS_TO_COPY
+        case _:
+            raise TypeError("expected UnitItem or UnitSupportItem")
+
+    for k in target_set:
+        setattr(other, k, getattr(unit_item, k))

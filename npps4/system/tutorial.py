@@ -21,9 +21,9 @@ async def phase3(context: idol.BasicSchoolIdolContext, u: main.User):
     # Add EXP
     await user.add_exp(context, u, 11)
     # Reine Saeki
-    await unit.add_unit(context, u, 13, True)
+    await unit.add_unit_simple(context, u, 13, True)
     # Akemi Kikuchi
-    await unit.add_unit(context, u, 9, True)
+    await unit.add_unit_simple(context, u, 9, True)
     # Bond calculation
     await unit.add_love_by_deck(context, u, u.active_deck_index, 34)
     u.tutorial_state = 3

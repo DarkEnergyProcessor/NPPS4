@@ -106,7 +106,7 @@ async def lbonus_execute(context: idol.SchoolIdolUserParams) -> LoginBonusRespon
         )
         accomplished_rewards = await advanced.fixup_achievement_reward(context, current_user, accomplished_rewards)
         unaccomplished_rewards = await advanced.fixup_achievement_reward(context, current_user, unaccomplished_rewards)
-        await advanced.process_achievement_reward(
+        await achievement.process_achievement_reward(
             context, current_user, achievement_list.accomplished, accomplished_rewards
         )
 

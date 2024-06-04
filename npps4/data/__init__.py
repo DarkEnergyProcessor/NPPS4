@@ -15,7 +15,7 @@ class ServerData:
     live_unit_drop_chance: schema.LiveUnitDropChance
     common_live_unit_drops: list[schema.LiveUnitDrop]
     live_specific_live_unit_drops: dict[int, list[schema.LiveUnitDrop]]
-    live_effort_drops: dict[int, list[schema.ItemWithWeight]]
+    live_effort_drops: dict[int, list[schema.BaseItemWithWeight]]
     secretbox_data: dict[int, schema.SecretboxData]
     serial_codes: list[schema.SerialCode]
 

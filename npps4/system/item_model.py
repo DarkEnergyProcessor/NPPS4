@@ -5,6 +5,19 @@ from .. import const
 from typing import Any
 
 
+class ItemExtraData(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(frozen=True)
+
+
+class BaseItem(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(frozen=True)
+
+    add_type: const.ADD_TYPE
+    item_id: int
+    amount: int = 1
+    extra_data: dict[str, Any] | None = None
+
+
 class Item(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="allow")
 
@@ -16,9 +29,5 @@ class Item(pydantic.BaseModel):
     comment: str = ""
     # rarity: int = 6  # For effort. TODO
 
-    def dump_extra_data(self) -> dict[str, Any]:
-        dump = self.model_dump()
-        for field_to_remove in Item.model_fields.keys():
-            del dump[field_to_remove]
-
-        return dump
+    def get_extra_data(self) -> ItemExtraData | None:
+        return None

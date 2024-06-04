@@ -37,7 +37,7 @@ class IncentiveItem(pydantic.BaseModel):
     item_option: str | None = None  # FIXME: What is this?
 
     @staticmethod
-    def from_incentive(context: idol.BasicSchoolIdolContext, i: main.Incentive, /):
+    async def from_incentive(context: idol.BasicSchoolIdolContext, i: main.Incentive, /):
         obj = IncentiveItem(
             incentive_id=i.id,
             incentive_item_id=i.item_id,
@@ -49,9 +49,15 @@ class IncentiveItem(pydantic.BaseModel):
             remaining_time="Forever" if i.expire_date == 0 else util.timestamp_to_datetime(i.expire_date),
         )
         # Add extra fields
-        if i.extra_data is not None:
-            for k, v in json.loads(i.extra_data).items():
-                setattr(obj, k, v)
+        if obj.add_type == const.ADD_TYPE.UNIT:
+            extra_data = unit_model.UnitExtraData.EMPTY
+            if i.extra_data is not None:
+                try:
+                    extra_data = unit_model.UnitExtraData.model_validate(json.dumps(i.extra_data))
+                except ValueError:
+                    pass
+            unit_item = await unit.create_unit_item(context, i.item_id, extra_data)
+            unit.populate_unit_item_to_other(unit_item, obj)
         return obj
 
 
@@ -116,7 +122,7 @@ class RewardHistoryResponse(pydantic.BaseModel):
     ad_info: ad_model.AdInfo
 
 
-@idol.register("reward", "rewardList")
+@idol.register("reward", "rewardList", log_response_data=True)
 async def reward_rewardlist(context: idol.SchoolIdolUserParams, request: RewardListRequest) -> RewardListResponse:
     current_user = await user.get_current(context)
     incentive = await reward.get_presentbox(
@@ -134,7 +140,7 @@ async def reward_rewardlist(context: idol.SchoolIdolUserParams, request: RewardL
     return RewardListResponse(
         item_count=incentive_total_count,
         order=request.order,
-        items=[IncentiveItem.from_incentive(context, i) for i in incentive],
+        items=[await IncentiveItem.from_incentive(context, i) for i in incentive],
         ad_info=ad_model.AdInfo(),
     )
 
@@ -171,7 +177,7 @@ async def reward_open(context: idol.SchoolIdolUserParams, request: RewardOpenReq
     unaccomplished_rewards = [await achievement.get_achievement_rewards(context, ach) for ach in achievement_list.new]
     accomplished_rewards = await advanced.fixup_achievement_reward(context, current_user, accomplished_rewards)
     unaccomplished_rewards = await advanced.fixup_achievement_reward(context, current_user, unaccomplished_rewards)
-    await advanced.process_achievement_reward(
+    await achievement.process_achievement_reward(
         context, current_user, achievement_list.accomplished, accomplished_rewards
     )
 
@@ -241,7 +247,7 @@ async def reward_openall(context: idol.SchoolIdolUserParams, request: RewardList
     unaccomplished_rewards = [await achievement.get_achievement_rewards(context, ach) for ach in achievement_list.new]
     accomplished_rewards = await advanced.fixup_achievement_reward(context, current_user, accomplished_rewards)
     unaccomplished_rewards = await advanced.fixup_achievement_reward(context, current_user, unaccomplished_rewards)
-    await advanced.process_achievement_reward(
+    await achievement.process_achievement_reward(
         context, current_user, achievement_list.accomplished, accomplished_rewards
     )
 

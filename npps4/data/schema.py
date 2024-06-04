@@ -29,13 +29,13 @@ class LiveUnitDropChance(pydantic.BaseModel):
     live_specific: int
 
 
-class ItemWithWeight(item_model.Item):
+class BaseItemWithWeight(item_model.BaseItem):
     weight: int
 
 
 class LiveEffortRewardDrops(pydantic.BaseModel):
     live_effort_point_box_spec_id: int
-    drops: list[ItemWithWeight]
+    drops: list[BaseItemWithWeight]
 
 
 class SecretboxCost(pydantic.BaseModel):
@@ -100,7 +100,7 @@ class SerialCodeGiveItem(pydantic.BaseModel):
     type: Literal["item"] = "item"
     message_en: str = "Serial Code Reward"
     message_jp: str = "Serial Code Reward"
-    items: list[pydantic.SerializeAsAny[item_model.Item]]
+    items: list[item_model.BaseItem]
 
 
 class SerialCodeRunFunction(pydantic.BaseModel):

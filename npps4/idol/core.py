@@ -6,6 +6,7 @@ import gzip
 import json
 import os
 import os.path
+import time
 import traceback
 import typing
 
@@ -183,7 +184,7 @@ async def build_response(
 def _log_response_data(module: str, action: str, response_data: pydantic.BaseModel):
     output_dir = os.path.join(config.get_data_directory(), "log_response_data")
     os.makedirs(output_dir, exist_ok=True)
-    t = util.time()
+    t = time.time_ns()
     filename = f"{module}_{action}_{t:08x}.json"
 
     with open(os.path.join(output_dir, filename), "w", encoding="utf-8", newline="\n") as f:

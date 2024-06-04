@@ -35690,22 +35690,30 @@
 					{
 						"add_type": 1001,
 						"item_id": 3546,
-						"is_signed": true
+						"extra_data": {
+							"is_signed": true
+						}
 					},
 					{
 						"add_type": 1001,
 						"item_id": 3547,
-						"is_signed": true
+						"extra_data": {
+							"is_signed": true
+						}
 					},
 					{
 						"add_type": 1001,
 						"item_id": 3548,
-						"is_signed": true
+						"extra_data": {
+							"is_signed": true
+						}
 					},
 					{
 						"add_type": 1001,
 						"item_id": 3549,
-						"is_signed": true
+						"extra_data": {
+							"is_signed": true
+						}
 					}
 				]
 			}

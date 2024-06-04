@@ -3,7 +3,8 @@ import calendar
 import pydantic
 import sqlalchemy
 
-from . import item
+from . import advanced
+from . import item_model
 from .. import const
 from .. import idol
 from ..config import config
@@ -17,7 +18,7 @@ class LoginBonusCalendar(pydantic.BaseModel):
     special_image_asset: str = ""
     received: bool
     ad_received: bool = False
-    item: item.item_model.Item
+    item: item_model.Item
 
 
 async def has_login_bonus(context: idol.BasicSchoolIdolContext, user: main.User, year: int, month: int, day: int):
@@ -54,12 +55,10 @@ async def get_calendar(context: idol.BasicSchoolIdolContext, year: int, month: i
 
     for day in range(1, days + 1):
         add_type, item_id, amount, special = await login_bonus_protocol.get_rewards(day, month, year, context)
+        item_base = item_model.BaseItem(add_type=const.ADD_TYPE(add_type), item_id=item_id, amount=amount)
         dotw = (weekday + day) % 7
         lbonus_calendar = LoginBonusCalendar(
-            day=day,
-            day_of_the_week=dotw,
-            received=False,
-            item=item.item_model.Item(add_type=const.ADD_TYPE(add_type), item_id=item_id, amount=amount),
+            day=day, day_of_the_week=dotw, received=False, item=await advanced.deserialize_item_data(context, item_base)
         )
 
         if special is not None:

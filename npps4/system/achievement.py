@@ -4,8 +4,10 @@ import dataclasses
 import pydantic
 import sqlalchemy
 
+from . import advanced
 from . import common
 from . import item_model
+from . import reward
 from .. import achievement_reward
 from .. import db
 from .. import idol
@@ -121,7 +123,22 @@ async def to_game_representation(
 
 
 async def get_achievement_rewards(context: idol.BasicSchoolIdolContext, ach: main.Achievement):
-    return achievement_reward.get(ach.achievement_id)
+    old_reward_data = achievement_reward.get(ach.achievement_id)
+    new_reward_data: list[common.AnyItem] = []
+
+    for i in old_reward_data:
+        extra_data = i.get_extra_data()
+        if extra_data is not None:
+            extra_data = extra_data.model_dump()
+
+        new_reward_data.append(
+            await advanced.deserialize_item_data(
+                context,
+                item_model.BaseItem(add_type=i.add_type, item_id=i.item_id, amount=i.amount, extra_data=extra_data),
+            )
+        )
+
+    return new_reward_data
 
 
 async def init(context: idol.BasicSchoolIdolContext, user: main.User):
@@ -604,3 +621,45 @@ async def count_accomplished_achievement_by_category(context: idol.BasicSchoolId
     )
     result = await context.db.achievement.execute(q)
     return [(int(r[0]), int(r[1])) for r in result]
+
+
+async def give_achievement_reward(
+    context: idol.BasicSchoolIdolContext,
+    user: main.User,
+    ach_info: achievement.Achievement,
+    rewards: list[item_model.Item],
+):
+    for r in rewards:
+        # TODO: Proper message for reward insertion
+        if r.reward_box_flag:
+            await reward.add_item(
+                context,
+                user,
+                r,
+                ach_info.title or "FIXME",
+                ach_info.title_en or ach_info.title or "FIXME EN",
+            )
+        else:
+            add_result = await advanced.add_item(context, user, r)
+            if not add_result.success:
+                await reward.add_item(
+                    context,
+                    user,
+                    r,
+                    ach_info.title or "FIXME",
+                    ach_info.title_en or ach_info.title or "FIXME EN",
+                )
+
+
+async def process_achievement_reward(
+    context: idol.BasicSchoolIdolContext,
+    user: main.User,
+    achievements: list[main.Achievement],
+    rewardss: list[list[item_model.Item]],
+):
+    for ach, reward_list in zip(achievements, rewardss):
+        ach_info = await get_achievement_info(context, ach.achievement_id)
+        if ach_info is not None and ach_info.auto_reward_flag:
+            await give_achievement_reward(context, user, ach_info, reward_list)
+            await mark_achievement_reward_claimed(context, ach)
+    await context.db.main.flush()

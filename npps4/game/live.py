@@ -643,7 +643,7 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
     new_achievement_rewards = await advanced.fixup_achievement_reward(context, current_user, new_achievement_rewards)
 
     # Give achievement rewards
-    await advanced.process_achievement_reward(
+    await achievement.process_achievement_reward(
         context, current_user, accomplished_achievement.accomplished, accomplished_achievement_rewards
     )
 

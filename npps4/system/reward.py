@@ -4,10 +4,10 @@ import json
 import pydantic
 import sqlalchemy
 
+from . import advanced
 from . import item_model
 from . import live
 from . import live_model
-from . import scenario_model
 from . import unit_model
 from .. import const
 from .. import idol
@@ -38,6 +38,7 @@ async def add_item(
     reason_en: str | None = None,
     expire: int = 0,
 ):
+    extra_data = item_data.get_extra_data()
     incentive = main.Incentive(
         user_id=user.id,
         add_type=item_data.add_type,
@@ -45,7 +46,9 @@ async def add_item(
         amount=item_data.amount,
         message_jp=reason_jp,
         message_en=reason_en,
-        extra_data=json.dumps(item_data.dump_extra_data()),
+        extra_data=(
+            json.dumps(extra_data.model_dump(mode="json"), separators=(",", ":")) if extra_data is not None else None
+        ),
         expire_date=expire,
     )
 
@@ -129,29 +132,23 @@ async def count_presentbox(
 
 
 async def resolve_incentive(context: idol.BasicSchoolIdolContext, user: main.User, incentive: main.Incentive):
-    match incentive.add_type:
-        case const.ADD_TYPE.UNIT:
-            assert incentive.extra_data is not None
-            extra_data = json.loads(incentive.extra_data)
-            base_info = {"item_id": incentive.item_id, "amount": incentive.amount}
-            if extra_data["is_support_member"]:
-                item_data = unit_model.UnitSupportItem.model_validate(base_info | extra_data)
-            else:
-                item_data = unit_model.UnitItem.model_validate(base_info | extra_data)
-        case const.ADD_TYPE.LIVE:
-            item_data = live_model.LiveItem(
-                item_id=incentive.item_id,
-                amount=incentive.amount,
-                additional_normal_live_status_list=await live.get_normal_live_clear_status_of_track(
-                    context, user, incentive.item_id
-                ),
-            )
-        case const.ADD_TYPE.SCENARIO:
-            item_data = scenario_model.ScenarioItem(item_id=incentive.item_id, amount=incentive.amount)
-        case _:
-            item_data = item_model.Item(
-                add_type=const.ADD_TYPE(incentive.add_type), item_id=incentive.item_id, amount=incentive.amount
-            )
+    extra_data = json.loads(incentive.extra_data) if incentive.extra_data is not None else None
+    item_data = await advanced.deserialize_item_data(
+        context,
+        item_model.BaseItem(
+            add_type=const.ADD_TYPE(incentive.add_type),
+            item_id=incentive.item_id,
+            amount=incentive.amount,
+            extra_data=extra_data,
+        ),
+    )
+    if isinstance(item_data, live_model.LiveItem):
+        item_data.additional_normal_live_status_list = await live.get_normal_live_clear_status_of_track(
+            context, user, incentive.item_id
+        )
+        item_data.additional_training_live_status_list = await live.get_training_live_clear_status_of_track(
+            context, user, incentive.item_id
+        )
     return item_data
 
 

@@ -41,8 +41,7 @@
 			"title": "ADD_TYPE",
 			"type": "integer"
 		},
-		"Item": {
-			"additionalProperties": true,
+		"BaseItem": {
 			"properties": {
 				"add_type": {
 					"$ref": "#/$defs/ADD_TYPE"
@@ -56,31 +55,27 @@
 					"title": "Amount",
 					"type": "integer"
 				},
-				"item_category_id": {
-					"default": 0,
-					"title": "Item Category Id",
-					"type": "integer"
-				},
-				"reward_box_flag": {
-					"default": false,
-					"title": "Reward Box Flag",
-					"type": "boolean"
-				},
-				"comment": {
-					"default": "",
-					"title": "Comment",
-					"type": "string"
+				"extra_data": {
+					"anyOf": [
+						{
+							"type": "object"
+						},
+						{
+							"type": "null"
+						}
+					],
+					"default": null,
+					"title": "Extra Data"
 				}
 			},
 			"required": [
 				"add_type",
 				"item_id"
 			],
-			"title": "Item",
+			"title": "BaseItem",
 			"type": "object"
 		},
-		"ItemWithWeight": {
-			"additionalProperties": true,
+		"BaseItemWithWeight": {
 			"properties": {
 				"add_type": {
 					"$ref": "#/$defs/ADD_TYPE"
@@ -94,20 +89,17 @@
 					"title": "Amount",
 					"type": "integer"
 				},
-				"item_category_id": {
-					"default": 0,
-					"title": "Item Category Id",
-					"type": "integer"
-				},
-				"reward_box_flag": {
-					"default": false,
-					"title": "Reward Box Flag",
-					"type": "boolean"
-				},
-				"comment": {
-					"default": "",
-					"title": "Comment",
-					"type": "string"
+				"extra_data": {
+					"anyOf": [
+						{
+							"type": "object"
+						},
+						{
+							"type": "null"
+						}
+					],
+					"default": null,
+					"title": "Extra Data"
 				},
 				"weight": {
 					"title": "Weight",
@@ -119,7 +111,7 @@
 				"item_id",
 				"weight"
 			],
-			"title": "ItemWithWeight",
+			"title": "BaseItemWithWeight",
 			"type": "object"
 		},
 		"LiveEffortRewardDrops": {
@@ -130,7 +122,7 @@
 				},
 				"drops": {
 					"items": {
-						"$ref": "#/$defs/ItemWithWeight"
+						"$ref": "#/$defs/BaseItemWithWeight"
 					},
 					"title": "Drops",
 					"type": "array"
@@ -605,7 +597,7 @@
 				},
 				"items": {
 					"items": {
-						"$ref": "#/$defs/Item"
+						"$ref": "#/$defs/BaseItem"
 					},
 					"title": "Items",
 					"type": "array"

@@ -50,7 +50,7 @@ async def simulate_completion(
 
     units: list[main.Unit] = []
     for uid in unit_ids:
-        unit_object = await unit.add_unit(context, user, uid, True)
+        unit_object = await unit.add_unit_simple(context, user, uid, True)
         if unit_object is None:
             raise RuntimeError("unable to add units")
 
