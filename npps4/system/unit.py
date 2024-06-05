@@ -151,13 +151,13 @@ async def add_unit_simple(
     extra_data: unit_model.UnitExtraData = unit_model.UnitExtraData.EMPTY,
 ):
     unit_item = await create_unit_item(context, unit_id, extra_data)
-    if isinstance(unit_item, unit_model.UnitSupportItem):
+    if isinstance(unit_item, unit_model.UnitItem):
+        unit_data = await create_unit_data(context, user, unit_item, active)
+        await add_unit_by_object(context, user, unit_data)
+        return unit_data
+    else:
         await add_supporter_unit(context, user, unit_id)
         return None
-
-    unit_data = await create_unit_data(context, user, unit_item, active)
-    await add_unit_by_object(context, user, unit_data)
-    return unit_data
 
 
 async def get_unit(context: idol.BasicSchoolIdolContext, unit_owning_user_id: int):
