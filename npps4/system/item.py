@@ -32,8 +32,8 @@ async def update_item_category_id(context: idol.BasicSchoolIdolContext, item_dat
     return item_data
 
 
-def loveca(amount: int, /):
-    return item_model.Item(add_type=const.ADD_TYPE.LOVECA, item_id=4, amount=amount, item_category_id=4)
+def loveca(amount: int, /, paid: bool = False):
+    return item_model.Item(add_type=const.ADD_TYPE.LOVECA, item_id=1 if paid else 4, amount=amount, item_category_id=4)
 
 
 def game_coin(amount: int, /):
@@ -42,6 +42,10 @@ def game_coin(amount: int, /):
 
 def social_point(amount: int, /):
     return item_model.Item(add_type=const.ADD_TYPE.SOCIAL_POINT, item_id=2, amount=amount, item_category_id=2)
+
+
+def base_loveca(amount: int, /, paid: bool = False):
+    return item_model.BaseItem(add_type=const.ADD_TYPE.LOVECA, item_id=1 if paid else 4, amount=amount)
 
 
 async def get_buff_item_ids(context: idol.BasicSchoolIdolContext):

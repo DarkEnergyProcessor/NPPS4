@@ -1,6 +1,7044 @@
 {
 	"$schema": "https://raw.githubusercontent.com/DarkEnergyProcessor/NPPS4/master/npps4/server_data_schema.json",
 	"badwords": [],
+	"achievement_reward": [
+		{
+			"achievement_id": 49,
+			"rewards": [
+				{
+					"add_type": 3001,
+					"item_id": 4
+				}
+			]
+		},
+		{
+			"achievement_id": 62,
+			"rewards": [
+				{
+					"add_type": 1000,
+					"item_id": 5
+				}
+			]
+		},
+		{
+			"achievement_id": 103,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 4
+				}
+			]
+		},
+		{
+			"achievement_id": 104,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 5
+				}
+			]
+		},
+		{
+			"achievement_id": 106,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 6
+				}
+			]
+		},
+		{
+			"achievement_id": 108,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 7
+				}
+			]
+		},
+		{
+			"achievement_id": 109,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 8
+				}
+			]
+		},
+		{
+			"achievement_id": 110,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 3
+				}
+			]
+		},
+		{
+			"achievement_id": 111,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 9
+				}
+			]
+		},
+		{
+			"achievement_id": 113,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 10
+				}
+			]
+		},
+		{
+			"achievement_id": 115,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 11
+				}
+			]
+		},
+		{
+			"achievement_id": 116,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 5
+				}
+			]
+		},
+		{
+			"achievement_id": 117,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 12
+				}
+			]
+		},
+		{
+			"achievement_id": 118,
+			"rewards": [
+				{
+					"add_type": 5200,
+					"item_id": 2
+				}
+			]
+		},
+		{
+			"achievement_id": 119,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 13
+				}
+			]
+		},
+		{
+			"achievement_id": 121,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 14
+				}
+			]
+		},
+		{
+			"achievement_id": 122,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 7
+				}
+			]
+		},
+		{
+			"achievement_id": 123,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 15
+				}
+			]
+		},
+		{
+			"achievement_id": 125,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 16
+				}
+			]
+		},
+		{
+			"achievement_id": 127,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 17
+				}
+			]
+		},
+		{
+			"achievement_id": 128,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 9
+				}
+			]
+		},
+		{
+			"achievement_id": 129,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 18
+				}
+			]
+		},
+		{
+			"achievement_id": 131,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 19
+				}
+			]
+		},
+		{
+			"achievement_id": 133,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 20
+				}
+			]
+		},
+		{
+			"achievement_id": 134,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 14
+				}
+			]
+		},
+		{
+			"achievement_id": 135,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 21
+				}
+			]
+		},
+		{
+			"achievement_id": 136,
+			"rewards": [
+				{
+					"add_type": 5200,
+					"item_id": 3
+				}
+			]
+		},
+		{
+			"achievement_id": 137,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 22
+				}
+			]
+		},
+		{
+			"achievement_id": 139,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 23
+				}
+			]
+		},
+		{
+			"achievement_id": 140,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 21
+				}
+			]
+		},
+		{
+			"achievement_id": 141,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 24
+				}
+			]
+		},
+		{
+			"achievement_id": 143,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 25
+				}
+			]
+		},
+		{
+			"achievement_id": 145,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 26
+				}
+			]
+		},
+		{
+			"achievement_id": 146,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 26
+				}
+			]
+		},
+		{
+			"achievement_id": 147,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 27
+				}
+			]
+		},
+		{
+			"achievement_id": 149,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 28
+				}
+			]
+		},
+		{
+			"achievement_id": 150,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 32
+				}
+			]
+		},
+		{
+			"achievement_id": 151,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 29
+				}
+			]
+		},
+		{
+			"achievement_id": 153,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 30
+				}
+			]
+		},
+		{
+			"achievement_id": 154,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 23
+				}
+			]
+		},
+		{
+			"achievement_id": 155,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 31
+				}
+			]
+		},
+		{
+			"achievement_id": 156,
+			"rewards": [
+				{
+					"add_type": 5200,
+					"item_id": 4
+				}
+			]
+		},
+		{
+			"achievement_id": 157,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 32
+				}
+			]
+		},
+		{
+			"achievement_id": 158,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 40
+				}
+			]
+		},
+		{
+			"achievement_id": 159,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 33
+				}
+			]
+		},
+		{
+			"achievement_id": 161,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 34
+				}
+			]
+		},
+		{
+			"achievement_id": 162,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 15
+				}
+			]
+		},
+		{
+			"achievement_id": 163,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 35
+				}
+			]
+		},
+		{
+			"achievement_id": 165,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 36
+				}
+			]
+		},
+		{
+			"achievement_id": 166,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 55
+				}
+			]
+		},
+		{
+			"achievement_id": 167,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 37
+				}
+			]
+		},
+		{
+			"achievement_id": 169,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 38
+				}
+			]
+		},
+		{
+			"achievement_id": 170,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 12
+				}
+			]
+		},
+		{
+			"achievement_id": 171,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 39
+				}
+			]
+		},
+		{
+			"achievement_id": 173,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 40
+				}
+			]
+		},
+		{
+			"achievement_id": 174,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 79
+				}
+			]
+		},
+		{
+			"achievement_id": 175,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 41
+				}
+			]
+		},
+		{
+			"achievement_id": 177,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 42
+				}
+			]
+		},
+		{
+			"achievement_id": 178,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 35
+				}
+			]
+		},
+		{
+			"achievement_id": 179,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 43
+				}
+			]
+		},
+		{
+			"achievement_id": 180,
+			"rewards": [
+				{
+					"add_type": 5200,
+					"item_id": 5
+				}
+			]
+		},
+		{
+			"achievement_id": 181,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 44
+				}
+			]
+		},
+		{
+			"achievement_id": 182,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 11
+				}
+			]
+		},
+		{
+			"achievement_id": 183,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 45
+				}
+			]
+		},
+		{
+			"achievement_id": 185,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 46
+				}
+			]
+		},
+		{
+			"achievement_id": 186,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 141
+				}
+			]
+		},
+		{
+			"achievement_id": 187,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 47
+				}
+			]
+		},
+		{
+			"achievement_id": 189,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 48
+				}
+			]
+		},
+		{
+			"achievement_id": 190,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 146
+				}
+			]
+		},
+		{
+			"achievement_id": 191,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 49
+				}
+			]
+		},
+		{
+			"achievement_id": 193,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 50
+				}
+			]
+		},
+		{
+			"achievement_id": 194,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 39
+				}
+			]
+		},
+		{
+			"achievement_id": 195,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 51
+				}
+			]
+		},
+		{
+			"achievement_id": 197,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 52
+				}
+			]
+		},
+		{
+			"achievement_id": 198,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 166
+				}
+			]
+		},
+		{
+			"achievement_id": 199,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 53
+				}
+			]
+		},
+		{
+			"achievement_id": 201,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 54
+				}
+			]
+		},
+		{
+			"achievement_id": 202,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 45
+				}
+			]
+		},
+		{
+			"achievement_id": 203,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 55
+				}
+			]
+		},
+		{
+			"achievement_id": 204,
+			"rewards": [
+				{
+					"add_type": 5200,
+					"item_id": 6
+				}
+			]
+		},
+		{
+			"achievement_id": 205,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 56
+				}
+			]
+		},
+		{
+			"achievement_id": 206,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 186
+				}
+			]
+		},
+		{
+			"achievement_id": 207,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 57
+				}
+			]
+		},
+		{
+			"achievement_id": 209,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 58
+				}
+			]
+		},
+		{
+			"achievement_id": 210,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 51
+				}
+			]
+		},
+		{
+			"achievement_id": 211,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 59
+				}
+			]
+		},
+		{
+			"achievement_id": 213,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 60
+				}
+			]
+		},
+		{
+			"achievement_id": 214,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 197
+				}
+			]
+		},
+		{
+			"achievement_id": 215,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 61
+				}
+			]
+		},
+		{
+			"achievement_id": 217,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 62
+				}
+			]
+		},
+		{
+			"achievement_id": 218,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 67
+				}
+			]
+		},
+		{
+			"achievement_id": 219,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 63
+				}
+			]
+		},
+		{
+			"achievement_id": 221,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 64
+				}
+			]
+		},
+		{
+			"achievement_id": 222,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 214
+				}
+			]
+		},
+		{
+			"achievement_id": 223,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 65
+				}
+			]
+		},
+		{
+			"achievement_id": 225,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 66
+				}
+			]
+		},
+		{
+			"achievement_id": 226,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 123
+				}
+			]
+		},
+		{
+			"achievement_id": 227,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 67
+				}
+			]
+		},
+		{
+			"achievement_id": 228,
+			"rewards": [
+				{
+					"add_type": 5200,
+					"item_id": 7
+				}
+			]
+		},
+		{
+			"achievement_id": 229,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 68
+				}
+			]
+		},
+		{
+			"achievement_id": 230,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 230
+				}
+			]
+		},
+		{
+			"achievement_id": 231,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 69
+				}
+			]
+		},
+		{
+			"achievement_id": 233,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 70
+				}
+			]
+		},
+		{
+			"achievement_id": 234,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 163
+				}
+			]
+		},
+		{
+			"achievement_id": 235,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 71
+				}
+			]
+		},
+		{
+			"achievement_id": 237,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 72
+				}
+			]
+		},
+		{
+			"achievement_id": 238,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 242
+				}
+			]
+		},
+		{
+			"achievement_id": 239,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 73
+				}
+			]
+		},
+		{
+			"achievement_id": 241,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 74
+				}
+			]
+		},
+		{
+			"achievement_id": 242,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 182
+				}
+			]
+		},
+		{
+			"achievement_id": 243,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 75
+				}
+			]
+		},
+		{
+			"achievement_id": 245,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 76
+				}
+			]
+		},
+		{
+			"achievement_id": 246,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 256
+				}
+			]
+		},
+		{
+			"achievement_id": 247,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 77
+				}
+			]
+		},
+		{
+			"achievement_id": 249,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 78
+				}
+			]
+		},
+		{
+			"achievement_id": 250,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 193
+				}
+			]
+		},
+		{
+			"achievement_id": 251,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 79
+				}
+			]
+		},
+		{
+			"achievement_id": 252,
+			"rewards": [
+				{
+					"add_type": 5200,
+					"item_id": 8
+				}
+			]
+		},
+		{
+			"achievement_id": 253,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 80
+				}
+			]
+		},
+		{
+			"achievement_id": 254,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 272
+				}
+			]
+		},
+		{
+			"achievement_id": 255,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 81
+				}
+			]
+		},
+		{
+			"achievement_id": 257,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 82
+				}
+			]
+		},
+		{
+			"achievement_id": 258,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 143
+				}
+			]
+		},
+		{
+			"achievement_id": 259,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 83
+				}
+			]
+		},
+		{
+			"achievement_id": 261,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 84
+				}
+			]
+		},
+		{
+			"achievement_id": 262,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 286
+				}
+			]
+		},
+		{
+			"achievement_id": 263,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 85
+				}
+			]
+		},
+		{
+			"achievement_id": 265,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 86
+				}
+			]
+		},
+		{
+			"achievement_id": 266,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 238
+				}
+			]
+		},
+		{
+			"achievement_id": 267,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 87
+				}
+			]
+		},
+		{
+			"achievement_id": 269,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 88
+				}
+			]
+		},
+		{
+			"achievement_id": 270,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 299
+				}
+			]
+		},
+		{
+			"achievement_id": 271,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 89
+				}
+			]
+		},
+		{
+			"achievement_id": 273,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 90
+				}
+			]
+		},
+		{
+			"achievement_id": 274,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 207
+				}
+			]
+		},
+		{
+			"achievement_id": 275,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 91
+				}
+			]
+		},
+		{
+			"achievement_id": 276,
+			"rewards": [
+				{
+					"add_type": 5200,
+					"item_id": 9
+				}
+			]
+		},
+		{
+			"achievement_id": 277,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 92
+				}
+			]
+		},
+		{
+			"achievement_id": 278,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 313
+				}
+			]
+		},
+		{
+			"achievement_id": 279,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 93
+				}
+			]
+		},
+		{
+			"achievement_id": 281,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 94
+				}
+			]
+		},
+		{
+			"achievement_id": 282,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 226
+				}
+			]
+		},
+		{
+			"achievement_id": 283,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 95
+				}
+			]
+		},
+		{
+			"achievement_id": 285,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 96
+				}
+			]
+		},
+		{
+			"achievement_id": 286,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 327
+				}
+			]
+		},
+		{
+			"achievement_id": 287,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 97
+				}
+			]
+		},
+		{
+			"achievement_id": 289,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 98
+				}
+			]
+		},
+		{
+			"achievement_id": 290,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 251
+				}
+			]
+		},
+		{
+			"achievement_id": 291,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 99
+				}
+			]
+		},
+		{
+			"achievement_id": 293,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 100
+				}
+			]
+		},
+		{
+			"achievement_id": 294,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 334
+				}
+			]
+		},
+		{
+			"achievement_id": 295,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 101
+				}
+			]
+		},
+		{
+			"achievement_id": 297,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 102
+				}
+			]
+		},
+		{
+			"achievement_id": 298,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 268
+				}
+			]
+		},
+		{
+			"achievement_id": 299,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 103
+				}
+			]
+		},
+		{
+			"achievement_id": 300,
+			"rewards": [
+				{
+					"add_type": 5200,
+					"item_id": 10
+				}
+			]
+		},
+		{
+			"achievement_id": 301,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 104
+				}
+			]
+		},
+		{
+			"achievement_id": 302,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 365
+				}
+			]
+		},
+		{
+			"achievement_id": 303,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 105
+				}
+			]
+		},
+		{
+			"achievement_id": 305,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 106
+				}
+			]
+		},
+		{
+			"achievement_id": 306,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 281
+				}
+			]
+		},
+		{
+			"achievement_id": 307,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 107
+				}
+			]
+		},
+		{
+			"achievement_id": 309,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 108
+				}
+			]
+		},
+		{
+			"achievement_id": 310,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 374
+				}
+			]
+		},
+		{
+			"achievement_id": 311,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 109
+				}
+			]
+		},
+		{
+			"achievement_id": 313,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 110
+				}
+			]
+		},
+		{
+			"achievement_id": 314,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 294
+				}
+			]
+		},
+		{
+			"achievement_id": 315,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 111
+				}
+			]
+		},
+		{
+			"achievement_id": 317,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 112
+				}
+			]
+		},
+		{
+			"achievement_id": 318,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 395
+				}
+			]
+		},
+		{
+			"achievement_id": 319,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 113
+				}
+			]
+		},
+		{
+			"achievement_id": 321,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 114
+				}
+			]
+		},
+		{
+			"achievement_id": 322,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 322
+				}
+			]
+		},
+		{
+			"achievement_id": 323,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 115
+				}
+			]
+		},
+		{
+			"achievement_id": 324,
+			"rewards": [
+				{
+					"add_type": 5200,
+					"item_id": 11
+				}
+			]
+		},
+		{
+			"achievement_id": 325,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 116
+				}
+			]
+		},
+		{
+			"achievement_id": 326,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 309
+				}
+			]
+		},
+		{
+			"achievement_id": 327,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 117
+				}
+			]
+		},
+		{
+			"achievement_id": 329,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 118
+				}
+			]
+		},
+		{
+			"achievement_id": 330,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 419
+				}
+			]
+		},
+		{
+			"achievement_id": 331,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 119
+				}
+			]
+		},
+		{
+			"achievement_id": 333,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 120
+				}
+			]
+		},
+		{
+			"achievement_id": 334,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 427
+				}
+			]
+		},
+		{
+			"achievement_id": 335,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 121
+				}
+			]
+		},
+		{
+			"achievement_id": 337,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 122
+				}
+			]
+		},
+		{
+			"achievement_id": 338,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 369
+				}
+			]
+		},
+		{
+			"achievement_id": 339,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 123
+				}
+			]
+		},
+		{
+			"achievement_id": 341,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 124
+				}
+			]
+		},
+		{
+			"achievement_id": 342,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 442
+				}
+			]
+		},
+		{
+			"achievement_id": 343,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 125
+				}
+			]
+		},
+		{
+			"achievement_id": 345,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 126
+				}
+			]
+		},
+		{
+			"achievement_id": 346,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 396
+				}
+			]
+		},
+		{
+			"achievement_id": 347,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 127
+				}
+			]
+		},
+		{
+			"achievement_id": 348,
+			"rewards": [
+				{
+					"add_type": 5200,
+					"item_id": 12
+				}
+			]
+		},
+		{
+			"achievement_id": 349,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 128
+				}
+			]
+		},
+		{
+			"achievement_id": 350,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 444
+				}
+			]
+		},
+		{
+			"achievement_id": 351,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 129
+				}
+			]
+		},
+		{
+			"achievement_id": 353,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 130
+				}
+			]
+		},
+		{
+			"achievement_id": 354,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 336
+				}
+			]
+		},
+		{
+			"achievement_id": 355,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 131
+				}
+			]
+		},
+		{
+			"achievement_id": 357,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 132
+				}
+			]
+		},
+		{
+			"achievement_id": 358,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 421
+				}
+			]
+		},
+		{
+			"achievement_id": 359,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 133
+				}
+			]
+		},
+		{
+			"achievement_id": 361,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 134
+				}
+			]
+		},
+		{
+			"achievement_id": 362,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 447
+				}
+			]
+		},
+		{
+			"achievement_id": 363,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 135
+				}
+			]
+		},
+		{
+			"achievement_id": 365,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 136
+				}
+			]
+		},
+		{
+			"achievement_id": 366,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 448
+				}
+			]
+		},
+		{
+			"achievement_id": 367,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 137
+				}
+			]
+		},
+		{
+			"achievement_id": 369,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 138
+				}
+			]
+		},
+		{
+			"achievement_id": 370,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 443
+				}
+			]
+		},
+		{
+			"achievement_id": 371,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 139
+				}
+			]
+		},
+		{
+			"achievement_id": 372,
+			"rewards": [
+				{
+					"add_type": 5200,
+					"item_id": 13
+				}
+			]
+		},
+		{
+			"achievement_id": 373,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 140
+				}
+			]
+		},
+		{
+			"achievement_id": 374,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 451
+				}
+			]
+		},
+		{
+			"achievement_id": 375,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 141
+				}
+			]
+		},
+		{
+			"achievement_id": 377,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 142
+				}
+			]
+		},
+		{
+			"achievement_id": 378,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 445
+				}
+			]
+		},
+		{
+			"achievement_id": 379,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 143
+				}
+			]
+		},
+		{
+			"achievement_id": 381,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 144
+				}
+			]
+		},
+		{
+			"achievement_id": 382,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 455
+				}
+			]
+		},
+		{
+			"achievement_id": 383,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 145
+				}
+			]
+		},
+		{
+			"achievement_id": 385,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 146
+				}
+			]
+		},
+		{
+			"achievement_id": 386,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 449
+				}
+			]
+		},
+		{
+			"achievement_id": 387,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 147
+				}
+			]
+		},
+		{
+			"achievement_id": 389,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 148
+				}
+			]
+		},
+		{
+			"achievement_id": 390,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 458
+				}
+			]
+		},
+		{
+			"achievement_id": 391,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 149
+				}
+			]
+		},
+		{
+			"achievement_id": 393,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 150
+				}
+			]
+		},
+		{
+			"achievement_id": 394,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 454
+				}
+			]
+		},
+		{
+			"achievement_id": 395,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 151
+				}
+			]
+		},
+		{
+			"achievement_id": 396,
+			"rewards": [
+				{
+					"add_type": 5200,
+					"item_id": 14
+				}
+			]
+		},
+		{
+			"achievement_id": 397,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 152
+				}
+			]
+		},
+		{
+			"achievement_id": 398,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 460
+				}
+			]
+		},
+		{
+			"achievement_id": 399,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 153
+				}
+			]
+		},
+		{
+			"achievement_id": 401,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 154
+				}
+			]
+		},
+		{
+			"achievement_id": 402,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 459
+				}
+			]
+		},
+		{
+			"achievement_id": 403,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 155
+				}
+			]
+		},
+		{
+			"achievement_id": 405,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 156
+				}
+			]
+		},
+		{
+			"achievement_id": 406,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 461
+				}
+			]
+		},
+		{
+			"achievement_id": 407,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 157
+				}
+			]
+		},
+		{
+			"achievement_id": 409,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 158
+				}
+			]
+		},
+		{
+			"achievement_id": 410,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 464
+				}
+			]
+		},
+		{
+			"achievement_id": 411,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 159
+				}
+			]
+		},
+		{
+			"achievement_id": 413,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 160
+				}
+			]
+		},
+		{
+			"achievement_id": 414,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 465
+				}
+			]
+		},
+		{
+			"achievement_id": 415,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 161
+				}
+			]
+		},
+		{
+			"achievement_id": 417,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 162
+				}
+			]
+		},
+		{
+			"achievement_id": 418,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 466
+				}
+			]
+		},
+		{
+			"achievement_id": 419,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 163
+				}
+			]
+		},
+		{
+			"achievement_id": 420,
+			"rewards": [
+				{
+					"add_type": 5200,
+					"item_id": 15
+				}
+			]
+		},
+		{
+			"achievement_id": 421,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 164
+				}
+			]
+		},
+		{
+			"achievement_id": 422,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 469
+				}
+			]
+		},
+		{
+			"achievement_id": 423,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 165
+				}
+			]
+		},
+		{
+			"achievement_id": 425,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 166
+				}
+			]
+		},
+		{
+			"achievement_id": 426,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 472
+				}
+			]
+		},
+		{
+			"achievement_id": 427,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 167
+				}
+			]
+		},
+		{
+			"achievement_id": 429,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 168
+				}
+			]
+		},
+		{
+			"achievement_id": 430,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 475
+				}
+			]
+		},
+		{
+			"achievement_id": 431,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 169
+				}
+			]
+		},
+		{
+			"achievement_id": 433,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 189
+				}
+			]
+		},
+		{
+			"achievement_id": 435,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 190
+				}
+			]
+		},
+		{
+			"achievement_id": 437,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 170
+				}
+			]
+		},
+		{
+			"achievement_id": 438,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 462
+				}
+			]
+		},
+		{
+			"achievement_id": 439,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 171
+				}
+			]
+		},
+		{
+			"achievement_id": 441,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 191
+				}
+			]
+		},
+		{
+			"achievement_id": 442,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 477
+				}
+			]
+		},
+		{
+			"achievement_id": 443,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 192
+				}
+			]
+		},
+		{
+			"achievement_id": 445,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 172
+				}
+			]
+		},
+		{
+			"achievement_id": 447,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 173
+				}
+			]
+		},
+		{
+			"achievement_id": 449,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 193
+				}
+			]
+		},
+		{
+			"achievement_id": 450,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 479
+				}
+			]
+		},
+		{
+			"achievement_id": 451,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 194
+				}
+			]
+		},
+		{
+			"achievement_id": 453,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 174
+				}
+			]
+		},
+		{
+			"achievement_id": 454,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 482
+				}
+			]
+		},
+		{
+			"achievement_id": 455,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 175
+				}
+			]
+		},
+		{
+			"achievement_id": 456,
+			"rewards": [
+				{
+					"add_type": 5200,
+					"item_id": 16
+				}
+			]
+		},
+		{
+			"achievement_id": 457,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 195
+				}
+			]
+		},
+		{
+			"achievement_id": 459,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 196
+				}
+			]
+		},
+		{
+			"achievement_id": 461,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 176
+				}
+			]
+		},
+		{
+			"achievement_id": 463,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 177
+				}
+			]
+		},
+		{
+			"achievement_id": 465,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 197
+				}
+			]
+		},
+		{
+			"achievement_id": 466,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 476
+				}
+			]
+		},
+		{
+			"achievement_id": 467,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 198
+				}
+			]
+		},
+		{
+			"achievement_id": 469,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 178
+				}
+			]
+		},
+		{
+			"achievement_id": 470,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 484
+				}
+			]
+		},
+		{
+			"achievement_id": 471,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 179
+				}
+			]
+		},
+		{
+			"achievement_id": 473,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 199
+				}
+			]
+		},
+		{
+			"achievement_id": 475,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 200
+				}
+			]
+		},
+		{
+			"achievement_id": 477,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 180
+				}
+			]
+		},
+		{
+			"achievement_id": 479,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 181
+				}
+			]
+		},
+		{
+			"achievement_id": 481,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 201
+				}
+			]
+		},
+		{
+			"achievement_id": 482,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 478
+				}
+			]
+		},
+		{
+			"achievement_id": 483,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 202
+				}
+			]
+		},
+		{
+			"achievement_id": 485,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 182
+				}
+			]
+		},
+		{
+			"achievement_id": 486,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 489
+				}
+			]
+		},
+		{
+			"achievement_id": 487,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 183
+				}
+			]
+		},
+		{
+			"achievement_id": 488,
+			"rewards": [
+				{
+					"add_type": 5200,
+					"item_id": 19
+				}
+			]
+		},
+		{
+			"achievement_id": 489,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 203
+				}
+			]
+		},
+		{
+			"achievement_id": 491,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 204
+				}
+			]
+		},
+		{
+			"achievement_id": 494,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 205
+				}
+			]
+		},
+		{
+			"achievement_id": 495,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 491
+				}
+			]
+		},
+		{
+			"achievement_id": 496,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 206
+				}
+			]
+		},
+		{
+			"achievement_id": 499,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 207
+				}
+			]
+		},
+		{
+			"achievement_id": 500,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 493
+				}
+			]
+		},
+		{
+			"achievement_id": 501,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 208
+				}
+			]
+		},
+		{
+			"achievement_id": 504,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 209
+				}
+			]
+		},
+		{
+			"achievement_id": 506,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 210
+				}
+			]
+		},
+		{
+			"achievement_id": 509,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 211
+				}
+			]
+		},
+		{
+			"achievement_id": 511,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 212
+				}
+			]
+		},
+		{
+			"achievement_id": 514,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 213
+				}
+			]
+		},
+		{
+			"achievement_id": 515,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 481
+				}
+			]
+		},
+		{
+			"achievement_id": 516,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 214
+				}
+			]
+		},
+		{
+			"achievement_id": 519,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 215
+				}
+			]
+		},
+		{
+			"achievement_id": 521,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 216
+				}
+			]
+		},
+		{
+			"achievement_id": 524,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 217
+				}
+			]
+		},
+		{
+			"achievement_id": 525,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 483
+				}
+			]
+		},
+		{
+			"achievement_id": 526,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 218
+				}
+			]
+		},
+		{
+			"achievement_id": 529,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 219
+				}
+			]
+		},
+		{
+			"achievement_id": 531,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 220
+				}
+			]
+		},
+		{
+			"achievement_id": 534,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 221
+				}
+			]
+		},
+		{
+			"achievement_id": 535,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 486
+				}
+			]
+		},
+		{
+			"achievement_id": 536,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 222
+				}
+			]
+		},
+		{
+			"achievement_id": 539,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 223
+				}
+			]
+		},
+		{
+			"achievement_id": 541,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 224
+				}
+			]
+		},
+		{
+			"achievement_id": 544,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 225
+				}
+			]
+		},
+		{
+			"achievement_id": 545,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 487
+				}
+			]
+		},
+		{
+			"achievement_id": 546,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 226
+				}
+			]
+		},
+		{
+			"achievement_id": 549,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 227
+				}
+			]
+		},
+		{
+			"achievement_id": 551,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 228
+				}
+			]
+		},
+		{
+			"achievement_id": 554,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 229
+				}
+			]
+		},
+		{
+			"achievement_id": 555,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 503
+				}
+			]
+		},
+		{
+			"achievement_id": 556,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 230
+				}
+			]
+		},
+		{
+			"achievement_id": 559,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 231
+				}
+			]
+		},
+		{
+			"achievement_id": 561,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 232
+				}
+			]
+		},
+		{
+			"achievement_id": 564,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 233
+				}
+			]
+		},
+		{
+			"achievement_id": 565,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 507
+				}
+			]
+		},
+		{
+			"achievement_id": 566,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 234
+				}
+			]
+		},
+		{
+			"achievement_id": 569,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 235
+				}
+			]
+		},
+		{
+			"achievement_id": 571,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 236
+				}
+			]
+		},
+		{
+			"achievement_id": 574,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 237
+				}
+			]
+		},
+		{
+			"achievement_id": 575,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 508
+				}
+			]
+		},
+		{
+			"achievement_id": 576,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 238
+				}
+			]
+		},
+		{
+			"achievement_id": 579,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 239
+				}
+			]
+		},
+		{
+			"achievement_id": 581,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 240
+				}
+			]
+		},
+		{
+			"achievement_id": 584,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 241
+				}
+			]
+		},
+		{
+			"achievement_id": 585,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 513
+				}
+			]
+		},
+		{
+			"achievement_id": 586,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 242
+				}
+			]
+		},
+		{
+			"achievement_id": 589,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 243
+				}
+			]
+		},
+		{
+			"achievement_id": 590,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 514
+				}
+			]
+		},
+		{
+			"achievement_id": 591,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 244
+				}
+			]
+		},
+		{
+			"achievement_id": 594,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 245
+				}
+			]
+		},
+		{
+			"achievement_id": 595,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 471
+				}
+			]
+		},
+		{
+			"achievement_id": 596,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 246
+				}
+			]
+		},
+		{
+			"achievement_id": 599,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 247
+				}
+			]
+		},
+		{
+			"achievement_id": 600,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 480
+				}
+			]
+		},
+		{
+			"achievement_id": 601,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 248
+				}
+			]
+		},
+		{
+			"achievement_id": 604,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 249
+				}
+			]
+		},
+		{
+			"achievement_id": 605,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 488
+				}
+			]
+		},
+		{
+			"achievement_id": 606,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 250
+				}
+			]
+		},
+		{
+			"achievement_id": 609,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 251
+				}
+			]
+		},
+		{
+			"achievement_id": 610,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 516
+				}
+			]
+		},
+		{
+			"achievement_id": 611,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 252
+				}
+			]
+		},
+		{
+			"achievement_id": 614,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 253
+				}
+			]
+		},
+		{
+			"achievement_id": 615,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 517
+				}
+			]
+		},
+		{
+			"achievement_id": 616,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 254
+				}
+			]
+		},
+		{
+			"achievement_id": 619,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 255
+				}
+			]
+		},
+		{
+			"achievement_id": 620,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 509
+				}
+			]
+		},
+		{
+			"achievement_id": 621,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 256
+				}
+			]
+		},
+		{
+			"achievement_id": 624,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 257
+				}
+			]
+		},
+		{
+			"achievement_id": 625,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 485
+				}
+			]
+		},
+		{
+			"achievement_id": 626,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 258
+				}
+			]
+		},
+		{
+			"achievement_id": 629,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 259
+				}
+			]
+		},
+		{
+			"achievement_id": 630,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 490
+				}
+			]
+		},
+		{
+			"achievement_id": 631,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 260
+				}
+			]
+		},
+		{
+			"achievement_id": 634,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 261
+				}
+			]
+		},
+		{
+			"achievement_id": 635,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 492
+				}
+			]
+		},
+		{
+			"achievement_id": 636,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 262
+				}
+			]
+		},
+		{
+			"achievement_id": 639,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 263
+				}
+			]
+		},
+		{
+			"achievement_id": 640,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 497
+				}
+			]
+		},
+		{
+			"achievement_id": 641,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 264
+				}
+			]
+		},
+		{
+			"achievement_id": 644,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 265
+				}
+			]
+		},
+		{
+			"achievement_id": 645,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 499
+				}
+			]
+		},
+		{
+			"achievement_id": 646,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 266
+				}
+			]
+		},
+		{
+			"achievement_id": 649,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 267
+				}
+			]
+		},
+		{
+			"achievement_id": 650,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 500
+				}
+			]
+		},
+		{
+			"achievement_id": 651,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 268
+				}
+			]
+		},
+		{
+			"achievement_id": 654,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 269
+				}
+			]
+		},
+		{
+			"achievement_id": 655,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 504
+				}
+			]
+		},
+		{
+			"achievement_id": 656,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 270
+				}
+			]
+		},
+		{
+			"achievement_id": 659,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 271
+				}
+			]
+		},
+		{
+			"achievement_id": 660,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 518
+				}
+			]
+		},
+		{
+			"achievement_id": 661,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 272
+				}
+			]
+		},
+		{
+			"achievement_id": 664,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 273
+				}
+			]
+		},
+		{
+			"achievement_id": 665,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 524
+				}
+			]
+		},
+		{
+			"achievement_id": 666,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 274
+				}
+			]
+		},
+		{
+			"achievement_id": 669,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 275
+				}
+			]
+		},
+		{
+			"achievement_id": 670,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 525
+				}
+			]
+		},
+		{
+			"achievement_id": 671,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 276
+				}
+			]
+		},
+		{
+			"achievement_id": 674,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 277
+				}
+			]
+		},
+		{
+			"achievement_id": 675,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 527
+				}
+			]
+		},
+		{
+			"achievement_id": 676,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 278
+				}
+			]
+		},
+		{
+			"achievement_id": 679,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 279
+				}
+			]
+		},
+		{
+			"achievement_id": 680,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 528
+				}
+			]
+		},
+		{
+			"achievement_id": 681,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 280
+				}
+			]
+		},
+		{
+			"achievement_id": 684,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 281
+				}
+			]
+		},
+		{
+			"achievement_id": 685,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 510
+				}
+			]
+		},
+		{
+			"achievement_id": 686,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 282
+				}
+			]
+		},
+		{
+			"achievement_id": 689,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 283
+				}
+			]
+		},
+		{
+			"achievement_id": 690,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 512
+				}
+			]
+		},
+		{
+			"achievement_id": 691,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 284
+				}
+			]
+		},
+		{
+			"achievement_id": 694,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 285
+				}
+			]
+		},
+		{
+			"achievement_id": 695,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 515
+				}
+			]
+		},
+		{
+			"achievement_id": 696,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 286
+				}
+			]
+		},
+		{
+			"achievement_id": 699,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 287
+				}
+			]
+		},
+		{
+			"achievement_id": 700,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 519
+				}
+			]
+		},
+		{
+			"achievement_id": 701,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 288
+				}
+			]
+		},
+		{
+			"achievement_id": 704,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 289
+				}
+			]
+		},
+		{
+			"achievement_id": 705,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 543
+				}
+			]
+		},
+		{
+			"achievement_id": 706,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 290
+				}
+			]
+		},
+		{
+			"achievement_id": 709,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 291
+				}
+			]
+		},
+		{
+			"achievement_id": 710,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 545
+				}
+			]
+		},
+		{
+			"achievement_id": 711,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 292
+				}
+			]
+		},
+		{
+			"achievement_id": 714,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 293
+				}
+			]
+		},
+		{
+			"achievement_id": 715,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 546
+				}
+			]
+		},
+		{
+			"achievement_id": 716,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 294
+				}
+			]
+		},
+		{
+			"achievement_id": 719,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 295
+				}
+			]
+		},
+		{
+			"achievement_id": 720,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 530
+				}
+			]
+		},
+		{
+			"achievement_id": 721,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 296
+				}
+			]
+		},
+		{
+			"achievement_id": 724,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 297
+				}
+			]
+		},
+		{
+			"achievement_id": 725,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 537
+				}
+			]
+		},
+		{
+			"achievement_id": 726,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 298
+				}
+			]
+		},
+		{
+			"achievement_id": 729,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 299
+				}
+			]
+		},
+		{
+			"achievement_id": 730,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 548
+				}
+			]
+		},
+		{
+			"achievement_id": 731,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 300
+				}
+			]
+		},
+		{
+			"achievement_id": 734,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 301
+				}
+			]
+		},
+		{
+			"achievement_id": 735,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 526
+				}
+			]
+		},
+		{
+			"achievement_id": 736,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 302
+				}
+			]
+		},
+		{
+			"achievement_id": 739,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 303
+				}
+			]
+		},
+		{
+			"achievement_id": 740,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 529
+				}
+			]
+		},
+		{
+			"achievement_id": 741,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 304
+				}
+			]
+		},
+		{
+			"achievement_id": 744,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 305
+				}
+			]
+		},
+		{
+			"achievement_id": 745,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 532
+				}
+			]
+		},
+		{
+			"achievement_id": 746,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 306
+				}
+			]
+		},
+		{
+			"achievement_id": 749,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 307
+				}
+			]
+		},
+		{
+			"achievement_id": 750,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 531
+				}
+			]
+		},
+		{
+			"achievement_id": 751,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 308
+				}
+			]
+		},
+		{
+			"achievement_id": 754,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 309
+				}
+			]
+		},
+		{
+			"achievement_id": 755,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 534
+				}
+			]
+		},
+		{
+			"achievement_id": 756,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 310
+				}
+			]
+		},
+		{
+			"achievement_id": 759,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 311
+				}
+			]
+		},
+		{
+			"achievement_id": 760,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 536
+				}
+			]
+		},
+		{
+			"achievement_id": 761,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 312
+				}
+			]
+		},
+		{
+			"achievement_id": 764,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 313
+				}
+			]
+		},
+		{
+			"achievement_id": 765,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 535
+				}
+			]
+		},
+		{
+			"achievement_id": 766,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 314
+				}
+			]
+		},
+		{
+			"achievement_id": 769,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 315
+				}
+			]
+		},
+		{
+			"achievement_id": 770,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 539
+				}
+			]
+		},
+		{
+			"achievement_id": 771,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 316
+				}
+			]
+		},
+		{
+			"achievement_id": 774,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 317
+				}
+			]
+		},
+		{
+			"achievement_id": 775,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 538
+				}
+			]
+		},
+		{
+			"achievement_id": 776,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 318
+				}
+			]
+		},
+		{
+			"achievement_id": 779,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 319
+				}
+			]
+		},
+		{
+			"achievement_id": 780,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 540
+				}
+			]
+		},
+		{
+			"achievement_id": 781,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 320
+				}
+			]
+		},
+		{
+			"achievement_id": 784,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 321
+				}
+			]
+		},
+		{
+			"achievement_id": 785,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 542
+				}
+			]
+		},
+		{
+			"achievement_id": 786,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 322
+				}
+			]
+		},
+		{
+			"achievement_id": 789,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 323
+				}
+			]
+		},
+		{
+			"achievement_id": 790,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 547
+				}
+			]
+		},
+		{
+			"achievement_id": 791,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 324
+				}
+			]
+		},
+		{
+			"achievement_id": 794,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 325
+				}
+			]
+		},
+		{
+			"achievement_id": 795,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 558
+				}
+			]
+		},
+		{
+			"achievement_id": 796,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 326
+				}
+			]
+		},
+		{
+			"achievement_id": 799,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 327
+				}
+			]
+		},
+		{
+			"achievement_id": 800,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 541
+				}
+			]
+		},
+		{
+			"achievement_id": 801,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 328
+				}
+			]
+		},
+		{
+			"achievement_id": 804,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 329
+				}
+			]
+		},
+		{
+			"achievement_id": 805,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 570
+				}
+			]
+		},
+		{
+			"achievement_id": 806,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 330
+				}
+			]
+		},
+		{
+			"achievement_id": 810,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 544
+				}
+			]
+		},
+		{
+			"achievement_id": 811,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 332
+				}
+			]
+		},
+		{
+			"achievement_id": 814,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 555
+				}
+			]
+		},
+		{
+			"achievement_id": 817,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 556
+				}
+			]
+		},
+		{
+			"achievement_id": 820,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 557
+				}
+			]
+		},
+		{
+			"achievement_id": 823,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 564
+				}
+			]
+		},
+		{
+			"achievement_id": 826,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 565
+				}
+			]
+		},
+		{
+			"achievement_id": 829,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 563
+				}
+			]
+		},
+		{
+			"achievement_id": 832,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 562
+				}
+			]
+		},
+		{
+			"achievement_id": 835,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 567
+				}
+			]
+		},
+		{
+			"achievement_id": 838,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 566
+				}
+			]
+		},
+		{
+			"achievement_id": 841,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 568
+				}
+			]
+		},
+		{
+			"achievement_id": 844,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 569
+				}
+			]
+		},
+		{
+			"achievement_id": 847,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 574
+				}
+			]
+		},
+		{
+			"achievement_id": 850,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 577
+				}
+			]
+		},
+		{
+			"achievement_id": 853,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 571
+				}
+			]
+		},
+		{
+			"achievement_id": 856,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 572
+				}
+			]
+		},
+		{
+			"achievement_id": 859,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 573
+				}
+			]
+		},
+		{
+			"achievement_id": 862,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 575
+				}
+			]
+		},
+		{
+			"achievement_id": 865,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 581
+				}
+			]
+		},
+		{
+			"achievement_id": 868,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 582
+				}
+			]
+		},
+		{
+			"achievement_id": 871,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 586
+				}
+			]
+		},
+		{
+			"achievement_id": 874,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 610
+				}
+			]
+		},
+		{
+			"achievement_id": 877,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 611
+				}
+			]
+		},
+		{
+			"achievement_id": 880,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 612
+				}
+			]
+		},
+		{
+			"achievement_id": 883,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 613
+				}
+			]
+		},
+		{
+			"achievement_id": 886,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 615
+				}
+			]
+		},
+		{
+			"achievement_id": 889,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 616
+				}
+			]
+		},
+		{
+			"achievement_id": 892,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 618
+				}
+			]
+		},
+		{
+			"achievement_id": 895,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 533
+				}
+			]
+		},
+		{
+			"achievement_id": 898,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 609
+				}
+			]
+		},
+		{
+			"achievement_id": 900,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 608
+				}
+			]
+		},
+		{
+			"achievement_id": 904,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 620
+				}
+			]
+		},
+		{
+			"achievement_id": 908,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 622
+				}
+			]
+		},
+		{
+			"achievement_id": 912,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 623
+				}
+			]
+		},
+		{
+			"achievement_id": 916,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 624
+				}
+			]
+		},
+		{
+			"achievement_id": 920,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 625
+				}
+			]
+		},
+		{
+			"achievement_id": 924,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 626
+				}
+			]
+		},
+		{
+			"achievement_id": 928,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 627
+				}
+			]
+		},
+		{
+			"achievement_id": 932,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 628
+				}
+			]
+		},
+		{
+			"achievement_id": 936,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 629
+				}
+			]
+		},
+		{
+			"achievement_id": 940,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 617
+				}
+			]
+		},
+		{
+			"achievement_id": 944,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 619
+				}
+			]
+		},
+		{
+			"achievement_id": 948,
+			"rewards": [
+				{
+					"add_type": 8000,
+					"item_id": 3,
+					"amount": 10
+				}
+			]
+		},
+		{
+			"achievement_id": 949,
+			"rewards": [
+				{
+					"add_type": 3006,
+					"item_id": 2,
+					"amount": 20
+				}
+			]
+		},
+		{
+			"achievement_id": 950,
+			"rewards": [
+				{
+					"add_type": 1000,
+					"item_id": 23,
+					"amount": 9
+				}
+			]
+		},
+		{
+			"achievement_id": 951,
+			"rewards": [
+				{
+					"add_type": 3006,
+					"item_id": 3,
+					"amount": 10
+				}
+			]
+		},
+		{
+			"achievement_id": 952,
+			"rewards": [
+				{
+					"add_type": 1000,
+					"item_id": 5,
+					"amount": 25
+				}
+			]
+		},
+		{
+			"achievement_id": 953,
+			"rewards": [
+				{
+					"add_type": 1000,
+					"item_id": 24,
+					"amount": 9
+				}
+			]
+		},
+		{
+			"achievement_id": 954,
+			"rewards": [
+				{
+					"add_type": 1000,
+					"item_id": 14101
+				}
+			]
+		},
+		{
+			"achievement_id": 955,
+			"rewards": [
+				{
+					"add_type": 1001,
+					"item_id": 2227
+				}
+			]
+		},
+		{
+			"achievement_id": 956,
+			"rewards": [
+				{
+					"add_type": 1000,
+					"item_id": 93,
+					"amount": 9
+				}
+			]
+		},
+		{
+			"achievement_id": 957,
+			"rewards": [
+				{
+					"add_type": 3001,
+					"item_id": 4,
+					"amount": 50
+				}
+			]
+		},
+		{
+			"achievement_id": 10010009,
+			"rewards": [
+				{
+					"add_type": 3001,
+					"item_id": 4
+				}
+			]
+		},
+		{
+			"achievement_id": 10040008,
+			"rewards": [
+				{
+					"add_type": 3001,
+					"item_id": 4
+				}
+			]
+		},
+		{
+			"achievement_id": 10090002,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 6
+				}
+			]
+		},
+		{
+			"achievement_id": 10090003,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 7
+				}
+			]
+		},
+		{
+			"achievement_id": 10090004,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 8
+				}
+			]
+		},
+		{
+			"achievement_id": 10090005,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 9
+				}
+			]
+		},
+		{
+			"achievement_id": 10090006,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 10
+				}
+			]
+		},
+		{
+			"achievement_id": 10090007,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 11
+				}
+			]
+		},
+		{
+			"achievement_id": 10090009,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 13
+				}
+			]
+		},
+		{
+			"achievement_id": 10090011,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 15
+				}
+			]
+		},
+		{
+			"achievement_id": 10090022,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 30
+				}
+			]
+		},
+		{
+			"achievement_id": 10090023,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 31
+				}
+			]
+		},
+		{
+			"achievement_id": 10090024,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 32
+				}
+			]
+		},
+		{
+			"achievement_id": 10090025,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 33
+				}
+			]
+		},
+		{
+			"achievement_id": 10090026,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 34
+				}
+			]
+		},
+		{
+			"achievement_id": 10090027,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 35
+				}
+			]
+		},
+		{
+			"achievement_id": 10090028,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 36
+				}
+			]
+		},
+		{
+			"achievement_id": 10090029,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 37
+				}
+			]
+		},
+		{
+			"achievement_id": 10090030,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 38
+				}
+			]
+		},
+		{
+			"achievement_id": 10090031,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 39
+				}
+			]
+		},
+		{
+			"achievement_id": 10090032,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 40
+				}
+			]
+		},
+		{
+			"achievement_id": 10090033,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 41
+				}
+			]
+		},
+		{
+			"achievement_id": 10090041,
+			"rewards": [
+				{
+					"add_type": 1000,
+					"item_id": 1
+				}
+			]
+		},
+		{
+			"achievement_id": 10090162,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 269
+				}
+			]
+		},
+		{
+			"achievement_id": 10093826,
+			"rewards": [
+				{
+					"add_type": 5200,
+					"item_id": 227
+				}
+			]
+		},
+		{
+			"achievement_id": 10093843,
+			"rewards": [
+				{
+					"add_type": 3001,
+					"item_id": 4,
+					"amount": 3
+				}
+			]
+		},
+		{
+			"achievement_id": 10093844,
+			"rewards": [
+				{
+					"add_type": 3001,
+					"item_id": 4,
+					"amount": 2
+				}
+			]
+		},
+		{
+			"achievement_id": 10093850,
+			"rewards": [
+				{
+					"add_type": 5200,
+					"item_id": 228
+				}
+			]
+		},
+		{
+			"achievement_id": 10100010,
+			"rewards": [
+				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 40000
+				}
+			]
+		},
+		{
+			"achievement_id": 10180011,
+			"rewards": [
+				{
+					"add_type": 3001,
+					"item_id": 4
+				}
+			]
+		},
+		{
+			"achievement_id": 10190014,
+			"rewards": [
+				{
+					"add_type": 3001,
+					"item_id": 4
+				}
+			]
+		},
+		{
+			"achievement_id": 10200007,
+			"rewards": [
+				{
+					"add_type": 3001,
+					"item_id": 4
+				}
+			]
+		},
+		{
+			"achievement_id": 10260004,
+			"rewards": [
+				{
+					"add_type": 3002,
+					"item_id": 2,
+					"amount": 4000
+				}
+			]
+		},
+		{
+			"achievement_id": 10290001,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 2
+				}
+			]
+		},
+		{
+			"achievement_id": 10290004,
+			"rewards": [
+				{
+					"add_type": 5500,
+					"item_id": 2
+				},
+				{
+					"add_type": 5500,
+					"item_id": 1
+				},
+				{
+					"add_type": 5500,
+					"item_id": 3
+				}
+			]
+		},
+		{
+			"achievement_id": 10290006,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 533
+				}
+			]
+		},
+		{
+			"achievement_id": 10290009,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3006
+				}
+			]
+		},
+		{
+			"achievement_id": 10290011,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3016
+				}
+			]
+		},
+		{
+			"achievement_id": 10290012,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3017
+				}
+			]
+		},
+		{
+			"achievement_id": 10290014,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3007
+				}
+			]
+		},
+		{
+			"achievement_id": 10290016,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3020
+				}
+			]
+		},
+		{
+			"achievement_id": 10290017,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3021
+				}
+			]
+		},
+		{
+			"achievement_id": 10290019,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3008
+				}
+			]
+		},
+		{
+			"achievement_id": 10290021,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3024
+				}
+			]
+		},
+		{
+			"achievement_id": 10290022,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3025
+				}
+			]
+		},
+		{
+			"achievement_id": 10290024,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3009
+				}
+			]
+		},
+		{
+			"achievement_id": 10290025,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3010
+				}
+			]
+		},
+		{
+			"achievement_id": 10290026,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3011
+				}
+			]
+		},
+		{
+			"achievement_id": 10290027,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3012
+				}
+			]
+		},
+		{
+			"achievement_id": 10290028,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3013
+				}
+			]
+		},
+		{
+			"achievement_id": 10290029,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3014
+				}
+			]
+		},
+		{
+			"achievement_id": 10290030,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3029
+				}
+			]
+		},
+		{
+			"achievement_id": 10290031,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3030
+				}
+			]
+		},
+		{
+			"achievement_id": 10290032,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3031
+				}
+			]
+		},
+		{
+			"achievement_id": 10290035,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3034
+				}
+			]
+		},
+		{
+			"achievement_id": 10290036,
+			"rewards": [
+				{
+					"add_type": 3005,
+					"item_id": 0,
+					"amount": 100
+				}
+			]
+		},
+		{
+			"achievement_id": 10290037,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3015
+				}
+			]
+		},
+		{
+			"achievement_id": 10290038,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3019
+				}
+			]
+		},
+		{
+			"achievement_id": 10290039,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3023
+				}
+			]
+		},
+		{
+			"achievement_id": 10290040,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3001
+				}
+			]
+		},
+		{
+			"achievement_id": 10290050,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3043
+				}
+			]
+		},
+		{
+			"achievement_id": 10290051,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3038
+				}
+			]
+		},
+		{
+			"achievement_id": 10290053,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3041
+				}
+			]
+		},
+		{
+			"achievement_id": 10290055,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3044
+				}
+			]
+		},
+		{
+			"achievement_id": 10290058,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3052
+				}
+			]
+		},
+		{
+			"achievement_id": 10290059,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3051
+				}
+			]
+		},
+		{
+			"achievement_id": 10290061,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3048
+				}
+			]
+		},
+		{
+			"achievement_id": 10290062,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3057
+				}
+			]
+		},
+		{
+			"achievement_id": 10290063,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3055
+				}
+			]
+		},
+		{
+			"achievement_id": 10290064,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3053
+				}
+			]
+		},
+		{
+			"achievement_id": 10290065,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3058
+				}
+			]
+		},
+		{
+			"achievement_id": 10290066,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3054
+				}
+			]
+		},
+		{
+			"achievement_id": 10290067,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3056
+				}
+			]
+		},
+		{
+			"achievement_id": 10290068,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3050
+				}
+			]
+		},
+		{
+			"achievement_id": 10290069,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3047
+				}
+			]
+		},
+		{
+			"achievement_id": 10290074,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3061
+				}
+			]
+		},
+		{
+			"achievement_id": 10290076,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3059
+				}
+			]
+		},
+		{
+			"achievement_id": 10290078,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3060
+				}
+			]
+		},
+		{
+			"achievement_id": 10290080,
+			"rewards": [
+				{
+					"add_type": 3005,
+					"item_id": 0,
+					"amount": 100
+				}
+			]
+		},
+		{
+			"achievement_id": 10290081,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3063
+				}
+			]
+		},
+		{
+			"achievement_id": 10290082,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3064
+				}
+			]
+		},
+		{
+			"achievement_id": 10290088,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3062
+				}
+			]
+		},
+		{
+			"achievement_id": 10290095,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3043
+				},
+				{
+					"add_type": 5300,
+					"item_id": 3044
+				},
+				{
+					"add_type": 5300,
+					"item_id": 3045
+				}
+			]
+		},
+		{
+			"achievement_id": 10290096,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 621
+				}
+			]
+		},
+		{
+			"achievement_id": 10290097,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 632
+				}
+			]
+		},
+		{
+			"achievement_id": 10290098,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3070
+				}
+			]
+		},
+		{
+			"achievement_id": 10290099,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3071
+				}
+			]
+		},
+		{
+			"achievement_id": 10290100,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3072
+				}
+			]
+		},
+		{
+			"achievement_id": 10290102,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3074
+				}
+			]
+		},
+		{
+			"achievement_id": 10290103,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3075
+				}
+			]
+		},
+		{
+			"achievement_id": 10290104,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3076
+				}
+			]
+		},
+		{
+			"achievement_id": 10290106,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 637
+				}
+			]
+		},
+		{
+			"achievement_id": 10290107,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3078
+				}
+			]
+		},
+		{
+			"achievement_id": 10290108,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3079
+				}
+			]
+		},
+		{
+			"achievement_id": 10290109,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3080
+				}
+			]
+		},
+		{
+			"achievement_id": 10290110,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3081
+				}
+			]
+		},
+		{
+			"achievement_id": 10290111,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3082
+				}
+			]
+		},
+		{
+			"achievement_id": 10290112,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3083
+				}
+			]
+		},
+		{
+			"achievement_id": 10290113,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3084
+				}
+			]
+		},
+		{
+			"achievement_id": 10290114,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3085
+				}
+			]
+		},
+		{
+			"achievement_id": 10290115,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 641
+				}
+			]
+		},
+		{
+			"achievement_id": 10290116,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 645
+				}
+			]
+		},
+		{
+			"achievement_id": 10290117,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 649
+				}
+			]
+		},
+		{
+			"achievement_id": 10290118,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 653
+				}
+			]
+		},
+		{
+			"achievement_id": 10290119,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 659
+				}
+			]
+		},
+		{
+			"achievement_id": 10290120,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 664
+				}
+			]
+		},
+		{
+			"achievement_id": 10290121,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 672
+				}
+			]
+		},
+		{
+			"achievement_id": 10290122,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 688
+				}
+			]
+		},
+		{
+			"achievement_id": 10290123,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 698
+				}
+			]
+		},
+		{
+			"achievement_id": 10290124,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 700
+				}
+			]
+		},
+		{
+			"achievement_id": 10290127,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3088
+				}
+			]
+		},
+		{
+			"achievement_id": 10290128,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3089
+				}
+			]
+		},
+		{
+			"achievement_id": 10290129,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3090
+				}
+			]
+		},
+		{
+			"achievement_id": 10290132,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3092
+				}
+			]
+		},
+		{
+			"achievement_id": 10290133,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3093
+				}
+			]
+		},
+		{
+			"achievement_id": 10290134,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3094
+				}
+			]
+		},
+		{
+			"achievement_id": 10290136,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 631
+				},
+				{
+					"add_type": 5000,
+					"item_id": 636
+				},
+				{
+					"add_type": 5000,
+					"item_id": 640
+				}
+			]
+		},
+		{
+			"achievement_id": 10290137,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 650
+				},
+				{
+					"add_type": 5000,
+					"item_id": 651
+				},
+				{
+					"add_type": 5000,
+					"item_id": 652
+				}
+			]
+		},
+		{
+			"achievement_id": 10290138,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 658
+				},
+				{
+					"add_type": 5000,
+					"item_id": 661
+				},
+				{
+					"add_type": 5000,
+					"item_id": 656
+				}
+			]
+		},
+		{
+			"achievement_id": 10290139,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 663
+				},
+				{
+					"add_type": 5000,
+					"item_id": 687
+				}
+			]
+		},
+		{
+			"achievement_id": 10290142,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 696
+				}
+			]
+		},
+		{
+			"achievement_id": 10290143,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3098
+				}
+			]
+		},
+		{
+			"achievement_id": 10290144,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3099
+				}
+			]
+		},
+		{
+			"achievement_id": 10290145,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3100
+				}
+			]
+		},
+		{
+			"achievement_id": 10290147,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 691
+				}
+			]
+		},
+		{
+			"achievement_id": 10290148,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 726
+				}
+			]
+		},
+		{
+			"achievement_id": 10290149,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 728
+				}
+			]
+		},
+		{
+			"achievement_id": 10290150,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 733
+				}
+			]
+		},
+		{
+			"achievement_id": 10290151,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 739
+				}
+			]
+		},
+		{
+			"achievement_id": 10290152,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 745
+				}
+			]
+		},
+		{
+			"achievement_id": 10290153,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 750
+				}
+			]
+		},
+		{
+			"achievement_id": 10290154,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 757
+				}
+			]
+		},
+		{
+			"achievement_id": 10290165,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3102
+				}
+			]
+		},
+		{
+			"achievement_id": 10290166,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3103
+				}
+			]
+		},
+		{
+			"achievement_id": 10290167,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 3104
+				}
+			]
+		},
+		{
+			"achievement_id": 10370001,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 13
+				}
+			]
+		},
+		{
+			"achievement_id": 10370002,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 20
+				}
+			]
+		},
+		{
+			"achievement_id": 10370003,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 214
+				}
+			]
+		},
+		{
+			"achievement_id": 10370004,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 230
+				}
+			]
+		},
+		{
+			"achievement_id": 10370005,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 419
+				}
+			]
+		},
+		{
+			"achievement_id": 10370006,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 442
+				}
+			]
+		},
+		{
+			"achievement_id": 10370007,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 444
+				}
+			]
+		},
+		{
+			"achievement_id": 10370008,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 447
+				}
+			]
+		},
+		{
+			"achievement_id": 10370009,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 448
+				}
+			]
+		},
+		{
+			"achievement_id": 10370010,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 141
+				}
+			]
+		},
+		{
+			"achievement_id": 10370011,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 146
+				}
+			]
+		},
+		{
+			"achievement_id": 10370012,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 460
+				}
+			]
+		},
+		{
+			"achievement_id": 20010007,
+			"rewards": [
+				{
+					"add_type": 3001,
+					"item_id": 4
+				},
+				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 10000
+				},
+				{
+					"add_type": 3002,
+					"item_id": 2,
+					"amount": 200
+				}
+			]
+		},
+		{
+			"achievement_id": 20010015,
+			"rewards": [
+				{
+					"add_type": 1001,
+					"item_id": 89
+				},
+				{
+					"add_type": 8000,
+					"item_id": 1
+				}
+			]
+		},
+		{
+			"achievement_id": 20010016,
+			"rewards": [
+				{
+					"add_type": 1001,
+					"item_id": 1024
+				},
+				{
+					"add_type": 8000,
+					"item_id": 1
+				}
+			]
+		},
+		{
+			"achievement_id": 20010017,
+			"rewards": [
+				{
+					"add_type": 1001,
+					"item_id": 382
+				},
+				{
+					"add_type": 8000,
+					"item_id": 1
+				}
+			]
+		},
+		{
+			"achievement_id": 20010018,
+			"rewards": [
+				{
+					"add_type": 3001,
+					"item_id": 4
+				},
+				{
+					"add_type": 1001,
+					"item_id": 632
+				},
+				{
+					"add_type": 1001,
+					"item_id": 1142
+				}
+			]
+		},
+		{
+			"achievement_id": 20010019,
+			"rewards": [
+				{
+					"add_type": 3001,
+					"item_id": 4
+				},
+				{
+					"add_type": 1001,
+					"item_id": 385
+				},
+				{
+					"add_type": 1001,
+					"item_id": 1354
+				}
+			]
+		},
+		{
+			"achievement_id": 20010020,
+			"rewards": [
+				{
+					"add_type": 3001,
+					"item_id": 4
+				},
+				{
+					"add_type": 1001,
+					"item_id": 384
+				},
+				{
+					"add_type": 1001,
+					"item_id": 1355
+				}
+			]
+		},
+		{
+			"achievement_id": 20010021,
+			"rewards": [
+				{
+					"add_type": 3001,
+					"item_id": 4
+				},
+				{
+					"add_type": 1001,
+					"item_id": 383
+				},
+				{
+					"add_type": 1001,
+					"item_id": 1356
+				}
+			]
+		},
+		{
+			"achievement_id": 50000001,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 1597
+				}
+			]
+		},
+		{
+			"achievement_id": 50000006,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 1601
+				}
+			]
+		},
+		{
+			"achievement_id": 50010001,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 1
+				}
+			]
+		},
+		{
+			"achievement_id": 50010002,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 2
+				}
+			]
+		},
+		{
+			"achievement_id": 50010003,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 3
+				}
+			]
+		},
+		{
+			"achievement_id": 50010004,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 4
+				}
+			]
+		},
+		{
+			"achievement_id": 50010005,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 5
+				}
+			]
+		},
+		{
+			"achievement_id": 50010006,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 6
+				}
+			]
+		},
+		{
+			"achievement_id": 50010007,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 7
+				}
+			]
+		},
+		{
+			"achievement_id": 50010008,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 8
+				}
+			]
+		},
+		{
+			"achievement_id": 50010009,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 9
+				}
+			]
+		},
+		{
+			"achievement_id": 50010190,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 190
+				}
+			]
+		},
+		{
+			"achievement_id": 50020001,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 300
+				}
+			]
+		},
+		{
+			"achievement_id": 50020002,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 301
+				}
+			]
+		},
+		{
+			"achievement_id": 50020003,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 302
+				}
+			]
+		},
+		{
+			"achievement_id": 50020004,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 303
+				}
+			]
+		},
+		{
+			"achievement_id": 50020005,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 304
+				}
+			]
+		},
+		{
+			"achievement_id": 50020006,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 305
+				}
+			]
+		},
+		{
+			"achievement_id": 50020007,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 306
+				}
+			]
+		},
+		{
+			"achievement_id": 50020008,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 307
+				}
+			]
+		},
+		{
+			"achievement_id": 50020009,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 308
+				}
+			]
+		},
+		{
+			"achievement_id": 50020010,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 309
+				}
+			]
+		},
+		{
+			"achievement_id": 50020011,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 310
+				}
+			]
+		},
+		{
+			"achievement_id": 50020012,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 311
+				}
+			]
+		},
+		{
+			"achievement_id": 50020013,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 312
+				}
+			]
+		},
+		{
+			"achievement_id": 50020014,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 313
+				}
+			]
+		},
+		{
+			"achievement_id": 50020015,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 314
+				}
+			]
+		},
+		{
+			"achievement_id": 50020016,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 315
+				}
+			]
+		},
+		{
+			"achievement_id": 50020017,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 316
+				}
+			]
+		},
+		{
+			"achievement_id": 50020018,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 317
+				}
+			]
+		},
+		{
+			"achievement_id": 50020019,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 318
+				}
+			]
+		},
+		{
+			"achievement_id": 50020020,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 319
+				}
+			]
+		},
+		{
+			"achievement_id": 50020021,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 320
+				}
+			]
+		},
+		{
+			"achievement_id": 50020022,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 321
+				}
+			]
+		},
+		{
+			"achievement_id": 50020023,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 322
+				}
+			]
+		},
+		{
+			"achievement_id": 50020024,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 323
+				}
+			]
+		},
+		{
+			"achievement_id": 50020025,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 324
+				}
+			]
+		},
+		{
+			"achievement_id": 50020026,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 325
+				}
+			]
+		},
+		{
+			"achievement_id": 50020027,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 326
+				}
+			]
+		},
+		{
+			"achievement_id": 50020028,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 327
+				}
+			]
+		},
+		{
+			"achievement_id": 50020029,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 328
+				}
+			]
+		},
+		{
+			"achievement_id": 50020030,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 329
+				}
+			]
+		},
+		{
+			"achievement_id": 50020031,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 330
+				}
+			]
+		},
+		{
+			"achievement_id": 50020032,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 331
+				}
+			]
+		},
+		{
+			"achievement_id": 50020033,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 332
+				}
+			]
+		},
+		{
+			"achievement_id": 50020034,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 333
+				}
+			]
+		},
+		{
+			"achievement_id": 50020035,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 334
+				}
+			]
+		},
+		{
+			"achievement_id": 50020036,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 335
+				}
+			]
+		},
+		{
+			"achievement_id": 50020037,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 336
+				}
+			]
+		},
+		{
+			"achievement_id": 50020038,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 337
+				}
+			]
+		},
+		{
+			"achievement_id": 50020039,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 338
+				}
+			]
+		},
+		{
+			"achievement_id": 50020040,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 339
+				}
+			]
+		},
+		{
+			"achievement_id": 50020041,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 340
+				}
+			]
+		},
+		{
+			"achievement_id": 50020042,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 341
+				}
+			]
+		},
+		{
+			"achievement_id": 50020043,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 342
+				}
+			]
+		},
+		{
+			"achievement_id": 50020044,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 343
+				}
+			]
+		},
+		{
+			"achievement_id": 50020045,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 344
+				}
+			]
+		},
+		{
+			"achievement_id": 50020046,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 345
+				}
+			]
+		},
+		{
+			"achievement_id": 50020047,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 346
+				}
+			]
+		},
+		{
+			"achievement_id": 50020048,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 347
+				}
+			]
+		},
+		{
+			"achievement_id": 50020049,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 348
+				}
+			]
+		},
+		{
+			"achievement_id": 50020050,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 349
+				}
+			]
+		},
+		{
+			"achievement_id": 50020051,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 350
+				}
+			]
+		},
+		{
+			"achievement_id": 50020052,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 351
+				}
+			]
+		},
+		{
+			"achievement_id": 50030001,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 500
+				}
+			]
+		},
+		{
+			"achievement_id": 50040037,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 636
+				}
+			]
+		},
+		{
+			"achievement_id": 50040055,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 654
+				}
+			]
+		},
+		{
+			"achievement_id": 50050001,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 1857
+				}
+			]
+		},
+		{
+			"achievement_id": 50050002,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 1858
+				}
+			]
+		},
+		{
+			"achievement_id": 50050003,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 1859
+				}
+			]
+		},
+		{
+			"achievement_id": 50050004,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 1860
+				}
+			]
+		},
+		{
+			"achievement_id": 50050007,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 1863
+				}
+			]
+		},
+		{
+			"achievement_id": 50050008,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 1864
+				}
+			]
+		},
+		{
+			"achievement_id": 50050009,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 1865
+				}
+			]
+		},
+		{
+			"achievement_id": 50050010,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 1866
+				}
+			]
+		},
+		{
+			"achievement_id": 50050011,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 1867
+				}
+			]
+		},
+		{
+			"achievement_id": 50050012,
+			"rewards": [
+				{
+					"add_type": 14000,
+					"item_id": 1868
+				}
+			]
+		},
+		{
+			"achievement_id": 100000001,
+			"rewards": [
+				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 10000
+				}
+			]
+		},
+		{
+			"achievement_id": 100000002,
+			"rewards": [
+				{
+					"add_type": 3002,
+					"item_id": 2,
+					"amount": 1000
+				}
+			]
+		},
+		{
+			"achievement_id": 100000027,
+			"rewards": [
+				{
+					"add_type": 1000,
+					"item_id": 5,
+					"amount": 3
+				}
+			]
+		},
+		{
+			"achievement_id": 200000001,
+			"rewards": [
+				{
+					"add_type": 3001,
+					"item_id": 4
+				}
+			]
+		}
+	],
 	"live_unit_drop_chance": {
 		"common": 9,
 		"live_specific": 1
@@ -35733,9 +42771,8 @@
 		{
 			"serial_code": "HESOYAM",
 			"action": {
-				"type": "item",
-				"message_jp": "健康、防具、お金 ($250,000)",
 				"message_en": "Health, Armour, and Money ($250,000)",
+				"message_jp": "健康、防具、お金 ($250,000)",
 				"items": [
 					{
 						"add_type": 3001,

@@ -1,10 +1,10 @@
-import base64
 import dataclasses
 import json
 import os
 import time
 
 from . import schema
+from ..system import item_model
 from ..config import config
 
 
@@ -12,6 +12,7 @@ from ..config import config
 class ServerData:
     json_schema_link: str | None
     badwords: list[str]
+    achievement_reward: dict[int, list[item_model.BaseItem]]
     live_unit_drop_chance: schema.LiveUnitDropChance
     common_live_unit_drops: list[schema.LiveUnitDrop]
     live_specific_live_unit_drops: dict[int, list[schema.LiveUnitDrop]]
@@ -36,7 +37,8 @@ def get():
 
                 server_data = ServerData(
                     json_schema_link=serialized_data.json_schema_link,
-                    badwords=[str(base64.urlsafe_b64decode(s), "utf-8") for s in serialized_data.badwords],
+                    badwords=serialized_data.badwords,
+                    achievement_reward=dict((k.achievement_id, k.rewards) for k in serialized_data.achievement_reward),
                     live_unit_drop_chance=serialized_data.live_unit_drop_chance,
                     common_live_unit_drops=serialized_data.common_live_unit_drops,
                     live_specific_live_unit_drops=dict(
@@ -62,7 +64,11 @@ def update():
     global last_server_data_timestamp
     server_data = get()  # ensure not None
     serialized_data = schema.SerializedServerData(
-        badwords=[str(base64.urlsafe_b64encode(s.encode("utf-8")), "utf-8") for s in server_data.badwords],
+        badwords=server_data.badwords,
+        achievement_reward=sorted(
+            (schema.AchievementReward(achievement_id=k, rewards=v) for k, v in server_data.achievement_reward.items()),
+            key=lambda k: k.achievement_id,
+        ),
         live_unit_drop_chance=server_data.live_unit_drop_chance,
         common_live_unit_drops=server_data.common_live_unit_drops,
         live_specific_live_unit_drops=[

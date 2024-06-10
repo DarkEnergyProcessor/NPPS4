@@ -6,9 +6,10 @@ import sqlalchemy
 
 from . import advanced
 from . import common
+from . import item
 from . import item_model
 from . import reward
-from .. import achievement_reward
+from .. import data
 from .. import db
 from .. import idol
 from .. import util
@@ -16,6 +17,8 @@ from ..db import achievement
 from ..db import main
 
 from typing import Callable, Concatenate
+
+ACHIEVEMENT_REWARD_DEFAULT = [item.base_loveca(1)]
 
 
 class AchievementData(pydantic.BaseModel):
@@ -122,23 +125,15 @@ async def to_game_representation(
     ]
 
 
-async def get_achievement_rewards(context: idol.BasicSchoolIdolContext, ach: main.Achievement):
-    old_reward_data = achievement_reward.get(ach.achievement_id)
-    new_reward_data: list[common.AnyItem] = []
+async def get_achievement_rewards(context: idol.BasicSchoolIdolContext, ach: main.Achievement | int, /):
+    if isinstance(ach, main.Achievement):
+        ach_id = ach.achievement_id
+    else:
+        ach_id = ach
 
-    for i in old_reward_data:
-        extra_data = i.get_extra_data()
-        if extra_data is not None:
-            extra_data = extra_data.model_dump()
-
-        new_reward_data.append(
-            await advanced.deserialize_item_data(
-                context,
-                item_model.BaseItem(add_type=i.add_type, item_id=i.item_id, amount=i.amount, extra_data=extra_data),
-            )
-        )
-
-    return new_reward_data
+    server_data = data.get()
+    old_reward_data = server_data.achievement_reward.get(ach_id, ACHIEVEMENT_REWARD_DEFAULT)
+    return [await advanced.deserialize_item_data(context, i) for i in old_reward_data]
 
 
 async def init(context: idol.BasicSchoolIdolContext, user: main.User):

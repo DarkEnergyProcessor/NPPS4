@@ -165,9 +165,15 @@ class SerialCode(pydantic.BaseModel):
         return self.action
 
 
+class AchievementReward(pydantic.BaseModel):
+    achievement_id: int
+    rewards: list[item_model.BaseItem]
+
+
 class SerializedServerData(pydantic.BaseModel):
     json_schema_link: pydantic.json_schema.SkipJsonSchema[str | None] = pydantic.Field(default=None, alias="$schema")
-    badwords: list[str]  # Note: Badwords are Base64-encoded in the JSON file!
+    badwords: list[pydantic.Base64UrlStr]
+    achievement_reward: list[AchievementReward]
     live_unit_drop_chance: LiveUnitDropChance
     common_live_unit_drops: list[LiveUnitDrop]
     live_specific_live_unit_drops: list[LiveSpecificLiveUnitDrop]

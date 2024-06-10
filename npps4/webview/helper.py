@@ -5,10 +5,10 @@ import json
 import fastapi
 import sqlalchemy
 
-from .. import achievement_reward
 from .. import idol
 from ..app import app
 from ..db import achievement
+from ..system import achievement as achievement_system
 
 from typing import Annotated
 
@@ -127,7 +127,7 @@ async def helper_achievement(request: fastapi.Request, achievement_id: Annotated
                     )
                 )
 
-            rewards = achievement_reward.get(achievement_id)
+            rewards = await achievement_system.get_achievement_rewards(context, achievement_id)
             rewards_json = json.dumps([r.model_dump() for r in rewards], ensure_ascii=False, indent="\t")
             return app.templates.TemplateResponse(
                 "helper_achievement_info.html",

@@ -41,6 +41,27 @@
 			"title": "ADD_TYPE",
 			"type": "integer"
 		},
+		"AchievementReward": {
+			"properties": {
+				"achievement_id": {
+					"title": "Achievement Id",
+					"type": "integer"
+				},
+				"rewards": {
+					"items": {
+						"$ref": "#/$defs/BaseItem"
+					},
+					"title": "Rewards",
+					"type": "array"
+				}
+			},
+			"required": [
+				"achievement_id",
+				"rewards"
+			],
+			"title": "AchievementReward",
+			"type": "object"
+		},
 		"BaseItem": {
 			"properties": {
 				"add_type": {
@@ -677,9 +698,17 @@
 	"properties": {
 		"badwords": {
 			"items": {
+				"format": "base64url",
 				"type": "string"
 			},
 			"title": "Badwords",
+			"type": "array"
+		},
+		"achievement_reward": {
+			"items": {
+				"$ref": "#/$defs/AchievementReward"
+			},
+			"title": "Achievement Reward",
 			"type": "array"
 		},
 		"live_unit_drop_chance": {
@@ -723,6 +752,7 @@
 	},
 	"required": [
 		"badwords",
+		"achievement_reward",
 		"live_unit_drop_chance",
 		"common_live_unit_drops",
 		"live_specific_live_unit_drops",
