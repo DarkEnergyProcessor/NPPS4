@@ -1,5 +1,5 @@
 {
-	"$schema": "https://raw.githubusercontent.com/DarkEnergyProcessor/NPPS4/master/npps4/server_data_schema.json",
+	"$schema": "server_data_schema.json",
 	"badwords": [],
 	"achievement_reward": [
 		{
