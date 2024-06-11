@@ -33,8 +33,23 @@
 			"achievement_id": 104,
 			"rewards": [
 				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 3000
+				},
+				{
 					"add_type": 5300,
 					"item_id": 5
+				}
+			]
+		},
+		{
+			"achievement_id": 105,
+			"rewards": [
+				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 3000
 				}
 			]
 		},
@@ -44,6 +59,24 @@
 				{
 					"add_type": 5300,
 					"item_id": 6
+				}
+			]
+		},
+		{
+			"achievement_id": 107,
+			"rewards": [
+				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 3000
+				},
+				{
+					"add_type": 3001,
+					"item_id": 4
+				},
+				{
+					"add_type": 5000,
+					"item_id": 2
 				}
 			]
 		},
@@ -60,6 +93,11 @@
 			"achievement_id": 109,
 			"rewards": [
 				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 3000
+				},
+				{
 					"add_type": 5300,
 					"item_id": 8
 				}
@@ -68,6 +106,11 @@
 		{
 			"achievement_id": 110,
 			"rewards": [
+				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 3000
+				},
 				{
 					"add_type": 5000,
 					"item_id": 3
@@ -84,11 +127,39 @@
 			]
 		},
 		{
+			"achievement_id": 112,
+			"rewards": [
+				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 3000
+				},
+				{
+					"add_type": 3001,
+					"item_id": 4
+				},
+				{
+					"add_type": 5000,
+					"item_id": 4
+				}
+			]
+		},
+		{
 			"achievement_id": 113,
 			"rewards": [
 				{
 					"add_type": 5300,
 					"item_id": 10
+				}
+			]
+		},
+		{
+			"achievement_id": 114,
+			"rewards": [
+				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 3000
 				}
 			]
 		},
@@ -104,6 +175,11 @@
 		{
 			"achievement_id": 116,
 			"rewards": [
+				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 3000
+				},
 				{
 					"add_type": 5000,
 					"item_id": 5
@@ -123,6 +199,19 @@
 			"achievement_id": 118,
 			"rewards": [
 				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 3000
+				},
+				{
+					"add_type": 3001,
+					"item_id": 4
+				},
+				{
+					"add_type": 5000,
+					"item_id": 6
+				},
+				{
 					"add_type": 5200,
 					"item_id": 2
 				}
@@ -134,6 +223,16 @@
 				{
 					"add_type": 5300,
 					"item_id": 13
+				}
+			]
+		},
+		{
+			"achievement_id": 120,
+			"rewards": [
+				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 3000
 				}
 			]
 		},
@@ -150,6 +249,11 @@
 			"achievement_id": 122,
 			"rewards": [
 				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 3000
+				},
+				{
 					"add_type": 5000,
 					"item_id": 7
 				}
@@ -165,11 +269,39 @@
 			]
 		},
 		{
+			"achievement_id": 124,
+			"rewards": [
+				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 3000
+				},
+				{
+					"add_type": 3001,
+					"item_id": 4
+				},
+				{
+					"add_type": 5000,
+					"item_id": 8
+				}
+			]
+		},
+		{
 			"achievement_id": 125,
 			"rewards": [
 				{
 					"add_type": 5300,
 					"item_id": 16
+				}
+			]
+		},
+		{
+			"achievement_id": 126,
+			"rewards": [
+				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 3000
 				}
 			]
 		},
@@ -186,6 +318,11 @@
 			"achievement_id": 128,
 			"rewards": [
 				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 3000
+				},
+				{
 					"add_type": 5000,
 					"item_id": 9
 				}
@@ -201,11 +338,43 @@
 			]
 		},
 		{
+			"achievement_id": 130,
+			"rewards": [
+				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 3000
+				},
+				{
+					"add_type": 3001,
+					"item_id": 4
+				},
+				{
+					"add_type": 5000,
+					"item_id": 10
+				}
+			]
+		},
+		{
 			"achievement_id": 131,
 			"rewards": [
 				{
 					"add_type": 5300,
 					"item_id": 19
+				}
+			]
+		},
+		{
+			"achievement_id": 132,
+			"rewards": [
+				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 3000
+				},
+				{
+					"add_type": 3001,
+					"item_id": 4
 				}
 			]
 		},
@@ -255,6 +424,20 @@
 			]
 		},
 		{
+			"achievement_id": 138,
+			"rewards": [
+				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 3000
+				},
+				{
+					"add_type": 3001,
+					"item_id": 4
+				}
+			]
+		},
+		{
 			"achievement_id": 139,
 			"rewards": [
 				{
@@ -282,10 +465,38 @@
 			]
 		},
 		{
+			"achievement_id": 142,
+			"rewards": [
+				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 3000
+				},
+				{
+					"add_type": 3001,
+					"item_id": 4
+				}
+			]
+		},
+		{
 			"achievement_id": 143,
 			"rewards": [
 				{
 					"add_type": 5300,
+					"item_id": 25
+				}
+			]
+		},
+		{
+			"achievement_id": 144,
+			"rewards": [
+				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 3000
+				},
+				{
+					"add_type": 5000,
 					"item_id": 25
 				}
 			]
@@ -303,6 +514,11 @@
 			"achievement_id": 146,
 			"rewards": [
 				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 3000
+				},
+				{
 					"add_type": 5000,
 					"item_id": 26
 				}
@@ -314,6 +530,20 @@
 				{
 					"add_type": 5300,
 					"item_id": 27
+				}
+			]
+		},
+		{
+			"achievement_id": 148,
+			"rewards": [
+				{
+					"add_type": 3000,
+					"item_id": 3,
+					"amount": 3000
+				},
+				{
+					"add_type": 3001,
+					"item_id": 4
 				}
 			]
 		},
@@ -4808,10 +5038,41 @@
 			]
 		},
 		{
+			"achievement_id": 10010004,
+			"rewards": [
+				{
+					"add_type": 3001,
+					"item_id": 4
+				},
+				{
+					"add_type": 5100,
+					"item_id": 3
+				}
+			]
+		},
+		{
+			"achievement_id": 10010005,
+			"rewards": [
+				{
+					"add_type": 1001,
+					"item_id": 1
+				}
+			]
+		},
+		{
 			"achievement_id": 10010009,
 			"rewards": [
 				{
 					"add_type": 3001,
+					"item_id": 4
+				}
+			]
+		},
+		{
+			"achievement_id": 10040004,
+			"rewards": [
+				{
+					"add_type": 5100,
 					"item_id": 4
 				}
 			]
@@ -42770,6 +43031,11 @@
 		},
 		{
 			"serial_code": "HESOYAM",
+			"usage_limit": {
+				"id": "HESOYAM",
+				"global": false,
+				"amount": 100
+			},
 			"action": {
 				"message_en": "Health, Armour, and Money ($250,000)",
 				"message_jp": "健康、防具、お金 ($250,000)",
@@ -42788,6 +43054,73 @@
 						"add_type": 3000,
 						"item_id": 3,
 						"amount": 250000
+					}
+				]
+			}
+		},
+		{
+			"serial_code": "INEEDSOMEHELP",
+			"usage_limit": {
+				"id": "HESOYAM",
+				"global": false,
+				"amount": 100
+			},
+			"action": {
+				"message_en": "Health, Armour, and Money ($250,000)",
+				"message_jp": "健康、防具、お金 ($250,000)",
+				"items": [
+					{
+						"add_type": 3001,
+						"item_id": 4,
+						"amount": 50
+					},
+					{
+						"add_type": 3002,
+						"item_id": 2,
+						"amount": 1000
+					},
+					{
+						"add_type": 3000,
+						"item_id": 3,
+						"amount": 250000
+					}
+				]
+			}
+		},
+		{
+			"serial_code": "ICANGOALLNIGHT",
+			"action": {
+				"message_en": "Foo",
+				"message_jp": "Bar",
+				"items": [
+					{
+						"add_type": 8000,
+						"item_id": 777002,
+						"amount": 50
+					},
+					{
+						"add_type": 8000,
+						"item_id": 3,
+						"amount": 50
+					}
+				]
+			}
+		},
+		{
+			"serial_code": "VKYPQCF",
+			"action": {
+				"message_en": "Foo",
+				"message_jp": "Bar",
+				"items": [
+					{
+						"add_type": 8000,
+						"item_id": 777002,
+						"amount": 50
+					},
+					{
+						"add_type": 8000,
+						"item_id": 3,
+						"amount": 50
 					}
 				]
 			}
