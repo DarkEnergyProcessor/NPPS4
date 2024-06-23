@@ -348,6 +348,7 @@ async def live_schedule(context: idol.SchoolIdolUserParams) -> LiveScheduleRespo
 
 
 DEBUG_SERVER_SCORE_CALCULATE = False
+DEBUG_SERVER_CONSUME_LP = False
 
 
 @idol.register("live", "partyList")
@@ -358,12 +359,12 @@ async def live_partylist(context: idol.SchoolIdolUserParams, request: LivePartyL
     live_info = await live.get_live_info_table(context, request.live_difficulty_id)
     if live_info is None:
         raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_FOUND)
-    cap_value = live_info.capital_value * request.lp_factor
-    if live_info.capital_type == 2:
-        # TODO
-        raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_ENOUGH_EVENT_POINT)
-    if live_info.capital_type == 1 and cap_value > user.get_current_energy(current_user):
-        raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_ENOUGH_CURRENT_ENERGY)
+    if DEBUG_SERVER_CONSUME_LP:
+        if live_info.capital_type == 2:
+            # TODO
+            raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_ENOUGH_EVENT_POINT)
+        if live_info.capital_type == 1 and user.has_energy(current_user, live_info.capital_value * request.lp_factor):
+            raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_ENOUGH_CURRENT_ENERGY)
 
     live_setting = await live.get_live_setting(context, live_info.live_setting_id)
     if live_setting is None:
@@ -422,14 +423,15 @@ async def live_play(context: idol.SchoolIdolUserParams, request: LivePlayRequest
     live_info = await live.get_live_info_table(context, request.live_difficulty_id)
     if live_info is None:
         raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_FOUND)
-    cap_value = live_info.capital_value * request.lp_factor
-    if live_info.capital_type == 2:
-        # TODO
-        raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_ENOUGH_EVENT_POINT)
-    if live_info.capital_type == 1 and cap_value > user.get_current_energy(current_user):
-        raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_ENOUGH_CURRENT_ENERGY)
-    # Consume LP
-    user.sub_energy(current_user, cap_value)
+    if DEBUG_SERVER_CONSUME_LP:
+        cap_value = live_info.capital_value * request.lp_factor
+        if live_info.capital_type == 2:
+            # TODO
+            raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_ENOUGH_EVENT_POINT)
+        if live_info.capital_type == 1 and user.has_energy(current_user, cap_value):
+            raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_ENOUGH_CURRENT_ENERGY)
+        # Consume LP
+        user.sub_energy(current_user, cap_value)
 
     live_setting = await live.get_live_setting_from_difficulty_id(context, request.live_difficulty_id)
     if live_setting is None:
