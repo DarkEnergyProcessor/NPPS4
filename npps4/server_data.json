@@ -43034,7 +43034,7 @@
 			"usage_limit": {
 				"id": "HESOYAM",
 				"global": false,
-				"amount": 100
+				"amount": 200
 			},
 			"action": {
 				"message_en": "Health, Armour, and Money ($250,000)",
@@ -43063,7 +43063,7 @@
 			"usage_limit": {
 				"id": "HESOYAM",
 				"global": false,
-				"amount": 100
+				"amount": 200
 			},
 			"action": {
 				"message_en": "Health, Armour, and Money ($250,000)",
