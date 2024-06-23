@@ -354,9 +354,18 @@ DEBUG_SERVER_SCORE_CALCULATE = False
 async def live_partylist(context: idol.SchoolIdolUserParams, request: LivePartyListRequest) -> LivePartyListResponse:
     current_user = await user.get_current(context)
 
-    # TODO: Check LP/token
+    # Check LP
+    live_info = await live.get_live_info_table(context, request.live_difficulty_id)
+    if live_info is None:
+        raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_FOUND)
+    cap_value = live_info.capital_value * request.lp_factor
+    if live_info.capital_type == 2:
+        # TODO
+        raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_ENOUGH_EVENT_POINT)
+    if live_info.capital_type == 1 and cap_value > user.get_current_energy(current_user):
+        raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_ENOUGH_CURRENT_ENERGY)
 
-    live_setting = await live.get_live_setting_from_difficulty_id(context, request.live_difficulty_id)
+    live_setting = await live.get_live_setting(context, live_info.live_setting_id)
     if live_setting is None:
         raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_FOUND)
 
@@ -409,11 +418,22 @@ async def live_precisescore(context: idol.SchoolIdolUserParams) -> LivePreciseSc
 async def live_play(context: idol.SchoolIdolUserParams, request: LivePlayRequest) -> LivePlayResponse:
     current_user = await user.get_current(context)
 
+    # Check LP
+    live_info = await live.get_live_info_table(context, request.live_difficulty_id)
+    if live_info is None:
+        raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_FOUND)
+    cap_value = live_info.capital_value * request.lp_factor
+    if live_info.capital_type == 2:
+        # TODO
+        raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_ENOUGH_EVENT_POINT)
+    if live_info.capital_type == 1 and cap_value > user.get_current_energy(current_user):
+        raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_ENOUGH_CURRENT_ENERGY)
+    # Consume LP
+    user.sub_energy(current_user, cap_value)
+
     live_setting = await live.get_live_setting_from_difficulty_id(context, request.live_difficulty_id)
     if live_setting is None:
         raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_FOUND)
-
-    # TODO: Check and consume LP/token
 
     beatmap_data = await live.get_live_info(context, request.live_difficulty_id, live_setting)
     if beatmap_data is None:
