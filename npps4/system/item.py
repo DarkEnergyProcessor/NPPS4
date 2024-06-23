@@ -3,6 +3,7 @@ import sqlalchemy
 from . import common
 from . import item_model
 from .. import const
+from .. import db
 from .. import idol
 from ..db import item
 from ..db import main
@@ -131,3 +132,8 @@ async def get_recovery_items(context: idol.BasicSchoolIdolContext, /, user: main
     q = sqlalchemy.select(main.RecoveryItem).where(main.RecoveryItem.user_id == user.id, main.RecoveryItem.amount > 0)
     result = await context.db.main.execute(q)
     return [common.ItemCount(item_id=i.item_id, amount=i.amount) for i in result.scalars()]
+
+
+@common.context_cacheable("recovery_item")
+async def get_recovery_item_info(context: idol.BasicSchoolIdolContext, recovery_item_id: int, /):
+    return await db.get_decrypted_row(context.db.item, item.RecoveryItem, recovery_item_id)

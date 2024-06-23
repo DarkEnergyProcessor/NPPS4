@@ -172,7 +172,7 @@ def add_energy(user: main.User, /, amount: int, *, t: int | None = None, overflo
         current_energy = get_current_energy(user, t)
         amount = amount - (current_energy - before)
         if amount > 0:
-            user.over_max_energy = user.energy_max + amount
+            user.over_max_energy = max(user.over_max_energy, user.energy_max) + amount
         else:
             user.over_max_energy = 0
 
@@ -203,6 +203,18 @@ def sub_energy(user: main.User, /, amount: int, *, t: int | None = None):
         return
 
     raise ValueError("not enough energy")
+
+
+def add_energy_percentage(
+    user: main.User, /, percentage: float, ntimes: int = 1, *, t: int | None = None, overflow: bool = True
+):
+    if percentage < 0.0 or percentage > 1.0:
+        raise ValueError("percentage out of range")
+    if t is None:
+        t = util.time()
+
+    energy_to_add = math.ceil(user.energy_max * percentage) * ntimes
+    add_energy(user, energy_to_add, t=t, overflow=overflow)
 
 
 async def add_exp(context: idol.BasicSchoolIdolContext, user: main.User, exp: int):
