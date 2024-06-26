@@ -251,6 +251,25 @@ def get_unit_rarity(context: idol.BasicSchoolIdolContext, rarity: int, /):
     return context.db.unit.get(unit.Rarity, rarity)
 
 
+@common.context_cacheable("unit_by_number")
+async def get_unit_info_from_unit_number(context: idol.BasicSchoolIdolContext, unit_number: int, /):
+    q = sqlalchemy.select(unit.Unit).where(unit.Unit.unit_number == unit_number)
+    result = await context.db.unit.execute(q)
+    unit_info = result.scalar()
+
+    if unit_info is None:
+        # Try decrypting all rows
+        q = sqlalchemy.select(unit.Unit).where(unit.Unit.unit_number == 0)
+        result = await context.db.unit.execute(q)
+        for encrypted_unit_info in result.scalars():
+            decrypted_unit_info = db.decrypt_row(context.db.unit, encrypted_unit_info)
+            if decrypted_unit_info and decrypted_unit_info.unit_number == unit_number:
+                unit_info = decrypted_unit_info
+                break
+
+    return unit_info
+
+
 @common.context_cacheable("unit_level_up_pattern")
 async def get_unit_level_up_pattern(context: idol.BasicSchoolIdolContext, unit_level_up_pattern_id: int, /):
     q = sqlalchemy.select(unit.UnitLevelUpPattern).where(

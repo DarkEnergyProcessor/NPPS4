@@ -58,10 +58,9 @@ async def run_script(arg: list[str]):
 
         if args.unit_id is None:
             # Look at unit_number
-            q = sqlalchemy.select(npps4.db.unit.Unit).where(npps4.db.unit.Unit.unit_number == args.unit_number)
-            unit_info = (await context.db.unit.execute(q)).scalar()
+            unit_info = await npps4.system.unit.get_unit_info_from_unit_number(context, args.unit_number)
         else:
-            unit_info = await context.db.unit.get(npps4.db.unit.Unit, args.unit_id)
+            unit_info = await npps4.system.unit.get_unit_info(context, args.unit_id)
 
         if unit_info is None:
             raise Exception("unit does not exist")
