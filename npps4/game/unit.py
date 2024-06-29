@@ -604,8 +604,8 @@ async def unit_merge(context: idol.SchoolIdolUserParams, request: UnitMergeReque
                 total_exp = total_exp + math.floor(unit_stats.merge_exp * (1 + multipler)) * supp_unit.amount
 
                 # Give skill EXP
-                if source_unit_skill is not None and source_unit_skill == unit_info.default_unit_skill_id:
-                    skill_level_data = await unit.get_unit_skill_level_data(context, source_unit_skill, 1)
+                if unit_info.default_unit_skill_id is not None:
+                    skill_level_data = await unit.get_unit_skill_level_data(context, unit_info.default_unit_skill_id, 1)
                     if skill_level_data:
                         skill_exp = skill_exp + skill_level_data.grant_exp * supp_unit.amount
             else:
