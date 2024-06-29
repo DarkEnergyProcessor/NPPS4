@@ -2,6 +2,7 @@ import collections.abc
 
 import sqlalchemy
 
+from . import func
 from .. import idol
 from .. import util
 from ..data import schema
@@ -11,7 +12,9 @@ from ..system import reward
 
 from typing import Callable
 
-functions: dict[str, Callable[[idol.BasicSchoolIdolContext, main.User], collections.abc.Awaitable[str | None]]] = {}
+functions: dict[str, Callable[[idol.BasicSchoolIdolContext, main.User], collections.abc.Awaitable[str | None]]] = {
+    "give_all_supporter_units": func.give_all_supporter_units
+}
 
 
 async def execute(
