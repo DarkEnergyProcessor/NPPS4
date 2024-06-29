@@ -172,10 +172,6 @@ async def login_authkey(context: idol.SchoolIdolParams, request: AuthkeyRequest)
     server_key = util.randbytes(32)
     token = await session.encapsulate_token(context, server_key, client_key)
 
-    # Log
-    util.log("My client key is", client_key)
-    util.log("And my auth_data is", auth_data)
-
     # Return response
     return AuthkeyResponse(
         authorize_token=token,
