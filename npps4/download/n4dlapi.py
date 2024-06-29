@@ -228,4 +228,4 @@ def initialize():
         )
 
     print("Getting release info keys")
-    release_key.update(_call_api("api/v1/release_info"))
+    release_key.update({int(k): v for k, v in _call_api("api/v1/release_info").items()})

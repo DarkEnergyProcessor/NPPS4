@@ -209,6 +209,6 @@ def initialize():
         raise RuntimeError("The specified archive directory structure is out-of-date")
 
     release_info: dict[str, str] = _read_json(f"{_archive_root}/release_info.json")
-    release_key.update(dict((int(k), v) for k, v in release_info.items()))
+    release_key.update({int(k): v for k, v in release_info.items()})
 
     app.core.mount("/archive-root", fastapi.staticfiles.StaticFiles(directory=_archive_root), "archive_root")
