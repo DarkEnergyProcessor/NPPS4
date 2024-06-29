@@ -594,7 +594,7 @@ async def unit_merge(context: idol.SchoolIdolUserParams, request: UnitMergeReque
             if unit_info is None:
                 raise idol.error.IdolError(detail="invalid unit id")
 
-            if await unit.sub_supporter_unit(context, current_user, supp_unit.unit_id):
+            if await unit.sub_supporter_unit(context, current_user, supp_unit.unit_id, supp_unit.amount):
                 unit_level_up_pattern = await unit.get_unit_level_up_pattern(
                     context, unit_info.unit_level_up_pattern_id
                 )
