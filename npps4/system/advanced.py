@@ -26,24 +26,16 @@ from ..config import config
 from ..db import game_mater
 from ..db import main
 
-from typing import Any, Callable, cast, overload
+from typing import Callable, cast, overload
 
 
+# TODO: Replace with simple boolean.
 @dataclasses.dataclass
 class AddResult:
     success: bool
-    reason_unit_full: bool = False
-    extra_data: Any | None = None
 
     def __bool__(self):
         return self.success
-
-    @property
-    def unit_data(self) -> main.Unit:
-        """Get underlying unit data (for unit addition only)"""
-        if isinstance(self.extra_data, main.Unit):
-            return self.extra_data
-        raise TypeError("cannot get unit_data")
 
 
 class PartyCenterUnitInfo(pydantic.BaseModel):
@@ -128,25 +120,26 @@ async def add_item(context: idol.BasicSchoolIdolContext, user: main.User, i: com
                 return AddResult(await unit.add_supporter_unit(context, user, i.item_id, i.amount))
             else:
                 unit_cnt = await unit.count_units(context, user, True)
-                if unit_cnt < user.unit_max:
+                if (unit_cnt + i.amount) < user.unit_max:
                     assert type(i) is not unit_model.UnitSupportItem
 
-                    if isinstance(i, unit_model.UnitItem):
-                        unit_item = i
-                    else:
-                        unit_item = await unit.create_unit_item(context, i.item_id)
-                        assert isinstance(unit_item, unit_model.UnitItem)
+                    for _ in range(i.amount):
+                        if isinstance(i, unit_model.UnitItem):
+                            unit_item = i
+                        else:
+                            unit_item = await unit.create_unit_item(context, i.item_id)
+                            assert isinstance(unit_item, unit_model.UnitItem)
 
-                    unit_data = await unit.create_unit_data(context, user, unit_item, True)
-                    await unit.add_unit_by_object(context, user, unit_data)
+                        unit_data = await unit.create_unit_data(context, user, unit_item, True)
+                        await unit.add_unit_by_object(context, user, unit_data)
 
-                    unit_item.unit_owning_user_id = unit_data.id
-                    if not isinstance(i, unit_model.UnitItem):
-                        util.copy_attr(unit_item, i)
+                        unit_item.unit_owning_user_id = unit_data.id
+                        if not isinstance(i, unit_model.UnitItem):
+                            util.copy_attr(unit_item, i)
 
-                    return AddResult(True, extra_data=unit_data)
+                    return AddResult(True)
                 else:
-                    return AddResult(False, reason_unit_full=True)
+                    return AddResult(False)
         case const.ADD_TYPE.GAME_COIN:
             user.game_coin = user.game_coin + i.amount
             return AddResult(True)
@@ -556,7 +549,7 @@ async def deserialize_item_data(
                 except pydantic.ValidationError:
                     pass
 
-            item_data = await unit.create_unit_item(context, item_base.item_id, unit_extra_data)
+            item_data = await unit.create_unit_item(context, item_base.item_id, item_base.amount, unit_extra_data)
         case const.ADD_TYPE.SCENARIO:
             item_data = scenario_model.ScenarioItem(item_id=item_base.item_id, amount=item_base.amount)
         case const.ADD_TYPE.LIVE:

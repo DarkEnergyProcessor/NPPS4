@@ -19,7 +19,7 @@ async def give_all_supporter_units(context: idol.BasicSchoolIdolContext, user: m
             context, item_model.BaseItem(add_type=const.ADD_TYPE.UNIT, item_id=unit_id, amount=100)
         )
         await reward.add_item(
-            context, user, item_data, " 追いかける, ショー・ヘーレーション!", "Oikakeru, Snow Halation!"
+            context, user, item_data, "追いかける, ショー・ヘーレーション!", "Oikakeru, Snow Halation!"
         )
 
     return "Given all supporter members (100x quantity each)."

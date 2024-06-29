@@ -150,7 +150,7 @@ async def add_unit_simple(
     active: bool,
     extra_data: unit_model.UnitExtraData = unit_model.UnitExtraData.EMPTY,
 ):
-    unit_item = await create_unit_item(context, unit_id, extra_data)
+    unit_item = await create_unit_item(context, unit_id, 1, extra_data)
     if isinstance(unit_item, unit_model.UnitItem):
         unit_data = await create_unit_data(context, user, unit_item, active)
         await add_unit_by_object(context, user, unit_data)
@@ -1057,6 +1057,7 @@ async def get_max_skill_exp(context: idol.BasicSchoolIdolContext, /, unit_info: 
 async def create_unit_item(
     context: idol.BasicSchoolIdolContext,
     unit_id: int,
+    amount: int = 1,
     /,
     extra_data: unit_model.UnitExtraData | None = unit_model.UnitExtraData.EMPTY,
 ):
@@ -1066,7 +1067,7 @@ async def create_unit_item(
 
     if unit_info.disable_rank_up > 0:
         return unit_model.UnitSupportItem(
-            item_id=unit_id, unit_rarity_id=unit_info.rarity, attribute=unit_info.attribute_id
+            item_id=unit_id, unit_rarity_id=unit_info.rarity, attribute=unit_info.attribute_id, amount=amount
         )
 
     if extra_data is None:
@@ -1123,6 +1124,7 @@ async def create_unit_item(
 
     return unit_model.UnitItem(
         item_id=unit_id,
+        amount=amount,
         unit_owning_user_id=0,
         unit_rarity_id=unit_info.rarity,
         exp=exp,

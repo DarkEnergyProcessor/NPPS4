@@ -56,7 +56,7 @@ class IncentiveItem(pydantic.BaseModel):
                     extra_data = unit_model.UnitExtraData.model_validate(json.dumps(i.extra_data))
                 except ValueError:
                     pass
-            unit_item = await unit.create_unit_item(context, i.item_id, extra_data)
+            unit_item = await unit.create_unit_item(context, i.item_id, i.amount, extra_data)
             unit.populate_unit_item_to_other(unit_item, obj)
         return obj
 
