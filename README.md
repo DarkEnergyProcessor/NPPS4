@@ -152,8 +152,6 @@ alembic upgrade head
 Most changes requires a server restart. However, changes that only touch `server_data.json` does not require server
 restart as that particular file is hot-reloaded by the server.
 
-```
-
 Client App
 -----
 
