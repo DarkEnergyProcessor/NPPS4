@@ -52,7 +52,7 @@ NPPS4 provides default private key which is used to develop other private server
 and compatible with community-patched APK.
 
 There's nothing to do to use this private key. This private key is used by default as per the sample configuration
-file `main.server_private_key`.
+key `main.server_private_key`.
 
 The public key of the default server key is:
 ```
@@ -134,6 +134,25 @@ uvicorn npps4.run.app:main --port 51376 --host <your lan IP or 0.0.0.0>
 ```
 
 **Caveat**: Currently, `--workers` option is not supported when using NPPS4-DLAPI download backend.
+
+Updating
+-----
+
+Before updating, please ensure if database breakage is not happening. See [DBBREAKAGE.md](DBBREAKAGE.md) for
+information.
+
+If there's no database breakage or you already know a way to handle the breakage (either by doing stuff manually or
+destroying the database), run:
+
+```
+git pull --ff-only
+alembic upgrade head
+```
+
+Most changes requires a server restart. However, changes that only touch `server_data.json` does not require server
+restart as that particular file is hot-reloaded by the server.
+
+```
 
 Client App
 -----
