@@ -24,7 +24,6 @@ class SerialCodeAPIResponse(pydantic.BaseModel):
 
 @app.webview.get("/serialCode/index")
 async def serial_code_index(request: fastapi.Request):
-    print(request.headers.items())
     token = ""
     authorize_header = request.headers.get("Authorize")
     if authorize_header is not None:
