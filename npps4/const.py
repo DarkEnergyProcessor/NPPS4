@@ -130,3 +130,14 @@ class EVOLUTION_BONUS_TYPE(enum.IntEnum):
     """EXP x1.5"""
     ULTRA_SUCCESS = 3
     """EXP x2"""
+
+
+class NOTICE_FILTER_ID(enum.IntEnum):
+    ALL = 0
+    MAIN_STORY = 1
+    SIDE_STORY = 2
+    NEW_MEMBER = 3
+    LIVE_CLEAR = 4
+    EVENT_CLEAR = 5
+    FRIENDS = 6
+    UNKNOWN = 99
