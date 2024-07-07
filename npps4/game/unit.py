@@ -398,7 +398,7 @@ async def unit_rankup(context: idol.SchoolIdolUserParams, request: UnitRankUpReq
     # Get needed data
     source_unit_info = await unit.get_unit_info(context, source_unit.unit_id)
     assert source_unit_info is not None
-    if source_unit_info.disable_rank_up > 0:
+    if source_unit_info.disable_rank_up != const.UNIT_CATEGORY.NORMAL:
         raise idol.error.IdolError(detail="cannot idolize this unit")
 
     source_unit_rarity = await unit.get_unit_rarity(context, source_unit_info.rarity)

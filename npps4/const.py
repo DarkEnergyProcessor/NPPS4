@@ -141,3 +141,19 @@ class NOTICE_FILTER_ID(enum.IntEnum):
     EVENT_CLEAR = 5
     FRIENDS = 6
     UNKNOWN = 99
+
+
+class UNIT_CATEGORY(enum.IntEnum):
+    NORMAL = 0
+    MATERIAL = 1
+    SKILL_UP = 3
+    REMOVABLE_SKILL_CAPACITY_UP = 4
+    COSTUME = 5
+    SYSTEM = 6
+
+
+class FRIEND_STATUS(enum.IntEnum):
+    OTHER = 0
+    FRIEND = 1
+    APPROVAL_WAIT = 2
+    PENDING = 3

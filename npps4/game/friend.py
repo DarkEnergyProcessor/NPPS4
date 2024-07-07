@@ -1,8 +1,10 @@
 import pydantic
 
+from .. import const
 from .. import idol
 from .. import util
 from ..system import common
+from ..system import friend
 from ..system import unit
 from ..system import unit_model
 from ..system import user
@@ -51,7 +53,7 @@ class FriendSearchResponse(common.TimestampMixin):
     center_unit_info: FriendSearchUnitInfo
     setting_award_id: int
     is_alliance: bool
-    friend_status: int
+    friend_status: const.FRIEND_STATUS
 
 
 @idol.register("friend", "list")
@@ -128,5 +130,5 @@ async def friend_search(context: idol.SchoolIdolUserParams, request: FriendSearc
         ),
         setting_award_id=target_user.active_award,
         is_alliance=False,  # TODO
-        friend_status=int(current_user.id == target_user.id),  # TODO
+        friend_status=await friend.get_friend_status(context, current_user, target_user),
     )
