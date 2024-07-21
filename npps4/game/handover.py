@@ -27,7 +27,21 @@ class HandoverReserveTransferResponse(pydantic.BaseModel):
     insert_date: str = pydantic.Field(default_factory=util.timestamp_to_datetime)
 
 
-# TODO: ADd into config.toml?
+class KIDCheckRequest(pydantic.BaseModel):
+    auth_code: str
+
+
+class KIDCheckUserInfo(pydantic.BaseModel):
+    user_id: str
+    name: str
+    level: int
+
+
+class KIDCheckResponse(common.TimestampMixin):
+    user_info: KIDCheckUserInfo
+
+
+# TODO: Add into config.toml?
 REROLL_TRANSFER_ID = "nil"
 REROLL_TRANSFER_PASSCODE = "nil"
 _REROLL_PASSCODE = handover.generate_passcode_sha1(REROLL_TRANSFER_ID, REROLL_TRANSFER_PASSCODE)
@@ -76,7 +90,7 @@ async def handover_kidstatus(context: idol.SchoolIdolUserParams) -> KIDStatusRes
     return KIDStatusResponse(has_klab_id=False)
 
 
-@idol.register("handover", "reserveTransfer")
+@idol.register("handover", "reserveTransfer", batchable=False)
 async def handover_reservetransfer(context: idol.SchoolIdolUserParams) -> HandoverReserveTransferResponse:
     current_user = await user.get_current(context)
     transfer_code = handover.generate_transfer_code()
@@ -85,7 +99,28 @@ async def handover_reservetransfer(context: idol.SchoolIdolUserParams) -> Handov
     return HandoverReserveTransferResponse(invite_code=current_user.invite_code, code=transfer_code)
 
 
-@idol.register("handover", "abortTransfer")
-async def handover_aborttransfer(context: idol.SchoolIdolUserParams) -> None:
+@idol.register("handover", "abortTransfer", batchable=False)
+async def handover_aborttransfer(context: idol.SchoolIdolUserParams):
     current_user = await user.get_current(context)
     current_user.transfer_sha1 = None
+
+
+@idol.register("handover", "kidCheck", batchable=False)
+async def handover_kidcheck(context: idol.SchoolIdolUserParams, request: KIDCheckRequest) -> KIDCheckResponse:
+    # TODO
+    util.stub("handover", "kidCheck", request)
+    raise idol.error.by_code(idol.error.ERROR_KLAB_ID_SERVICE_NOT_REGISTERED)
+
+
+@idol.register("handover", "kidHandover", batchable=False)
+async def handover_kidhandover(context: idol.SchoolIdolUserParams):
+    # TODO
+    util.stub("handover", "kidHandover")
+    raise idol.error.by_code(idol.error.ERROR_KLAB_ID_SERVICE_NOT_REGISTERED)
+
+
+@idol.register("handover", "kidRegister", batchable=False)
+async def handover_kidregister(context: idol.SchoolIdolUserParams, request: KIDCheckRequest):
+    # TODO
+    util.stub("handover", "kidRegister", request)
+    raise idol.error.by_code(idol.error.ERROR_KLAB_ID_SERVICE_ALREADY_REGISTERED)
