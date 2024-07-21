@@ -100,7 +100,7 @@ async def handover_reservetransfer(context: idol.SchoolIdolUserParams) -> Handov
 
 
 @idol.register("handover", "abortTransfer", batchable=False)
-async def handover_aborttransfer(context: idol.SchoolIdolUserParams):
+async def handover_aborttransfer(context: idol.SchoolIdolUserParams) -> None:
     current_user = await user.get_current(context)
     current_user.transfer_sha1 = None
 
@@ -113,14 +113,14 @@ async def handover_kidcheck(context: idol.SchoolIdolUserParams, request: KIDChec
 
 
 @idol.register("handover", "kidHandover", batchable=False)
-async def handover_kidhandover(context: idol.SchoolIdolUserParams):
+async def handover_kidhandover(context: idol.SchoolIdolUserParams) -> None:
     # TODO
     util.stub("handover", "kidHandover")
     raise idol.error.by_code(idol.error.ERROR_KLAB_ID_SERVICE_NOT_REGISTERED)
 
 
 @idol.register("handover", "kidRegister", batchable=False)
-async def handover_kidregister(context: idol.SchoolIdolUserParams, request: KIDCheckRequest):
+async def handover_kidregister(context: idol.SchoolIdolUserParams, request: KIDCheckRequest) -> None:
     # TODO
     util.stub("handover", "kidRegister", request)
     raise idol.error.by_code(idol.error.ERROR_KLAB_ID_SERVICE_ALREADY_REGISTERED)
