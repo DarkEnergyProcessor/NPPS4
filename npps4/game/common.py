@@ -4,6 +4,7 @@ from .. import idol
 from ..system import common
 from ..system import item
 from ..system import live
+from ..system import reward
 from ..system import user
 
 
@@ -17,8 +18,18 @@ class CommonRecoveryEnergyRequest(pydantic.BaseModel):
     amount: int
 
 
-class CommonRecoveryEnergyResponse(pydantic.BaseModel):
+class CommonRecoveryEnergyResponse(common.TimestampMixin):
     item_list: list[common.ItemCount]
+    energy_max: int
+    present_cnt: int
+    after_sns_coin: int
+    after_game_coin: int
+    before_sns_coin: int
+    over_max_energy: int
+    training_energy: int
+    before_game_coin: int
+    energy_full_time: str
+    training_energy_max: int
 
 
 @idol.register("common", "liveResume")
@@ -32,8 +43,9 @@ async def common_liveresume(context: idol.SchoolIdolUserParams, request: CommonL
 async def common_recoveryenergy(
     context: idol.SchoolIdolUserParams, request: CommonRecoveryEnergyRequest
 ) -> CommonRecoveryEnergyResponse:
-    # https://github.com/DarkEnergyProcessor/NPPS/blob/v3.1.x/modules/common/recoveryEnergy.php
     current_user = await user.get_current(context)
+    current_loveca = user.get_loveca(current_user)
+
     if request.energy_type != 1:
         # TODO
         raise idol.error.by_code(idol.error.ERROR_CODE_ENERGY_FULL)
@@ -41,9 +53,10 @@ async def common_recoveryenergy(
         raise idol.error.IdolError(detail="Amount out of range")
 
     if request.item_id == 0:
-        if user.get_loveca(current_user) >= request.amount:
+        if current_loveca >= request.amount:
             # Loveca, behave as restore 100% LP
-            user.add_energy_percentage(current_user, 1.0)
+            user.add_energy_percentage(current_user, 1.0, request.amount)
+            user.sub_loveca(current_user, request.amount)
         else:
             raise idol.error.by_code(idol.error.ERROR_CODE_NOT_ENOUGH_LOVECA)
     else:
@@ -67,4 +80,17 @@ async def common_recoveryenergy(
         else:
             raise idol.error.by_code(idol.error.ERROR_CODE_RECOVER_ITEM_NOT_ENOUGH)
 
-    return CommonRecoveryEnergyResponse(item_list=await item.get_recovery_items(context, current_user))
+    user_info = await user.get_user_info(context, current_user)
+    return CommonRecoveryEnergyResponse(
+        item_list=await item.get_recovery_items(context, current_user),
+        energy_max=user_info.energy_max,
+        over_max_energy=user_info.over_max_energy,
+        energy_full_time=user_info.energy_full_time,
+        before_sns_coin=current_loveca,
+        after_sns_coin=user_info.sns_coin,
+        before_game_coin=user_info.game_coin,
+        after_game_coin=user_info.game_coin,  # Game coin is unused in this scenario
+        training_energy=user_info.training_energy,
+        training_energy_max=user_info.training_energy_max,
+        present_cnt=await reward.count_presentbox(context, current_user),
+    )
