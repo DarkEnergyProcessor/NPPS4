@@ -60,6 +60,25 @@ class UserAddUnitResponse(pydantic.BaseModel):
     after_unit_max: int
 
 
+class UserSetNotificationNotification(pydantic.BaseModel):
+    lp: bool
+    live: bool
+    push: bool
+    lbonus: bool
+    campaign: bool
+    muse_event: bool
+    update_info: bool
+    aqours_event: bool
+    muse_birthday: bool
+    muse_secretbox: bool
+    aqours_birthday: bool
+    aqours_secretbox: bool
+
+
+class UserSetNotificationRequest(pydantic.BaseModel):
+    notification: UserSetNotificationNotification
+
+
 @idol.register("user", "changeName", batchable=False)
 async def user_changename(context: idol.SchoolIdolUserParams, request: ChangeNameRequest) -> ChangeNameResponse:
     await advanced.test_name(context, request.name)
@@ -90,12 +109,9 @@ async def user_userinfo(context: idol.SchoolIdolUserParams) -> UserInfoResponse:
 
 
 @idol.register("user", "setNotificationToken", batchable=False)
-async def user_setnotificationtoken(
-    context: idol.SchoolIdolUserParams, request: UserNotificationTokenRequest
-) -> UserNotificationTokenRequest:
+async def user_setnotificationtoken(context: idol.SchoolIdolUserParams, request: UserNotificationTokenRequest) -> None:
     # TODO
     util.stub("user", "setNotificationToken", request)
-    return request
 
 
 @idol.register("user", "changeNavi")
@@ -119,3 +135,8 @@ async def user_addunitmax(context: idol.SchoolIdolUserParams, request: UserAddUn
     return UserAddUnitResponse(
         used_loveca=current_loveca - user.get_loveca(current_user), after_unit_max=current_user.unit_max
     )
+
+
+async def user_setnotification(context: idol.SchoolIdolUserParams, request: UserSetNotificationRequest) -> None:
+    # TODO
+    util.stub("user", "setNotification", request)
