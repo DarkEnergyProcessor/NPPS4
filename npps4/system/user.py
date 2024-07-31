@@ -17,6 +17,8 @@ from ..db import main
 from ..db import game_mater
 from ..idol import session
 
+from typing import Protocol
+
 
 class UserInfoData(pydantic.BaseModel):
     user_id: int
@@ -263,3 +265,53 @@ def sub_loveca(user: main.User, /, amount: int, *, sub_paid_only: bool = False):
         user.free_sns_coin = user.free_sns_coin - amount1
         user.paid_sns_coin = user.paid_sns_coin - amount2
         return True
+
+
+class CleanupProtocol(Protocol):
+    user_id: sqlalchemy.orm.Mapped[int]
+
+
+async def _clean_table[T: CleanupProtocol](context: idol.BasicSchoolIdolContext, cls: type[T], user_id: int, /):
+    q = sqlalchemy.delete(cls).where(cls.user_id == user_id)
+    await context.db.main.execute(q)
+
+
+async def delete_user(context: idol.BasicSchoolIdolContext, user_id: int):
+    user_data = await get(context, user_id)
+    if user_data is None:
+        raise ValueError("User doesn't exist")
+    await _clean_table(context, main.NormalLiveUnlock, user_id)
+    await _clean_table(context, main.LocalSerialCodeUsage, user_id)
+    await _clean_table(context, main.ExchangePointItem, user_id)
+    await _clean_table(context, main.RecoveryItem, user_id)
+    await _clean_table(context, main.Item, user_id)
+    await _clean_table(context, main.LiveInProgress, user_id)
+    await _clean_table(context, main.UnitRemovableSkill, user_id)
+    await _clean_table(context, main.RemovableSkillInfo, user_id)
+    await _clean_table(context, main.MuseumUnlock, user_id)
+    await _clean_table(context, main.LiveClear, user_id)
+    await _clean_table(context, main.SubScenario, user_id)
+    await _clean_table(context, main.Scenario, user_id)
+    await _clean_table(context, main.Incentive, user_id)
+    await _clean_table(context, main.LoginBonus, user_id)
+    await _clean_table(context, main.Achievement, user_id)
+    await _clean_table(context, main.Album, user_id)
+    await _clean_table(context, main.UnitSupporter, user_id)
+    await _clean_table(context, main.UnitDeck, user_id)
+    await _clean_table(context, main.TOSAgree, user_id)
+    await _clean_table(context, main.Award, user_id)
+    await _clean_table(context, main.Background, user_id)
+    await _clean_table(context, main.RequestCache, user_id)
+    await _clean_table(context, main.Session, user_id)
+
+    # Perform failsafe on party_user_id
+    q = (
+        sqlalchemy.update(main.LiveInProgress)
+        .where(main.LiveInProgress.party_user_id == user_id)
+        .values(party_user_id=main.LiveInProgress.user_id)
+    )
+    await context.db.main.execute(q)
+
+    # Delete user
+    await context.db.main.delete(user_data)
+    await context.db.main.flush()

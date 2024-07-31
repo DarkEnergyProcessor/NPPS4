@@ -365,7 +365,7 @@ class RecoveryItem(common.Base, kw_only=True):
 
 
 class ExchangePointItem(common.Base, kw_only=True):
-    """LP Recovery item"""
+    """Sticker Shop item"""
 
     id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
     user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
