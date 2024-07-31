@@ -55,8 +55,15 @@ class SecretboxButton(pydantic.BaseModel):
     rate_modifier: list[int] | None = None
 
 
-class SecretboxData(pydantic.BaseModel):
+class HasIDString(pydantic.BaseModel):
     id_string: str
+
+    @property
+    def _internal_id(self) -> int:
+        return util.java_hash_code(self.id_string)
+
+
+class SecretboxData(HasIDString):
     name: str
     name_en: str | None
     member_category: int
@@ -82,7 +89,7 @@ class SecretboxData(pydantic.BaseModel):
 
     @property
     def secretbox_id(self) -> int:
-        return util.java_hash_code(self.id_string)
+        return self._internal_id
 
 
 class SerialCodeHashed(pydantic.BaseModel):
@@ -170,6 +177,23 @@ class AchievementReward(pydantic.BaseModel):
     rewards: list[item_model.BaseItem]
 
 
+class ExchangeCost(pydantic.BaseModel):
+    rarity: int
+    cost: int
+
+
+class StickerShop(item_model.BaseItem, HasIDString):
+    name: str
+    name_en: str | None = None
+    costs: list[ExchangeCost]  # user can pay with one of cost in here
+    limit: int = 0  # 0 means unlimited although some have hardcoded limit of 1 (e.g. backgrounds)
+    end_time: int = 0  # 0 means no expiration date
+
+    @property
+    def exchange_item_id(self) -> int:
+        return self._internal_id
+
+
 class SerializedServerData(pydantic.BaseModel):
     json_schema_link: pydantic.json_schema.SkipJsonSchema[str | None] = pydantic.Field(default=None, alias="$schema")
     badwords: list[pydantic.Base64UrlStr]
@@ -180,3 +204,4 @@ class SerializedServerData(pydantic.BaseModel):
     live_effort_drops: list[LiveEffortRewardDrops]
     secretbox_data: list[SecretboxData]
     serial_codes: list[SerialCode]
+    sticker_shop: list[StickerShop]

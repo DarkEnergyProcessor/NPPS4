@@ -4,8 +4,11 @@ import os
 import time
 
 from . import schema
+from .. import util
 from ..system import item_model
 from ..config import config
+
+from typing import Callable
 
 
 @dataclasses.dataclass
@@ -19,6 +22,21 @@ class ServerData:
     live_effort_drops: dict[int, list[schema.BaseItemWithWeight]]
     secretbox_data: dict[int, schema.SecretboxData]
     serial_codes: list[schema.SerialCode]
+    sticker_shop: list[schema.StickerShop]
+
+
+def ensure_no_conflict[
+    T: schema.HasIDString, E: Exception
+](items: list[T], exc_type: Callable[[str], E] = Exception, /):
+    ids: dict[int, str] = {}
+    for item in items:
+        item_id = item._internal_id
+        if item_id in ids:
+            raise exc_type(
+                f"conflict item id string between '{item.id_string}' and '{ids[item_id]}' (id number is {item_id})"
+            )
+        ids[item_id] = item.id_string
+    return items
 
 
 SERVER_DATA_PATH = config.get_server_data_path()
@@ -34,8 +52,7 @@ def get():
         try:
             with open(SERVER_DATA_PATH, "r", encoding="utf-8", newline="") as f:
                 serialized_data = schema.SerializedServerData.model_validate(json.load(f))
-
-                server_data = ServerData(
+                new_server_data = ServerData(
                     json_schema_link=serialized_data.json_schema_link,
                     badwords=serialized_data.badwords,
                     achievement_reward=dict((k.achievement_id, k.rewards) for k in serialized_data.achievement_reward),
@@ -47,15 +64,17 @@ def get():
                     live_effort_drops=dict(
                         (d.live_effort_point_box_spec_id, d.drops) for d in serialized_data.live_effort_drops
                     ),
-                    secretbox_data={sb.secretbox_id: sb for sb in serialized_data.secretbox_data},
+                    secretbox_data={sb.secretbox_id: sb for sb in ensure_no_conflict(serialized_data.secretbox_data)},
                     serial_codes=serialized_data.serial_codes,
+                    sticker_shop=ensure_no_conflict(serialized_data.sticker_shop),
                 )
-                last_server_data_timestamp = stat.st_mtime_ns
-        except json.JSONDecodeError as e:
-            if server_data is None:
+                server_data = new_server_data
+        except Exception as e:
+            if isinstance(e, KeyboardInterrupt) or server_data is None:
                 raise e from None
-            # Return old data
-            return server_data
+            util.log("Cannot load new data, using old data for now", util.logging.ERROR, e)
+        finally:
+            last_server_data_timestamp = stat.st_mtime_ns
 
     return server_data
 
@@ -79,8 +98,9 @@ def update():
             schema.LiveEffortRewardDrops(live_effort_point_box_spec_id=live_effort_point_box_spec_id, drops=drops)
             for live_effort_point_box_spec_id, drops in server_data.live_effort_drops.items()
         ],
-        secretbox_data=list(server_data.secretbox_data.values()),
+        secretbox_data=ensure_no_conflict(list(server_data.secretbox_data.values())),
         serial_codes=server_data.serial_codes,
+        sticker_shop=ensure_no_conflict(server_data.sticker_shop),
     )
     serialized_data.json_schema_link = server_data.json_schema_link
 

@@ -135,6 +135,24 @@
 			"title": "BaseItemWithWeight",
 			"type": "object"
 		},
+		"ExchangeCost": {
+			"properties": {
+				"rarity": {
+					"title": "Rarity",
+					"type": "integer"
+				},
+				"cost": {
+					"title": "Cost",
+					"type": "integer"
+				}
+			},
+			"required": [
+				"rarity",
+				"cost"
+			],
+			"title": "ExchangeCost",
+			"type": "object"
+		},
 		"LiveEffortRewardDrops": {
 			"properties": {
 				"live_effort_point_box_spec_id": {
@@ -693,6 +711,80 @@
 			],
 			"title": "SerialCodeUsageLimit",
 			"type": "object"
+		},
+		"StickerShop": {
+			"properties": {
+				"id_string": {
+					"title": "Id String",
+					"type": "string"
+				},
+				"add_type": {
+					"$ref": "#/$defs/ADD_TYPE"
+				},
+				"item_id": {
+					"title": "Item Id",
+					"type": "integer"
+				},
+				"amount": {
+					"default": 1,
+					"title": "Amount",
+					"type": "integer"
+				},
+				"extra_data": {
+					"anyOf": [
+						{
+							"type": "object"
+						},
+						{
+							"type": "null"
+						}
+					],
+					"default": null,
+					"title": "Extra Data"
+				},
+				"name": {
+					"title": "Name",
+					"type": "string"
+				},
+				"name_en": {
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "null"
+						}
+					],
+					"default": null,
+					"title": "Name En"
+				},
+				"costs": {
+					"items": {
+						"$ref": "#/$defs/ExchangeCost"
+					},
+					"title": "Costs",
+					"type": "array"
+				},
+				"limit": {
+					"default": 0,
+					"title": "Limit",
+					"type": "integer"
+				},
+				"end_time": {
+					"default": 0,
+					"title": "End Time",
+					"type": "integer"
+				}
+			},
+			"required": [
+				"id_string",
+				"add_type",
+				"item_id",
+				"name",
+				"costs"
+			],
+			"title": "StickerShop",
+			"type": "object"
 		}
 	},
 	"properties": {
@@ -748,6 +840,13 @@
 			},
 			"title": "Serial Codes",
 			"type": "array"
+		},
+		"sticker_shop": {
+			"items": {
+				"$ref": "#/$defs/StickerShop"
+			},
+			"title": "Sticker Shop",
+			"type": "array"
 		}
 	},
 	"required": [
@@ -758,7 +857,8 @@
 		"live_specific_live_unit_drops",
 		"live_effort_drops",
 		"secretbox_data",
-		"serial_codes"
+		"serial_codes",
+		"sticker_shop"
 	],
 	"title": "SerializedServerData",
 	"type": "object",
