@@ -43375,15 +43375,6 @@
 			"action": {
 				"function": "give_all_supporter_units"
 			}
-		},
-		{
-			"serial_code": {
-				"salt": "iX-qJVoo-SA55IyXuFRS_w==",
-				"hash": "96a24e8792317f1269a476728e9e741d5c7c9c52c4d532cfd1b9ce31a9e13bb4"
-			},
-			"action": {
-				"function": "give_all_supporter_units"
-			}
 		}
 	],
 	"sticker_shop": []
