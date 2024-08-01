@@ -408,6 +408,19 @@ class NormalLiveUnlock(common.Base, kw_only=True):
     __table_args__ = (sqlalchemy.UniqueConstraint(user_id, live_track_id),)
 
 
+class ExchangeItemLimit(common.Base, kw_only=True):
+    """Tracks on bought item in sticker shop."""
+
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
+    user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
+    )
+    exchange_item_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, index=True)
+    count: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
+
+    __table_args__ = (sqlalchemy.UniqueConstraint(user_id, exchange_item_id),)
+
+
 engine = sqlalchemy.ext.asyncio.create_async_engine(config.get_database_url())
 sessionmaker = sqlalchemy.ext.asyncio.async_sessionmaker(engine)
 
