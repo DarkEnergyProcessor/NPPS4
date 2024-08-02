@@ -34,7 +34,7 @@ class ExchangeItemBase(pydantic.BaseModel):
     amount: int = 1
     item_category_id: int = 0
     is_rank_max: bool = False
-    cost_list: list[ExchangeCost]
+    cost_list: list[ExchangeCost]  # Note: Limited to 3 costs
     already_obtained: bool = False
     got_item_count: int = 0
     term_count: int = 0
@@ -201,7 +201,9 @@ async def get_exchange_item_info(context: idol.BasicSchoolIdolContext, /, user: 
                 add_type=raw_info.add_type,
                 item_id=raw_info.item_id,
                 amount=raw_info.amount,
-                cost_list=[ExchangeCost(rarity=cost.rarity, cost_value=cost.cost) for cost in raw_info.costs],
+                cost_list=[
+                    ExchangeCost(rarity=cost.rarity, cost_value=cost.cost) for cost in raw_info.costs[:3]
+                ],  # Client crash if you have more than 3
                 already_obtained=exchange_got_item_count > 0,
                 got_item_count=exchange_got_item_count,
                 term_count=exchange_term_count,
