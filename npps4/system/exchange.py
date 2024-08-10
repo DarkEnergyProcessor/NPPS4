@@ -48,7 +48,7 @@ class ExchangeItemWithMaxCount(ExchangeItemBase):
     max_item_count: int
 
 
-class ExchangeItemWithMaxCountAndExpirt(ExchangeItemBase):
+class ExchangeItemWithMaxCountAndExpiry(ExchangeItemBase):
     term_end_date: str
     max_item_count: int
 
@@ -164,6 +164,75 @@ async def _get_exchange_item_limit(
     return exchange_limit
 
 
+async def add_exchange_item_got_count(
+    context: idol.BasicSchoolIdolContext, /, user: main.User, exchange_item_id: int, amount: int
+):
+    exchange_limit = await _get_exchange_item_limit(context, user, exchange_item_id, True)
+    assert exchange_limit is not None
+    exchange_limit.count = exchange_limit.count + amount
+    await context.db.main.flush()
+
+
+async def get_exchange_item_info_by_raw_info(
+    context: idol.BasicSchoolIdolContext, user: main.User, raw_info: data.schema.StickerShop, time: int | None = None, /
+):
+    if time is None:
+        time = util.time()
+
+    exchange_item_id = raw_info.exchange_item_id
+    exchange_limit = await _get_exchange_item_limit(context, user, exchange_item_id, False)
+    exchange_title = context.get_text(raw_info.name, raw_info.name_en)
+    exchange_is_new = exchange_limit is None
+    exchange_limit = await _get_exchange_item_limit(context, user, exchange_item_id, True)
+    assert exchange_limit is not None
+    exchange_max_amount = None
+    exchange_got_item_count = exchange_limit.count
+    exchange_term_count = max((raw_info.end_time - time + 86399) // 86400, 0)
+    if raw_info.limit > 0:
+        exchange_max_amount = raw_info.limit
+
+    # Handling special case
+    match raw_info.add_type:
+        case const.ADD_TYPE.AWARD:
+            exchange_max_amount = 1
+            exchange_got_item_count = int(await award.has_award(context, user, raw_info.item_id))
+        case const.ADD_TYPE.BACKGROUND:
+            exchange_max_amount = 1
+            exchange_got_item_count = int(await background.has_background(context, user, raw_info.item_id))
+
+    # Oh no
+    exchange_item_data = ExchangeItemBase(
+        exchange_item_id=exchange_item_id,
+        title=exchange_title,
+        is_new=exchange_is_new,
+        add_type=raw_info.add_type,
+        item_id=raw_info.item_id,
+        amount=raw_info.amount,
+        cost_list=[
+            ExchangeCost(rarity=cost.rarity, cost_value=cost.cost) for cost in raw_info.costs[:3]
+        ],  # Client crash if you have more than 3
+        already_obtained=exchange_got_item_count > 0,
+        got_item_count=exchange_got_item_count,
+        term_count=exchange_term_count,
+    )
+    if exchange_max_amount is not None:
+        if raw_info.end_time > 0:
+            exchange_item_data = ExchangeItemWithMaxCountAndExpiry(
+                term_end_date=util.timestamp_to_datetime(raw_info.end_time),
+                max_item_count=exchange_max_amount,
+                **exchange_item_data.model_dump(),
+            )
+        else:
+            exchange_item_data = ExchangeItemWithMaxCount(
+                max_item_count=exchange_max_amount, **exchange_item_data.model_dump()
+            )
+    elif raw_info.end_time > 0:
+        exchange_item_data = ExchangeItemWithExpiry(
+            term_end_date=util.timestamp_to_datetime(raw_info.end_time), **exchange_item_data.model_dump()
+        )
+    return exchange_item_data
+
+
 async def get_exchange_item_info(context: idol.BasicSchoolIdolContext, /, user: main.User):
     server_data = data.get()
     result: list[ExchangeItemBase] = []
@@ -172,57 +241,16 @@ async def get_exchange_item_info(context: idol.BasicSchoolIdolContext, /, user: 
         time = util.time()
 
         if raw_info.end_time == 0 or raw_info.end_time >= time:
-            exchange_item_id = raw_info.exchange_item_id
-            exchange_limit = await _get_exchange_item_limit(context, user, exchange_item_id, False)
-            exchange_title = context.get_text(raw_info.name, raw_info.name_en)
-            exchange_is_new = exchange_limit is None
-            exchange_limit = await _get_exchange_item_limit(context, user, exchange_item_id, True)
-            assert exchange_limit is not None
-            exchange_max_amount = None
-            exchange_got_item_count = exchange_limit.count
-            exchange_term_count = max((raw_info.end_time - time + 86399) // 86400, 0)
-            if raw_info.limit > 0:
-                exchange_max_amount = raw_info.limit
-
-            # Handling special case
-            match raw_info.add_type:
-                case const.ADD_TYPE.AWARD:
-                    exchange_max_amount = 1
-                    exchange_got_item_count = int(await award.has_award(context, user, raw_info.item_id))
-                case const.ADD_TYPE.BACKGROUND:
-                    exchange_max_amount = 1
-                    exchange_got_item_count = int(await background.has_background(context, user, raw_info.item_id))
-
-            # Oh no
-            exchange_item_data = ExchangeItemBase(
-                exchange_item_id=exchange_item_id,
-                title=exchange_title,
-                is_new=exchange_is_new,
-                add_type=raw_info.add_type,
-                item_id=raw_info.item_id,
-                amount=raw_info.amount,
-                cost_list=[
-                    ExchangeCost(rarity=cost.rarity, cost_value=cost.cost) for cost in raw_info.costs[:3]
-                ],  # Client crash if you have more than 3
-                already_obtained=exchange_got_item_count > 0,
-                got_item_count=exchange_got_item_count,
-                term_count=exchange_term_count,
-            )
-            if exchange_max_amount is not None:
-                if raw_info.end_time > 0:
-                    exchange_item_data = ExchangeItemWithMaxCountAndExpirt(
-                        term_end_date=util.timestamp_to_datetime(raw_info.end_time),
-                        max_item_count=exchange_max_amount,
-                        **exchange_item_data.model_dump(),
-                    )
-                else:
-                    exchange_item_data = ExchangeItemWithMaxCount(
-                        max_item_count=exchange_max_amount, **exchange_item_data.model_dump()
-                    )
-            elif raw_info.end_time > 0:
-                exchange_item_data = ExchangeItemWithExpiry(
-                    term_end_date=util.timestamp_to_datetime(raw_info.end_time), **exchange_item_data.model_dump()
-                )
-            result.append(exchange_item_data)
+            result.append(await get_exchange_item_info_by_raw_info(context, user, raw_info, time))
 
     return result
+
+
+async def find_raw_exchange_item_info_by_id(context: idol.BasicSchoolIdolContext, exchange_item_id: int, /):
+    server_data = data.get()
+
+    for raw_info in server_data.sticker_shop:
+        if raw_info._internal_id == exchange_item_id:
+            return raw_info
+
+    return None

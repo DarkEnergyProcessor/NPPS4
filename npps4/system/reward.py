@@ -162,3 +162,15 @@ async def remove_incentive(context: idol.BasicSchoolIdolContext, incentive: main
     # TODO: Move to incentive history
     await context.db.main.delete(incentive)
     await context.db.main.flush()
+
+
+async def has_at_least_one(
+    context: idol.BasicSchoolIdolContext, user: main.User, add_type: const.ADD_TYPE, item_id: int
+):
+    q = (
+        sqlalchemy.select(sqlalchemy.func.count())
+        .select_from(main.Incentive)
+        .where(main.Incentive.add_type == int(add_type), main.Incentive.item_id == item_id)
+    )
+    result = await context.db.main.execute(q)
+    return (result.scalar() or 0) > 0
