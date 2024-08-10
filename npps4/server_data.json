@@ -43341,37 +43341,25 @@
 			}
 		},
 		{
-			"serial_code": {
-				"salt": "_IEt9Eb2kMPvbgB6E0zRug==",
-				"hash": "04d4299eaf3edf8b02d9480eaacb55c77af7b7500c84ad484b2c5b15e89fc332"
-			},
+			"serial_code": "Qk4KcP1VGIc",
 			"action": {
 				"function": "give_all_supporter_units"
 			}
 		},
 		{
-			"serial_code": {
-				"salt": "rBQ3johTJh1sxTacPDxAvA==",
-				"hash": "382443b9dff660bc9d5c79a64d5ac21bc843e1cf59f4460cc2511b992fcd4783"
-			},
+			"serial_code": "youtu.be/Qk4KcP1VGIc",
 			"action": {
 				"function": "give_all_supporter_units"
 			}
 		},
 		{
-			"serial_code": {
-				"salt": "qaBf6z0u6RA06Ju-rRSVEg==",
-				"hash": "204915e55e0eee168278c9665878ae28c0883aebddb97f668423409d4c5e6335"
-			},
+			"serial_code": "https://youtu.be/Qk4KcP1VGIc",
 			"action": {
 				"function": "give_all_supporter_units"
 			}
 		},
 		{
-			"serial_code": {
-				"salt": "Uad6gGlAbiSxb_GbTximNQ==",
-				"hash": "6c24a8be63ec471c0f2bea10425e484b31a3371788cb308523dd22f6197533e6"
-			},
+			"serial_code": "https://www.youtube.com/watch?v=Qk4KcP1VGIc",
 			"action": {
 				"function": "give_all_supporter_units"
 			}
