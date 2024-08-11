@@ -78,10 +78,16 @@ async def helper_apisplitter():
 
 
 @app.webview.get("/helper/achievement")
-async def helper_achievement(request: fastapi.Request, achievement_id: Annotated[int, fastapi.Query(alias="id")] = 0):
+async def helper_achievement(
+    request: fastapi.Request,
+    achievement_type: Annotated[int, fastapi.Query(alias="type")] = 0,
+    achievement_id: Annotated[int, fastapi.Query(alias="id")] = 0,
+):
     async with idol.create_basic_context(request) as context:
         if achievement_id == 0:
             q = sqlalchemy.select(achievement.Achievement)
+            if achievement_type != 0:
+                q = q.where(achievement.Achievement.achievement_type == achievement_type)
             result = await context.db.achievement.execute(q)
             achievements = [(ach.achievement_id, get_achievement_name(ach)) for ach in result.scalars()]
             return app.templates.TemplateResponse(
