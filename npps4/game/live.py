@@ -640,6 +640,7 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
     for unit_type_id in unit_types_in_deck:
         accomplished_achievement.extend(await achievement.check_type_7(context, current_user, unit_type_id, True))
     accomplished_achievement.extend(await achievement.check_type_53_recursive(context, current_user))
+    accomplished_achievement.fix()
 
     # Process achievement rewards part 1
     accomplished_achievement_rewards = [
