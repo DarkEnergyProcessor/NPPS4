@@ -17,7 +17,7 @@ from .. import util
 from ..db import achievement
 from ..db import main
 
-from typing import Awaitable, Callable, Concatenate
+from typing import Callable, Concatenate
 
 ACHIEVEMENT_REWARD_DEFAULT = [item.base_loveca(1)]
 
@@ -250,7 +250,9 @@ async def check_type_countable(
     count: int,
     pindex: int = 1,
     *args: int | None,
-    test: Callable[[achievement.Achievement, collections.abc.Sequence[int | None]], Awaitable[bool]] = test_params,
+    test: Callable[
+        [achievement.Achievement, collections.abc.Sequence[int | None]], collections.abc.Awaitable[bool]
+    ] = test_params,
 ):
     q = sqlalchemy.select(main.Achievement).where(
         main.Achievement.user_id == user.id,
@@ -297,7 +299,9 @@ async def check_type_increment(
     increment: bool,
     pindex: int = 1,
     *args: int | None,
-    test: Callable[[achievement.Achievement, collections.abc.Sequence[int | None]], Awaitable[bool]] = test_params,
+    test: Callable[
+        [achievement.Achievement, collections.abc.Sequence[int | None]], collections.abc.Awaitable[bool]
+    ] = test_params,
 ):
     q = sqlalchemy.select(main.Achievement).where(
         main.Achievement.user_id == user.id,
@@ -513,7 +517,7 @@ class _Type50Checker:
                         q = sqlalchemy.select(achievement.UnitTypeGroup.achievement_unit_type_group_id).where(
                             achievement.UnitTypeGroup.unit_type_id == unit_info.unit_type_id
                         )
-                        r = await self.context.db.unit.execute(q)
+                        r = await self.context.db.achievement.execute(q)
                         result.update(r.scalars())
 
                     previous_unit_set[unit_id] = result
