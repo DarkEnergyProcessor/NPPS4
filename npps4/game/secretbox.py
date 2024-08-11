@@ -82,7 +82,7 @@ if USE_STUB_DATA:
 
 else:
 
-    @idol.register("secretbox", "all", log_response_data=True)
+    @idol.register("secretbox", "all")
     async def secretbox_all(context: idol.SchoolIdolUserParams) -> SecretboxAllResponse:
         current_user = await user.get_current(context)
         item_list = await item.get_item_list(context, current_user)
