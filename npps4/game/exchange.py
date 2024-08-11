@@ -53,6 +53,9 @@ async def exchange_iteminfo(context: idol.SchoolIdolUserParams) -> ExchangeItemI
     )
 
 
+AWARD_AND_BACKGROUND = (const.ADD_TYPE.AWARD, const.ADD_TYPE.BACKGROUND)
+
+
 @idol.register("exchange", "usePoint")
 async def exchange_usepoint(
     context: idol.SchoolIdolUserParams, request: ExchangeUsePointRequest
@@ -90,7 +93,7 @@ async def exchange_usepoint(
         raise idol.error.by_code(idol.error.ERROR_CODE_NOT_ENOUGH_EXCHANGE_POINT)
 
     # Specific case for background and award
-    if raw_exchange_info.add_type in (const.ADD_TYPE.AWARD, const.ADD_TYPE.BACKGROUND):
+    if raw_exchange_info.add_type in AWARD_AND_BACKGROUND:
         if await reward.has_at_least_one(context, current_user, raw_exchange_info.add_type, raw_exchange_info.item_id):
             errcode = (
                 idol.error.ERROR_CODE_AWARD_IS_CONTAINED_IN_BOX
@@ -106,8 +109,12 @@ async def exchange_usepoint(
     item_result: list[pydantic.SerializeAsAny[item_model.Item]] = []
     for _ in range(request.amount):
         item_data = await advanced.deserialize_item_data(context, raw_exchange_info)
-        item_data.reward_box_flag = True
-        await reward.add_item(context, current_user, item_data, "Sticker Shop")
+        if raw_exchange_info.add_type in (const.ADD_TYPE.AWARD, const.ADD_TYPE.BACKGROUND):
+            item_data.reward_box_flag = False
+            await advanced.add_item(context, current_user, item_data)
+        else:
+            item_data.reward_box_flag = True
+            await reward.add_item(context, current_user, item_data, "Sticker Shop")
         item_result.append(item_data)
 
     await exchange.sub_exchange_point(context, current_user, exchange_rarity.rarity, required_exchange_point)
