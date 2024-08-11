@@ -99,8 +99,29 @@ async def get_item_data_guaranteed(context: idol.BasicSchoolIdolContext, /, user
 
 
 async def add_item(context: idol.BasicSchoolIdolContext, /, user: main.User, item_id: int, amount: int):
-    item_data = await get_item_data_guaranteed(context, user, item_id)
-    item_data.amount = item_data.amount + amount
+    match item_id:
+        case 2:
+            user.social_point = user.social_point + amount
+        case 3:
+            user.game_coin = user.game_coin + amount
+        case 4:
+            user.free_sns_coin = user.free_sns_coin + amount
+        case _:
+            item_data = await get_item_data_guaranteed(context, user, item_id)
+            item_data.amount = item_data.amount + amount
+
+
+async def get_item_count(context: idol.BasicSchoolIdolContext, /, user: main.User, item_id: int):
+    match item_id:
+        case 2:
+            return user.social_point
+        case 3:
+            return user.game_coin
+        case 4:
+            return user.free_sns_coin + user.paid_sns_coin
+        case _:
+            item_data = await get_item_data(context, user, item_id)
+            return 0 if item_data is None else item_data.amount
 
 
 async def get_recovery_item_data(context: idol.BasicSchoolIdolContext, /, user: main.User, recovery_item_id: int):

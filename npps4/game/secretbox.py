@@ -82,7 +82,7 @@ if USE_STUB_DATA:
 
 else:
 
-    @idol.register("secretbox", "all")
+    @idol.register("secretbox", "all", log_response_data=True)
     async def secretbox_all(context: idol.SchoolIdolUserParams) -> SecretboxAllResponse:
         current_user = await user.get_current(context)
         item_list = await item.get_item_list(context, current_user)
@@ -103,8 +103,31 @@ LOWEST_RARITY_SORT_ORDER = (1, 2, 3, 5, 4)
 async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: SecretboxPonRequest) -> SecretboxPonResponse:
     current_user = await user.get_current(context)
     secretbox_id, button_index, cost_index = secretbox.decode_cost_id(request.id)
-    secretbox_data = secretbox.get_secretbox_data(secretbox_id)
-    secretbox_button = secretbox.get_secretbox_button(secretbox_id, button_index)
+
+    try:
+        secretbox_data = secretbox.get_secretbox_data(secretbox_id)
+    except KeyError as e:
+        util.log("uh oh secretbox_data", secretbox_id, e=e)
+        raise idol.error.by_code(idol.error.ERROR_CODE_SECRET_BOX_NOT_EXIST) from e
+
+    try:
+        secretbox_button = secretbox.get_secretbox_button(secretbox_data, button_index)
+        secretbox_cost = secretbox_button.costs[cost_index - 1]
+    except IndexError as e:
+        util.log("uh oh secretbox_button", button_index, cost_index, e=e)
+        raise idol.error.by_code(idol.error.ERROR_CODE_SECRET_BOX_COST_TYPE_IS_NOT_SPECIFIED) from e
+
+    # Check currency
+    if (
+        await secretbox.get_user_currency(context, current_user, secretbox_cost.cost_type, secretbox_cost.cost_item_id)
+        < secretbox_cost.cost_amount
+    ):
+        raise idol.error.by_code(idol.error.ERROR_CODE_SECRET_BOX_REMAINING_COST_IS_NOT_ENOUGH)
+
+    # Capture current user info
+    before_user_info = await user.get_user_info(context, current_user)
+
+    # Roll units
     unit_roll = secretbox.roll_units(
         secretbox_id,
         secretbox_button.unit_count,
@@ -114,8 +137,6 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
     )
     unit_data_list: list[unit_model.AnyUnitItem] = []
     current_unit_count = await unit.count_units(context, current_user, True)
-    before_user = await user.get_user_info(context, current_user)
-    # TODO: Subtract currency
 
     umi_rare_mode = False
     lowest_rarity = 5  # sort order
@@ -166,13 +187,18 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
         context, current_user, achievement_list.accomplished, accomplished_rewards
     )
 
+    # Subtract currency
+    await secretbox.sub_user_currency(
+        context, current_user, secretbox_cost.cost_type, secretbox_cost.cost_item_id, secretbox_cost.cost_amount
+    )
+
     if umi_rare_mode:
         unit_data_list[0].unit_rarity_id = 4
 
     item_list = await item.get_item_list(context, current_user)
 
     return SecretboxPonResponse(
-        before_user_info=before_user,
+        before_user_info=before_user_info,
         after_user_info=await user.get_user_info(context, current_user),
         accomplished_achievement_list=await achievement.to_game_representation(
             context, achievement_list.accomplished, accomplished_rewards
@@ -185,7 +211,15 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
         is_unit_max=current_unit_count >= current_user.unit_max,
         item_list=item_list[0],
         button_list=await secretbox.get_secretbox_button_response(context, current_user, secretbox_data),
-        secret_box_info=await secretbox.get_secretbox_info_response(context, current_user, secretbox_data),
+        secret_box_info=await secretbox.get_secretbox_info_response(
+            context,
+            current_user,
+            secretbox_data,
+            await secretbox.get_user_currency(
+                context, current_user, secretbox_cost.cost_type, secretbox_cost.cost_item_id
+            )
+            >= secretbox_cost.cost_amount,
+        ),
         secret_box_items=SecretboxItems(unit=unit_data_list, item=[]),
         museum_info=await museum.get_museum_info_data(context, current_user),
         present_cnt=await reward.count_presentbox(context, current_user),

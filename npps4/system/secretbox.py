@@ -1,7 +1,7 @@
-import itertools
-import operator
-
+from . import item
 from . import secretbox_model
+from . import user
+from .. import const
 from .. import data
 from .. import idol
 from .. import util
@@ -30,7 +30,7 @@ def decode_cost_id(cost_id: int):
 
 
 async def get_secretbox_button_response(
-    context: idol.BasicSchoolIdolContext, user: main.User, secretbox: data.schema.SecretboxData
+    context: idol.BasicSchoolIdolContext, target_user: main.User, secretbox: data.schema.SecretboxData
 ):
     return [
         # TODO: Free once a day scouting
@@ -39,7 +39,8 @@ async def get_secretbox_button_response(
             cost_list=[
                 secretbox_model.SecretboxAllCost(
                     id=encode_cost_id(secretbox.secretbox_id, i, j),
-                    payable=False,
+                    payable=await get_user_currency(context, target_user, cost.cost_type, cost.cost_item_id)
+                    >= cost.cost_amount,
                     unit_count=button.unit_count,
                     type=cost.cost_type,
                     item_id=cost.cost_item_id,
@@ -54,7 +55,10 @@ async def get_secretbox_button_response(
 
 
 async def get_secretbox_info_response(
-    context: idol.BasicSchoolIdolContext, user: main.User, secretbox: data.schema.SecretboxData
+    context: idol.BasicSchoolIdolContext,
+    target_user: main.User,
+    secretbox: data.schema.SecretboxData,
+    can_do_more: bool,
 ):
     return secretbox_model.SecretboxAllSecretboxInfo(
         secret_box_id=secretbox.secretbox_id,
@@ -64,11 +68,11 @@ async def get_secretbox_info_response(
         end_date=util.timestamp_to_datetime(secretbox.end_time),
         add_gauge=0,  # TODO
         always_display_flag=1,
-        pon_count=100,  # TODO
+        pon_count=can_do_more * 100,  # TODO
     )
 
 
-async def get_all_secretbox_data_response(context: idol.BasicSchoolIdolContext, user: main.User):
+async def get_all_secretbox_data_response(context: idol.BasicSchoolIdolContext, target_user: main.User):
     server_data = data.get()
     member_category_list: dict[int, list[secretbox_model.SecretboxAllPage]] = {}
 
@@ -92,8 +96,8 @@ async def get_all_secretbox_data_response(context: idol.BasicSchoolIdolContext, 
                     context, secretbox.animation_asset_layout[3], secretbox.animation_asset_layout_en[3]
                 ),
             ),
-            button_list=await get_secretbox_button_response(context, user, secretbox),
-            secret_box_info=await get_secretbox_info_response(context, user, secretbox),
+            button_list=await get_secretbox_button_response(context, target_user, secretbox),
+            secret_box_info=await get_secretbox_info_response(context, target_user, secretbox, False),
         )
         member_category_list.setdefault(secretbox.member_category, []).append(page)
 
@@ -137,6 +141,50 @@ def roll_units(
     return [util.SYSRAND.choice(secretbox_data.rarity_pools[i]) for i in picked_rarity_index]
 
 
-def get_secretbox_button(secretbox_id: int, button_index: int):
-    secretbox_data = get_secretbox_data(secretbox_id)
+def get_secretbox_button(secretbox_data: int | data.schema.SecretboxData, button_index: int):
+    if isinstance(secretbox_data, int):
+        secretbox_data = get_secretbox_data(secretbox_id=secretbox_data)
     return secretbox_data.buttons[button_index - 1]
+
+
+async def get_user_currency(
+    context: idol.BasicSchoolIdolContext,
+    target_user: main.User,
+    /,
+    cost_type: const.SECRETBOX_COST_TYPE,
+    cost_item_id: int | None,
+):
+    match cost_type:
+        case const.SECRETBOX_COST_TYPE.ITEM_TICKET:
+            if cost_item_id is None:
+                raise ValueError("Empty item_id for type 1000")
+            return await item.get_item_count(context, target_user, cost_item_id)
+        case const.SECRETBOX_COST_TYPE.GAME_COIN:
+            return target_user.game_coin
+        case const.SECRETBOX_COST_TYPE.LOVECA:
+            return user.get_loveca(target_user, include_free=cost_item_id != 1)
+        case const.SECRETBOX_COST_TYPE.FRIEND:
+            return target_user.social_point
+        case _:
+            return 0
+
+
+async def sub_user_currency(
+    context: idol.BasicSchoolIdolContext,
+    target_user: main.User,
+    /,
+    cost_type: const.SECRETBOX_COST_TYPE,
+    cost_item_id: int | None,
+    amount: int,
+):
+    match cost_type:
+        case const.SECRETBOX_COST_TYPE.ITEM_TICKET:
+            if cost_item_id is None:
+                raise ValueError("Empty item_id for type 1000")
+            await item.add_item(context, target_user, cost_item_id, -amount)
+        case const.SECRETBOX_COST_TYPE.GAME_COIN:
+            target_user.game_coin = target_user.game_coin - amount
+        case const.SECRETBOX_COST_TYPE.LOVECA:
+            user.sub_loveca(target_user, amount, sub_paid_only=cost_item_id == 1)
+        case const.SECRETBOX_COST_TYPE.FRIEND:
+            target_user.social_point = target_user.social_point - amount

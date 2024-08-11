@@ -25,7 +25,7 @@ AnySecretboxAllAnimationAsset = SecretboxAllAnimation3Asset | SecretboxAllAnimat
 
 class SecretboxAllCost(pydantic.BaseModel):
     id: int
-    payable: int
+    payable: bool
     unit_count: int
     type: const.SECRETBOX_COST_TYPE
     # Note: IF "type" above is "LOVECA", then possible item_id values:
