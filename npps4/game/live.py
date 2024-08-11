@@ -595,6 +595,7 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
     assert current_deck is not None
     unit_types_in_deck: set[int] = set()
     unit_deck_full_info: list[unit_model.UnitInfoData] = []
+    unit_deck_unit_ids: list[int] = []
     for unit_owning_user_id in current_deck[1]:
         unit_data = await unit.get_unit(context, unit_owning_user_id)
         unit.validate_unit(current_user, unit_data)
@@ -614,6 +615,7 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
             if subscenario_id > 0 and await subscenario.unlock(context, current_user, subscenario_id):
                 subscenario_unlocks.append(subscenario_id)
 
+        unit_deck_unit_ids.append(unit_data.unit_id)
         unit_deck_full_info.append((await unit.get_unit_data_full_info(context, unit_data))[0])
 
     # Check achievement
@@ -626,6 +628,9 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
         + await achievement.check_type_32(context, current_user, live_setting.live_track_id)
         # TODO: Check type 33
         + await achievement.check_type_37(context, current_user, live_setting.live_track_id, True)
+        + await achievement.check_type_50(
+            context, current_user, live_setting.live_track_id, combo_rank, unit_deck_unit_ids, True
+        )
         + await achievement.check_type_58(context, current_user, True)
     )
     if score_rank < 5:

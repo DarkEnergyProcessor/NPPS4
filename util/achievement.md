@@ -174,7 +174,7 @@ When to check: Clearing a live show.
 * `params6` - Combo rank (1 S, 2 A, 3 B, 4 C) or `null` for no combo rank requirement.
 * `params7` - _Unknown_
 * `params8` - `achievement_unit_type_group_id` in `achievement_unit_type_group_m` table.
-* `params9` - _Unknown_
+* `params9` - 1 = All, 2 = One or more
 * `params10` - Amount of live show to clear.
 
 ### _Unknown_ (Type 51)

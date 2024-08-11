@@ -164,6 +164,23 @@ class Tag(common.GameDBBase):
     __table_args__ = (sqlalchemy.PrimaryKeyConstraint(achievement_id, achievement_category_id),)
 
 
+class UnitTypeGroup(common.GameDBBase):
+    """```sql
+        CREATE TABLE `achievement_unit_type_group_m` (
+        `achievement_unit_type_group_id` INTEGER NOT NULL,
+        `unit_type_id` INTEGER NOT NULL,
+        `rank` INTEGER NOT NULL,
+        PRIMARY KEY (`achievement_unit_type_group_id`,`unit_type_id`)
+    )```
+    """
+
+    __tablename__ = "achievement_unit_type_group_m"
+    achievement_unit_type_group_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger)
+    unit_type_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger)
+    rank: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    __table_args__ = (sqlalchemy.PrimaryKeyConstraint(achievement_unit_type_group_id, unit_type_id),)
+
+
 engine = sqlalchemy.ext.asyncio.create_async_engine(
     f"sqlite+aiosqlite:///file:{download.get_db_path('achievement')}?mode=ro&uri=true",
     connect_args={"check_same_thread": False},

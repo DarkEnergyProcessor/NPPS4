@@ -8,6 +8,7 @@ from . import advanced
 from . import common
 from . import item
 from . import item_model
+from . import unit
 from . import reward
 from .. import data
 from .. import db
@@ -16,7 +17,7 @@ from .. import util
 from ..db import achievement
 from ..db import main
 
-from typing import Callable, Concatenate
+from typing import Awaitable, Callable, Concatenate
 
 ACHIEVEMENT_REWARD_DEFAULT = [item.base_loveca(1)]
 
@@ -232,7 +233,7 @@ async def get_achievement_count(
     return result.scalar() or 0
 
 
-def test_params(ach_info: achievement.Achievement, args: collections.abc.Sequence[int | None]):
+async def test_params(ach_info: achievement.Achievement, args: collections.abc.Sequence[int | None]):
     if args:
         for i in range(min(len(args), 11)):
             if args[i] is not None:
@@ -249,6 +250,7 @@ async def check_type_countable(
     count: int,
     pindex: int = 1,
     *args: int | None,
+    test: Callable[[achievement.Achievement, collections.abc.Sequence[int | None]], Awaitable[bool]] = test_params,
 ):
     q = sqlalchemy.select(main.Achievement).where(
         main.Achievement.user_id == user.id,
@@ -266,7 +268,7 @@ async def check_type_countable(
         if ach_info is None:
             raise ValueError("achievement info is none, database is corrupted?")
 
-        if test_params(ach_info, args):
+        if await test(ach_info, args):
             target_amount = int(getattr(ach_info, f"params{pindex}", None) or 1)
             if count >= target_amount:
                 # Achieved.
@@ -295,6 +297,7 @@ async def check_type_increment(
     increment: bool,
     pindex: int = 1,
     *args: int | None,
+    test: Callable[[achievement.Achievement, collections.abc.Sequence[int | None]], Awaitable[bool]] = test_params,
 ):
     q = sqlalchemy.select(main.Achievement).where(
         main.Achievement.user_id == user.id,
@@ -312,7 +315,7 @@ async def check_type_increment(
         if ach_info is None:
             raise ValueError("achievement info is none, database is corrupted?")
 
-        if test_params(ach_info, args):
+        if await test(ach_info, args):
             target_amount = int(getattr(ach_info, f"params{pindex}", None) or 1)
             count = ach.count + increment
             if count >= target_amount:
@@ -486,6 +489,81 @@ async def check_type_37(context: idol.BasicSchoolIdolContext, user: main.User, l
 
     # Note, there's no "count" in here but the database requires it, so specify unused parameter index (e.g. 2)
     return await check_type_increment(context, user, 37, increment, 2, live_track_id)
+
+
+class _Type50Checker:
+    def __init__(self, context: idol.BasicSchoolIdolContext, user: main.User, unit_deck: list[int], /):
+        self.context = context
+        self.user = user
+        self.unit_deck = unit_deck
+        self.achievement_groups: list[set[int]] = []
+
+    async def init(self):
+        if len(self.achievement_groups) == 0:
+            previous_unit_set: dict[int, set[int]] = {}
+
+            for unit_id in self.unit_deck:
+                if unit_id in previous_unit_set:
+                    self.achievement_groups.append(previous_unit_set[unit_id])
+                else:
+                    # Perform query on unit type
+                    unit_info = await unit.get_unit_info(self.context, unit_id)
+                    result: set[int] = set()
+                    if unit_info is not None:
+                        q = sqlalchemy.select(achievement.UnitTypeGroup.achievement_unit_type_group_id).where(
+                            achievement.UnitTypeGroup.unit_type_id == unit_info.unit_type_id
+                        )
+                        r = await self.context.db.unit.execute(q)
+                        result.update(r.scalars())
+
+                    previous_unit_set[unit_id] = result
+                    self.achievement_groups.append(result)
+
+    async def all(self, achievement_unit_type_group_id: int):
+        await self.init()
+        for group_id in self.achievement_groups:
+            if achievement_unit_type_group_id not in group_id:
+                return False
+
+        return True
+
+    async def any(self, achievement_unit_type_group_id: int):
+        await self.init()
+        for group_id in self.achievement_groups:
+            if achievement_unit_type_group_id in group_id:
+                return True
+
+        return False
+
+    async def __call__(self, ach_info: achievement.Achievement, args: collections.abc.Sequence[int | None]):
+        if (
+            ach_info.params8 is not None
+            and (ach_info.params1 is None or ach_info.params1 == args[0])
+            and (ach_info.params6 is None or ach_info.params6 == args[1])
+        ):
+            match ach_info.params9:
+                case 1:
+                    return await self.all(ach_info.params8)
+                case 2:
+                    return await self.any(ach_info.params8)
+        return False
+
+
+async def check_type_50(
+    context: idol.BasicSchoolIdolContext,
+    user: main.User,
+    live_track_id: int,
+    combo_rank: int,
+    unit_deck: list[int],
+    increment: bool,
+):
+    """
+    Check live show clear where all or one of the deck are in specific group.
+    """
+
+    return await check_type_increment(
+        context, user, 50, increment, 10, live_track_id, combo_rank, test=_Type50Checker(context, user, unit_deck)
+    )
 
 
 async def check_type_53_old(context: idol.BasicSchoolIdolContext, user: main.User):
