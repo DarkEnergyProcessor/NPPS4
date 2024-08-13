@@ -175,7 +175,7 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
                 reward_data.as_item_reward,
                 "FIXME scouting JP Text",
                 "Scouting",
-                (unit_info.rarity <= 2 and unit_info.disable_rank_up == 0) * (util.time() + 60),
+                (unit_info.rarity <= 2 and unit_info.disable_rank_up == 0) * unit_expiry,
             )
         unit_data_list.append(reward_data.as_item_reward)
         lowest_rarity = min(lowest_rarity, LOWEST_RARITY_SORT_ORDER[reward_data.as_item_reward.unit_rarity_id - 1])
