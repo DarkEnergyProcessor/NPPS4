@@ -559,6 +559,7 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
     current_user.game_coin = current_user.game_coin + given_g
 
     # Add units
+    unit_expiry = util.time() + const.COMMON_UNIT_EXPIRY
     current_unit_count = await unit.count_units(context, current_user, True)
     for reward_data in (live_clear_drop, live_combo_drop, live_score_drop):
         if reward_data is not None:
@@ -569,6 +570,7 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
                 current_unit_count=current_unit_count,
                 reason_jp="FIXME live show reward JP text",
                 reason_en="Live Show! Reward",
+                expire=unit_expiry,
             )
 
     # Add bond

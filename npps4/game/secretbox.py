@@ -1,5 +1,6 @@
 import pydantic
 
+from .. import const
 from .. import idol
 from .. import util
 from ..system import achievement
@@ -145,6 +146,7 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
         if unit_info is not None and unit_info.rarity == 2 and unit_info.unit_type_id in (4, 94):
             umi_rare_mode = True
 
+    unit_expiry = util.time() + const.COMMON_UNIT_EXPIRY
     for unit_id in unit_roll:
         reward_data = await unit.quick_create_by_unit_add(context, current_user, unit_id)
         if not isinstance(reward_data.as_item_reward, unit_model.UnitItem):
@@ -164,6 +166,8 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
             current_unit_count = current_unit_count + 1
         else:
             # Move to present box
+            unit_info = await unit.get_unit_info(context, reward_data.unit_id)
+            assert unit_info is not None
             reward_data.as_item_reward.reward_box_flag = True
             await reward.add_item(
                 context,
@@ -171,6 +175,7 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
                 reward_data.as_item_reward,
                 "FIXME scouting JP Text",
                 "Scouting",
+                (unit_info.rarity <= 2 and unit_info.disable_rank_up == 0) * (util.time() + 60),
             )
         unit_data_list.append(reward_data.as_item_reward)
         lowest_rarity = min(lowest_rarity, LOWEST_RARITY_SORT_ORDER[reward_data.as_item_reward.unit_rarity_id - 1])

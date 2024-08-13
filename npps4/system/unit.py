@@ -942,6 +942,7 @@ async def process_quick_add(
     current_unit_count: int | None = None,
     reason_jp: str = "Reward",
     reason_en: str = "Reward",
+    expire: int = 0,
 ):
     if current_unit_count is None:
         current_unit_count = await count_units(context, user, True)
@@ -951,13 +952,7 @@ async def process_quick_add(
             if current_unit_count >= user.unit_max:
                 # Move to present box
                 quick_add_result.as_item_reward.reward_box_flag = True
-                await reward.add_item(
-                    context,
-                    user,
-                    quick_add_result.as_item_reward,
-                    reason_jp,
-                    reason_en,
-                )
+                await reward.add_item(context, user, quick_add_result.as_item_reward, reason_jp, reason_en, expire)
             else:
                 assert quick_add_result.full_info is not None
                 await add_unit_by_object(context, user, quick_add_result.unit_data)
