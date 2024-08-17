@@ -194,23 +194,23 @@ async def encapsulate_token(context: BasicSchoolIdolContext, server_key: bytes, 
     return str(base64.urlsafe_b64encode(salt + result), "utf-8")
 
 
-async def decapsulate_token(context: BasicSchoolIdolContext, token_data: str):
+async def cleanup_session_table(context: BasicSchoolIdolContext, /):
     t = util.time()
-
-    # Delete unauthenticated tokens
     q = sqlalchemy.delete(main.Session).where(
         main.Session.user_id == None, main.Session.last_accessed < (t - FIRST_STAGE_TOKEN_MAX_DURATION)
     )
     await context.db.main.execute(q)
-    await context.db.main.flush()
 
     # Delete tokens
     expiry_time = config.get_session_expiry_time()
     if expiry_time > 0:
         q = sqlalchemy.delete(main.Session).where(main.Session.last_accessed < (t - expiry_time))
         await context.db.main.execute(q)
-        await context.db.main.flush()
 
+    await context.db.main.flush()
+
+
+async def decapsulate_token(context: BasicSchoolIdolContext, token_data: str):
     encoded_data = base64.urlsafe_b64decode(token_data)
     salt, result = encoded_data[:SALT_SIZE], encoded_data[SALT_SIZE:]
     try:
@@ -218,7 +218,12 @@ async def decapsulate_token(context: BasicSchoolIdolContext, token_data: str):
     except itsdangerous.BadSignature:
         return None
 
+    # Get token
     q = sqlalchemy.select(main.Session).where(main.Session.token == token)
+    expiry_time = config.get_session_expiry_time()
+    if expiry_time > 0:
+        q = q.where(main.Session.last_accessed >= (util.time() - expiry_time))
+
     result = await context.db.main.execute(q)
     session = result.scalar()
     if session is None:

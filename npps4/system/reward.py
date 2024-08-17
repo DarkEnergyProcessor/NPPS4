@@ -30,7 +30,7 @@ class FilterConfig(pydantic.BaseModel):
     category: RewardCategory
 
 
-async def _delete_expired_incentive(context: idol.BasicSchoolIdolContext, time: int = 0):
+async def cleanup_incentive(context: idol.BasicSchoolIdolContext, time: int = 0):
     if time == 0:
         time = util.time()
 
@@ -47,7 +47,7 @@ async def add_item(
     reason_en: str | None = None,
     expire: int = 0,
 ):
-    await _delete_expired_incentive(context)
+    await cleanup_incentive(context)
     extra_data = item_data.get_extra_data()
     incentive = main.Incentive(
         user_id=user.id,
@@ -99,7 +99,7 @@ async def get_presentbox(
     order_expiry_date: bool = False,
 ):
     t = util.time()
-    await _delete_expired_incentive(context, t)
+    await cleanup_incentive(context, t)
 
     # Query non-expire incentives.
     q = sqlalchemy.select(main.Incentive).where(
@@ -130,7 +130,7 @@ async def count_presentbox(
     context: idol.BasicSchoolIdolContext, /, user: main.User, filter_config: FilterConfig | None = None
 ):
     t = util.time()
-    await _delete_expired_incentive(context, t)
+    await cleanup_incentive(context, t)
 
     q = (
         sqlalchemy.select(sqlalchemy.func.count())
@@ -166,7 +166,7 @@ async def resolve_incentive(context: idol.BasicSchoolIdolContext, user: main.Use
 
 
 async def get_incentive(context: idol.BasicSchoolIdolContext, user: main.User, incentive_id: int):
-    await _delete_expired_incentive(context)
+    await cleanup_incentive(context)
     q = sqlalchemy.select(main.Incentive).where(main.Incentive.user_id == user.id, main.Incentive.id == incentive_id)
     result = await context.db.main.execute(q)
     return result.scalar()
@@ -181,7 +181,7 @@ async def remove_incentive(context: idol.BasicSchoolIdolContext, incentive: main
 async def has_at_least_one(
     context: idol.BasicSchoolIdolContext, user: main.User, add_type: const.ADD_TYPE, item_id: int
 ):
-    await _delete_expired_incentive(context)
+    await cleanup_incentive(context)
     q = (
         sqlalchemy.select(sqlalchemy.func.count())
         .select_from(main.Incentive)
