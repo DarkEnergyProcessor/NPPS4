@@ -80,12 +80,12 @@ class Session(common.Base, kw_only=True):
     id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
     token: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(unique=True)
     user_id: sqlalchemy.orm.Mapped[int | None] = sqlalchemy.orm.mapped_column(
-        common.IDInteger, sqlalchemy.ForeignKey(User.id)
+        common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
     )
     client_key: sqlalchemy.orm.Mapped[bytes] = sqlalchemy.orm.mapped_column()
     server_key: sqlalchemy.orm.Mapped[bytes] = sqlalchemy.orm.mapped_column()
     last_accessed: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
-        common.IDInteger, default_factory=util.time
+        common.IDInteger, default_factory=util.time, index=True
     )
 
 
