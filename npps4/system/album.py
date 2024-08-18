@@ -92,6 +92,7 @@ async def trigger_achievement(
         result = await achievement.check_type_21(context, user, count)
         ach_ctx.extend(result)
 
+    ach_ctx.fix()
     return ach_ctx
 
 
