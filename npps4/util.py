@@ -87,6 +87,7 @@ def stub(module: str, action: str, request: Any = None, /):
 
 
 TIMEZONE_JST = datetimelib.timezone(datetimelib.timedelta(hours=9))
+OFFSET_JST = 32400
 
 
 def datetime(ts: int | None = None):
@@ -159,17 +160,23 @@ def extract_token_from_authorize(authorize: str):
     return None
 
 
-def get_next_day_timestamp(ts: int | None = None, /, *, ndays: int = 1, offset: int = 32400):
+def get_next_day_timestamp(ts: int | None = None, /, *, ndays: int = 1, offset: int = OFFSET_JST):
     if ts is None:
         ts = time()
     day = get_days_since_unix(ts, offset=offset)
     return (day + ndays) * 86400 - offset
 
 
-def get_days_since_unix(ts: int | None = None, /, *, offset: int = 32400):
+def get_days_since_unix(ts: int | None = None, /, *, offset: int = OFFSET_JST):
     if ts is None:
         ts = time()
     return (ts + offset) // 86400
+
+
+def get_weeks_since_unix(ts: int | None = None, /, *, offset: int = OFFSET_JST, dow: int = 1):
+    day = get_days_since_unix(ts, offset=offset)
+    # +4 because 1st January is Thursday
+    return max((day + 4 - dow) // 7, 0)
 
 
 def clamp[T: int | float](v: T, minval: T, maxval: T, /):

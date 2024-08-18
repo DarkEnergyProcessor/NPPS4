@@ -215,6 +215,10 @@ class Achievement(common.Base, kw_only=True):
     )
     end_date: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0, index=True)
     is_new: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=True, index=True)
+    reset_type: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)
+    reset_value: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, default=0, index=True
+    )  # For reset_type > 0
 
     __table_args__ = (sqlalchemy.UniqueConstraint(achievement_id, user_id),)
 

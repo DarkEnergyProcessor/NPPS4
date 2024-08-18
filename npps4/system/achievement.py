@@ -111,6 +111,7 @@ async def add_achievement(
         insert_date=time,
         end_date=0 if ach.end_date is None else util.datetime_to_timestamp(ach.end_date),
         is_new=True,
+        reset_type=ach.reset_type,
     )
     context.db.main.add(user_ach)
     await context.db.main.flush()
