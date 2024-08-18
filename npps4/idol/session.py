@@ -30,12 +30,18 @@ class BasicSchoolIdolContext:
         return self
 
     async def __aexit__(self, exc_type, exc, tb):
-        if exc_type is None:
-            await self.db.commit()
-        else:
-            await self.db.rollback()
-        await self.db.cleanup()
         self.cache.clear()
+
+        try:
+            if exc_type is None:
+                await self.db.commit()
+            else:
+                await self.db.rollback()
+        except:
+            await self.db.rollback()
+            raise
+        finally:
+            await self.db.cleanup()
 
     def is_lang_jp(self):
         return self.lang == idoltype.Language.jp
