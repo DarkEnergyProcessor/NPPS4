@@ -27,6 +27,12 @@ class BasicSchoolIdolContext:
         self.cache: dict[str, dict[Any, Any]] = {}
 
     async def __aenter__(self):
+        mainsession = self.db.main
+        if mainsession.bind.dialect.name == "sqlite":
+            # HACK: Set busy timeout to 25s
+            await mainsession.execute(sqlalchemy.text("PRAGMA busy_timeout=25000"))
+            # HACK: Increase WAL page size to 100000
+            await mainsession.execute(sqlalchemy.text("PRAGMA wal_autocheckpoint=100000"))
         return self
 
     async def __aexit__(self, exc_type, exc, tb):
