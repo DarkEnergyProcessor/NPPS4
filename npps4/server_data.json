@@ -6661,7 +6661,8 @@
 			"rewards": [
 				{
 					"add_type": 3001,
-					"item_id": 4
+					"item_id": 4,
+					"amount": 5
 				},
 				{
 					"add_type": 3000,
@@ -6779,6 +6780,16 @@
 				{
 					"add_type": 1001,
 					"item_id": 1356
+				}
+			]
+		},
+		{
+			"achievement_id": 20040001,
+			"rewards": [
+				{
+					"add_type": 3001,
+					"item_id": 4,
+					"amount": 5
 				}
 			]
 		},
