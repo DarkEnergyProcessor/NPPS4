@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import dataclasses
 import pickle
@@ -14,13 +15,13 @@ from .. import util
 from ..config import config
 from ..db import main
 
-from typing import Annotated, Any, cast, overload, override
+from typing import Annotated, Any, Callable, cast, overload, override
 
 
 class BasicSchoolIdolContext:
     """Context object used only to access the database function."""
 
-    def __init__(self, lang: idoltype.Language):
+    def __init__(self, lang: idoltype.Language = idoltype.Language.jp):
         self.lang = lang
         self.db = database.Database()
         self.cache: dict[str, dict[Any, Any]] = {}
@@ -34,7 +35,7 @@ class BasicSchoolIdolContext:
         else:
             await self.db.rollback()
         await self.db.cleanup()
-        self.cache = {}
+        self.cache.clear()
 
     def is_lang_jp(self):
         return self.lang == idoltype.Language.jp
@@ -67,6 +68,12 @@ class BasicSchoolIdolContext:
             self.cache[key] = k
         k[id] = value
 
+    def support_background_task(self) -> bool:
+        return False
+
+    def add_task[**P](self, func: Callable[P, Any], *args: P.args, **kwargs: P.kwargs):
+        raise NotImplementedError("not implemented for basic context")
+
 
 class SchoolIdolParams(BasicSchoolIdolContext):
     """Context object used for unauthenticated request."""
@@ -74,6 +81,7 @@ class SchoolIdolParams(BasicSchoolIdolContext):
     def __init__(
         self,
         request: fastapi.Request,
+        background_task: fastapi.BackgroundTasks,
         authorize: Annotated[str, fastapi.Header(alias="Authorize")],
         client_version: Annotated[str, fastapi.Header(alias="Client-Version")],
         lang: Annotated[idoltype.Language, fastapi.Header(alias="LANG")],
@@ -108,6 +116,7 @@ class SchoolIdolParams(BasicSchoolIdolContext):
         self.platform = platform_type
         self.x_message_code = request.headers.get("X-Message-Code")
         self.request = request
+        self.bgtasks = background_task
         # Note: Due to how FastAPI works, the `request_data` form is retrieved TWICE!
         # One in here, retrieved as raw bytes, and the other one is in _get_request_data
         # as Pydantic model.
@@ -115,6 +124,12 @@ class SchoolIdolParams(BasicSchoolIdolContext):
         self.raw_request_data = request_data or b""
 
         super().__init__(lang)
+
+    def support_background_task(self):
+        return True
+
+    def add_task[**P](self, func: Callable[P, Any], *args: P.args, **kwargs: P.kwargs):
+        return self.bgtasks.add_task(func, *args, **kwargs)
 
 
 class SchoolIdolAuthParams(SchoolIdolParams):
@@ -126,13 +141,14 @@ class SchoolIdolAuthParams(SchoolIdolParams):
     def __init__(
         self,
         request: fastapi.Request,
+        background_task: fastapi.BackgroundTasks,
         authorize: Annotated[str, fastapi.Header(alias="Authorize")],
         client_version: Annotated[str, fastapi.Header(alias="Client-Version")],
         lang: Annotated[idoltype.Language, fastapi.Header(alias="LANG")],
         platform_type: Annotated[idoltype.PlatformType, fastapi.Header(alias="Platform-Type")],
         request_data: Annotated[bytes | None, fastapi.Form(exclude=True, include=False)] = None,
     ):
-        super().__init__(request, authorize, client_version, lang, platform_type, request_data)
+        super().__init__(request, background_task, authorize, client_version, lang, platform_type, request_data)
         self.token_async = None
 
     @override
@@ -152,13 +168,14 @@ class SchoolIdolUserParams(SchoolIdolAuthParams):
     def __init__(
         self,
         request: fastapi.Request,
+        background_task: fastapi.BackgroundTasks,
         authorize: Annotated[str, fastapi.Header(alias="Authorize")],
         client_version: Annotated[str, fastapi.Header(alias="Client-Version")],
         lang: Annotated[idoltype.Language, fastapi.Header(alias="LANG")],
         platform_type: Annotated[idoltype.PlatformType, fastapi.Header(alias="Platform-Type")],
         request_data: Annotated[bytes | None, fastapi.Form(exclude=True, include=False)] = None,
     ):
-        super().__init__(request, authorize, client_version, lang, platform_type, request_data)
+        super().__init__(request, background_task, authorize, client_version, lang, platform_type, request_data)
 
     @override
     async def finalize(self):
@@ -208,6 +225,19 @@ async def cleanup_session_table(context: BasicSchoolIdolContext, /):
         await context.db.main.execute(q)
 
     await context.db.main.flush()
+
+
+_currently_cleaning = False
+
+
+async def try_cleanup_tokens():
+    global _currently_cleaning
+    if not _currently_cleaning:
+        _currently_cleaning = True
+        await asyncio.sleep(60)
+        async with BasicSchoolIdolContext() as context:
+            await cleanup_session_table(context)
+        _currently_cleaning = False
 
 
 async def decapsulate_token(context: BasicSchoolIdolContext, token_data: str):

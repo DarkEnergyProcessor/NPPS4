@@ -74,6 +74,8 @@ async def get_current(context: idol.SchoolIdolUserParams):
     if result is None:
         raise ValueError("logic error, user is None")
 
+    context.add_task(session.try_cleanup_tokens)
+
     if result.locked:
         raise idol.error.locked()
 

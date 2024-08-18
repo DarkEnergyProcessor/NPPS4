@@ -1,12 +1,11 @@
-from typing import Literal
+import pydantic
+
 from .. import idol
 from .. import util
 from ..system import advanced
 from ..system import common
 from ..system import unit
 from ..system import user
-
-import pydantic
 
 
 class BirthdayUserInfoResponse(pydantic.BaseModel):

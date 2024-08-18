@@ -1,3 +1,4 @@
+import asyncio
 import enum
 import json
 
@@ -39,6 +40,19 @@ async def cleanup_incentive(context: idol.BasicSchoolIdolContext, time: int = 0)
     await context.db.main.flush()
 
 
+_currently_cleaning = False
+
+
+async def try_cleanup_incentive():
+    global _currently_cleaning
+    if not _currently_cleaning:
+        _currently_cleaning = True
+        await asyncio.sleep(60)
+        async with idol.BasicSchoolIdolContext() as context:
+            await cleanup_incentive(context)
+        _currently_cleaning = False
+
+
 async def add_item(
     context: idol.BasicSchoolIdolContext,
     user: main.User,
@@ -47,7 +61,9 @@ async def add_item(
     reason_en: str | None = None,
     expire: int = 0,
 ):
-    await cleanup_incentive(context)
+    if context.support_background_task():
+        context.add_task(try_cleanup_incentive)
+
     extra_data = item_data.get_extra_data()
     incentive = main.Incentive(
         user_id=user.id,
@@ -98,8 +114,10 @@ async def get_presentbox(
     order_ascending: bool = False,
     order_expiry_date: bool = False,
 ):
+    if context.support_background_task():
+        context.add_task(try_cleanup_incentive)
+
     t = util.time()
-    await cleanup_incentive(context, t)
 
     # Query non-expire incentives.
     q = sqlalchemy.select(main.Incentive).where(
@@ -129,8 +147,10 @@ async def get_presentbox(
 async def count_presentbox(
     context: idol.BasicSchoolIdolContext, /, user: main.User, filter_config: FilterConfig | None = None
 ):
+    if context.support_background_task():
+        context.add_task(try_cleanup_incentive)
+
     t = util.time()
-    await cleanup_incentive(context, t)
 
     q = (
         sqlalchemy.select(sqlalchemy.func.count())
@@ -166,7 +186,9 @@ async def resolve_incentive(context: idol.BasicSchoolIdolContext, user: main.Use
 
 
 async def get_incentive(context: idol.BasicSchoolIdolContext, user: main.User, incentive_id: int):
-    await cleanup_incentive(context)
+    if context.support_background_task():
+        context.add_task(try_cleanup_incentive)
+
     q = sqlalchemy.select(main.Incentive).where(main.Incentive.user_id == user.id, main.Incentive.id == incentive_id)
     result = await context.db.main.execute(q)
     return result.scalar()
@@ -181,7 +203,9 @@ async def remove_incentive(context: idol.BasicSchoolIdolContext, incentive: main
 async def has_at_least_one(
     context: idol.BasicSchoolIdolContext, user: main.User, add_type: const.ADD_TYPE, item_id: int
 ):
-    await cleanup_incentive(context)
+    if context.support_background_task():
+        context.add_task(try_cleanup_incentive)
+
     q = (
         sqlalchemy.select(sqlalchemy.func.count())
         .select_from(main.Incentive)
