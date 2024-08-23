@@ -16,10 +16,20 @@ os.makedirs(os.path.join(ROOT_DIR, "data"), exist_ok=True)
 
 
 try:
-    with open(os.path.normpath(os.path.join(ROOT_DIR, "config.toml")), "rb") as f:
+    config_file = "config.toml"
+
+    if "NPPS4_CONFIG" in os.environ:
+        config_file = os.path.abspath(os.environ["NPPs4_CONFIG"])
+        print("overriding config file", config_file)
+
+    abs_config_file = os.path.normpath(os.path.join(ROOT_DIR, config_file))
+    print("abs_config_file", abs_config_file)
+    with open(os.path.normpath(os.path.join(ROOT_DIR, config_file)), "rb") as f:
         CONFIG_DATA = data.ConfigData.model_validate(tomllib.load(f), strict=True)
 except IOError as e:
-    raise Exception("Unable to load config.toml. Is it present in the project root?") from e
+    raise Exception(
+        "Unable to load config.toml. Try setting `NPPS4_CONFIG` environment variable or ensure `config.toml` is present in the project root."
+    ) from e
 
 try:
     with open(os.path.join(ROOT_DIR, CONFIG_DATA.main.server_private_key), "rb") as f:
