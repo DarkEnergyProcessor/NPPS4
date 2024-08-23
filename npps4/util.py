@@ -1,4 +1,5 @@
 import base64
+import collections.abc
 import datetime as datetimelib
 import hashlib
 import hmac
@@ -17,7 +18,7 @@ import pydantic
 
 from .config import config
 
-from typing import Any, cast
+from typing import Any, Callable, cast, overload
 
 SYSRAND = random.SystemRandom()
 
@@ -111,11 +112,38 @@ def datetime_to_timestamp(dt: str):
     return int(dtobj.timestamp())
 
 
-def ensure_no_none[_T, _E: Exception](list_to: list[_T | None], exc: type[_E] = Exception, *args):
-    if None in list_to:
-        raise exc(*args)
+@overload
+def ensure_no_none[
+    T, E: Exception, **P
+](
+    list_to: collections.abc.Sequence[T | None], exc: Callable[P, E] = Exception, *args: P.args, **kwargs: P.kwargs
+) -> collections.abc.Sequence[T]: ...
 
-    return cast(list[_T], list_to)
+
+@overload
+def ensure_no_none[
+    T, E: Exception, **P
+](
+    list_to: collections.abc.MutableSequence[T | None],
+    exc: Callable[P, E] = Exception,
+    *args: P.args,
+    **kwargs: P.kwargs,
+) -> collections.abc.MutableSequence[T]: ...
+
+
+@overload
+def ensure_no_none[
+    T, E: Exception, **P
+](list_to: list[T | None], exc: Callable[P, E] = Exception, *args: P.args, **kwargs: P.kwargs) -> list[T]: ...
+
+
+def ensure_no_none[
+    T, E: Exception, **P
+](list_to: collections.abc.Sequence[T | None], exc: Callable[P, E] = Exception, *args: P.args, **kwargs: P.kwargs):
+    if None in list_to:
+        raise exc(*args, **kwargs)
+
+    return cast(collections.abc.Sequence[T], list_to)
 
 
 class _MeasureClass:

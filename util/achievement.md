@@ -171,10 +171,14 @@ Note: This seems used for limited-time achievement only.
 When to check: Clearing a live show.
 
 * `params1` - `live_track_id` in `live_m` or `null` for no live track requirement.
+* `params2` - Difficulty (1 = Easy, 2 = Normal, 3 = Hard, 4 = Expert, 6 = Master), or `null` for no difficulty requirement.
+* `params3` - Song attribute (1 = Smile, 2 = Pure, 3 = Cool) or `null` for no song attribute requirement.
+* `params4` - _Unknown_ (used in Rhythmic Carnival)
+* `params5` - Score rank (1 S, 2 A, 3 B, 4 C) or `null` for no score rank requirement.
 * `params6` - Combo rank (1 S, 2 A, 3 B, 4 C) or `null` for no combo rank requirement.
 * `params7` - _Unknown_
-* `params8` - `achievement_unit_type_group_id` in `achievement_unit_type_group_m` table.
-* `params9` - 1 = All, 2 = One or more
+* `params8` - `achievement_unit_type_group_id` in `achievement_unit_type_group_m` table or `null` if no unit group requirement.
+* `params9` - Controls `param8` behavior. 1 = All team unit type, 2 = At least one unit type in team
 * `params10` - Amount of live show to clear.
 
 ### _Unknown_ (Type 51)

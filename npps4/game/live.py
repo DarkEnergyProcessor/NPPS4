@@ -631,7 +631,15 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
         # TODO: Check type 33
         + await achievement.check_type_37(context, current_user, live_setting.live_track_id, True)
         + await achievement.check_type_50(
-            context, current_user, live_setting.live_track_id, combo_rank, unit_deck_unit_ids, True
+            context,
+            current_user,
+            live_setting.live_track_id,
+            live_setting.difficulty,
+            live_setting.attribute_icon_id,
+            score_rank,
+            combo_rank,
+            unit_deck_unit_ids,
+            True,
         )
         + await achievement.check_type_58(context, current_user, True)
     )

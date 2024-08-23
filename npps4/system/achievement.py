@@ -614,18 +614,35 @@ class _Type50Checker:
 
         return False
 
-    async def __call__(self, ach_info: achievement.Achievement, args: collections.abc.Sequence[int | None]):
-        if (
-            ach_info.params8 is not None
-            and (ach_info.params1 is None or ach_info.params1 == args[0])
-            and (ach_info.params6 is None or ach_info.params6 == args[1])
-        ):
-            match ach_info.params9:
-                case 1:
-                    return await self.all(ach_info.params8)
-                case 2:
-                    return await self.any(ach_info.params8)
+    async def false(self, achievement_unit_type_group_id: int):
         return False
+
+    async def test_member_type(self, params8: int | None, params9: int | None):
+        if params8 is None:
+            return True
+        return await _Type50Checker.comparer.get(params9, _Type50Checker.false)(self, params8)
+
+    async def __call__(self, ach_info: achievement.Achievement, args: collections.abc.Sequence[int | None]):
+        # args:
+        # 0. live_track_id
+        # 1. difficulty
+        # 2. attribute_id
+        # 3. score_rank
+        # 4. combo_rank
+
+        args = util.ensure_no_none(args)
+
+        return (
+            (ach_info.params1 is None or ach_info.params1 == args[0])
+            and (ach_info.params2 is None or ach_info.params2 == args[1])
+            and (ach_info.params3 is None or ach_info.params3 == args[2])
+            and ach_info.params4 is None  # TODO
+            and (ach_info.params5 is None or ach_info.params5 >= args[3])
+            and (ach_info.params6 is None or ach_info.params6 >= args[4])
+            and (await self.test_member_type(ach_info.params8, ach_info.params9))
+        )
+
+    comparer = {None: false, 1: all, 2: any}
 
 
 async def check_type_50(
@@ -633,6 +650,9 @@ async def check_type_50(
     user: main.User,
     /,
     live_track_id: int,
+    difficulty: int,
+    attribute: int,
+    score_rank: int,
     combo_rank: int,
     unit_deck: list[int],
     increment: bool,
@@ -642,51 +662,18 @@ async def check_type_50(
     """
 
     return await check_type_increment(
-        context, user, 50, increment, 10, live_track_id, combo_rank, test=_Type50Checker(context, user, unit_deck)
+        context,
+        user,
+        50,
+        increment,
+        10,
+        live_track_id,
+        difficulty,
+        attribute,
+        score_rank,
+        combo_rank,
+        test=_Type50Checker(context, user, unit_deck),
     )
-
-
-async def check_type_53_old(context: idol.BasicSchoolIdolContext, user: main.User, /):
-    """
-    Check amount of achievement cleared with specific category
-    """
-    q = (
-        sqlalchemy.select(achievement.Achievement)
-        .where(achievement.Achievement.achievement_type == 53)
-        .group_by(achievement.Achievement.params1)
-    )
-    result = await context.db.achievement.execute(q)
-    achievement_category_to_check = set(int(ach.params1) for ach in result.scalars() if ach.params1 is not None)
-    achievement_id_list_by_category: dict[int, list[int]] = {}
-
-    for ach_cat in achievement_category_to_check:
-        q = sqlalchemy.select(achievement.Tag).where(achievement.Tag.achievement_category_id == ach_cat)
-        result = await context.db.achievement.execute(q)
-        achievement_id_list_by_category[ach_cat] = [ach.achievement_id for ach in result.scalars()]
-
-    achievement_result_all = AchievementContext()
-
-    while True:
-        achievement_result = AchievementContext()
-        achievement_count_by_category: dict[int, int] = dict((i, 0) for i in achievement_id_list_by_category.keys())
-
-        achievements = await get_achievements(context, user, True)
-        for ach in achievements:
-            for ach_cat_id, ach_ids in achievement_id_list_by_category.items():
-                if ach.achievement_id in ach_ids:
-                    achievement_count_by_category[ach_cat_id] = achievement_count_by_category[ach_cat_id] + 1
-
-        for ach_cat_id in achievement_id_list_by_category.keys():
-            achievement_result = achievement_result + await check_type_countable(
-                context, user, 53, achievement_count_by_category[ach_cat_id] or 0, 2, ach_cat_id
-            )
-
-        if achievement_result.has_achievement():
-            achievement_result_all = achievement_result_all + achievement_result
-        else:
-            break
-
-    return achievement_result_all
 
 
 @recursive_achievement(53)
