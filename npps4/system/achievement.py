@@ -118,6 +118,56 @@ async def add_achievement(
     return user_ach
 
 
+async def has_achievement(context: idol.BasicSchoolIdolContext, user: main.User, /, achievement_id: int):
+    q = sqlalchemy.select(main.Achievement.achievement_id).where(
+        main.Achievement.achievement_id == achievement_id, main.Achievement.user_id == user.id
+    )
+    result = await context.db.main.execute(q)
+    return result.scalar() is not None
+
+
+async def update_resettable_achievement(
+    context: idol.BasicSchoolIdolContext, user: main.User, ts: int | None = None, /
+):
+    if ts is None:
+        ts = util.time()
+
+    if context.get_cache(f"update_resettable_achievement_{ts}", user.id) is not None:
+        return
+
+    modified = False
+    q = sqlalchemy.select(main.Achievement).where(
+        main.Achievement.user_id == user.id,
+        main.Achievement.reset_type > 0,
+        sqlalchemy.or_(
+            sqlalchemy.and_(
+                main.Achievement.reset_type == 1, main.Achievement.reset_value != util.get_days_since_unix(ts)
+            ),
+            sqlalchemy.and_(
+                main.Achievement.reset_type == 2, main.Achievement.reset_value != util.get_weeks_since_unix(ts)
+            ),
+        ),
+    )
+    result = await context.db.main.execute(q)
+
+    for ach_data in result.scalars():
+        ach_info = await context.db.achievement.get(achievement.Achievement, ach_data.achievement_id)
+
+        if ach_info is None or (not ach_info.default_open_flag):
+            await context.db.main.delete(ach_data)
+        else:
+            ach_data.is_accomplished = False
+            ach_data.is_reward_claimed = False
+            ach_data.count = 0
+
+        modified = True
+
+    if modified:
+        await context.db.main.flush()
+
+    context.set_cache(f"update_resettable_achievement_{ts}", user.id, True)
+
+
 async def to_game_representation(
     context: idol.BasicSchoolIdolContext, achs: list[main.Achievement], rewardss: list[list[item_model.Item]]
 ):
@@ -164,6 +214,8 @@ async def get_achievement(context: idol.BasicSchoolIdolContext, /, user: main.Us
 
 
 async def get_achievements(context: idol.BasicSchoolIdolContext, user: main.User, accomplished: bool | None = None):
+    await update_resettable_achievement(context, user)
+
     if accomplished is not None:
         q = sqlalchemy.select(main.Achievement).where(
             main.Achievement.user_id == user.id, main.Achievement.is_accomplished == accomplished
@@ -255,6 +307,9 @@ async def check_type_countable(
         [achievement.Achievement, collections.abc.Sequence[int | None]], collections.abc.Awaitable[bool]
     ] = test_params,
 ):
+    time = util.time()
+    await update_resettable_achievement(context, user, time)
+
     q = sqlalchemy.select(main.Achievement).where(
         main.Achievement.user_id == user.id,
         main.Achievement.achievement_type == achievement_type,
@@ -262,7 +317,6 @@ async def check_type_countable(
     )
     result = await context.db.main.execute(q)
 
-    time = util.time()
     achieved: list[main.Achievement] = []
     new: list[main.Achievement] = []
 
@@ -279,15 +333,26 @@ async def check_type_countable(
                 ach.is_accomplished = True
                 achieved.append(ach)
 
+                # Update reset value
+                match ach.reset_type:
+                    case 1:
+                        ach.reset_value = util.get_days_since_unix(time)
+                    case 2:
+                        ach.reset_value = util.get_weeks_since_unix(time)
+
                 # New achievement
                 for next_ach_id in await get_next_achievement_ids(context, ach.achievement_id):
                     new_ach_info = await get_achievement_info(context, next_ach_id)
-                    if new_ach_info is not None:
+                    if new_ach_info is not None and not await has_achievement(
+                        context, user, new_ach_info.achievement_id
+                    ):
                         new_ach = await add_achievement(context, user, new_ach_info, time)
                         # Append to new achievement
                         new.append(new_ach)
             else:
                 ach.count = count
+
+            await context.db.main.flush()
 
     await context.db.main.flush()
     return AchievementContext(accomplished=achieved, new=new)
@@ -329,10 +394,19 @@ async def check_type_increment(
                 ach.is_accomplished = True
                 achieved.append(ach)
 
+                # Update reset value
+                match ach.reset_type:
+                    case 1:
+                        ach.reset_value = util.get_days_since_unix(time)
+                    case 2:
+                        ach.reset_value = util.get_weeks_since_unix(time)
+
                 # New achievement
                 for next_ach_id in await get_next_achievement_ids(context, ach.achievement_id):
                     new_ach_info = await get_achievement_info(context, next_ach_id)
-                    if new_ach_info is not None:
+                    if new_ach_info is not None and not await has_achievement(
+                        context, user, new_ach_info.achievement_id
+                    ):
                         new_ach = await add_achievement(context, user, new_ach_info, time)
                         # Append to new achievement
                         new.append(new_ach)
@@ -682,10 +756,8 @@ async def get_achievement_filter_ids(context: idol.BasicSchoolIdolContext):
 
 async def count_accomplished_achievement_by_category(context: idol.BasicSchoolIdolContext, user: main.User):
     # Get all achieved
-    q = (
-        sqlalchemy.select(main.Achievement)
-        .where(main.Achievement.user_id == user.id, main.Achievement.is_accomplished == True)
-        .with_only_columns(main.Achievement.achievement_id)
+    q = sqlalchemy.select(main.Achievement.achievement_id).where(
+        main.Achievement.user_id == user.id, main.Achievement.is_accomplished == True
     )
     result = await context.db.main.execute(q)
     all_accomplished = list(result.scalars())
