@@ -1,0 +1,10 @@
+services:
+  npps4:
+    image: MikuAuahDark/NPPS4:latest
+    environment:
+      PORT: 51376
+    ports:
+      - 51376:51376
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
