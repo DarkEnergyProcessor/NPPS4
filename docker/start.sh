@@ -16,6 +16,12 @@ if [ ! -f "/data/config.toml" ]; then
 	exit 1
 fi
 
+if [ ! -f "/data/server_data.json" ]; then
+        cp npps4/server_data.json /data/server_data.json
+        sed -i 's|server_data = "npps4/server_data.json"|server_data = "/data/server_data.json"|g' /data/config.toml
+        cp npps4/server_data_schema.json /data/server_data_schema.json
+fi
+
 port="${PORT:-51376}"
 
 export NPPS4_CONFIG=/data/config.toml
