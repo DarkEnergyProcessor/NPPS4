@@ -19,7 +19,7 @@ try:
     config_file = "config.toml"
 
     if "NPPS4_CONFIG" in os.environ:
-        config_file = os.path.abspath(os.environ["NPPs4_CONFIG"])
+        config_file = os.path.abspath(os.environ["NPPS4_CONFIG"])
         print("overriding config file", config_file)
 
     abs_config_file = os.path.normpath(os.path.join(ROOT_DIR, config_file))

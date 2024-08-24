@@ -1,0 +1,12 @@
+services:
+  npps4:
+    container_name: npps4
+    build:
+      dockerfile: "./docker/Dockerfile"
+    environment:
+      PORT: 51376
+    ports:
+      - 51376:51376
+    volumes:
+      - ./docker/data:/data
+    restart: unless-stopped
