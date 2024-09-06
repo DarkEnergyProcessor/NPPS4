@@ -1,3 +1,5 @@
+import collections.abc
+
 import sqlalchemy
 
 from . import session
@@ -25,7 +27,9 @@ async def load_response(context: session.SchoolIdolParams, endpoint: str):
     return None
 
 
-async def store_response(context: session.SchoolIdolParams, endpoint: str, response: bytes):
+async def store_response(
+    context: session.SchoolIdolParams, endpoint: str, response_base: collections.abc.Sequence[int]
+):
     if ENABLE_CACHE:
         if isinstance(context, session.SchoolIdolUserParams) and context.nonce > 0:
             assert context.token is not None
@@ -36,6 +40,7 @@ async def store_response(context: session.SchoolIdolParams, endpoint: str, respo
             )
             result = await context.db.main.execute(q)
 
+            response = bytes(response_base)
             cache = result.scalar()
             if cache is None:
                 cache = main.RequestCache(user_id=user_id, endpoint=endpoint, nonce=nonce, response=response)
