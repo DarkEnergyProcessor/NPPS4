@@ -65,7 +65,7 @@ class Endpoint(Generic[_T, _U, _V]):
 
 def _get_request_data(model: type[_U]):
     def actual_getter(
-        request_data: Annotated[pydantic.Json[model], fastapi.Form()],
+        request_data: Annotated[pydantic.Json, fastapi.Form()],
         xmc: Annotated[str | None, fastapi.Header(alias="X-Message-Code")],
     ):
         return request_data

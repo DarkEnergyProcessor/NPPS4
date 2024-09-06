@@ -22,8 +22,6 @@ try:
         config_file = os.path.abspath(os.environ["NPPS4_CONFIG"])
         print("overriding config file", config_file)
 
-    abs_config_file = os.path.normpath(os.path.join(ROOT_DIR, config_file))
-    print("abs_config_file", abs_config_file)
     with open(os.path.normpath(os.path.join(ROOT_DIR, config_file)), "rb") as f:
         CONFIG_DATA = data.ConfigData.model_validate(tomllib.load(f), strict=True)
 except IOError as e:

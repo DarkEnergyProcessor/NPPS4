@@ -1,5 +1,5 @@
 import os.path
-import setuptools
+import setuptools  # type: ignore
 
 import npps4.version
 
