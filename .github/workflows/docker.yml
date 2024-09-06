@@ -3,8 +3,10 @@
 name: Build docker images
 
 on:
-  push:
-    branches: [ master ]
+  workflow_run:
+    branches: [master]
+    workflows: [Syntax Check]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -14,6 +16,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Set up QEMU
         id: qemu
