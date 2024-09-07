@@ -5,6 +5,18 @@ import zlib
 import pydantic
 import sqlalchemy
 
+from . import achievement
+from . import award
+from . import background
+from . import exchange
+from . import item
+from . import lbonus
+from . import live
+from . import museum
+from . import reward
+from . import scenario
+from . import subscenario
+from . import unit
 from .. import const
 from .. import idol
 from .. import util
@@ -91,22 +103,23 @@ class CommonItemData(pydantic.BaseModel):
 
 class AccountData(pydantic.BaseModel):
     user: UserData
-    tos: list[int]
     background: list[int]
     award: list[int]
     unit: list[UnitData]
     deck: list[DeckData]
+    sis: list[CommonItemData]  # id = removable_skill_id
     achievement: list[AchievementData]
     login_bonus: list[str]  # string in format: YYYYMMDD
     present_box: list[PresentBoxData]
     scenario: list[int]  # Positive = completed, negative = not completed but availble
     subscenario: list[int]  # Positive = completed, negative = not completed but availble
     museum: list[int]  # List of museum_contents_id
-    live: list[LiveClearData]
-    sis: list[CommonItemData]  # id = removable_skill_id
-    items: list[CommonItemData]  # id = item_id, for add_type 1000
-    exchange: list[CommonItemData]  # id = exchange_point_id
+    live_clear: list[LiveClearData]
     normal_live_unlock: list[int]  # List of live_track_id
+    items: list[CommonItemData]  # id = item_id
+    buff_items: list[CommonItemData]  # id = item_id
+    reinforce_items: list[CommonItemData]  # id = item_id
+    exchange: list[CommonItemData]  # id = exchange_point_id
 
 
 async def export_user(context: idol.BasicSchoolIdolContext, target: main.User, /, secret_key: bytes | None = None):
@@ -151,12 +164,16 @@ async def export_user(context: idol.BasicSchoolIdolContext, target: main.User, /
         current_limited_effort_point=target.current_limited_effort_point,
     )
 
+    # Backgrounds
+    background_list = [bkg.background_id for bkg in await background.get_backgrounds(context, target)]
+
+    # Awards
+    award_list = [aw.award_id for aw in await award.get_awards(context, target)]
+
     # Iterate all units
     unit_data_list: list[UnitData] = []
-    unit_owning_user_id_lookup: dict[int, int] = {}
-    q = sqlalchemy.select(main.Unit).where(main.Unit.user_id == target.id)
-    result = await context.db.main.execute(q)
-    for unit_data in result.scalars():
+    unit_owning_user_id_lookup: dict[int, int] = {}  # [unit_owning_user_id, index+1]
+    for unit_data in await unit.get_all_units(context, target, None):
         unit_data_serialized = UnitData(
             unit_id=unit_data.unit_id,
             # bits: 0 = active, 1 = fav. flag, 2 = signed, 3-4 = rank, 5-6 = display rank
@@ -175,30 +192,126 @@ async def export_user(context: idol.BasicSchoolIdolContext, target: main.User, /
         )
         unit_data_list.append(unit_data_serialized)
         unit_owning_user_id_lookup[unit_data.id] = len(unit_data_list)
+    user_data.center_unit_owning_user_id = unit_owning_user_id_lookup[target.center_unit_owning_user_id]
+
+    # Deck
+    simple_deck_list = await unit.get_all_deck_simple(context, target)
+    deck_data_list = [
+        DeckData(
+            name=deck[1],
+            index=deck[0],
+            units=[
+                (0 if unit_owning_user_id == 0 else unit_owning_user_id_lookup[unit_owning_user_id])
+                for unit_owning_user_id in deck[2]
+            ],
+        )
+        for deck in simple_deck_list
+    ]
+
+    # SIS/Removable Skill
+    removable_skill_data = await unit.get_removable_skill_info_request(context, target)
+    removable_skill_list = [
+        CommonItemData(id=info.unit_removable_skill_id, amount=info.total_amount)
+        for info in removable_skill_data.owning_info
+    ]
+    for equip_info in removable_skill_data.equipment_info.values():
+        unit_data = unit_data_list[unit_owning_user_id_lookup[equip_info.unit_owning_user_id] - 1]
+        unit_data.removable_skills = [d.unit_removable_skill_id for d in equip_info.detail]
+
+    # Achievement
+    achievement_list = [
+        AchievementData(
+            achievement_id=ach.achievement_id,
+            count=ach.count,
+            # bits: 0 = is_accomplished, 1 = is_reward_claimed, 2 = is_new
+            flags=ach.is_accomplished | (ach.is_reward_claimed << 1) | (ach.is_new << 2),
+            reset_value=ach.reset_value,
+        )
+        for ach in await achievement.get_achievements(context, target, None)
+    ]
+
+    # Login bonus
+    login_bonus_list = [f"{lb[0]:04}{lb[1]:02}{lb[2]:02}" for lb in await lbonus.all_login_bonus(context, target)]
+
+    # Present box
+    present_box = await reward.get_presentbox_simple(context, target)
+    present_box_list = [
+        PresentBoxData(
+            add_type=const.ADD_TYPE(pbox.add_type),
+            item_id=pbox.item_id,
+            amount=pbox.amount,
+            message_jp=pbox.message_jp,
+            message_en=pbox.message_en,
+            expire=pbox.expire_date,
+            extra_data=pbox.extra_data,
+        )
+        for pbox in present_box
+    ]
+
+    # Scenario
+    scenario_encoded_list = [
+        sc.scenario_id * int((-1) ** (not sc.completed)) for sc in await scenario.get_all(context, target)
+    ]
+
+    # Subscenario
+    subscenario_encoded_list = [
+        sc.subscenario_id * int((-1) ** (not sc.completed)) for sc in await subscenario.get_all(context, target)
+    ]
+
+    # Museum
+    museum_data = await museum.get_museum_info_data(context, target)
+
+    # Live clear
+    live_clear_data = [
+        LiveClearData(
+            live_difficulty_id=lc.live_difficulty_id,
+            hi_score=lc.hi_score,
+            hi_combo_cnt=lc.hi_combo_cnt,
+            clear_cnt=lc.clear_cnt,
+        )
+        for lc in await live.get_all_live_clear_data(context, target)
+    ]
+
+    # Regular items
+    items_list_full = await item.get_item_list(context, target)
+    general_item_list = [CommonItemData(id=info.item_id, amount=info.amount) for info in items_list_full[0]]
+    buff_item_list = [CommonItemData(id=info.item_id, amount=info.amount) for info in items_list_full[1]]
+    reinforce_item_list = [CommonItemData(id=info.item_id, amount=info.amount) for info in items_list_full[2]]
+
+    # Exchange
+    exchange_points = [
+        CommonItemData(id=info.exchange_point_id, amount=info.amount)
+        for info in await exchange.get_exchange_point_list(context, target)
+        if info.amount > 0
+    ]
+
+    # Normal live unlock
+    normal_live_unlock = list(await live.get_all_normal_live_unlock(context, target))
 
     account_data = AccountData(
         user=user_data,
-        tos=[],
-        background=[],
-        award=[],
+        background=background_list,
+        award=award_list,
         unit=unit_data_list,
-        deck=[],
-        achievement=[],
-        login_bonus=[],
-        present_box=[],
-        scenario=[],
-        subscenario=[],
-        museum=[],
-        live=[],
-        sis=[],
-        items=[],
-        exchange=[],
-        normal_live_unlock=[],
+        sis=removable_skill_list,
+        deck=deck_data_list,
+        achievement=achievement_list,
+        login_bonus=login_bonus_list,
+        present_box=present_box_list,
+        scenario=scenario_encoded_list,
+        subscenario=subscenario_encoded_list,
+        museum=museum_data.contents_id_list,
+        live_clear=live_clear_data,
+        normal_live_unlock=normal_live_unlock,
+        items=general_item_list,
+        buff_items=buff_item_list,
+        reinforce_items=reinforce_item_list,
+        exchange=exchange_points,
     )
 
     json_encoded = account_data.model_dump_json().encode("utf-8")
     salt = util.randbytes(16)
-    hash_hmac = hmac.new(secret_key, digestmod=hashlib.sha256)
+    hash_hmac = hmac.new(secret_key, salt, digestmod=hashlib.sha256)
     hash_hmac.update(json_encoded)
 
     result = salt + zlib.compress(json_encoded, 9, 31)

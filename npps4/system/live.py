@@ -83,6 +83,14 @@ async def get_live_clear_data(
     return live_clear
 
 
+async def get_all_live_clear_data(
+    context: idol.BasicSchoolIdolContext, user: main.User, /
+) -> collections.abc.Iterable[main.LiveClear]:
+    q = sqlalchemy.select(main.LiveClear).where(main.LiveClear.user_id == user.id)
+    result = await context.db.main.execute(q)
+    return result.scalars()
+
+
 async def live_status_from_live_clear(
     context: idol.BasicSchoolIdolContext,
     live_difficulty_id: int,
@@ -338,6 +346,14 @@ async def has_normal_live_unlock(context: idol.BasicSchoolIdolContext, user: mai
     )
     result = await context.db.main.execute(q)
     return result.scalar() is not None
+
+
+async def get_all_normal_live_unlock(
+    context: idol.BasicSchoolIdolContext, user: main.User, /
+) -> collections.abc.Iterable[int]:
+    q = sqlalchemy.select(main.NormalLiveUnlock.live_track_id).where(main.NormalLiveUnlock.user_id == user.id)
+    result = await context.db.main.execute(q)
+    return result.scalars()
 
 
 async def get_live_in_progress(context: idol.BasicSchoolIdolContext, user: main.User):

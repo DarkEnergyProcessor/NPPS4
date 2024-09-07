@@ -1,3 +1,4 @@
+import collections.abc
 import dataclasses
 import itertools
 import math
@@ -62,14 +63,15 @@ async def count_units(context: idol.BasicSchoolIdolContext, user: main.User, act
     return result.scalar() or 0
 
 
-async def get_all_units(context: idol.SchoolIdolParams, user: main.User, active: bool | None = None):
-    if active is None:
-        q = sqlalchemy.select(main.Unit).where(main.Unit.user_id == user.id)
-    else:
-        q = sqlalchemy.select(main.Unit).where(main.Unit.user_id == user.id, main.Unit.active == active)
+async def get_all_units(
+    context: idol.BasicSchoolIdolContext, user: main.User, active: bool | None = None
+) -> collections.abc.Iterable[main.Unit]:
+    q = sqlalchemy.select(main.Unit).where(main.Unit.user_id == user.id)
+    if active is not None:
+        q = q.where(main.Unit.active == active)
 
     result = await context.db.main.execute(q)
-    return result.scalars().all()
+    return result.scalars()
 
 
 async def create_unit(
@@ -440,6 +442,32 @@ async def save_unit_deck(
     deck.unit_owning_user_id_8 = unit_owning_user_ids[7]
     deck.unit_owning_user_id_9 = unit_owning_user_ids[8]
     await context.db.main.flush()
+
+
+async def get_all_deck_simple(
+    context: idol.BasicSchoolIdolContext, user: main.User
+) -> list[tuple[int, str, tuple[int, int, int, int, int, int, int, int, int]]]:
+    q = sqlalchemy.select(main.UnitDeck).where(main.UnitDeck.user_id == user.id)
+    result = await context.db.main.execute(q)
+
+    return [
+        (
+            deck.deck_number,
+            deck.name,
+            (
+                deck.unit_owning_user_id_1,
+                deck.unit_owning_user_id_2,
+                deck.unit_owning_user_id_3,
+                deck.unit_owning_user_id_4,
+                deck.unit_owning_user_id_5,
+                deck.unit_owning_user_id_6,
+                deck.unit_owning_user_id_7,
+                deck.unit_owning_user_id_8,
+                deck.unit_owning_user_id_9,
+            ),
+        )
+        for deck in result.scalars()
+    ]
 
 
 async def find_all_valid_deck_number_ids(context: idol.SchoolIdolParams, user: main.User):

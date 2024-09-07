@@ -1,3 +1,4 @@
+import collections.abc
 import pydantic
 import sqlalchemy
 
@@ -80,6 +81,16 @@ async def get_exchange_point(
         await context.db.main.flush()
 
     return exchange_point
+
+
+async def get_exchange_point_list(
+    context: idol.BasicSchoolIdolContext, user: main.User, /
+) -> collections.abc.Iterable[main.ExchangePointItem]:
+    q = sqlalchemy.select(main.ExchangePointItem).where(
+        main.ExchangePointItem.user_id == user.id, main.ExchangePointItem.amount > 0
+    )
+    result = await context.db.main.execute(q)
+    return result.scalars()
 
 
 async def get_exchange_point_amount(context: idol.BasicSchoolIdolContext, /, user: main.User, exchange_point_id: int):

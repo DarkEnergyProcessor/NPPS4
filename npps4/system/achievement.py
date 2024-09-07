@@ -213,17 +213,17 @@ async def get_achievement(context: idol.BasicSchoolIdolContext, /, user: main.Us
     return ach
 
 
-async def get_achievements(context: idol.BasicSchoolIdolContext, user: main.User, accomplished: bool | None = None):
+async def get_achievements(
+    context: idol.BasicSchoolIdolContext, user: main.User, accomplished: bool | None = None
+) -> collections.abc.Iterable[main.Achievement]:
     await update_resettable_achievement(context, user)
 
+    q = sqlalchemy.select(main.Achievement).where(main.Achievement.user_id == user.id)
     if accomplished is not None:
-        q = sqlalchemy.select(main.Achievement).where(
-            main.Achievement.user_id == user.id, main.Achievement.is_accomplished == accomplished
-        )
-    else:
-        q = sqlalchemy.select(main.Achievement).where(main.Achievement.user_id == user.id)
+        q = q.where(main.Achievement.is_accomplished == accomplished)
+
     result = await context.db.main.execute(q)
-    return list(result.scalars())
+    return result.scalars()
 
 
 async def get_unclaimed_achievements(

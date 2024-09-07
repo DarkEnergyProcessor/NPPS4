@@ -1,4 +1,5 @@
 import asyncio
+import collections.abc
 import enum
 import json
 
@@ -113,7 +114,7 @@ async def get_presentbox(
     limit: int = 1000,
     order_ascending: bool = False,
     order_expiry_date: bool = False,
-):
+) -> collections.abc.Sequence[main.Incentive]:
     if context.support_background_task():
         context.add_task(try_cleanup_incentive)
 
@@ -139,9 +140,28 @@ async def get_presentbox(
     else:
         q = q.order_by(main.Incentive.insert_date.asc() if order_ascending else main.Incentive.insert_date.desc())
 
-    q = q.offset(offset).limit(limit)
+    q = q.offset(offset)
+    if limit < 0:
+        q = q.limit(limit)
+
     result = await context.db.main.execute(q)
     return list(result.scalars())
+
+
+async def get_presentbox_simple(
+    context: idol.BasicSchoolIdolContext, user: main.User, /
+) -> collections.abc.Iterable[main.Incentive]:
+    if context.support_background_task():
+        context.add_task(try_cleanup_incentive)
+
+    t = util.time()
+
+    # Query non-expire incentives.
+    q = sqlalchemy.select(main.Incentive).where(
+        main.Incentive.user_id == user.id, (main.Incentive.expire_date == 0) | (main.Incentive.expire_date >= t)
+    )
+    result = await context.db.main.execute(q)
+    return result.scalars()
 
 
 async def count_presentbox(

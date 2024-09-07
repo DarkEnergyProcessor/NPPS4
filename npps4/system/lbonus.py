@@ -78,3 +78,9 @@ async def get_login_count(context: idol.BasicSchoolIdolContext, user: main.User)
     )
     qc = await context.db.main.execute(q)
     return qc.scalar() or 0
+
+
+async def all_login_bonus(context: idol.BasicSchoolIdolContext, user: main.User, /):
+    q = sqlalchemy.select(main.LoginBonus).where(main.LoginBonus.user_id == user.id)
+    result = await context.db.main.execute(q)
+    return [(lb.day, lb.month, lb.year) for lb in result.scalars()]

@@ -222,11 +222,10 @@ async def unit_supporterall(context: idol.SchoolIdolUserParams) -> unit_model.Su
 @idol.register("unit", "unitAll")
 async def unit_unitall(context: idol.SchoolIdolUserParams) -> UnitAllInfoResponse:
     current_user = await user.get_current(context)
-    units = await unit.get_all_units(context, current_user)
 
     unit_result: dict[bool, list[unit_model.UnitInfoData]] = {False: [], True: []}
 
-    for unit_data in units:
+    for unit_data in await unit.get_all_units(context, current_user):
         unit_serialized_data, _ = await unit.get_unit_data_full_info(context, unit_data)
         unit_result[unit_data.active].append(unit_serialized_data)
 
