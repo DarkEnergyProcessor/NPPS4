@@ -122,7 +122,13 @@ class AccountData(pydantic.BaseModel):
     exchange: list[CommonItemData]  # id = exchange_point_id
 
 
-async def export_user(context: idol.BasicSchoolIdolContext, target: main.User, /, secret_key: bytes | None = None):
+async def export_user(
+    context: idol.BasicSchoolIdolContext,
+    target: main.User,
+    /,
+    secret_key: bytes | None = None,
+    nullify_credentials: bool = False,
+):
     """
     Export user data to JSON which can be imported back by "compatible" implementation.
 
@@ -136,9 +142,9 @@ async def export_user(context: idol.BasicSchoolIdolContext, target: main.User, /
         secret_key = config.get_secret_key()
 
     user_data = UserData(
-        key=target.key,
-        passwd=target.passwd,
-        transfer_sha1=target.transfer_sha1,
+        key=None if nullify_credentials else target.key,
+        passwd=None if nullify_credentials else target.passwd,
+        transfer_sha1=None if nullify_credentials else target.transfer_sha1,
         name=target.name,
         exp=target.exp,
         coin=target.game_coin,
@@ -318,5 +324,18 @@ async def export_user(context: idol.BasicSchoolIdolContext, target: main.User, /
     return result, hash_hmac.digest()
 
 
-async def import_user(context: idol.BasicSchoolIdolContext, serialized_data: bytes, /, signature: bytes):
+def extract_serialized_data(serialized_data: bytes, /, signature: bytes | None):
+    salt = serialized_data[:16]
+    json_encoded = zlib.decompress(serialized_data[16:], 31)
+
+    if signature is not None:
+        hash_hmac = hmac.new(config.get_secret_key(), salt, digestmod=hashlib.sha256)
+        hash_hmac.update(json_encoded)
+        if hash_hmac.digest() != signature:
+            raise RuntimeError("account data bad signature")
+
+    return AccountData.model_validate_json(json_encoded)
+
+
+async def import_user(context: idol.BasicSchoolIdolContext, serialized_data: AccountData, /):
     pass
