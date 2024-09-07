@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	{% if enabled %}
+	<script>
+		function main()
+		{
+			const lang = document.getElementById("language").value
+			const transferIDInput = document.getElementById("transfer_id")
+			const transferPasscodeInput = document.getElementById("transfer_passcode")
+			const secretKeyInput = document.getElementById("secret_key")
+			const initiateExportButton = document.getElementById("initiate_export")
+			const statusParagraph = document.getElementById("status")
+			const payloadTextArea = document.getElementById("payload")
+			const signatureTextArea = document.getElementById("signature")
+
+			initiateExportButton.addEventListener("click", async () => {
+				try
+				{
+					const ts = Math.floor(new Date() / 1000)
+					const response = await fetch("", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+							"Authorize": `consumerKey=lovelive_test&timestamp=${ts}&version=1.1&nonce=WV0`,
+							"LANG": lang,
+						},
+						body: JSON.stringify({
+							transfer_id: transferIDInput.value,
+							transfer_passcode: transferPasscodeInput.value,
+							server_key: secretKeyInput.value
+						})
+					})
+
+					const result = await response.json()
+					if (result.error)
+						throw result.error
+
+					statusParagraph.textContent = ""
+					payloadTextArea.value = result.account_data
+					signatureTextArea.value = result.signature
+				}
+				catch (e)
+				{
+					console.error(e)
+					statusParagraph.textContent = e.toString()
+				}
+			})
+		}
+
+		if (document.readyState !== "loading")
+			main()
+		else
+			document.addEventListener("DOMContentLoaded", main)
+	</script>
+	{% endif %}
+</head>
+
+<body>
+	<h1>Account Export</h1>
+	<section>
+		{% if enabled %}
+		<input id="language" type="hidden" value="{{lang}}">
+		<label for="transfer_id">Tranfer ID</label>
+		<input id="transfer_id" type="text">
+		<br/>
+		<label for="transfer_id">Tranfer Passcode</label>
+		<input id="transfer_passcode" type="text">
+		<br/>
+		<label for="secret_key">Secret Key (optional)</label>
+		<input id="secret_key" type="text">
+		<br/>
+		<p>Secret key is used to ensure only private server configured with the specified secret key can import the account back, subject to the other server configuration.</p>
+		<p>If no secret key is provided, the current server secret key will be used (which you may not know). Your other secret key is only used for signing, it's not stored.</p>
+		<button id="initiate_export">Export</button>
+		<p id="status" style="color:red"></p>
+		<br/>
+		<p>Exported Account Data</p>
+		<textarea id="payload" readonly></textarea>
+		<p>Signature</p>
+		<textarea id="signature" readonly></textarea>
+		{% else %}
+		<p>Account export has been disabled in this server.</p>
+		{% endif %}
+	</section>
+</body>
+
+</html>

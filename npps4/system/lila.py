@@ -122,6 +122,11 @@ class AccountData(pydantic.BaseModel):
     exchange: list[CommonItemData]  # id = exchange_point_id
 
 
+class BadSignature(RuntimeError):
+    def __init__(self):
+        super().__init__("account data bad signature")
+
+
 async def export_user(
     context: idol.BasicSchoolIdolContext,
     target: main.User,
@@ -324,15 +329,17 @@ async def export_user(
     return result, hash_hmac.digest()
 
 
-def extract_serialized_data(serialized_data: bytes, /, signature: bytes | None):
+def extract_serialized_data(serialized_data: bytes, /, signature: bytes | None, secret_key: bytes | None = None):
     salt = serialized_data[:16]
     json_encoded = zlib.decompress(serialized_data[16:], 31)
 
     if signature is not None:
-        hash_hmac = hmac.new(config.get_secret_key(), salt, digestmod=hashlib.sha256)
+        if secret_key is None:
+            secret_key = config.get_secret_key()
+        hash_hmac = hmac.new(secret_key, salt, digestmod=hashlib.sha256)
         hash_hmac.update(json_encoded)
         if hash_hmac.digest() != signature:
-            raise RuntimeError("account data bad signature")
+            raise BadSignature()
 
     return AccountData.model_validate_json(json_encoded)
 

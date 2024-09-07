@@ -216,3 +216,8 @@ def get_live_box_drop_protocol():
 def get_session_expiry_time():
     global CONFIG_DATA
     return CONFIG_DATA.main.session_expiry
+
+
+def is_account_export_enabled():
+    global CONFIG_DATA
+    return CONFIG_DATA.iex.enable_export

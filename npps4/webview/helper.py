@@ -1,14 +1,20 @@
+import base64
 import dataclasses
 import html
 import json
 
 import fastapi
+import pydantic
 import sqlalchemy
 
 from .. import idol
+from .. import util
 from ..app import app
+from ..config import config
 from ..db import achievement
 from ..system import achievement as achievement_system
+from ..system import handover
+from ..system import lila
 
 from typing import Annotated
 
@@ -70,6 +76,18 @@ class AchievementData:
     params: list[tuple[str, str]]
     needs: list[tuple[int, str]]
     opens: list[tuple[int, str]]
+
+
+class HelperExportRequest(pydantic.BaseModel):
+    transfer_id: str
+    transfer_passcode: str
+    server_key: str | None = None
+
+
+class HelperExportResponse(pydantic.BaseModel):
+    error: str | None = None
+    account_data: str | None = None
+    signature: str | None = None
 
 
 @app.webview.get("/helper/apisplitter")
@@ -148,3 +166,49 @@ async def helper_achievement(
 @app.webview.get("/helper/achtranslate")
 async def helper_achtranslate():
     return fastapi.responses.FileResponse("util/achtranslator.html", media_type="text/html")
+
+
+@app.webview.get("/helper/export")
+async def helper_export_get(request: fastapi.Request):
+    return app.templates.TemplateResponse(
+        request,
+        "helper_export.html",
+        {"enabled": config.is_account_export_enabled(), "lang": request.headers.get("lang", "en")},
+    )
+
+
+if config.is_account_export_enabled():
+
+    @app.webview.post(
+        "/helper/export", response_class=fastapi.responses.JSONResponse, response_model=HelperExportResponse
+    )
+    async def helper_export_post(
+        request: fastapi.Request, response: fastapi.Response, request_data: HelperExportRequest
+    ) -> HelperExportResponse:
+        try:
+            async with idol.create_basic_context(request) as context:
+                sha1 = handover.generate_passcode_sha1(request_data.transfer_id, request_data.transfer_passcode)
+                target_user = await handover.find_user_by_passcode(context, sha1)
+                if target_user is None:
+                    response.status_code = 404
+                    return HelperExportResponse(error="User not found.")
+
+                serialized_data, signature = await lila.export_user(
+                    context,
+                    target_user,
+                    (
+                        None
+                        if (request_data.server_key is None or len(request_data.server_key) == 0)
+                        else request_data.server_key.encode("utf-8")
+                    ),
+                    True,
+                )
+
+                response.status_code = 200
+                return HelperExportResponse(
+                    account_data=str(base64.urlsafe_b64encode(serialized_data), "utf-8"),
+                    signature=str(base64.urlsafe_b64encode(signature), "utf-8"),
+                )
+        except Exception as e:
+            response.status_code = 500
+            return HelperExportResponse(error=str(e))
