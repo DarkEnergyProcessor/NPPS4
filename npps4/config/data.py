@@ -78,12 +78,19 @@ class _Advanced(pydantic.BaseModel):
     verify_xmc: bool = True
 
 
+class _ImportExport(pydantic.BaseModel):
+    enable_export: bool = False
+    enable_import: bool = False
+    bypass_signature: bool = False
+
+
 class ConfigData(pydantic.BaseModel):
     main: _Main
     database: _Database
     download: _Download
     game: _Game
     advanced: _Advanced
+    iex: _ImportExport = pydantic.Field(default_factory=_ImportExport)
 
 
 __all__ = ["ConfigData"]

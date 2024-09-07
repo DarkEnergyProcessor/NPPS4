@@ -136,6 +136,23 @@ live_unit_drop = "external/live_unit_drop.py"
 # Path is relative to the project root directory.
 live_box_drop = "external/live_box_drop.py"
 
+[iex]
+# This is account import/export setting.
+# Feel free to change as needed, but consider it when exposing them.
+
+# Enable account data export.
+# Export UI can be accessed through /webview.php/helper/export
+enable_export = true
+
+# Enable account data import.
+# Import UI can be accessed through /webview.php/helper/import
+enable_import = false
+
+# When importing account through import UI, bypass any signature check.
+# Normally, only account exported with same "main.secret_key" can be imported
+# back.
+bypass_signature = false
+
 [advanced]
 # This is advanced configuration.
 # In most cases, you don't have to change anything.
