@@ -145,7 +145,7 @@ def _already_expired(pbox: main.Incentive, time: int, /):
         and pbox.expire_date is None
     ):
         return time > (pbox.insert_date + const.COMMON_UNIT_EXPIRY)
-    if pbox.expire_date is None:
+    if pbox.expire_date == 0:
         return False
     return time > pbox.expire_date
 
@@ -271,7 +271,7 @@ async def export_user(
     ]
 
     # Login bonus
-    login_bonus_list = [f"{lb[0]:04}{lb[1]:02}{lb[2]:02}" for lb in await lbonus.all_login_bonus(context, target)]
+    login_bonus_list = [f"{lb[2]:04}{lb[1]:02}{lb[0]:02}" for lb in await lbonus.all_login_bonus(context, target)]
 
     # Present box
     time = util.time()
