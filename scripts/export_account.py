@@ -2,6 +2,7 @@ import npps4.script_dummy  # Must be first
 
 import argparse
 import base64
+import sys
 
 import npps4.config.config
 import npps4.idol
@@ -17,6 +18,7 @@ def tobytesutf8(input: str):
 async def run_script(arg: list[str]):
     parser = argparse.ArgumentParser(__file__)
     npps4.scriptutils.user.register_args(parser.add_mutually_exclusive_group(required=True))
+    parser.add_argument("output", nargs="?", help="Exported account data output file")
     parser.add_argument(
         "--secret-key",
         type=tobytesutf8,
@@ -33,12 +35,13 @@ async def run_script(arg: list[str]):
             context, target_user, args.secret_key, args.nullify_credentials
         )
 
-        print("Export data:")
-        print(str(base64.urlsafe_b64encode(serialized_data), "utf-8"))
-        print()
-        print("signature:")
-        print(str(base64.urlsafe_b64encode(signature), "utf-8"))
-        print()
+        print("Signature:", str(base64.urlsafe_b64encode(signature), "utf-8"), file=sys.stderr)
+
+        if args.output:
+            with open(args.output, "wb") as f:
+                f.write(base64.urlsafe_b64encode(serialized_data))
+        else:
+            sys.stdout.buffer.write(base64.urlsafe_b64encode(serialized_data))
 
 
 if __name__ == "__main__":

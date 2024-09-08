@@ -28,7 +28,7 @@ async def run_script(arg: list[str]):
         "--secret-key",
         type=tobytesutf8,
         default=npps4.config.config.get_secret_key(),
-        help="Secret key used for signing the account dta.",
+        help="Secret key used for signing the account data.",
         required=False,
     )
     parser.add_argument("--compact", action="store_true", help="Print compact JSON representation.")
