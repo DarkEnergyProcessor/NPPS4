@@ -108,6 +108,9 @@ class CommonItemData(pydantic.BaseModel):
     def tuple(self):
         return (self.id, self.amount)
 
+    def has_quantity(self):
+        return self.amount > 0
+
 
 class AccountData(pydantic.BaseModel):
     user: UserData
@@ -383,7 +386,9 @@ def extract_serialized_data(serialized_data: bytes, /, signature: bytes | None, 
 
 
 async def import_user(context: idol.BasicSchoolIdolContext, serialized_data: AccountData, /):
-    target = await user.create(context, serialized_data.user.key, serialized_data.user.passwd)
+    target = await user.create(context, None, None)
+    target.key = serialized_data.user.key
+    target.passwd = serialized_data.user.passwd
     target.transfer_sha1 = serialized_data.user.transfer_sha1
     target.name = serialized_data.user.name
     target.bio = serialized_data.user.bio
@@ -422,7 +427,9 @@ async def import_user(context: idol.BasicSchoolIdolContext, serialized_data: Acc
             await award.unlock_award(context, target, aw, target.active_award == aw)
 
     # Removable skill (note: must be done first before adding units)
-    for removable_skill_id, amount in map(CommonItemData.tuple, serialized_data.sis):
+    for removable_skill_id, amount in map(
+        CommonItemData.tuple, filter(CommonItemData.has_quantity, serialized_data.sis)
+    ):
         await unit.add_unit_removable_skill(context, target, removable_skill_id, amount)
 
     # Units
@@ -455,7 +462,7 @@ async def import_user(context: idol.BasicSchoolIdolContext, serialized_data: Acc
         target.center_unit_owning_user_id = reverse_unit_owning_user_id_lookup[target.center_unit_owning_user_id]
 
     # Support Unit
-    for unit_id, amount in map(CommonItemData.tuple, serialized_data.supp_unit):
+    for unit_id, amount in map(CommonItemData.tuple, filter(CommonItemData.has_quantity, serialized_data.supp_unit)):
         await unit.add_supporter_unit(context, target, unit_id, amount)
 
     # Deck
@@ -517,16 +524,23 @@ async def import_user(context: idol.BasicSchoolIdolContext, serialized_data: Acc
     # TODO: Is this itertools.chain correct?
     for item_id, amount in map(
         CommonItemData.tuple,
-        itertools.chain(serialized_data.items, serialized_data.buff_items, serialized_data.reinforce_items),
+        filter(
+            CommonItemData.has_quantity,
+            itertools.chain(serialized_data.items, serialized_data.buff_items, serialized_data.reinforce_items),
+        ),
     ):
         await item.add_item(context, target, item_id, amount)
 
     # Recovery Items
-    for recovery_item_id, amount in map(CommonItemData.tuple, serialized_data.recovery_items):
+    for recovery_item_id, amount in map(
+        CommonItemData.tuple, filter(CommonItemData.has_quantity, serialized_data.recovery_items)
+    ):
         await item.add_recovery_item(context, target, recovery_item_id, amount)
 
     # Exchange point
-    for exchange_point_id, amount in map(CommonItemData.tuple, serialized_data.exchange):
+    for exchange_point_id, amount in map(
+        CommonItemData.tuple, filter(CommonItemData.has_quantity, serialized_data.exchange)
+    ):
         await exchange.add_exchange_point(context, target, exchange_point_id, amount)
 
     # Achievement (note: it must be done last)
