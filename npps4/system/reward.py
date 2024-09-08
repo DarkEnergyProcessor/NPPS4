@@ -48,7 +48,7 @@ async def try_cleanup_incentive():
     global _currently_cleaning
     if not _currently_cleaning:
         _currently_cleaning = True
-        await asyncio.sleep(60)
+        await asyncio.sleep(delay=5)
         async with idol.BasicSchoolIdolContext() as context:
             await cleanup_incentive(context)
         _currently_cleaning = False
