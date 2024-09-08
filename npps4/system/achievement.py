@@ -99,8 +99,11 @@ async def get_next_achievement_ids(context: idol.BasicSchoolIdolContext, achieve
 
 
 async def add_achievement(
-    context: idol.BasicSchoolIdolContext, user: main.User, ach: achievement.Achievement, time: int
+    context: idol.BasicSchoolIdolContext, user: main.User, ach: achievement.Achievement, time: int | None = None
 ):
+    if time is None:
+        time = util.time()
+
     user_ach = main.Achievement(
         achievement_id=ach.achievement_id,
         user_id=user.id,
