@@ -227,7 +227,7 @@ async def export_user(
         )
         unit_data_list.append(unit_data_serialized)
         unit_owning_user_id_lookup[unit_data.id] = len(unit_data_list)
-    user_data.center_unit_owning_user_id = unit_owning_user_id_lookup[target.center_unit_owning_user_id]
+    user_data.center_unit_owning_user_id = unit_owning_user_id_lookup.get(target.center_unit_owning_user_id, 0)
 
     # Supporter unit
     supp_unit_list: list[CommonItemData] = [
