@@ -1,6 +1,6 @@
 services:
   npps4:
-    image: ghcr.io/DarkEnergyProcessor/NPPS4:latest
+    image: ghcr.io/darkenergyprocessor/npps4:latest
     environment:
       PORT: 51376
     ports:
