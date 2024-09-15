@@ -314,6 +314,8 @@ async def delete_user(context: idol.BasicSchoolIdolContext, user_id: int):
     )
     await context.db.main.execute(q)
 
+    await _clean_table(context, main.Unit, user_id)
+
     # Delete user
     await context.db.main.delete(user_data)
     await context.db.main.flush()
