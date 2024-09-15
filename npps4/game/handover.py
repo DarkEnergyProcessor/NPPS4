@@ -51,6 +51,7 @@ _REROLL_PASSCODE = handover.generate_passcode_sha1(REROLL_TRANSFER_ID, REROLL_TR
 async def handover_exec(context: idol.SchoolIdolUserParams, request: HandoverExecRequest) -> None:
     # Special case for "nil", "nil":
     current_user = await user.get_current(context)
+    util.log("exec", request)
 
     if request.handover_id == REROLL_TRANSFER_ID and request.handover_code == _REROLL_PASSCODE:
         if current_user.level == 1:

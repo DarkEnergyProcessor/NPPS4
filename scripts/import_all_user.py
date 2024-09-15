@@ -4,8 +4,6 @@ import argparse
 import struct
 import traceback
 
-import sqlalchemy
-
 import npps4.config.config
 import npps4.db.main
 import npps4.idol

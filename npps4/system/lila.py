@@ -230,7 +230,8 @@ async def export_user(
         )
         unit_data_list.append(unit_data_serialized)
         unit_owning_user_id_lookup[unit_data.id] = len(unit_data_list)
-    user_data.center_unit_owning_user_id = unit_owning_user_id_lookup.get(target.center_unit_owning_user_id, 0)
+    if target.center_unit_owning_user_id > 0:
+        user_data.center_unit_owning_user_id = unit_owning_user_id_lookup[target.center_unit_owning_user_id]
 
     # Supporter unit
     supp_unit_list: list[CommonItemData] = [
@@ -457,9 +458,11 @@ async def import_user(context: idol.BasicSchoolIdolContext, serialized_data: Acc
 
         for removable_skill_id in unit_sdata.removable_skills:
             await unit.attach_unit_removable_skill(context, unit_data, removable_skill_id)
-    if target.center_unit_owning_user_id > 0:
+    if serialized_data.user.center_unit_owning_user_id > 0:
         # Reverse
-        target.center_unit_owning_user_id = reverse_unit_owning_user_id_lookup[target.center_unit_owning_user_id]
+        target.center_unit_owning_user_id = reverse_unit_owning_user_id_lookup[
+            serialized_data.user.center_unit_owning_user_id
+        ]
 
     # Support Unit
     for unit_id, amount in map(CommonItemData.tuple, filter(CommonItemData.has_quantity, serialized_data.supp_unit)):
