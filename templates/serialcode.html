@@ -14,61 +14,57 @@
 	</style>
 	<script>
 		function main() {
-			const serialCodeInput = document.getElementById("serial_code")
-			const submitButtom = document.getElementById("submit")
-			const resultButton = document.getElementById("result")
-			const token = document.getElementById("token").value
-			const lang = document.getElementById("language").value
-			let inProgress = false
+			const serialCodeInput = document.getElementById("serial_code");
+			const submitButtom = document.getElementById("submit");
+			const resultButton = document.getElementById("result");
+			const token = document.getElementById("token").value;
+			const lang = document.getElementById("language").value;
+			var inProgress = false;
 
-			submitButtom.addEventListener("click", async () => {
-				const key = serialCodeInput.value
-				if (inProgress || key.length == 0) {
-					return
+			submitButtom.addEventListener("click", function () {
+				const key = serialCodeInput.value.trim();
+				if (inProgress || !key) {
+					return;
 				}
+				const ts = Math.floor(new Date() / 1000);
 
-				inProgress = true
-				resultButton.textContent = "Entering..."
-				resultButton.style.color = "yellow"
+				inProgress = true;
+				resultButton.textContent = "Entering...";
+				resultButton.style.color = "yellow";
 
-				try {
-					const ts = Math.floor(new Date() / 1000)
-
-					const response = await fetch("", {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-							"Authorize": `consumerKey=lovelive_test&timestamp=${ts}&version=1.1&nonce=WV0&token=${token}`,
-							"LANG": lang,
-						},
-						body: JSON.stringify({
-							key: key,
-						})
-					})
-					if (response.status != 200) {
-						throw await response.text()
+				const xhr = new XMLHttpRequest();
+				xhr.onerror = function onerr(e) {
+					console.error(e);
+					resultButton.textContent = e.toString();
+					resultButton.style.color = "red";
+					inProgress = false;
+				}
+				xhr.onload = function() {
+					if (!xhr.status.toString().startsWith("2")) {
+						return onerr(xhr.response);
 					}
-					const result = await response.json()
-					resultButton.textContent = result.msg
+					const result = JSON.parse(xhr.response);
+					resultButton.textContent = result.msg;
 					resultButton.style.color = result.ok ? "green" : "red"
-
 					if (result.ok) {
-						serialCodeInput.value = ""
+						serialCodeInput.value = "";
 					}
-				} catch (e) {
-					console.error(e)
-					resultButton.textContent = e.toString()
-					resultButton.style.color = "red"
+					inProgress = false;
 				}
-
-				inProgress = false
+				xhr.open("POST", "");
+				xhr.setRequestHeader("Content-Type", "application/json");
+				xhr.setRequestHeader("Authorize", "consumerKey=lovelive_test&timestamp=" + ts + "&version=1.1&nonce=WV0&token=" + token);
+				xhr.setRequestHeader("LANG", lang);
+				xhr.send(JSON.stringify({
+				    key: key,
+				}));
 			})
 		}
 
 		if (document.readyState !== "loading") {
-			main()
+			main();
 		} else {
-			document.addEventListener("DOMContentLoaded", main)
+			document.addEventListener("DOMContentLoaded", main);
 		}
 	</script>
 </head>
@@ -81,5 +77,3 @@
 	<button id="submit" style="width:100%;margin-top:0.25rem">Enter</button>
 	<p id="result" style="white-space:pre-line"></p>
 </body>
-
-</html>
