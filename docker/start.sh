@@ -8,6 +8,7 @@ fi
 
 source venv/bin/activate
 pip install -r requirements.txt
+pip install asyncpg
 
 if [ ! -f "/data/config.toml" ]; then
         cp config.sample.toml /data/config.toml
