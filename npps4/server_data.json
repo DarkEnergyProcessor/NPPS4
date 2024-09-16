@@ -43257,11 +43257,6 @@
 		},
 		{
 			"serial_code": "HESOYAM",
-			"usage_limit": {
-				"id": "HESOYAM",
-				"global": false,
-				"amount": 200
-			},
 			"action": {
 				"message_en": "Health, Armour, and Money ($250,000)",
 				"message_jp": "健康、防具、お金 ($250,000)",
@@ -43286,11 +43281,6 @@
 		},
 		{
 			"serial_code": "INEEDSOMEHELP",
-			"usage_limit": {
-				"id": "HESOYAM",
-				"global": false,
-				"amount": 200
-			},
 			"action": {
 				"message_en": "Health, Armour, and Money ($250,000)",
 				"message_jp": "健康、防具、お金 ($250,000)",
