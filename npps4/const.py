@@ -15,6 +15,7 @@ SUBSCENARIO_REWARD_COMMENT_EN = "Side story cleared!"
 SUBSCENARIO_REWARD_COMMENT_JP = "サイドストーリークリア！"
 
 COMMON_UNIT_EXPIRY = 86400 * 60  # 60 days
+MAX_EFFORT_SCORE = 300000000  # 300 million
 
 
 class ADD_TYPE(enum.IntEnum):

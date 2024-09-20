@@ -4,6 +4,7 @@
 /util/sampledata
 /venv
 
+*.bin
 *.pyc
 /*.ipynb
 /config.toml

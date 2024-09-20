@@ -29,7 +29,7 @@ async def get_effort_spec(context: idol.BasicSchoolIdolContext, live_effort_poin
 async def add_effort(context: idol.BasicSchoolIdolContext, user: main.User, amount: int):
     result: list[EffortPointInfo] = []
     live_box_drop_protocol = config.get_live_box_drop_protocol()
-    current_amount = amount
+    current_amount = max(amount, const.MAX_EFFORT_SCORE)
     offer_limited_box_id = 0
 
     # TODO: Properly handle limited effort box
