@@ -41,6 +41,10 @@ class SecretboxAllButton(pydantic.BaseModel):
     secret_box_name: str
 
 
+class SecretboxAllButtonWithBaloon(SecretboxAllButton):
+    balloon_asset: str | None = None
+
+
 class SecretboxAllButtonShowCost(pydantic.BaseModel):
     cost_type: const.SECRETBOX_COST_TYPE
     item_id: int | None = None
@@ -51,7 +55,7 @@ class SecretboxAllButtonWithShowCost(SecretboxAllButton):
     show_cost: SecretboxAllButtonShowCost
 
 
-AnySecretboxButton = SecretboxAllButton | SecretboxAllButtonWithShowCost
+AnySecretboxButton = SecretboxAllButton | SecretboxAllButtonWithShowCost | SecretboxAllButtonWithBaloon
 
 
 class SecretboxAllSecretboxInfo(pydantic.BaseModel):

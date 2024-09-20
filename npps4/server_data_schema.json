@@ -361,6 +361,18 @@
 					],
 					"default": null,
 					"title": "Rate Modifier"
+				},
+				"balloon_asset": {
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "null"
+						}
+					],
+					"default": null,
+					"title": "Balloon Asset"
 				}
 			},
 			"required": [

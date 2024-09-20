@@ -53,6 +53,8 @@ class SecretboxButton(pydantic.BaseModel):
     guarantee_specific_rarity_amount: int = 0  # 0 = no guarantee
     guaranteed_rarity: int = 0  # 0 = no guarantee, > 0 = 1-based index of rarity_pools
     rate_modifier: list[int] | None = None
+    balloon_asset: str | None = None  # For stub types (9, 10, 11)
+    balloon_asset_en: str | None = None  # For stub types (9, 10, 11)
 
 
 class HasIDString(pydantic.BaseModel):

@@ -29,26 +29,51 @@ def decode_cost_id(cost_id: int):
     return secretbox_id, button_index, cost_index
 
 
+async def query_secretbox_button(
+    context: idol.BasicSchoolIdolContext,
+    user: main.User,
+    button: data.schema.SecretboxButton,
+    secretbox_name: str,
+    ids: tuple[int, int],
+):
+    costs = [
+        secretbox_model.SecretboxAllCost(
+            id=encode_cost_id(ids[0], ids[1], j),
+            payable=await get_user_currency(context, user, cost.cost_type, cost.cost_item_id) >= cost.cost_amount,
+            unit_count=button.unit_count,
+            type=cost.cost_type,
+            item_id=cost.cost_item_id,
+            amount=cost.cost_amount,
+        )
+        for j, cost in enumerate(button.costs, 1)
+    ]
+
+    if button.balloon_asset is not None:
+        return secretbox_model.SecretboxAllButtonWithBaloon(
+            secret_box_button_type=button.button_type,
+            cost_list=costs,
+            secret_box_name=secretbox_name,
+            balloon_asset=button.balloon_asset,
+        )
+    else:
+        return secretbox_model.SecretboxAllButton(
+            secret_box_button_type=button.button_type,
+            cost_list=costs,
+            secret_box_name=secretbox_name,
+        )
+
+
 async def get_secretbox_button_response(
     context: idol.BasicSchoolIdolContext, target_user: main.User, secretbox: data.schema.SecretboxData
 ):
     return [
         # TODO: Free once a day scouting
-        secretbox_model.SecretboxAllButton(
-            secret_box_button_type=button.button_type,
-            cost_list=[
-                secretbox_model.SecretboxAllCost(
-                    id=encode_cost_id(secretbox.secretbox_id, i, j),
-                    payable=await get_user_currency(context, target_user, cost.cost_type, cost.cost_item_id)
-                    >= cost.cost_amount,
-                    unit_count=button.unit_count,
-                    type=cost.cost_type,
-                    item_id=cost.cost_item_id,
-                    amount=cost.cost_amount,
-                )
-                for j, cost in enumerate(button.costs, 1)
-            ],
-            secret_box_name=context.get_text(secretbox.name, secretbox.name_en),
+        await query_secretbox_button(
+            context,
+            target_user,
+            button,
+            context.get_text(secretbox.name, secretbox.name_en),
+            (secretbox.secretbox_id, i),
         )
         for i, button in enumerate(secretbox.buttons, 1)
     ]
@@ -77,11 +102,8 @@ async def get_all_secretbox_data_response(context: idol.BasicSchoolIdolContext, 
     member_category_list: dict[int, list[secretbox_model.SecretboxAllPage]] = {}
 
     for secretbox in server_data.secretbox_data.values():
-        page = secretbox_model.SecretboxAllPage(
-            menu_asset=_determine_en_path(context, secretbox.menu_asset, secretbox.menu_asset_en),
-            page_order=secretbox.order,
-            # TODO: Detect SecretboxAllAnimation2Asset
-            animation_assets=secretbox_model.SecretboxAllAnimation3Asset(
+        if len(secretbox.animation_asset_layout) > 3:
+            animation_assets = secretbox_model.SecretboxAllAnimation3Asset(
                 type=secretbox.animation_layout_type,
                 background_asset=_determine_en_path(
                     context, secretbox.animation_asset_layout[0], secretbox.animation_asset_layout_en[0]
@@ -95,7 +117,24 @@ async def get_all_secretbox_data_response(context: idol.BasicSchoolIdolContext, 
                 additional_asset_3=_determine_en_path(
                     context, secretbox.animation_asset_layout[3], secretbox.animation_asset_layout_en[3]
                 ),
-            ),
+            )
+        else:
+            animation_assets = secretbox_model.SecretboxAllAnimation2Asset(
+                type=secretbox.animation_layout_type,
+                background_asset=_determine_en_path(
+                    context, secretbox.animation_asset_layout[0], secretbox.animation_asset_layout_en[0]
+                ),
+                additional_asset_1=_determine_en_path(
+                    context, secretbox.animation_asset_layout[1], secretbox.animation_asset_layout_en[1]
+                ),
+                additional_asset_2=_determine_en_path(
+                    context, secretbox.animation_asset_layout[2], secretbox.animation_asset_layout_en[2]
+                ),
+            )
+        page = secretbox_model.SecretboxAllPage(
+            menu_asset=_determine_en_path(context, secretbox.menu_asset, secretbox.menu_asset_en),
+            page_order=secretbox.order,
+            animation_assets=animation_assets,
             button_list=await get_secretbox_button_response(context, target_user, secretbox),
             secret_box_info=await get_secretbox_info_response(context, target_user, secretbox, False),
         )
