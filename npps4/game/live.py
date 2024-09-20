@@ -505,6 +505,13 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
     if live_setting is None:
         raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_FOUND)
 
+    beatmap_data = await live.get_live_info(context, request.live_difficulty_id, live_setting)
+    if beatmap_data is None:
+        raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOTES_LIST_NOT_FOUND)
+
+    if request.max_combo > len(beatmap_data.notes_list):
+        raise idol.error.IdolError(detail="...", http_code=423)
+
     # Get old data
     live_clear_data = await live.get_live_clear_data(context, current_user, request.live_difficulty_id, True)
     old_live_clear_data = copy.copy(live_clear_data)
