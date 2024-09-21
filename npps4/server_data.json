@@ -46375,6 +46375,156 @@
 			]
 		},
 		{
+			"id_string": "down_sr_r_sticker",
+			"add_type": 3006,
+			"item_id": 2,
+			"amount": 20,
+			"name": "シール",
+			"name_en": "Sticker",
+			"costs": [
+				{
+					"rarity": 3,
+					"cost": 1
+				}
+			]
+		},
+		{
+			"id_string": "down_ssr_r_sticker",
+			"add_type": 3006,
+			"item_id": 2,
+			"amount": 100,
+			"name": "シール",
+			"name_en": "Sticker",
+			"costs": [
+				{
+					"rarity": 5,
+					"cost": 1
+				}
+			]
+		},
+		{
+			"id_string": "down_ur_r_sticker",
+			"add_type": 3006,
+			"item_id": 2,
+			"amount": 500,
+			"name": "シール",
+			"name_en": "Sticker",
+			"costs": [
+				{
+					"rarity": 4,
+					"cost": 1
+				},
+				{
+					"rarity": 6,
+					"cost": 1
+				}
+			]
+		},
+		{
+			"id_string": "up_sr_sticker",
+			"add_type": 3006,
+			"item_id": 3,
+			"amount": 1,
+			"name": "Sシール",
+			"name_en": "S Sticker",
+			"costs": [
+				{
+					"rarity": 2,
+					"cost": 20
+				}
+			]
+		},
+		{
+			"id_string": "down_ssr_sr_sticker",
+			"add_type": 3006,
+			"item_id": 3,
+			"amount": 5,
+			"name": "Sシール",
+			"name_en": "S Sticker",
+			"costs": [
+				{
+					"rarity": 5,
+					"cost": 1
+				}
+			]
+		},
+		{
+			"id_string": "down_ur_sr_sticker",
+			"add_type": 3006,
+			"item_id": 3,
+			"amount": 25,
+			"name": "Sシール",
+			"name_en": "S Sticker",
+			"costs": [
+				{
+					"rarity": 4,
+					"cost": 1
+				},
+				{
+					"rarity": 6,
+					"cost": 1
+				}
+			]
+		},
+		{
+			"id_string": "up_ssr_sticker",
+			"add_type": 3006,
+			"item_id": 5,
+			"amount": 1,
+			"name": "SSシール",
+			"name_en": "SS Sticker",
+			"costs": [
+				{
+					"rarity": 2,
+					"cost": 100
+				},
+				{
+					"rarity": 3,
+					"cost": 5
+				}
+			]
+		},
+		{
+			"id_string": "down_ur_ssr_sticker",
+			"add_type": 3006,
+			"item_id": 5,
+			"amount": 5,
+			"name": "SSシール",
+			"name_en": "SS Sticker",
+			"costs": [
+				{
+					"rarity": 4,
+					"cost": 1
+				},
+				{
+					"rarity": 6,
+					"cost": 1
+				}
+			]
+		},
+		{
+			"id_string": "up_ur_sticker",
+			"add_type": 3006,
+			"item_id": 4,
+			"amount": 1,
+			"name": "Uシール",
+			"name_en": "U Sticker",
+			"costs": [
+				{
+					"rarity": 2,
+					"cost": 500
+				},
+				{
+					"rarity": 3,
+					"cost": 25
+				},
+				{
+					"rarity": 5,
+					"cost": 5
+				}
+			]
+		},
+		{
 			"id_string": "background_2",
 			"add_type": 5200,
 			"item_id": 2,
