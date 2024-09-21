@@ -449,7 +449,7 @@ async def live_play(context: idol.SchoolIdolUserParams, request: LivePlayRequest
     if guest is None:
         raise idol.error.IdolError(idol.error.ERROR_CODE_LIVE_INVALID_PARTY_USER)
 
-    guest_center_unit_owning_user_id = await unit.get_unit_center(context, guest)
+    guest_center_unit_owning_user_id = await unit.get_unit_center(context, guest, True)
     if guest_center_unit_owning_user_id == 0:
         raise idol.error.IdolError(idol.error.ERROR_CODE_LIVE_INVALID_PARTY_USER)
 

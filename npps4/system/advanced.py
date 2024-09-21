@@ -194,7 +194,8 @@ async def get_user_guest_party_info(context: idol.BasicSchoolIdolContext, user: 
     unit_center = await unit.get_unit_center(context, user)
     if unit_center is None:
         raise ValueError("invalid user no center")
-    unit_data = await unit.get_unit(context, await unit.get_unit_center(context, user))
+
+    unit_data = await unit.get_unit(context, await unit.get_unit_center(context, user, True))
     unit.validate_unit(user, unit_data)
     unit_info = await unit.get_unit_info(context, unit_data.unit_id)
     if unit_info is None:

@@ -487,7 +487,14 @@ async def set_unit_center(context: idol.BasicSchoolIdolContext, user: main.User,
     await context.db.main.flush()
 
 
-async def get_unit_center(context: idol.BasicSchoolIdolContext, user: main.User):
+async def get_unit_center(
+    context: idol.BasicSchoolIdolContext, user: main.User, center_team_instead_of_partner: bool = False
+):
+    if center_team_instead_of_partner:
+        current_deck = await load_unit_deck(context, user, user.active_deck_index, True)
+        assert current_deck[1][4] > 0
+        return current_deck[1][4]
+
     return user.center_unit_owning_user_id
 
 
