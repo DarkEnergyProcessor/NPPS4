@@ -499,7 +499,7 @@ async def import_user(context: idol.BasicSchoolIdolContext, serialized_data: Acc
         scenario_data.completed = scenario_sid > 0
 
     # Subscenario
-    for subscenario_sid in serialized_data.scenario:
+    for subscenario_sid in serialized_data.subscenario:
         subscenario_id = abs(subscenario_sid)
         subscenario_data = await subscenario.get(context, target, subscenario_id)
         if subscenario_data is None:
