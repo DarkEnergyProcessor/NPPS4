@@ -48,18 +48,22 @@ async def query_secretbox_button(
         for j, cost in enumerate(button.costs, 1)
     ]
 
+    name = secretbox_name
+    if button.name is not None:
+        name = context.get_text(button.name, button.name_en)
+
     if button.balloon_asset is not None:
         return secretbox_model.SecretboxAllButtonWithBaloon(
             secret_box_button_type=button.button_type,
             cost_list=costs,
-            secret_box_name=secretbox_name,
-            balloon_asset=button.balloon_asset,
+            secret_box_name=name,
+            balloon_asset=_determine_en_path(context, button.balloon_asset, button.balloon_asset_en),
         )
     else:
         return secretbox_model.SecretboxAllButton(
             secret_box_button_type=button.button_type,
             cost_list=costs,
-            secret_box_name=secretbox_name,
+            secret_box_name=name,
         )
 
 

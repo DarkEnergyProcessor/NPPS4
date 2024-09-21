@@ -40590,6 +40590,7 @@
 					],
 					"unit_count": 1,
 					"balloon_asset": "assets/image/secretbox/balloon/balloon_5.png",
+					"balloon_asset_en": "",
 					"rate_modifier": [
 						4,
 						0,
@@ -40609,6 +40610,7 @@
 					],
 					"unit_count": 1,
 					"balloon_asset": "assets/image/secretbox/balloon/balloon_6.png",
+					"balloon_asset_en": "",
 					"rate_modifier": [
 						0,
 						4,
@@ -40628,6 +40630,7 @@
 					],
 					"unit_count": 1,
 					"balloon_asset": "assets/image/secretbox/balloon/balloon_7.png",
+					"balloon_asset_en": "",
 					"rate_modifier": [
 						0,
 						0,
@@ -44165,6 +44168,7 @@
 					],
 					"unit_count": 1,
 					"balloon_asset": "assets/image/secretbox/balloon/balloon_5.png",
+					"balloon_asset_en": "",
 					"rate_modifier": [
 						4,
 						0,
@@ -44184,6 +44188,7 @@
 					],
 					"unit_count": 1,
 					"balloon_asset": "assets/image/secretbox/balloon/balloon_6.png",
+					"balloon_asset_en": "",
 					"rate_modifier": [
 						0,
 						4,
@@ -44203,6 +44208,7 @@
 					],
 					"unit_count": 1,
 					"balloon_asset": "assets/image/secretbox/balloon/balloon_7.png",
+					"balloon_asset_en": "",
 					"rate_modifier": [
 						0,
 						0,

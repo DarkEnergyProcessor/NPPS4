@@ -373,6 +373,18 @@
 					],
 					"default": null,
 					"title": "Balloon Asset"
+				},
+				"balloon_asset_en": {
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "null"
+						}
+					],
+					"default": null,
+					"title": "Balloon Asset En"
 				}
 			},
 			"required": [
