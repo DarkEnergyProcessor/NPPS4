@@ -149,6 +149,8 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
     unit_expiry = util.time() + const.COMMON_UNIT_EXPIRY
     for unit_id in unit_roll:
         reward_data = await unit.quick_create_by_unit_add(context, current_user, unit_id)
+        assert reward_data.as_item_reward.unit_rarity_id is not None
+
         if not isinstance(reward_data.as_item_reward, unit_model.UnitItem):
             await unit.add_supporter_unit(context, current_user, reward_data.unit_id)
         else:

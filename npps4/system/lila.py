@@ -362,6 +362,13 @@ async def export_user(
         exchange=exchange_points,
     )
 
+    return export_account_data(account_data, secret_key)
+
+
+def export_account_data(account_data: AccountData, secret_key: bytes | None = None):
+    if secret_key is None:
+        secret_key = config.get_secret_key()
+
     json_encoded = account_data.model_dump_json().encode("utf-8")
     salt = util.randbytes(16)
     hash_hmac = hmac.new(secret_key, salt, digestmod=hashlib.sha256)

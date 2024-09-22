@@ -1209,10 +1209,14 @@ async def unit_info_data_to_unit_item(context: idol.BasicSchoolIdolContext, unit
     if unit_info is None:
         raise ValueError("cannot find unit info (db corrupt?)")
 
+    rarity = unit_info_data.unit_rarity_id
+    if rarity is None:
+        rarity = unit_info.rarity
+
     return unit_model.UnitItem(
         item_id=unit_info_data.unit_id,
         unit_owning_user_id=unit_info_data.unit_owning_user_id,
-        unit_rarity_id=unit_info_data.unit_rarity_id,
+        unit_rarity_id=rarity,
         exp=unit_info_data.exp,
         next_exp=unit_info_data.next_exp,
         level=unit_info_data.level,

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<style>
+		textarea {
+			min-width: 500px;
+			min-height: 100px;
+		}
+	</style>
+	<script>
+		function main()
+		{
+			const userInfoInput = document.getElementById("user_userinfo")
+			const api1Input = document.getElementById("api_1")
+			const api2Input = document.getElementById("api_2")
+			const secretKeyInput = document.getElementById("secret_key")
+			const hititButton = document.getElementById("hitit")
+			const statusParagraph = document.getElementById("status")
+			const payloadTextArea = document.getElementById("payload")
+			const signatureTextArea = document.getElementById("signature")
+
+			hititButton.addEventListener("click", async () => {
+				try
+				{
+					const ts = Math.floor(new Date() / 1000)
+					const response = await fetch("", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							userinfo: JSON.parse(userInfoInput.value),
+							api1: JSON.parse(api1Input.value),
+							api2: JSON.parse(api2Input.value),
+							server_key: secretKeyInput.value
+						})
+					})
+
+					const result = await response.json()
+					if (result.error)
+						throw result.error
+
+					statusParagraph.textContent = ""
+					payloadTextArea.value = result.account_data
+					signatureTextArea.value = result.signature
+				}
+				catch (e)
+				{
+					console.error(e)
+					statusParagraph.textContent = e.toString()
+				}
+			})
+		}
+
+		if (document.readyState !== "loading")
+			main()
+		else
+			document.addEventListener("DOMContentLoaded", main)
+	</script>
+</head>
+
+<body>
+	<h1>SIF Capture to NPPS4</h1>
+	<p>Please populate the JSON <b>response data</b> of particular endpoint.</p>
+	<p>/user/userInfo</p>
+	<textarea id="user_userinfo"></textarea>
+	<br/>
+	<p>/api (large one, the first one)</p>
+	<textarea id="api_1"></textarea>
+	<br/>
+	<p>/api (small one, the second one)</p>
+	<textarea id="api_2"></textarea>
+	<br/>
+	<label for="secret_key">Secret Key (optional)</label>
+	<input id="secret_key" type="text">
+	<br/>
+	<button id="hitit">Convert</button>
+	<p id="status" style="color:red"></p>
+	<br/>
+	<p>Converted data goes here</p>
+	<textarea id="payload"></textarea>
+	<p>Signature</p>
+	<input type="text" id="signature" style="min-width: 500px">
+</body>
+
+</html>

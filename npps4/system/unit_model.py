@@ -12,7 +12,7 @@ class UnitSupportItem(item_model.Item):
     is_support_member: bool = True
     is_hit: Any | None = None
     item_id: int
-    unit_rarity_id: int
+    unit_rarity_id: int | None = None
     attribute: int
 
     @pydantic.computed_field
@@ -23,7 +23,7 @@ class UnitSupportItem(item_model.Item):
 
 class UnitInfoBase(pydantic.BaseModel):
     unit_owning_user_id: int
-    unit_rarity_id: int
+    unit_rarity_id: int | None = None
     exp: int
     next_exp: int
     level: int

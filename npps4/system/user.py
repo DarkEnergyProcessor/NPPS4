@@ -34,7 +34,7 @@ class UserInfoData(pydantic.BaseModel):
     social_point: int
     unit_max: int
     waiting_unit_max: int
-    current_energy: int
+    current_energy: int | None = None
     energy_max: int
     energy_full_time: str
     license_live_energy_recoverly_time: int
