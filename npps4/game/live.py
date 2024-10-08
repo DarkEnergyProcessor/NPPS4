@@ -348,7 +348,7 @@ async def live_schedule(context: idol.SchoolIdolUserParams) -> LiveScheduleRespo
 
 
 DEBUG_SERVER_SCORE_CALCULATE = False
-DEBUG_SERVER_CONSUME_LP = True
+DEBUG_SERVER_CONSUME_LP = False
 
 
 @idol.register("live", "partyList")
