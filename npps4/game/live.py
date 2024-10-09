@@ -348,7 +348,7 @@ async def live_schedule(context: idol.SchoolIdolUserParams) -> LiveScheduleRespo
 
 
 DEBUG_SERVER_SCORE_CALCULATE = False
-DEBUG_SERVER_CONSUME_LP = False
+DEBUG_SERVER_CONSUME_LP = True
 
 
 @idol.register("live", "partyList")
@@ -363,7 +363,9 @@ async def live_partylist(context: idol.SchoolIdolUserParams, request: LivePartyL
         if live_info.capital_type == 2:
             # TODO
             raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_ENOUGH_EVENT_POINT)
-        if live_info.capital_type == 1 and user.has_energy(current_user, live_info.capital_value * request.lp_factor):
+        if live_info.capital_type == 1 and not user.has_energy(
+            current_user, live_info.capital_value * request.lp_factor
+        ):
             raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_ENOUGH_CURRENT_ENERGY)
 
     live_setting = await live.get_live_setting(context, live_info.live_setting_id)
@@ -428,7 +430,7 @@ async def live_play(context: idol.SchoolIdolUserParams, request: LivePlayRequest
         if live_info.capital_type == 2:
             # TODO
             raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_ENOUGH_EVENT_POINT)
-        if live_info.capital_type == 1 and user.has_energy(current_user, cap_value):
+        if live_info.capital_type == 1 and not user.has_energy(current_user, cap_value):
             raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_ENOUGH_CURRENT_ENERGY)
         # Consume LP
         user.sub_energy(current_user, cap_value)
