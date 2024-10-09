@@ -108,7 +108,7 @@ async def get_user_info(context: idol.BasicSchoolIdolContext, user: main.User):
         energy_max=user.energy_max,
         energy_full_time=util.timestamp_to_datetime(user.energy_full_time),
         license_live_energy_recoverly_time=user.license_live_energy_recoverly_time,
-        energy_full_need_time=user.energy_full_need_time,
+        energy_full_need_time=(user.over_max_energy == 0) * max(user.energy_full_time - util.time(), 0),
         over_max_energy=user.over_max_energy,
         training_energy=user.training_energy,
         training_energy_max=user.training_energy_max,
@@ -191,21 +191,27 @@ def sub_energy(user: main.User, /, amount: int, *, t: int | None = None):
     current_energy = get_current_energy(user, t)
     overflow_energy = 0
     if user.over_max_energy > 0:
-        overflow_energy = user.over_max_energy - current_energy
+        overflow_energy = user.over_max_energy - user.energy_max
+        current_energy = user.energy_max
 
     # Is overflow LP >= LP?
-    if overflow_energy > amount:
+    if overflow_energy >= amount:
         user.over_max_energy = user.over_max_energy - amount
+        return
+    elif overflow_energy == amount:  # Need to handle this special case
+        user.over_max_energy = 0
         return
 
     # Overflow LP < LP.
     consume_normal_energy = amount - overflow_energy
     if current_energy >= consume_normal_energy:
         user.energy_full_time = (
-            max(user.energy_full_time, t) + game_mater.GAME_SETTING.live_energy_recoverly_time * amount
+            max(user.energy_full_time, t) + game_mater.GAME_SETTING.live_energy_recoverly_time * consume_normal_energy
         )
+        user.over_max_energy = 0
         return
 
+    print("uh???", amount, t, user.energy_full_time, user.energy_max, user.over_max_energy)
     raise ValueError("not enough energy")
 
 
