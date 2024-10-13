@@ -211,7 +211,6 @@ def sub_energy(user: main.User, /, amount: int, *, t: int | None = None):
         user.over_max_energy = 0
         return
 
-    print("uh???", amount, t, user.energy_full_time, user.energy_max, user.over_max_energy)
     raise ValueError("not enough energy")
 
 
@@ -241,6 +240,8 @@ async def add_exp(context: idol.BasicSchoolIdolContext, user: main.User, exp: in
         next_level_info.append(NextLevelInfo(level=user.level, from_exp=next_exp))
         next_exp = core.get_next_exp_cumulative(user.level)
         max_energy = core.get_energy_by_rank(user.level)
+        # Try to increase max LP. Do it here so add_energy below consider it into account.
+        user.energy_max = max_energy
         add_energy(user, max_energy, t=t)
 
     if level_up:
