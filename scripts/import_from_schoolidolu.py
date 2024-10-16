@@ -65,6 +65,11 @@ class SchoolidoluTeam(pydantic.BaseModel):
     members: list[SchoolidoluOwnedCard] | None
 
 
+class SchoolidoluCard(pydantic.BaseModel):
+    id: int
+    game_id: int
+
+
 def list_user_accounts(username: str, json_output: bool):
     with httpx.Client() as client:
         response = client.get(f"https://schoolido.lu/api/users/{username}/?expand_accounts=true")
@@ -113,6 +118,7 @@ async def convert_to_npps4_script(
     account_data: SchoolidoluUserAccount,
     cards: list[SchoolidoluOwnedCard],
     teams: list[SchoolidoluTeam],
+    client: httpx.AsyncClient,
 ):
     import datetime
 
@@ -124,12 +130,25 @@ async def convert_to_npps4_script(
     import npps4.system.unit
 
     unit_number_info: dict[int, npps4.db.unit.Unit] = {}
+    sit_unit_number_to_unit_id: dict[int, int] = {}
 
     async def get_unit_info_by_number(context: npps4.idol.BasicSchoolIdolContext, unit_number: int, /):
         if unit_number not in unit_number_info:
             q = sqlalchemy.select(npps4.db.unit.Unit).where(npps4.db.unit.Unit.unit_number == unit_number).limit(1)
             result = await context.db.unit.execute(q)
             unit_info = result.scalar()
+            if unit_info is None:
+                print(
+                    f"Warning: card number {unit_number} does not exist. Asking SchoolIdolu for actual unit_id...",
+                    file=sys.stderr,
+                )
+                if unit_number not in sit_unit_number_to_unit_id:
+                    response = await client.get(f"https://schoolido.lu/api/cards/{unit_number}/")
+                    response.raise_for_status()
+                    card_info = SchoolidoluCard.model_validate(response.json())
+                    sit_unit_number_to_unit_id[unit_number] = card_info.game_id
+                unit_info = await context.db.unit.get(npps4.db.unit.Unit, sit_unit_number_to_unit_id[unit_number])
+
             if unit_info is None:
                 raise Exception(f"card number {unit_number} does not exist")
             unit_number_info[unit_number] = unit_info
@@ -178,7 +197,14 @@ async def convert_to_npps4_script(
                         case 1:
                             target_level = 40 if card.idolized else 30
 
-                print("        # #", card.card, " - https://sif.kirara.ca/card/", card.card, sep="", file=f)
+                print(
+                    "        # #",
+                    unit_info.unit_number,
+                    " - https://sif.kirara.ca/card/",
+                    unit_info.unit_number,
+                    sep="",
+                    file=f,
+                )
                 print(
                     "        unit_data = await npps4.system.unit.create_unit(context, user, ",
                     unit_info.unit_id,
@@ -250,7 +276,7 @@ async def convert_to_npps4_script(
                     ", sign_flag=",
                     repr(await npps4.system.unit.has_signed_variant(context, unit_info.unit_id)),
                     ")  # https://sif.kirara.ca/card/",
-                    card.card,
+                    unit_info.unit_number,
                     sep="",
                     file=f,
                 )
@@ -272,7 +298,7 @@ async def convert_to_npps4_script(
 
 
 async def process_account(account_id: int):
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=httpx.Timeout(timeout=30)) as client:
         response = await client.get(f"https://schoolido.lu/api/accounts/{account_id}/")
         response.raise_for_status()
         account_data = SchoolidoluUserAccount.model_validate(response.json())
@@ -287,9 +313,9 @@ async def process_account(account_id: int):
             SchoolidoluTeam, client, f"https://schoolido.lu/api/teams/?owner_account={account_id}&page_size=15"
         )
 
-    with io.StringIO() as f:
-        await convert_to_npps4_script(f, account_data, cards, teams)
-        return f.getvalue()
+        with io.StringIO() as f:
+            await convert_to_npps4_script(f, account_data, cards, teams, client)
+            return f.getvalue()
 
 
 def run_formatter(python_code: str):
