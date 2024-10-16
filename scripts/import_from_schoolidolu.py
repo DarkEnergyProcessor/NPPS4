@@ -131,7 +131,8 @@ async def convert_to_npps4_script(
             result = await context.db.unit.execute(q)
             unit_info = result.scalar()
             if unit_info is None:
-                raise Exception(f"card number {unit_number} does not exist")
+                print("WARNING: Card number ", str(unit_number), " does not exist. Skipped!")
+                return None
             unit_number_info[unit_number] = unit_info
         else:
             unit_info = unit_number_info[unit_number]
@@ -164,6 +165,8 @@ async def convert_to_npps4_script(
         for card in cards:
             if card.stored == "Deck":
                 unit_info = await get_unit_info_by_number(context, card.card)
+                if unit_info is None:
+                    continue
                 target_level = 1
                 if card.max_level:
                     match unit_info.rarity:
@@ -238,6 +241,8 @@ async def convert_to_npps4_script(
         for card in cards:
             if card.stored == "Album":
                 unit_info = await get_unit_info_by_number(context, card.card)
+                if unit_info is None:
+                    continue
                 print(
                     "        await npps4.system.album.update(context, user, ",
                     unit_info.unit_id,
