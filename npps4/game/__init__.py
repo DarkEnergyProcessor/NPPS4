@@ -32,6 +32,7 @@ if not config.is_script_mode():
     from . import payment
     from . import personalnotice
     from . import profile
+    from . import ranking
     from . import reward
     from . import scenario
     from . import secretbox
