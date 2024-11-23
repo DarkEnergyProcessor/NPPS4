@@ -1,5 +1,6 @@
 import pydantic
 
+from . import models
 from .. import const
 from .. import idol
 from .. import util
@@ -16,36 +17,16 @@ class FriendListRequest(pydantic.BaseModel):
     page: int
 
 
-class FriendListFriendUserData(pydantic.BaseModel):
-    user_id: int
-    name: str
-    level: int
+class FriendListFriendUserData(models.UserData):
     comment: str
     elapsed_time_from_login: str
     elapsed_time_from_applied: str
 
 
-class FriendListFriendCenterUnitInfo(pydantic.BaseModel):
-    unit_id: int
-    level: int
-    love: int
-    rank: int
-    display_rank: int
-    smile: int
-    cute: int
-    cool: int
-    is_love_max: bool
-    is_rank_max: bool
-    is_level_max: bool
-    unit_skill_exp: int
-    removable_skill_ids: list[int]
-    unit_removable_skill_capacity: int
-
-
 class FriendListFriend(pydantic.BaseModel):
     is_new: bool = False
     user_data: FriendListFriendUserData
-    center_unit_info: FriendListFriendCenterUnitInfo
+    center_unit_info: models.CenterUnitInfo
     setting_award_id: int
 
 
