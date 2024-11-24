@@ -290,9 +290,9 @@ class LiveClear(common.Base, kw_only=True):
     )
     live_difficulty_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, index=True)
     difficulty: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(index=True)  # for fast lookup
-    hi_score: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
+    hi_score: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0, index=True)
     hi_combo_cnt: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
-    clear_cnt: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
+    clear_cnt: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0, index=True)
 
     __table_args__ = (sqlalchemy.UniqueConstraint(user_id, live_difficulty_id),)
 
