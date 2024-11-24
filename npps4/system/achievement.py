@@ -10,6 +10,7 @@ from . import item
 from . import item_model
 from . import unit
 from . import reward
+from .. import const
 from .. import data
 from .. import db
 from .. import idol
@@ -792,6 +793,9 @@ async def give_achievement_reward(
                 )
 
 
+BACKGROUND_TITLE_ADD_TYPE = (const.ADD_TYPE.BACKGROUND, const.ADD_TYPE.AWARD)
+
+
 async def process_achievement_reward(
     context: idol.BasicSchoolIdolContext,
     user: main.User,
@@ -800,7 +804,13 @@ async def process_achievement_reward(
 ):
     for ach, reward_list in zip(achievements, rewardss):
         ach_info = await get_achievement_info(context, ach.achievement_id)
-        if ach_info is not None and ach_info.auto_reward_flag:
-            await give_achievement_reward(context, user, ach_info, reward_list)
-            await mark_achievement_reward_claimed(context, ach)
+        if ach_info is not None:
+            if ach_info.auto_reward_flag:
+                await give_achievement_reward(context, user, ach_info, reward_list)
+                await mark_achievement_reward_claimed(context, ach)
+            else:
+                # Backgrounds and titles are always gained, regardless of the auto_reward_flag
+                for r in reward_list:
+                    if r.add_type in BACKGROUND_TITLE_ADD_TYPE:
+                        await advanced.add_item(context, user, r)
     await context.db.main.flush()
