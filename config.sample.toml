@@ -34,6 +34,13 @@ server_data = "npps4/server_data.json"
 # The default is 72 hours (3 days).
 session_expiry = 259200
 
+# For live replay, store the backup of live show notes data?
+# If this is false, then players will lose their live show replays when the
+# beatmap data is modified.
+# If this is true, then player will still able to play their live show replays
+# with the unmodified beatmap data but increase the database size.
+save_notes_list = false
+
 [database]
 # This is database-related configuration.
 # NPPS4 uses SQLAlchemy for its ORM mapper library.

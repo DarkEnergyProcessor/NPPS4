@@ -425,6 +425,31 @@ class ExchangeItemLimit(common.Base, kw_only=True):
     __table_args__ = (sqlalchemy.UniqueConstraint(user_id, exchange_item_id),)
 
 
+class NotesListBackup(common.Base, kw_only=True):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
+
+    crc32: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, index=True)  # Fast lookup
+    sha256: sqlalchemy.orm.Mapped[bytes] = sqlalchemy.orm.mapped_column(unique=True)  # Raw SHA256
+    notes_list: sqlalchemy.orm.Mapped[bytes] = sqlalchemy.orm.mapped_column()  # GZip compressed notes list
+
+
+class LiveReplay(common.Base, kw_only=True):
+    """Contain live replay data."""
+
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
+    user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(
+        common.IDInteger, sqlalchemy.ForeignKey(User.id), index=True
+    )
+    live_difficulty_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, index=True)
+    use_skill: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column()
+    timestamp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger)
+    notes_crc32: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger)
+    notes_sha256: sqlalchemy.orm.Mapped[bytes] = sqlalchemy.orm.mapped_column()
+    precise_log: sqlalchemy.orm.Mapped[bytes] = sqlalchemy.orm.mapped_column()  # GZip compressed precise score log
+
+    __table_args__ = (sqlalchemy.UniqueConstraint(user_id, live_difficulty_id, use_skill),)
+
+
 engine = sqlalchemy.ext.asyncio.create_async_engine(config.get_database_url())
 sessionmaker = sqlalchemy.ext.asyncio.async_sessionmaker(engine)
 

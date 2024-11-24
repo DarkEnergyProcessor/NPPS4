@@ -31,6 +31,7 @@ class _Main(pydantic.BaseModel):
     server_private_key_password: str = ""
     server_data: str
     session_expiry: int = 0
+    save_notes_list: bool = False
 
 
 class _Database(pydantic.BaseModel):

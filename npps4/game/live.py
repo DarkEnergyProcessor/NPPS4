@@ -23,6 +23,8 @@ from ..system import unit
 from ..system import unit_model
 from ..system import user
 
+from typing import Any
+
 
 class EventInfo(pydantic.BaseModel):
     event_id: int
@@ -149,10 +151,13 @@ class LiveRewardTriggerLog(pydantic.BaseModel):
 
 # https://github.com/YumeMichi/honoka-chan/blob/6778972c1ff54a8a038ea07b676e6acdbb211f96/handler/live.go#L447
 # Along with some asking from other people.
-class LivePreciseScoreData(pydantic.BaseModel):
-    has_record: bool
-    live_info: live_model.LiveInfo
+class LivePreciseScore(pydantic.BaseModel):
+    has_record: bool = False
     can_replay: bool = False
+    live_info: live_model.LiveInfo
+
+
+class LivePreciseScoreWithData(LivePreciseScore):
     random_seed: int = pydantic.Field(default_factory=util.time)
     max_combo: int
     update_date: str
@@ -164,9 +169,9 @@ class LivePreciseScoreData(pydantic.BaseModel):
 
 class LivePreciseScoreResponse(common.TimestampMixin):
     rank_info: list[LivePlayRankInfo]
-    on: LivePreciseScoreData
-    off: LivePreciseScoreData
-    can_activate_Effect: bool = False
+    on: dict[str, Any]  # TODO: Use LivePreciseScore(WithData)
+    off: dict[str, Any]  # TODO: Use LivePreciseScore(WithData)
+    can_activate_effect: bool = False
 
 
 class LiveRewardLiveSettingIcon(pydantic.BaseModel):
@@ -214,7 +219,7 @@ class LiveRewardRequest(pydantic.BaseModel):
     score_cute: int
     score_cool: int
     love_cnt: int
-    precise_score_log: LiveRewardPreciseScore
+    precise_score_log: dict[str, Any]
     event_point: int
     event_id: int | None
 
@@ -697,6 +702,17 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
     # Clean live in progress
     context.db.main.expunge(live_in_progress)
     await live.clean_live_in_progress(context, current_user)
+
+    # Store precise log score
+    if request.precise_score_log["live_setting"]["precise_score_auto_update_flag"]:
+        await live.record_precise_score(
+            context,
+            current_user,
+            request.live_difficulty_id,
+            bool(request.precise_score_log["is_skill_on"]),
+            beatmap_data.notes_list,
+            request.precise_score_log,
+        )
 
     # Create response
     reward_unit_list = LiveRewardUnitList()

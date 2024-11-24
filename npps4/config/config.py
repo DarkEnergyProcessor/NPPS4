@@ -221,3 +221,8 @@ def get_session_expiry_time():
 def is_account_export_enabled():
     global CONFIG_DATA
     return CONFIG_DATA.iex.enable_export
+
+
+def store_backup_of_notes_list():
+    global CONFIG_DATA
+    return CONFIG_DATA.main.save_notes_list

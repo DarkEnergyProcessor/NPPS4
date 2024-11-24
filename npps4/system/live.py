@@ -1,6 +1,10 @@
+import binascii
 import collections.abc
+import gzip
+import hashlib
 
 import sqlalchemy
+import pydantic_core
 
 from . import common
 from . import item
@@ -13,7 +17,7 @@ from ..config import config
 from ..db import main
 from ..db import live
 
-from typing import Literal, overload
+from typing import Any, Literal, overload
 
 
 async def unlock_normal_live(context: idol.BasicSchoolIdolContext, user: main.User, live_track_id: int):
@@ -478,3 +482,59 @@ async def get_training_live_status(context: idol.BasicSchoolIdolContext, /, user
         live_status_result.extend(await get_training_live_clear_status_of_track(context, user, live_track_id))
 
     return live_status_result
+
+
+async def record_notes_list(context: idol.BasicSchoolIdolContext, notes_list: list[live_model.LiveNote], /):
+    notes_list_json = pydantic_core.to_json(notes_list)
+    sha256 = hashlib.sha256(notes_list_json, usedforsecurity=False).digest()
+    crc32 = binascii.crc32(notes_list_json)
+
+    if config.store_backup_of_notes_list():
+        q = sqlalchemy.select(main.NotesListBackup).where(
+            main.NotesListBackup.crc32 == crc32, main.NotesListBackup.sha256 == sha256
+        )
+        result = await context.db.main.execute(q)
+        backup_notes = result.scalar()
+
+        if backup_notes is None:
+            backup_notes = main.NotesListBackup(crc32=crc32, sha256=sha256, notes_list=gzip.compress(notes_list_json))
+            context.db.main.add(backup_notes)
+            await context.db.main.flush()
+
+    return crc32, sha256
+
+
+async def record_precise_score(
+    context: idol.BasicSchoolIdolContext,
+    /,
+    user: main.User,
+    live_difficulty_id: int,
+    use_skill: bool,
+    notes_list: list[live_model.LiveNote],
+    precise_log_data: dict[str, Any],
+):
+    # use_skill = bool(precise_log_data.get("is_skill_on", True))
+    q = sqlalchemy.select(main.LiveReplay).where(
+        main.LiveReplay.user_id == user.id,
+        main.LiveReplay.live_difficulty_id == live_difficulty_id,
+        main.LiveReplay.use_skill == use_skill,
+    )
+    result = await context.db.main.execute(q)
+    replay = result.scalar()
+
+    if replay is None:
+        replay = main.LiveReplay(
+            user_id=user.id,
+            live_difficulty_id=live_difficulty_id,
+            use_skill=use_skill,
+            timestamp=0,
+            notes_crc32=0,
+            notes_sha256=b"",
+            precise_log=b"",
+        )
+        context.db.main.add(replay)
+
+    replay.timestamp = util.time()
+    replay.notes_crc32, replay.notes_sha256 = await record_notes_list(context, notes_list)
+    replay.precise_log = gzip.compress(pydantic_core.to_json(precise_log_data))
+    await context.db.main.flush()
