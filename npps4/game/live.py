@@ -167,6 +167,10 @@ class LivePreciseScoreWithData(LivePreciseScore):
     trigger_log: list[LiveRewardTriggerLog] | None = None
 
 
+class LivePreciseScoreRequest(pydantic.BaseModel):
+    live_difficulty_id: int
+
+
 class LivePreciseScoreResponse(common.TimestampMixin):
     rank_info: list[LivePlayRankInfo]
     on: dict[str, Any]  # TODO: Use LivePreciseScore(WithData)
@@ -417,9 +421,58 @@ async def live_partylist(context: idol.SchoolIdolUserParams, request: LivePartyL
 
 
 @idol.register("live", "preciseScore")
-async def live_precisescore(context: idol.SchoolIdolUserParams) -> LivePreciseScoreResponse:
-    util.stub("live", "preciseScore", context.raw_request_data)
-    raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_PRECISE_LIST_NOT_FOUND)
+async def live_precisescore(
+    context: idol.SchoolIdolUserParams, request: LivePreciseScoreRequest
+) -> LivePreciseScoreResponse:
+    current_user = await user.get_current(context)
+
+    live_setting = await live.get_live_setting_from_difficulty_id(context, request.live_difficulty_id)
+    if live_setting is None:
+        raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_FOUND)
+    live_info = await live.get_live_info_without_notes(context, request.live_difficulty_id, live_setting)
+
+    with_skill_record = await live.pull_precise_score_with_beatmap(
+        context, current_user, request.live_difficulty_id, True
+    )
+    without_skill_record = await live.pull_precise_score_with_beatmap(
+        context, current_user, request.live_difficulty_id, False
+    )
+
+    if with_skill_record is None and without_skill_record is None:
+        raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_PRECISE_LIST_NOT_FOUND)
+
+    if with_skill_record is None:
+        on_dict = {"has_record": False, "can_replay": False, "live_info": live_info.model_dump(mode="json")}
+    else:
+        live_info_json = live_info.model_dump()
+        live_info_json["notes_list"] = live.NotesListRoot(with_skill_record[1]).model_dump()
+        on_dict = with_skill_record[0]
+        on_dict["has_record"] = True
+        on_dict["can_replay"] = True
+        on_dict["live_info"] = live_info_json
+
+    if without_skill_record is None:
+        off_dict = {"has_record": False, "can_replay": False, "live_info": live_info.model_dump(mode="json")}
+    else:
+        live_info_json = live_info.model_dump()
+        live_info_json["notes_list"] = live.NotesListRoot(without_skill_record[1]).model_dump()
+        off_dict = without_skill_record[0]
+        off_dict["has_record"] = True
+        off_dict["can_replay"] = True
+        off_dict["live_info"] = live_info_json
+
+    return LivePreciseScoreResponse(
+        rank_info=[
+            LivePlayRankInfo(rank=5, rank_min=0, rank_max=live_setting.c_rank_score - 1),
+            LivePlayRankInfo(rank=4, rank_min=live_setting.c_rank_score, rank_max=live_setting.b_rank_score - 1),
+            LivePlayRankInfo(rank=3, rank_min=live_setting.b_rank_score, rank_max=live_setting.a_rank_score - 1),
+            LivePlayRankInfo(rank=2, rank_min=live_setting.a_rank_score, rank_max=live_setting.s_rank_score - 1),
+            LivePlayRankInfo(rank=1, rank_min=live_setting.s_rank_score, rank_max=0),
+        ],
+        on=on_dict,
+        off=off_dict,
+        can_activate_effect=True,  # TODO
+    )
 
 
 @idol.register("live", "play", xmc_verify=idol.XMCVerifyMode.CROSS)

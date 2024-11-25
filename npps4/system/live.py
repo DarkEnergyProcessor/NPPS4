@@ -2,9 +2,10 @@ import binascii
 import collections.abc
 import gzip
 import hashlib
+import json
 
 import sqlalchemy
-import pydantic_core
+import pydantic
 
 from . import common
 from . import item
@@ -484,8 +485,12 @@ async def get_training_live_status(context: idol.BasicSchoolIdolContext, /, user
     return live_status_result
 
 
+class NotesListRoot(pydantic.RootModel):
+    root: list[live_model.LiveNote]
+
+
 async def record_notes_list(context: idol.BasicSchoolIdolContext, notes_list: list[live_model.LiveNote], /):
-    notes_list_json = pydantic_core.to_json(notes_list)
+    notes_list_json = NotesListRoot(notes_list).model_dump_json().encode("utf-8")
     sha256 = hashlib.sha256(notes_list_json, usedforsecurity=False).digest()
     crc32 = binascii.crc32(notes_list_json)
 
@@ -536,5 +541,64 @@ async def record_precise_score(
 
     replay.timestamp = util.time()
     replay.notes_crc32, replay.notes_sha256 = await record_notes_list(context, notes_list)
-    replay.precise_log = gzip.compress(pydantic_core.to_json(precise_log_data))
+    replay.precise_log = gzip.compress(json.dumps(precise_log_data).encode("utf-8"))
     await context.db.main.flush()
+
+
+async def pull_precise_score_with_beatmap(
+    context: idol.BasicSchoolIdolContext, /, user: main.User, live_difficulty_id: int, use_skill: bool
+):
+    q = sqlalchemy.select(main.LiveReplay).where(
+        main.LiveReplay.user_id == user.id,
+        main.LiveReplay.live_difficulty_id == live_difficulty_id,
+        main.LiveReplay.use_skill == use_skill,
+    )
+    result = await context.db.main.execute(q)
+    replay = result.scalar()
+    if replay is None:
+        return None
+
+    # Get notes cache
+    q = sqlalchemy.select(main.NotesListBackup.notes_list).where(
+        main.NotesListBackup.crc32 == replay.notes_crc32, main.NotesListBackup.sha256 == replay.notes_sha256
+    )
+    result = await context.db.main.execute(q)
+    notes_list_bytes = result.scalar()
+    notes_list = None
+    if notes_list_bytes is not None:
+        notes_list = NotesListRoot.model_validate_json(gzip.decompress(notes_list_bytes)).root
+
+    if notes_list is None:
+        # Try look at current beatmap
+        live_setting = await get_live_setting_from_difficulty_id(context, live_difficulty_id)
+        if live_setting is None:
+            return None
+
+        beatmap_protocol = config.get_beatmap_provider_protocol()
+        beatmap_data = await beatmap_protocol.get_beatmap_data(live_setting.notes_setting_asset, context)
+        if beatmap_data is None:
+            return None
+
+        notes_list_unprocessed = [
+            live_model.LiveNote(
+                timing_sec=l.timing_sec,
+                notes_attribute=l.notes_attribute,
+                notes_level=l.notes_level,
+                effect=l.effect,
+                effect_value=l.effect_value,
+                position=l.position,
+                speed=l.speed,
+                vanish=l.vanish,
+            )
+            for l in beatmap_data
+        ]
+        notes_list_bytes = NotesListRoot(notes_list_unprocessed).model_dump_json().encode("utf-8")
+        sha256_of_notes = hashlib.sha256(notes_list_bytes, usedforsecurity=False).digest()
+
+        if replay.notes_sha256 == sha256_of_notes:
+            notes_list = notes_list_unprocessed
+
+    if notes_list is None:
+        return None
+
+    return json.loads(gzip.decompress(replay.precise_log)), notes_list
