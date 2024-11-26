@@ -374,18 +374,28 @@ async def clean_live_in_progress(context: idol.BasicSchoolIdolContext, user: mai
 
 
 async def register_live_in_progress(
-    context: idol.BasicSchoolIdolContext, user: main.User, party_user: main.User, lp_factor: int, unit_deck_id: int
+    context: idol.BasicSchoolIdolContext,
+    user: main.User,
+    party_user: main.User,
+    lp_factor: int,
+    unit_deck_id: int,
+    deck_data_bytes: bytes,
 ):
     live_in_progress = await get_live_in_progress(context, user)
     if live_in_progress is None:
         wip = main.LiveInProgress(
-            user_id=user.id, party_user_id=party_user.id, lp_factor=lp_factor, unit_deck_id=unit_deck_id
+            user_id=user.id,
+            party_user_id=party_user.id,
+            lp_factor=lp_factor,
+            unit_deck_id=unit_deck_id,
+            deck_data=deck_data_bytes,
         )
         context.db.main.add(wip)
     else:
         live_in_progress.party_user_id = party_user.id
         live_in_progress.lp_factor = lp_factor
         live_in_progress.unit_deck_id = unit_deck_id
+        live_in_progress.deck_data = deck_data_bytes
     await context.db.main.flush()
 
 
@@ -601,4 +611,4 @@ async def pull_precise_score_with_beatmap(
     if notes_list is None:
         return None
 
-    return json.loads(gzip.decompress(replay.precise_log)), notes_list
+    return json.loads(gzip.decompress(replay.precise_log)), notes_list, replay.timestamp

@@ -34,7 +34,7 @@ class RankingData(pydantic.BaseModel):
     rank: int
     score: int
     user_data: models.UserData
-    center_unit_info: models.CenterUnitInfo
+    center_unit_info: common.CenterUnitInfo
     setting_award_id: int
 
 
@@ -76,7 +76,7 @@ async def ranking_live(context: idol.SchoolIdolUserParams, request: RankingLiveR
                 rank=i,
                 score=score,
                 user_data=models.UserData(user_id=user_id, name=target_user.name, level=target_user.level),
-                center_unit_info=models.CenterUnitInfo(
+                center_unit_info=common.CenterUnitInfo(
                     unit_id=unit_data.unit_id,
                     level=unit_full_data.level,
                     rank=unit_data.rank,

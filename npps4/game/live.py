@@ -1,4 +1,5 @@
 import copy
+import json
 import math
 
 import pydantic
@@ -420,7 +421,7 @@ async def live_partylist(context: idol.SchoolIdolUserParams, request: LivePartyL
     )
 
 
-@idol.register("live", "preciseScore")
+@idol.register("live", "preciseScore", log_response_data=True)
 async def live_precisescore(
     context: idol.SchoolIdolUserParams, request: LivePreciseScoreRequest
 ) -> LivePreciseScoreResponse:
@@ -450,6 +451,7 @@ async def live_precisescore(
         on_dict["has_record"] = True
         on_dict["can_replay"] = True
         on_dict["live_info"] = live_info_json
+        on_dict["update_date"] = util.timestamp_to_datetime(with_skill_record[2])
 
     if without_skill_record is None:
         off_dict = {"has_record": False, "can_replay": False, "live_info": live_info.model_dump(mode="json")}
@@ -460,6 +462,7 @@ async def live_precisescore(
         off_dict["has_record"] = True
         off_dict["can_replay"] = True
         off_dict["live_info"] = live_info_json
+        off_dict["update_date"] = util.timestamp_to_datetime(without_skill_record[2])
 
     return LivePreciseScoreResponse(
         rank_info=[
@@ -524,7 +527,9 @@ async def live_play(context: idol.SchoolIdolUserParams, request: LivePlayRequest
     )
 
     # Register live in progress
-    await live.register_live_in_progress(context, current_user, guest, request.lp_factor, request.unit_deck_id)
+    await live.register_live_in_progress(
+        context, current_user, guest, request.lp_factor, request.unit_deck_id, stats.model_dump_json().encode("utf-8")
+    )
 
     return LivePlayResponse(
         rank_info=[
@@ -758,6 +763,8 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
 
     # Store precise log score
     if request.precise_score_log["live_setting"]["precise_score_auto_update_flag"]:
+        request.precise_score_log["deck_info"] = json.loads(live_in_progress.deck_data)
+        request.precise_score_log["max_combo"] = request.max_combo
         await live.record_precise_score(
             context,
             current_user,

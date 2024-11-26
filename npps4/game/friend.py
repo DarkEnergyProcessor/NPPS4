@@ -26,7 +26,7 @@ class FriendListFriendUserData(models.UserData):
 class FriendListFriend(pydantic.BaseModel):
     is_new: bool = False
     user_data: FriendListFriendUserData
-    center_unit_info: models.CenterUnitInfo
+    center_unit_info: common.CenterUnitInfo
     setting_award_id: int
 
 

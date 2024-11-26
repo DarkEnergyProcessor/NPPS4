@@ -83,10 +83,16 @@ class PartyInfo(pydantic.BaseModel):
     friend_status: int
 
 
-class LiveDeckUnitAttribute(pydantic.BaseModel):
-    smile: int
-    cute: int
-    cool: int
+class LiveDeckUnitAttribute(common.CenterUnitInfo):
+    unit_skill_level: int
+    position: int
+
+
+class LiveDeckStats(pydantic.BaseModel):
+    smile: int = 0
+    cute: int = 0
+    cool: int = 0
+    hp: int = 0
 
 
 class LiveDeckInfo(pydantic.BaseModel):
@@ -96,6 +102,9 @@ class LiveDeckInfo(pydantic.BaseModel):
     total_cool: int
     total_hp: int
     prepared_hp_damage: int = 0
+    total_status: LiveDeckStats
+    center_bonus: LiveDeckStats
+    si_bonus: LiveDeckStats
     unit_list: list[LiveDeckUnitAttribute]
 
 
@@ -327,7 +336,12 @@ class TeamStatCalculator:
         love_stats: list[tuple[int, int, int]] = []
         sis_stats: list[tuple[int, int, int]] = []
         unit_types: list[int] = []
-        max_hp = 0
+
+        total = LiveDeckStats()
+        leader = LiveDeckStats()
+        sis = LiveDeckStats()
+        sis_ids: list[list[int]] = []
+        unit_full: list[unit_model.UnitInfoData] = []
 
         # Retrieve base stats
         for unit_data in player_units:
@@ -335,12 +349,11 @@ class TeamStatCalculator:
             unit_infos.append(unit_info)
             unit_types.append(unit_info.unit_type_id)
 
-            unit_rarity = await self.get_unit_rarity(unit_info.rarity)
-            stats = await unit.get_unit_stats_from_unit_data(
-                self.context, unit.UnitStatsCalculationID.from_unit_data(unit_data)
-            )
+            unit_full_data, stats = await unit.get_unit_data_full_info(self.context, unit_data)
+            unit_full.append(unit_full_data)
+            sis_ids.append(await unit.get_unit_removable_skills(self.context, unit_data))
             base_stats.append(stats)
-            max_hp = max_hp + stats.hp
+            total.hp = total.hp + stats.hp
 
         # Apply bond stat
         for i in range(9):
@@ -369,27 +382,55 @@ class TeamStatCalculator:
         leader_stats = await self.calculate_leader_bonus(sis_stats, unit_types, player_units[4])
         guest_stats = await self.calculate_leader_bonus(sis_stats, unit_types, guest)
 
-        smile = 0
-        pure = 0
-        cool = 0
-
         final_stats: list[LiveDeckUnitAttribute] = []
 
         for i in range(9):
+            sis.smile = sis.smile + sis_stats[i][0]
+            sis.cute = sis.cute + sis_stats[i][1]
+            sis.cool = sis.cool + sis_stats[i][2]
+            leader.smile = leader.smile + leader_stats[i][0]
+            leader.cute = leader.cute + leader_stats[i][1]
+            leader.cool = leader.cool + leader_stats[i][2]
+
             current_smile = sis_stats[i][0] + leader_stats[i][0] + guest_stats[i][0]
             current_pure = sis_stats[i][1] + leader_stats[i][1] + guest_stats[i][1]
             current_cool = sis_stats[i][2] + leader_stats[i][2] + guest_stats[i][2]
-            smile = smile + current_smile
-            pure = pure + current_pure
-            cool = cool + current_cool
-            final_stats.append(LiveDeckUnitAttribute(smile=current_smile, cute=current_pure, cool=current_cool))
+            total.smile = total.smile + current_smile
+            total.cute = total.cute + current_pure
+            total.cool = total.cool + current_cool
+
+            unit_data = player_units[i]
+            unit_full_data = unit_full[i]
+            final_stats.append(
+                LiveDeckUnitAttribute(
+                    unit_id=unit_data.unit_id,
+                    level=unit_full_data.level,
+                    love=unit_data.love,
+                    rank=unit_data.rank,
+                    display_rank=unit_data.display_rank,
+                    smile=current_smile,
+                    cute=current_pure,
+                    cool=current_cool,
+                    is_love_max=unit_full_data.is_love_max,
+                    is_rank_max=unit_full_data.is_rank_max,
+                    is_level_max=unit_full_data.is_level_max,
+                    unit_skill_exp=unit_data.skill_exp,
+                    unit_skill_level=unit_full_data.unit_skill_level,
+                    unit_removable_skill_capacity=unit_data.unit_removable_skill_capacity,
+                    removable_skill_ids=sis_ids[i],
+                    position=i + 1,
+                )
+            )
 
         return LiveDeckInfo(
             unit_deck_id=unit_deck_id,
-            total_smile=smile,
-            total_cute=pure,
-            total_cool=cool,
-            total_hp=max_hp,
+            total_smile=total.smile,
+            total_cute=total.cute,
+            total_cool=total.cool,
+            total_hp=total.hp,
+            total_status=total,
+            center_bonus=leader,
+            si_bonus=sis,
             unit_list=final_stats,
         )
 
