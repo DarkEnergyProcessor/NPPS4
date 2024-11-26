@@ -342,6 +342,7 @@ class LiveInProgress(common.Base, kw_only=True):
     )
     lp_factor: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
     unit_deck_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    deck_data: sqlalchemy.orm.Mapped[bytes] = sqlalchemy.orm.mapped_column()  # JSON-encoded LiveDeckInfo
 
 
 class Item(common.Base, kw_only=True):
