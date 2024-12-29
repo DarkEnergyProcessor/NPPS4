@@ -421,7 +421,7 @@ async def live_partylist(context: idol.SchoolIdolUserParams, request: LivePartyL
     )
 
 
-@idol.register("live", "preciseScore", log_response_data=True)
+@idol.register("live", "preciseScore")
 async def live_precisescore(
     context: idol.SchoolIdolUserParams, request: LivePreciseScoreRequest
 ) -> LivePreciseScoreResponse:
