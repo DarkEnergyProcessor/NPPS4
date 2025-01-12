@@ -20,7 +20,7 @@ Certain params may have additional information in parenthesis, such as:
   * greater than or equal - Checked condition is equal or greater than of specific value (`a >= b`).
 * unknown - It is unknown what to do with this value.
 * local track - The increment value is tracked in this achievement only. This implies "compare greater than or equal".
-* global track - The value is tracked in global user statistics. This implies "compare greater than or equal".
+* global track - The value is tracked across previous achievement. This implies "compare greater than or equal".
 * behavior - Changes certain behavior when comparing certain constraints.
 
 Below is the list of achievement types and their corresponding parameters:
@@ -85,13 +85,9 @@ When to check: Scouting.
 
 ### Practice (Type 11)
 
-**Undocumented.** This achievement is ambiguous for 2 reasons:
-1. "Practice" can mean "practice a club member"; or
-2. Performing a live show.
+When to check: Practicing member.
 
-When to check: Unknown
-
-* `params1` - Amount of practice?
+* `params1` - Times to practice. (global track)
 
 ### Skill Level Practice (Type 13)
 
