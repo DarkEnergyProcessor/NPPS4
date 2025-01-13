@@ -244,8 +244,11 @@ async def get_unit_support_list_response(context: idol.BasicSchoolIdolContext, /
 
 
 @common.context_cacheable("unit")
-def get_unit_info(context: idol.BasicSchoolIdolContext, unit_id: int, /):
-    return db.get_decrypted_row(context.db.unit, unit.Unit, unit_id)
+async def get_unit_info(context: idol.BasicSchoolIdolContext, unit_id: int, /):
+    unit_info = await db.get_decrypted_row(context.db.unit, unit.Unit, unit_id)
+    if unit_info is None:
+        raise ValueError(f"info on unit_id {unit_id} does not exist")
+    return unit_info
 
 
 @common.context_cacheable("unit_rarity")

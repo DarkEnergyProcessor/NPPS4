@@ -400,7 +400,11 @@ async def register_live_in_progress(
 
 
 async def get_live_track_info(context: idol.BasicSchoolIdolContext, live_track_id: int, /):
-    return await db.get_decrypted_row(context.db.live, live.LiveTrack, live_track_id)
+    live_track = await db.get_decrypted_row(context.db.live, live.LiveTrack, live_track_id)
+    if live_track is None:
+        raise ValueError(f"track info of live_track_id {live_track_id} not found")
+
+    return live_track
 
 
 async def get_special_live_rotation_time_modulo(context: idol.BasicSchoolIdolContext, /):

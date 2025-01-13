@@ -20,7 +20,8 @@ Certain params may have additional information in parenthesis, such as:
   * greater than or equal - Checked condition is equal or greater than of specific value (`a >= b`).
 * unknown - It is unknown what to do with this value.
 * local track - The increment value is tracked in this achievement only. This implies "compare greater than or equal".
-* global track - The value is tracked across previous achievement. This implies "compare greater than or equal".
+* recursive track - The value is tracked across previous achievement. This implies "compare greater than or equal".
+* global track - The value is tracked based on player stats. This implies "compare greater than or equal".
 * behavior - Changes certain behavior when comparing certain constraints.
 
 Below is the list of achievement types and their corresponding parameters:
@@ -81,13 +82,13 @@ When to check: When clearing a live show.
 When to check: Scouting.
 
 * `params1` - `secretbox_id` in the server (1 = μ's Regular, 2 = μ's Honor, 61 = Aqours Regular, 62 = Aqours Honor) (compare equal).
-* `params3` - Amount of members to scout (global track).
+* `params3` - Amount of members to scout (recursive track).
 
 ### Practice (Type 11)
 
 When to check: Practicing member.
 
-* `params1` - Times to practice. (global track)
+* `params1` - Times to practice. (recursive track)
 
 ### Skill Level Practice (Type 13)
 
@@ -99,25 +100,25 @@ When to check: Practicing member.
 
 When to check: Scouting, Present Box, Clearing a live show.
 
-* `params1` - Amount of different members to collect (global track).
+* `params1` - Amount of different members to collect (recursive track).
 
 ### Idolize Different Members in Album (Type 19)
 
 When to check: Scouting, Present Box, Clearing a live show, Idolizing member.
 
-* `params1` - Amount of different members to idolize (global track).
+* `params1` - Amount of different members to idolize (recursive track).
 
 ### Max Bond Different Members in Album (Type 20)
 
 When to check: Clearing a live show.
 
-* `params1` - Amount of different members to max bond (global track).
+* `params1` - Amount of different members to max bond (recursive track).
 
 ### Max Level Different Members in Album (Type 21)
 
 When to check: Practicing member.
 
-* `params1` - Amount of different members to max level after being idolized (global track).
+* `params1` - Amount of different members to max level after being idolized (recursive track).
 
 ### Main Story (Type 23)
 
@@ -129,7 +130,7 @@ When to check: Clearing a main story.
 
 When to check: Anywhere
 
-* `params1` - Amount of friends (global track).
+* `params1` - Amount of friends (recursive track).
 
 ### Login (Type 27)
 
@@ -147,7 +148,7 @@ No parameters.
 
 When to check: Clearing a live show, Present Box (EXP-related present only).
 
-* `params1` - Player level (global track).
+* `params1` - Player level (recursive track).
 
 ### Live Clear Once with Specific Song (Type 32)
 
@@ -191,10 +192,11 @@ When to check: Clearing a live show.
 * `params4` - _Unknown_ (event-specific) (unknown)
 * `params5` - Score rank (1 S, 2 A, 3 B, 4 C) or `null` for no score rank requirement (compare less than or equal).
 * `params6` - Combo rank (1 S, 2 A, 3 B, 4 C) or `null` for no combo rank requirement (compare less than or equal).
-* `params7` - Controls `param8` behavior. 1 = Team must only consist of speicifc units. 2 = At least one of each units present. (behavior)
+* `params7` - Controls `param8` behavior. 1 = Team must only consist of speicifc units. 2 = At least one of each units present. If `param8` is `null`, then this is also `null`. (behavior)
 * `params8` - `achievement_unit_type_group_id` in `achievement_unit_type_group_m` table or `null` if no unit group requirement (compare equal).
-* `params9` - Controls `param8` behavior. 1 = All team unit type, 2 = At least one unit type in team. (behavior)
+* `params9` - Controls `param8` behavior. 1 = All team unit type, 2 = At least one unit type in team. If `param8` is `null`, then this is also `null`. (behavior)
 * `params10` - Amount of live show to clear (local track).
+* `params11` - If 1, it must be swing note. (compare equal)
 
 To explain `params7` more, consider an achievement that requires Printemps member. Now consider these teams in no
 particular order (Printemps members marked in bold):
@@ -237,14 +239,14 @@ When to check: Clearing a live show.
 
 When to check: Getting login bonus.
 
-* `params1` - Amount of login required. (global track)
+* `params1` - Amount of login required. (recursive track)
 
 ### Clear Specific Achievement Category (Type 53)
 
 When to check: When completing achievement.
 
 * `params1` - Achievement category in `achievement_category_m`. (compare equal)
-* `params2` - Amount of achievement to clear. (global track)
+* `params2` - Amount of achievement to clear. (recursive track)
 * `params3` - _Unknown_ (unknown)
 
 ### Collect Items (Type 55)
@@ -255,7 +257,7 @@ When to check: Collecting item (implies Present Box and Clearing a live show).
 
 * `params1` - `item_id` in `kg_item_m` table (compare equal).
 * `params2` - _Unknown_ (always 1). (unknown)
-* `params3` - _Unknown_. (unknown)
+* `params3` - Amount to collect. (global track)
 * `params5` - _Unknown_. (unknown)
 
 ### _Unknown_ (Type 56)
@@ -266,19 +268,19 @@ When to check: Collecting item (implies Present Box and Clearing a live show).
 
 When to check: Clearing a main story.
 
-* `params1` - Amount of main story to clear. (global track)
+* `params1` - Amount of main story to clear. (recursive track)
 
 ### Total Live Clear (Type 58)
 
 When to check: Clearing a live show.
 
-* `params1` - Amount of live show to clear. (global track)
+* `params1` - Amount of live show to clear. (recursive track)
 
 ### Unlock Main Story (Type 59)
 
 When to check: Clearing a live show.
 
-* `params1` - Amount of main story to unlock. (global track)
+* `params1` - Amount of main story to unlock. (recursive track)
 
 ### _Unknown_ Login Bonus (Type 60)
 

@@ -1,6 +1,7 @@
 import abc
 import collections.abc
 import dataclasses
+import types
 import typing
 
 import pydantic
@@ -10,6 +11,7 @@ from . import advanced
 from . import common
 from . import item
 from . import item_model
+from . import live
 from . import unit
 from . import reward
 from .. import const
@@ -91,8 +93,10 @@ class AchievementUpdateLiveClear:
 
     live_track_id: int
     difficulty: int
+    attribute: int
     score_rank: int
     combo_rank: int
+    swing: bool
     team_unit_ids: tuple[int, int, int, int, int, int, int, int, int]
     team_unit_type_ids: tuple[int, int, int, int, int, int, int, int, int]
 
@@ -109,32 +113,32 @@ class AchievementUpdateSecretbox:
 class AchievementUpdateNewUnit:
     """Instantiate this to perform checks on achievement with "New Unique Unit" trigger."""
 
-    value: int
-    """Total amount"""
+    unit_ids: list[int]
+    """List of units"""
 
 
 @dataclasses.dataclass(kw_only=True)
 class AchievementUpdateUnitRankUp:
     """Instantiate this to perform checks on achievement with "Idolize" trigger."""
 
-    value: int
-    """Total amount"""
+    unit_ids: list[int]
+    """List of units"""
 
 
 @dataclasses.dataclass(kw_only=True)
 class AchievementUpdateUnitMaxLevel:
     """Instantiate this to perform checks on achievement with "Max Level" trigger."""
 
-    value: int
-    """Total amount"""
+    unit_ids: list[int]
+    """List of units"""
 
 
 @dataclasses.dataclass(kw_only=True)
 class AchievementUpdateUnitMaxLove:
     """Instantiate this to perform checks on achievement with "Max Bond" trigger."""
 
-    value: int
-    """Total amount"""
+    unit_ids: list[int]
+    """List of units"""
 
 
 @dataclasses.dataclass(kw_only=True)
@@ -161,6 +165,7 @@ class AchievementUpdateUnitMerge:
     skill_level: int
 
 
+@dataclasses.dataclass(kw_only=True)
 class AchievementUpdateFinishScenario:
     """Instantiate this to perform checks on achievement with "Clearing Main Story" trigger."""
 
@@ -168,6 +173,7 @@ class AchievementUpdateFinishScenario:
     """Main story ID"""
 
 
+@dataclasses.dataclass(kw_only=True)
 class AchievementUpdateItemCollect:
     """Instantiate this to perform checks on achievement with "Got Item" trigger."""
 
@@ -176,26 +182,41 @@ class AchievementUpdateItemCollect:
     amount: int
 
 
+@dataclasses.dataclass(kw_only=True)
 class AchievementUpdateAnywhere:
     """Instantiate this to perform achievement checks anywhere."""
 
     pass
 
 
+@dataclasses.dataclass(kw_only=True)
+class AchievementUpdateAchievementComplete:
+    """Instantiate this to perform achievement checks when completing an achievement (instantiated if necessary)."""
+
+    completed_achievement_id: list[int]
+    """List of completed achievement IDs"""
+
+
 class AchievementChecker[T](abc.ABC):
     @abc.abstractmethod
     async def test_param(
-        self, context: idol.BasicSchoolIdolContext, data: T, achievement_info: achievement.Achievement
+        self, context: idol.BasicSchoolIdolContext, data: T, achievement_info: achievement.Achievement, /
     ) -> bool: ...
 
     async def update(
-        self, context: idol.BasicSchoolIdolContext, oldvalue: int, data: T, achievement_info: achievement.Achievement
+        self,
+        context: idol.BasicSchoolIdolContext,
+        user: main.User,
+        oldvalue: int,
+        data: T,
+        achievement_info: achievement.Achievement,
+        /,
     ) -> int:
         return oldvalue + 1
 
     @abc.abstractmethod
     async def is_accomplished(
-        self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
+        self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement, /
     ) -> bool: ...
 
     @property
@@ -207,8 +228,9 @@ ACHIEVEMENT_CHECKER: dict[type, dict[int, AchievementChecker[Any]]] = {}
 
 
 def register_achievement_checker(achievement_id: int):
-    def wrap0[T: AchievementChecker[Any]](cls: type[T]):
-        achtestinfo = ACHIEVEMENT_CHECKER.setdefault(cls, {})
+    def wrap0[T](cls: type[AchievementChecker[T]]):
+        the_T = typing.get_args(types.get_original_bases(cls)[0])[0]
+        achtestinfo = ACHIEVEMENT_CHECKER.setdefault(the_T, {})
         inst = cls()
         achtestinfo[achievement_id] = inst
         return cls
@@ -339,6 +361,7 @@ class CheckGachaPon(AchievementChecker[AchievementUpdateSecretbox]):
     async def update(
         self,
         context: idol.BasicSchoolIdolContext,
+        user: main.User,
         oldvalue: int,
         data: AchievementUpdateSecretbox,
         achievement_info: achievement.Achievement,
@@ -390,6 +413,7 @@ class CheckUnitSkillUp(AchievementChecker[AchievementUpdateUnitMerge]):
     async def update(
         self,
         context: idol.BasicSchoolIdolContext,
+        user: main.User,
         oldvalue: int,
         data: AchievementUpdateUnitMerge,
         achievement_info: achievement.Achievement,
@@ -420,11 +444,13 @@ class CheckCollectUniqueUnit(AchievementChecker[AchievementUpdateNewUnit]):
     async def update(
         self,
         context: idol.BasicSchoolIdolContext,
+        user: main.User,
         oldvalue: int,
         data: AchievementUpdateNewUnit,
         achievement_info: achievement.Achievement,
     ) -> int:
-        return data.value
+        # TODO: Query album
+        return oldvalue + len(data.unit_ids)
 
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
@@ -450,11 +476,13 @@ class CheckRankUpUniqueUnit(AchievementChecker[AchievementUpdateUnitRankUp]):
     async def update(
         self,
         context: idol.BasicSchoolIdolContext,
+        user: main.User,
         oldvalue: int,
         data: AchievementUpdateUnitRankUp,
         achievement_info: achievement.Achievement,
     ) -> int:
-        return data.value
+        # TODO: Query album
+        return oldvalue + len(data.unit_ids)
 
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
@@ -480,11 +508,13 @@ class CheckMaxLoveUnit(AchievementChecker[AchievementUpdateUnitMaxLove]):
     async def update(
         self,
         context: idol.BasicSchoolIdolContext,
+        user: main.User,
         oldvalue: int,
         data: AchievementUpdateUnitMaxLove,
         achievement_info: achievement.Achievement,
     ) -> int:
-        return data.value
+        # TODO: Query album
+        return oldvalue + len(data.unit_ids)
 
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
@@ -510,11 +540,13 @@ class CheckMaxLevelUnit(AchievementChecker[AchievementUpdateUnitMaxLevel]):
     async def update(
         self,
         context: idol.BasicSchoolIdolContext,
+        user: main.User,
         oldvalue: int,
         data: AchievementUpdateUnitMaxLevel,
         achievement_info: achievement.Achievement,
     ) -> int:
-        return data.value
+        # TODO: Query album
+        return oldvalue + len(data.unit_ids)
 
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
@@ -556,6 +588,7 @@ class CheckFriendCount(AchievementChecker[AchievementUpdateAnywhere]):
     async def update(
         self,
         context: idol.BasicSchoolIdolContext,
+        user: main.User,
         oldvalue: int,
         data: AchievementUpdateAnywhere,
         achievement_info: achievement.Achievement,
@@ -615,6 +648,7 @@ class CheckPlayerRankUp(AchievementChecker[AchievementUpdateLevelUp]):
     async def update(
         self,
         context: idol.BasicSchoolIdolContext,
+        user: main.User,
         oldvalue: int,
         data: AchievementUpdateLevelUp,
         achievement_info: achievement.Achievement,
@@ -626,6 +660,301 @@ class CheckPlayerRankUp(AchievementChecker[AchievementUpdateLevelUp]):
     ) -> bool:
         assert achievement_info.params1 is not None
         return value >= achievement_info.params1
+
+    @property
+    def recursive(self):
+        return True
+
+
+@register_achievement_checker(32)
+@register_achievement_checker(37)
+class CheckLiveClearOnceWithTrack(AchievementChecker[AchievementUpdateLiveClear]):
+    async def test_param(
+        self,
+        context: idol.BasicSchoolIdolContext,
+        data: AchievementUpdateLiveClear,
+        achievement_info: achievement.Achievement,
+    ) -> bool:
+        return achievement_info.params1 is not None and achievement_info.params1 == data.live_track_id
+
+    async def is_accomplished(
+        self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
+    ) -> bool:
+        amount = achievement_info.params2 or 1
+        return value >= amount
+
+
+@register_achievement_checker(33)
+class CheckSpecificUnitRankUp(AchievementChecker[AchievementUpdateUnitRankUp]):
+    async def test_param(
+        self,
+        context: idol.BasicSchoolIdolContext,
+        data: AchievementUpdateUnitRankUp,
+        achievement_info: achievement.Achievement,
+    ) -> bool:
+        if achievement_info.params1 is None or achievement_info.params2 is None:
+            return False
+
+        unit_type_ids = [(await unit.get_unit_info(context, unit_id)).unit_type_id for unit_id in data.unit_ids]
+        return achievement_info.params1 in unit_type_ids
+
+    async def update(
+        self,
+        context: idol.BasicSchoolIdolContext,
+        user: main.User,
+        oldvalue: int,
+        data: AchievementUpdateUnitRankUp,
+        achievement_info: achievement.Achievement,
+    ) -> int:
+        assert achievement_info.params1 is not None
+        unit_type_ids = [(await unit.get_unit_info(context, unit_id)).unit_type_id for unit_id in data.unit_ids]
+        return oldvalue + unit_type_ids.count(achievement_info.params1)
+
+    async def is_accomplished(
+        self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
+    ) -> bool:
+        assert achievement_info.params2 is not None
+        return value >= achievement_info.params2
+
+
+@register_achievement_checker(50)
+class CheckLiveAdvanced(AchievementChecker[AchievementUpdateLiveClear]):
+    async def test_param(
+        self,
+        context: idol.BasicSchoolIdolContext,
+        data: AchievementUpdateLiveClear,
+        achievement_info: achievement.Achievement,
+    ) -> bool:
+        if achievement_info.params10 is None:
+            return False
+
+        # Check live track
+        if achievement_info.params1 is not None and achievement_info.params1 != data.live_track_id:
+            return False
+
+        # Check difficulty
+        if achievement_info.params2 is not None and achievement_info.params2 != data.difficulty:
+            return False
+
+        # Check attribute
+        if achievement_info.params3 is not None and achievement_info.params3 != data.attribute:
+            return False
+
+        # Check score rank
+        if achievement_info.params5 is not None and data.score_rank > achievement_info.params5:
+            return False
+
+        # Check combo rank
+        if achievement_info.params6 is not None and data.combo_rank > achievement_info.params6:
+            return False
+
+        # Check swing constraint
+        if achievement_info.params11 is not None and bool(achievement_info.params11) != data.swing:
+            return False
+
+        # Check unit constraints
+        if achievement_info.params8 is not None:
+            if achievement_info.params7 is None or achievement_info.params9 is None:
+                return False
+
+            unit_type_group = await get_unit_type_groups(context, achievement_info.params8)
+            unit_type_group_ids = [x[0] for x in unit_type_group]
+
+            # Test params7
+            params7_data = set(data.team_unit_type_ids).intersection(unit_type_group_ids)
+            match achievement_info.params7:
+                case 1:
+                    params7_ok = len(params7_data) > 0
+                case 2:
+                    params7_ok = len(params7_data) == 9
+                case _:
+                    params7_ok = False
+
+            if not params7_ok:
+                return False
+
+            # Test params9
+            params9_data = set(unit_type_group_ids)
+            for unit_type_id in data.team_unit_type_ids:
+                params9_data.remove(unit_type_id)
+
+            match achievement_info.params9:
+                case 1:
+                    params9_ok = len(params9_data) == 0
+                case 2:
+                    params9_ok = len(params9_data) != len(unit_type_group_ids)
+                case _:
+                    params9_ok = False
+
+            if not params9_ok:
+                return False
+
+        return True
+
+    async def is_accomplished(
+        self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
+    ) -> bool:
+        assert achievement_info.params10 is not None
+        return value >= achievement_info.params10
+
+
+@register_achievement_checker(51)
+class CheckLiveClearWithUnitType2(AchievementChecker[AchievementUpdateLiveClear]):
+    async def test_param(
+        self,
+        context: idol.BasicSchoolIdolContext,
+        data: AchievementUpdateLiveClear,
+        achievement_info: achievement.Achievement,
+    ) -> bool:
+        if achievement_info.params1 != 1 or achievement_info.params2 is None or achievement_info.params3 is None:
+            return False
+
+        return achievement_info.params2 in data.team_unit_type_ids
+
+    async def is_accomplished(
+        self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
+    ) -> bool:
+        assert achievement_info.params3 is not None
+        return value >= achievement_info.params3
+
+
+@register_achievement_checker(53)
+class CheckAchievementClear(AchievementChecker[AchievementUpdateAchievementComplete]):
+    async def test_param(
+        self,
+        context: idol.BasicSchoolIdolContext,
+        data: AchievementUpdateAchievementComplete,
+        achievement_info: achievement.Achievement,
+    ) -> bool:
+        if achievement_info.params1 is None or achievement_info.params2 is None:
+            return False
+
+        ach_id_in_cat = set(await get_achievement_ids_from_category(context, achievement_info.params1))
+        for ach_id in data.completed_achievement_id:
+            if ach_id in ach_id_in_cat:
+                return True
+
+        return False
+
+    async def update(
+        self,
+        context: idol.BasicSchoolIdolContext,
+        user: main.User,
+        oldvalue: int,
+        data: AchievementUpdateAchievementComplete,
+        achievement_info: achievement.Achievement,
+    ) -> int:
+        assert achievement_info.params1 is not None
+        ach_id_in_cat = set(await get_achievement_ids_from_category(context, achievement_info.params1))
+        completed_ach_id = set(data.completed_achievement_id)
+        return oldvalue + len(ach_id_in_cat.intersection(completed_ach_id))
+
+    async def is_accomplished(
+        self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
+    ) -> bool:
+        assert achievement_info.params2 is not None
+        return value >= achievement_info.params2
+
+
+@register_achievement_checker(55)
+class CheckCollectItem(AchievementChecker[AchievementUpdateItemCollect]):
+    async def test_param(
+        self,
+        context: idol.BasicSchoolIdolContext,
+        data: AchievementUpdateItemCollect,
+        achievement_info: achievement.Achievement,
+    ) -> bool:
+        if data.add_type != const.ADD_TYPE.ITEM or achievement_info.params1 is None or achievement_info.params3 is None:
+            return False
+
+        return data.item_id == achievement_info.params1
+
+    async def update(
+        self,
+        context: idol.BasicSchoolIdolContext,
+        user: main.User,
+        oldvalue: int,
+        data: AchievementUpdateItemCollect,
+        achievement_info: achievement.Achievement,
+    ) -> int:
+        return await item.get_item_count(context, user, data.item_id)
+
+    async def is_accomplished(
+        self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
+    ) -> bool:
+        assert achievement_info.params3 is not None
+        return value >= achievement_info.params3
+
+
+@register_achievement_checker(57)
+class CheckTotalScenarioClear(AchievementChecker[AchievementUpdateFinishScenario]):
+    async def test_param(
+        self,
+        context: idol.BasicSchoolIdolContext,
+        data: AchievementUpdateFinishScenario,
+        achievement_info: achievement.Achievement,
+    ) -> bool:
+        return achievement_info.params1 is not None
+
+    async def is_accomplished(
+        self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
+    ) -> bool:
+        assert achievement_info.params1 is not None
+        return value >= achievement_info.params1
+
+
+@register_achievement_checker(58)
+class CheckTotalLiveClear(AchievementChecker[AchievementUpdateLiveClear]):
+    async def test_param(
+        self,
+        context: idol.BasicSchoolIdolContext,
+        data: AchievementUpdateLiveClear,
+        achievement_info: achievement.Achievement,
+    ) -> bool:
+        return achievement_info.params1 is not None
+
+    async def is_accomplished(
+        self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
+    ) -> bool:
+        assert achievement_info.params1 is not None
+        return value >= achievement_info.params1
+
+
+@register_achievement_checker(59)
+class CheckTotalUnlockedScenario(AchievementChecker[AchievementUpdateItemCollect]):
+    async def test_param(
+        self,
+        context: idol.BasicSchoolIdolContext,
+        data: AchievementUpdateItemCollect,
+        achievement_info: achievement.Achievement,
+    ) -> bool:
+        return data.add_type == const.ADD_TYPE.SCENARIO and achievement_info.params1 is not None
+
+    async def is_accomplished(
+        self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
+    ) -> bool:
+        assert achievement_info.params1 is not None
+        return value >= achievement_info.params1
+
+
+@register_achievement_checker(60)
+class CheckLoginOnSpecificTime(AchievementChecker[AchievementUpdateLoginBonus]):
+    async def test_param(
+        self,
+        context: idol.BasicSchoolIdolContext,
+        data: AchievementUpdateLoginBonus,
+        achievement_info: achievement.Achievement,
+    ) -> bool:
+        if achievement_info.params1 is None or achievement_info.params2 is None:
+            return False
+
+        dt = util.datetime()
+        return achievement_info.params1 == dt.month and achievement_info.params2 == dt.day
+
+    async def is_accomplished(
+        self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
+    ) -> bool:
+        return value > 0
 
 
 @common.context_cacheable("achievement")
@@ -639,16 +968,43 @@ async def get_achievement_info(context: idol.BasicSchoolIdolContext, achievement
 
 @common.context_cacheable("achievement_story")
 async def get_next_achievement_ids(context: idol.BasicSchoolIdolContext, achievement_id: int):
-    q = sqlalchemy.select(achievement.Story).where(achievement.Story.achievement_id == achievement_id)
+    q = sqlalchemy.select(achievement.Story.next_achievement_id).where(
+        achievement.Story.achievement_id == achievement_id
+    )
     result = await context.db.achievement.execute(q)
-    return list(ach.next_achievement_id for ach in result.scalars())
+    return list(result.scalars())
+
+
+@common.context_cacheable("achievement_reverse_story")
+async def get_prerequisite_achievement_ids(context: idol.BasicSchoolIdolContext, achievement_id: int):
+    q = sqlalchemy.select(achievement.Story.achievement_id).where(
+        achievement.Story.next_achievement_id == achievement_id
+    )
+    result = await context.db.achievement.execute(q)
+    return list(result.scalars())
 
 
 @common.context_cacheable("achievement_unit_type_group")
-async def get_unit_type_groups(context, achievement_unit_type_group_id: int):
+async def get_unit_type_groups(context: idol.BasicSchoolIdolContext, achievement_unit_type_group_id: int):
     q = sqlalchemy.select(achievement.UnitTypeGroup).where(
         achievement.UnitTypeGroup.achievement_unit_type_group_id == achievement_unit_type_group_id
     )
+    result = await context.db.achievement.execute(q)
+    final_result: list[tuple[int, int]] = []
+
+    for obj in result.scalars():
+        final_result.append((obj.unit_type_id, obj.rank))
+
+    return final_result
+
+
+@common.context_cacheable("achievement_category")
+async def get_achievement_ids_from_category(context: idol.BasicSchoolIdolContext, achievement_category_id: int):
+    q = sqlalchemy.select(achievement.Tag.achievement_id).where(
+        achievement.Tag.achievement_category_id == achievement_category_id
+    )
+    result = await context.db.achievement.execute(q)
+    return list(result.scalars())
 
 
 async def add_achievement(
