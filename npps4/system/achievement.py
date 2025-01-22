@@ -1,4 +1,5 @@
 import abc
+import collections
 import collections.abc
 import dataclasses
 import types
@@ -79,6 +80,15 @@ class AchievementContext:
         accomplished_ids = set(ach.achievement_id for ach in self.accomplished)
         self.new = [ach for ach in self.new if ach.achievement_id not in accomplished_ids]
         return self
+
+    def add(self, ach: main.Achievement):
+        if ach.is_accomplished:
+            if ach not in self.accomplished:
+                self.accomplished.append(ach)
+            if ach in self.new:
+                self.new.remove(ach)
+        else:
+            self.new.append(ach)
 
     def __add__(self, other: "AchievementContext"):
         return AchievementContext(self.accomplished + other.accomplished, self.new + other.new).fix()
@@ -601,6 +611,10 @@ class CheckFriendCount(AchievementChecker[AchievementUpdateAnywhere]):
         # TODO: query friend count
         return False
 
+    @property
+    def recursive(self):
+        return True
+
 
 @register_achievement_checker(27)
 class CheckLogin(AchievementChecker[AchievementUpdateLoginBonus]):
@@ -818,6 +832,27 @@ class CheckLiveClearWithUnitType2(AchievementChecker[AchievementUpdateLiveClear]
         return value >= achievement_info.params3
 
 
+@register_achievement_checker(52)
+class CheckLoginRecursive(AchievementChecker[AchievementUpdateLoginBonus]):
+    async def test_param(
+        self,
+        context: idol.BasicSchoolIdolContext,
+        data: AchievementUpdateLoginBonus,
+        achievement_info: achievement.Achievement,
+    ) -> bool:
+        return achievement_info.params1 is not None
+
+    async def is_accomplished(
+        self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
+    ) -> bool:
+        assert achievement_info.params1 is not None
+        return value >= achievement_info.params1
+
+    @property
+    def recursive(self):
+        return True
+
+
 @register_achievement_checker(53)
 class CheckAchievementClear(AchievementChecker[AchievementUpdateAchievementComplete]):
     async def test_param(
@@ -855,6 +890,10 @@ class CheckAchievementClear(AchievementChecker[AchievementUpdateAchievementCompl
         assert achievement_info.params2 is not None
         return value >= achievement_info.params2
 
+    @property
+    def recursive(self):
+        return True
+
 
 @register_achievement_checker(55)
 class CheckCollectItem(AchievementChecker[AchievementUpdateItemCollect]):
@@ -885,6 +924,10 @@ class CheckCollectItem(AchievementChecker[AchievementUpdateItemCollect]):
         assert achievement_info.params3 is not None
         return value >= achievement_info.params3
 
+    @property
+    def recursive(self):
+        return True
+
 
 @register_achievement_checker(57)
 class CheckTotalScenarioClear(AchievementChecker[AchievementUpdateFinishScenario]):
@@ -901,6 +944,10 @@ class CheckTotalScenarioClear(AchievementChecker[AchievementUpdateFinishScenario
     ) -> bool:
         assert achievement_info.params1 is not None
         return value >= achievement_info.params1
+
+    @property
+    def recursive(self):
+        return True
 
 
 @register_achievement_checker(58)
@@ -919,6 +966,10 @@ class CheckTotalLiveClear(AchievementChecker[AchievementUpdateLiveClear]):
         assert achievement_info.params1 is not None
         return value >= achievement_info.params1
 
+    @property
+    def recursive(self):
+        return True
+
 
 @register_achievement_checker(59)
 class CheckTotalUnlockedScenario(AchievementChecker[AchievementUpdateItemCollect]):
@@ -935,6 +986,10 @@ class CheckTotalUnlockedScenario(AchievementChecker[AchievementUpdateItemCollect
     ) -> bool:
         assert achievement_info.params1 is not None
         return value >= achievement_info.params1
+
+    @property
+    def recursive(self):
+        return True
 
 
 @register_achievement_checker(60)
@@ -1008,7 +1063,12 @@ async def get_achievement_ids_from_category(context: idol.BasicSchoolIdolContext
 
 
 async def add_achievement(
-    context: idol.BasicSchoolIdolContext, user: main.User, ach: achievement.Achievement, time: int | None = None
+    context: idol.BasicSchoolIdolContext,
+    user: main.User,
+    ach: achievement.Achievement,
+    time: int | None = None,
+    *,
+    flush: bool = True,
 ):
     if time is None:
         time = util.time()
@@ -1026,7 +1086,8 @@ async def add_achievement(
         reset_type=ach.reset_type,
     )
     context.db.main.add(user_ach)
-    await context.db.main.flush()
+    if flush:
+        await context.db.main.flush()
     return user_ach
 
 
@@ -1057,6 +1118,9 @@ async def update_resettable_achievement(
             ),
             sqlalchemy.and_(
                 main.Achievement.reset_type == 2, main.Achievement.reset_value != util.get_weeks_since_unix(ts)
+            ),
+            sqlalchemy.and_(
+                main.Achievement.reset_type == 3, main.Achievement.reset_value != util.get_months_since_unix(ts)
             ),
         ),
     )
@@ -1198,6 +1262,126 @@ async def get_achievement_count(
     return result.scalar() or 0
 
 
+async def is_unlock_satisfied(context: idol.BasicSchoolIdolContext, target_ach_id: int, *unlocked_ach_ids: int):
+    ach_ids = set(unlocked_ach_ids)
+    prerequisite = set(await get_prerequisite_achievement_ids(context, target_ach_id))
+    return ach_ids.intersection(prerequisite) == prerequisite
+
+
+async def get_unlocked_achievements_by_id(
+    context: idol.BasicSchoolIdolContext, target_user: main.User, *achievement_ids: int
+):
+    q = sqlalchemy.select(main.Achievement.achievement_id).where(
+        main.Achievement.user_id == target_user.id,
+        main.Achievement.achievement_id.in_(achievement_ids),
+        main.Achievement.is_accomplished == True,
+    )
+    result = await context.db.main.execute(q)
+    return list(result.scalars())
+
+
+def pop_iterator[T](d: collections.deque[T]):
+    while True:
+        try:
+            yield d.pop()
+        except IndexError:
+            return
+
+
+async def _check_impl(
+    context: idol.BasicSchoolIdolContext,
+    target_user: main.User,
+    update_instance: Any,
+    container: AchievementContext,
+):
+    try:
+        info = ACHIEVEMENT_CHECKER[type(update_instance)]
+        if len(info) == 0:
+            raise Exception("empty")
+    except Exception as e:
+        util.log(
+            f"Achievement updater '{type(update_instance).__name__}' does not exist. This is probably not what you want.",
+            severity=util.logging.WARNING,
+            e=e,
+        )
+        return
+
+    acceptable_achievement_type = set(info.keys())
+    q = sqlalchemy.select(main.Achievement).where(
+        main.Achievement.user_id == target_user.id,
+        main.Achievement.achievement_type.in_(acceptable_achievement_type),
+        main.Achievement.is_accomplished == False,
+    )
+    result = await context.db.main.execute(q)
+    queue = collections.deque(result.scalars())  # for recursive checkers
+    queue.extend(c for c in container.new if c.achievement_type in acceptable_achievement_type)
+    newly_added: set[main.Achievement] = set()
+
+    for ach in pop_iterator(queue):
+        if ach.is_accomplished:
+            # Likely a duplicate
+            continue
+
+        ach_info = await get_achievement_info(context, ach.achievement_id)
+        checker = info.get(ach_info.achievement_type)
+
+        if checker is not None and await checker.test_param(context, update_instance, ach_info):
+            ach.count = await checker.update(context, target_user, ach.count, update_instance, ach_info)
+            if await checker.is_accomplished(context, ach.count, ach_info):
+                # Accomplished
+                ach.is_accomplished = True
+                container.add(ach)  # Add to accomplished list
+
+                # Get next achievement
+                for open_ach_id in await get_next_achievement_ids(context, ach.achievement_id):
+                    if await is_unlock_satisfied(
+                        context,
+                        open_ach_id,
+                        *[a.achievement_id for a in container.accomplished],
+                        *await get_unlocked_achievements_by_id(
+                            context, target_user, *await get_prerequisite_achievement_ids(context, open_ach_id)
+                        ),
+                    ):
+                        new_ach_info = await get_achievement_info(context, open_ach_id)
+                        new_ach = await add_achievement(context, target_user, new_ach_info, flush=False)
+                        container.add(new_ach)
+
+                        if checker.recursive:
+                            queue.append(new_ach)
+
+                            if ach_info.achievement_type == new_ach_info.achievement_type:
+                                # Carryover value
+                                new_ach.count = ach.count
+
+        if ach.is_accomplished and ach in newly_added:
+            newly_added.remove(ach)
+
+
+async def check(context: idol.BasicSchoolIdolContext, target_user: main.User, /, *updates):
+    container = AchievementContext()
+
+    for update_instance in updates:
+        await _check_impl(context, target_user, update_instance, container)
+
+    # Anywhere check
+    await _check_impl(context, target_user, AchievementUpdateAnywhere(), container)
+
+    # Type 53 check
+    container.fix()
+    type_53_container = AchievementContext()
+    await _check_impl(
+        context,
+        target_user,
+        AchievementUpdateAchievementComplete(
+            completed_achievement_id=[a.achievement_id for a in container.accomplished]
+        ),
+        type_53_container,
+    )
+
+    await context.db.main.flush()
+    return container + type_53_container
+
+
 async def test_params(ach_info: achievement.Achievement, args: collections.abc.Sequence[int | None]):
     if args:
         for i in range(min(len(args), 11)):
@@ -1251,6 +1435,8 @@ async def check_type_countable(
                         ach.reset_value = util.get_days_since_unix(time)
                     case 2:
                         ach.reset_value = util.get_weeks_since_unix(time)
+                    case 3:
+                        ach.reset_value = util.get_months_since_unix(time)
 
                 # New achievement
                 for next_ach_id in await get_next_achievement_ids(context, ach.achievement_id):

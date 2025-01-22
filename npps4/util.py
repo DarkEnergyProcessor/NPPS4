@@ -182,6 +182,11 @@ def get_weeks_since_unix(ts: int | None = None, /, *, offset: int = OFFSET_JST, 
     return max((day + 4 - dow) // 7, 0)
 
 
+def get_months_since_unix(ts: int | None = None, /):
+    dt = datetime(ts)
+    return dt.month
+
+
 def clamp[T: int | float](v: T, minval: T, maxval: T, /):
     return min(max(v, minval), maxval)
 
