@@ -1,6 +1,5 @@
 import sqlalchemy
 
-from . import achievement
 from .. import idol
 from ..db import main
 from ..db import unit
@@ -47,7 +46,9 @@ async def all_series(context: idol.BasicSchoolIdolContext):
     return {i.album_series_id: list() for i in result.scalars()}
 
 
-async def count_album_with(context: idol.BasicSchoolIdolContext, user: main.User, *criteria):
+async def count_album_with(
+    context: idol.BasicSchoolIdolContext, user: main.User, *criteria: sqlalchemy.ColumnElement[bool]
+):
     q = (
         sqlalchemy.select(sqlalchemy.func.count())
         .select_from(main.Album)
@@ -55,45 +56,6 @@ async def count_album_with(context: idol.BasicSchoolIdolContext, user: main.User
     )
     qc = await context.db.main.execute(q)
     return qc.scalar() or 0
-
-
-async def trigger_achievement(
-    context: idol.BasicSchoolIdolContext,
-    user: main.User,
-    *,
-    obtained: bool = False,
-    idolized: bool = False,
-    max_love: bool = False,
-    max_level: bool = False,
-):
-    """
-    Check for achievement type 18 through 21
-    """
-
-    ach_ctx = achievement.AchievementContext()
-
-    if obtained:
-        count = await count_album_with(context, user)
-        result = await achievement.check_type_18(context, user, count)
-        ach_ctx.extend(result)
-
-    if idolized:
-        count = await count_album_with(context, user, main.Album.rank_max_flag == True)
-        result = await achievement.check_type_19(context, user, count)
-        ach_ctx.extend(result)
-
-    if max_love:
-        count = await count_album_with(context, user, main.Album.love_max_flag == True)
-        result = await achievement.check_type_20(context, user, count)
-        ach_ctx.extend(result)
-
-    if max_level:
-        count = await count_album_with(context, user, main.Album.rank_level_max_flag == True)
-        result = await achievement.check_type_21(context, user, count)
-        ach_ctx.extend(result)
-
-    ach_ctx.fix()
-    return ach_ctx
 
 
 async def has_ever_got_unit(context: idol.BasicSchoolIdolContext, user: main.User, unit_id: int):

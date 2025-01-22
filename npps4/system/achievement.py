@@ -9,6 +9,7 @@ import pydantic
 import sqlalchemy
 
 from . import advanced
+from . import album
 from . import common
 from . import item
 from . import item_model
@@ -123,8 +124,7 @@ class AchievementUpdateSecretbox:
 class AchievementUpdateNewUnit:
     """Instantiate this to perform checks on achievement with "New Unique Unit" trigger."""
 
-    unit_ids: list[int]
-    """List of units"""
+    pass
 
 
 @dataclasses.dataclass(kw_only=True)
@@ -139,16 +139,14 @@ class AchievementUpdateUnitRankUp:
 class AchievementUpdateUnitMaxLevel:
     """Instantiate this to perform checks on achievement with "Max Level" trigger."""
 
-    unit_ids: list[int]
-    """List of units"""
+    pass
 
 
 @dataclasses.dataclass(kw_only=True)
 class AchievementUpdateUnitMaxLove:
     """Instantiate this to perform checks on achievement with "Max Bond" trigger."""
 
-    unit_ids: list[int]
-    """List of units"""
+    pass
 
 
 @dataclasses.dataclass(kw_only=True)
@@ -189,7 +187,7 @@ class AchievementUpdateItemCollect:
 
     add_type: const.ADD_TYPE
     item_id: int
-    amount: int
+    amount: int = 1
 
 
 @dataclasses.dataclass(kw_only=True)
@@ -459,8 +457,7 @@ class CheckCollectUniqueUnit(AchievementChecker[AchievementUpdateNewUnit]):
         data: AchievementUpdateNewUnit,
         achievement_info: achievement.Achievement,
     ) -> int:
-        # TODO: Query album
-        return oldvalue + len(data.unit_ids)
+        return await album.count_album_with(context, user)
 
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
@@ -491,8 +488,7 @@ class CheckRankUpUniqueUnit(AchievementChecker[AchievementUpdateUnitRankUp]):
         data: AchievementUpdateUnitRankUp,
         achievement_info: achievement.Achievement,
     ) -> int:
-        # TODO: Query album
-        return oldvalue + len(data.unit_ids)
+        return await album.count_album_with(context, user, main.Album.rank_max_flag == True)
 
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
@@ -523,8 +519,7 @@ class CheckMaxLoveUnit(AchievementChecker[AchievementUpdateUnitMaxLove]):
         data: AchievementUpdateUnitMaxLove,
         achievement_info: achievement.Achievement,
     ) -> int:
-        # TODO: Query album
-        return oldvalue + len(data.unit_ids)
+        return await album.count_album_with(context, user, main.Album.love_max_flag == True)
 
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
@@ -555,8 +550,7 @@ class CheckMaxLevelUnit(AchievementChecker[AchievementUpdateUnitMaxLevel]):
         data: AchievementUpdateUnitMaxLevel,
         achievement_info: achievement.Achievement,
     ) -> int:
-        # TODO: Query album
-        return oldvalue + len(data.unit_ids)
+        return await album.count_album_with(context, user, main.Album.rank_level_max_flag == True)
 
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement

@@ -185,7 +185,13 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
         lowest_rarity = min(lowest_rarity, LOWEST_RARITY_SORT_ORDER[reward_data.as_item_reward.unit_rarity_id - 1])
 
     # Trigger achievement
-    achievement_list = await album.trigger_achievement(context, current_user, idolized=True)
+    achievement_list = await achievement.check(
+        context,
+        current_user,
+        achievement.AchievementUpdateSecretbox(secretbox_id=secretbox_id, amount=secretbox_button.unit_count),
+        achievement.AchievementUpdateNewUnit(),
+        achievement.AchievementUpdateUnitRankUp(unit_ids=[]),
+    )
     accomplished_rewards = [
         await achievement.get_achievement_rewards(context, ach) for ach in achievement_list.accomplished
     ]

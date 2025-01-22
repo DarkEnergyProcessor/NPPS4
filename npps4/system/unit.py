@@ -1267,3 +1267,28 @@ def populate_unit_item_to_other(unit_item: unit_model.UnitItem | unit_model.Unit
 
     for k in target_set:
         setattr(other, k, getattr(unit_item, k))
+
+
+async def tupleize_unit_id_and_type(context: idol.BasicSchoolIdolContext, unit_ids: list[int]):
+    unit_type_ids = [(await get_unit_info(context, u)).unit_type_id for u in unit_ids]
+    return (
+        unit_ids[0],
+        unit_ids[1],
+        unit_ids[2],
+        unit_ids[3],
+        unit_ids[4],
+        unit_ids[5],
+        unit_ids[6],
+        unit_ids[7],
+        unit_ids[8],
+    ), (
+        unit_type_ids[0],
+        unit_type_ids[1],
+        unit_type_ids[2],
+        unit_type_ids[3],
+        unit_type_ids[4],
+        unit_type_ids[5],
+        unit_type_ids[6],
+        unit_type_ids[7],
+        unit_type_ids[8],
+    )

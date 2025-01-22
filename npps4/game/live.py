@@ -693,35 +693,26 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
         unit_deck_full_info.append((await unit.get_unit_data_full_info(context, unit_data))[0])
 
     # Check achievement
-    accomplished_achievement = (
-        await achievement.check_type_1(context, current_user, True)
-        + await achievement.check_type_2(context, current_user, live_setting.difficulty, True)
-        # album.trigger_achievement call below checks type 18 through 22.
-        + await album.trigger_achievement(context, current_user, obtained=True, idolized=True, max_love=True)
-        + await achievement.check_type_30(context, current_user)
-        + await achievement.check_type_32(context, current_user, live_setting.live_track_id)
-        # TODO: Check type 33
-        + await achievement.check_type_37(context, current_user, live_setting.live_track_id, True)
-        + await achievement.check_type_50(
-            context,
-            current_user,
-            live_setting.live_track_id,
-            live_setting.difficulty,
-            live_setting.attribute_icon_id,
-            score_rank,
-            combo_rank,
-            unit_deck_unit_ids,
-            True,
-        )
-        + await achievement.check_type_58(context, current_user, True)
+    unit_ids_tuple, unit_type_ids_tuple = await unit.tupleize_unit_id_and_type(context, unit_deck_unit_ids)
+    live_ach_update = achievement.AchievementUpdateLiveClear(
+        live_track_id=live_setting.live_track_id,
+        difficulty=live_setting.difficulty,
+        attribute=live_setting.attribute_icon_id,
+        score_rank=score_rank,
+        combo_rank=combo_rank,
+        swing=bool(live_setting.swing_flag),
+        team_unit_ids=unit_ids_tuple,
+        team_unit_type_ids=unit_type_ids_tuple,
     )
-    if score_rank < 5:
-        accomplished_achievement.extend(await achievement.check_type_3(context, current_user, score_rank, True))
-    if combo_rank < 5:
-        accomplished_achievement.extend(await achievement.check_type_4(context, current_user, combo_rank, True))
-    for unit_type_id in unit_types_in_deck:
-        accomplished_achievement.extend(await achievement.check_type_7(context, current_user, unit_type_id, True))
-    accomplished_achievement.extend(await achievement.check_type_53_recursive(context, current_user))
+    achievement_update = [
+        live_ach_update,
+        achievement.AchievementUpdateNewUnit(),
+        achievement.AchievementUpdateUnitMaxLove(),
+    ]
+    if len(next_level_info) > 1:
+        achievement_update.append(achievement.AchievementUpdateLevelUp(rank=current_user.level))
+
+    accomplished_achievement = await achievement.check(context, current_user, *achievement_update)
     accomplished_achievement.fix()
 
     # Process achievement rewards part 1
@@ -733,12 +724,19 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
     )
 
     # Check achievement part 2
+    scenario_updates = []
     unlocked_scenario = await scenario.count(context, current_user)
     for reward_list in temp_achievement_rewards:
         for reward_data in reward_list:
             if reward_data.add_type == const.ADD_TYPE.SCENARIO:
                 unlocked_scenario = unlocked_scenario + 1
-    accomplished_achievement.extend(await achievement.check_type_59(context, current_user, unlocked_scenario))
+                scenario_updates.append(
+                    achievement.AchievementUpdateItemCollect(
+                        add_type=const.ADD_TYPE.SCENARIO, item_id=reward_data.item_id
+                    )
+                )
+
+    accomplished_achievement.extend(await achievement.check(context, current_user, *scenario_updates))
 
     # Process achievement rewards part 2
     accomplished_achievement_rewards = [

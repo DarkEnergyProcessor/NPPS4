@@ -88,13 +88,11 @@ async def scenario_reward(context: idol.SchoolIdolUserParams, request: ScenarioR
     await scenario.complete(context, current_user, request.scenario_id)
 
     # Trigger achievement
-    finished_scenario_count = await scenario.count_completed(context, current_user)
-    # FIXME: Recursive checking
-    achievement_list = (
-        await achievement.check_type_23(context, current_user, request.scenario_id)
-        + await achievement.check_type_57(context, current_user, finished_scenario_count)
-        + await achievement.check_type_53_recursive(context, current_user)
-        + await achievement.check_type_30(context, current_user)
+    achievement_list = await achievement.check(
+        context,
+        current_user,
+        achievement.AchievementUpdateFinishScenario(scenario_id=request.scenario_id),
+        achievement.AchievementUpdateLevelUp(rank=current_user.level),
     )
 
     # Give achievement rewards

@@ -159,16 +159,23 @@ async def reward_open(context: idol.SchoolIdolUserParams, request: RewardOpenReq
     supp_units = await unit.get_all_supporter_unit(context, current_user)
     success = bool(add_result)
 
-    achievement_list = achievement.AchievementContext()
+    album_trigger = []
+    achievement_update = []
     if success:
         await reward.remove_incentive(context, incentive)
-        if item_data.add_type == const.ADD_TYPE.UNIT:
-            # Trigger achievement
-            achievement_list = await album.trigger_achievement(
-                context, current_user, obtained=True, idolized=True, max_love=True, max_level=True
-            ) + await achievement.check_type_53_recursive(context, current_user)
+        if item_data.add_type == const.ADD_TYPE.UNIT and len(album_trigger) == 0:
+            album_trigger.append(achievement.AchievementUpdateNewUnit())
+            album_trigger.append(achievement.AchievementUpdateUnitRankUp(unit_ids=[]))
+
+        achievement_update.append(
+            achievement.AchievementUpdateItemCollect(
+                add_type=item_data.add_type, item_id=item_data.item_id, amount=item_data.amount
+            )
+        )
     else:
         raise idol.error.by_code(idol.error.ERROR_CODE_LIMIT_OVER)
+
+    achievement_list = await achievement.check(context, current_user, *album_trigger, *achievement_update)
 
     # Give achievement rewards
     accomplished_rewards = [
@@ -220,6 +227,7 @@ async def reward_openall(context: idol.SchoolIdolUserParams, request: RewardList
     reward_count = len(incentives)
     reward_item_list: list[RewardIncentiveItem] = []
     need_check_unit_ach = False
+    achievement_update = []
 
     for incentive in incentives:
         item_data = await reward.resolve_incentive(context, current_user, incentive)
@@ -234,12 +242,18 @@ async def reward_openall(context: idol.SchoolIdolUserParams, request: RewardList
             if item_data.add_type == const.ADD_TYPE.UNIT:
                 need_check_unit_ach = True
 
-    achievement_list = achievement.AchievementContext()
+            achievement_update.append(
+                achievement.AchievementUpdateItemCollect(
+                    add_type=item_data.add_type, item_id=item_data.item_id, amount=item_data.amount
+                )
+            )
+
     if need_check_unit_ach:
-        # Trigger achievement
-        achievement_list = await album.trigger_achievement(
-            context, current_user, obtained=True, idolized=True, max_love=True, max_level=True
-        ) + await achievement.check_type_53_recursive(context, current_user)
+        achievement_update.append(achievement.AchievementUpdateNewUnit())
+        achievement_update.append(achievement.AchievementUpdateUnitRankUp(unit_ids=[]))
+
+    achievement_list = await achievement.check(context, current_user, *achievement_update)
+
     # Give achievement rewards
     accomplished_rewards = [
         await achievement.get_achievement_rewards(context, ach) for ach in achievement_list.accomplished

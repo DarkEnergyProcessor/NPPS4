@@ -429,7 +429,9 @@ async def unit_rankup(context: idol.SchoolIdolUserParams, request: UnitRankUpReq
             raise idol.error.IdolError(detail="not enough money")
 
     await album.update(context, current_user, source_unit.unit_id, rank_max=True)
-    achievement_list = await album.trigger_achievement(context, current_user, idolized=True)
+    achievement_list = await achievement.check(
+        context, current_user, achievement.AchievementUpdateUnitRankUp(unit_ids=[source_unit.unit_id])
+    )
     accomplished_rewards = [
         await achievement.get_achievement_rewards(context, ach) for ach in achievement_list.accomplished
     ]
@@ -646,7 +648,12 @@ async def unit_merge(context: idol.SchoolIdolUserParams, request: UnitMergeReque
     # Update album and trigger achievement
     after_unit, _ = await unit.get_unit_data_full_info(context, source_unit)
     await album.update(context, current_user, source_unit.unit_id, rank_level_max=after_unit.is_level_max)
-    achievement_list = await album.trigger_achievement(context, current_user, idolized=True)
+    achievement_list = await achievement.check(
+        context,
+        current_user,
+        achievement.AchievementUpdateUnitRankUp(unit_ids=[]),
+        achievement.AchievementUpdateUnitMerge(unit_owning_user_id=source_unit.id, skill_level=after_unit.skill_level),
+    )
     accomplished_rewards = [
         await achievement.get_achievement_rewards(context, ach) for ach in achievement_list.accomplished
     ]
@@ -725,7 +732,9 @@ async def unit_exchangepointrankup(
         raise idol.error.IdolError(detail="max SIS reached")
 
     await album.update(context, current_user, source_unit.unit_id, rank_max=True)
-    achievement_list = await album.trigger_achievement(context, current_user, idolized=True)
+    achievement_list = await achievement.check(
+        context, current_user, achievement.AchievementUpdateUnitRankUp(unit_ids=[source_unit.unit_id])
+    )
     accomplished_rewards = [
         await achievement.get_achievement_rewards(context, ach) for ach in achievement_list.accomplished
     ]
