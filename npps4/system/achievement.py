@@ -41,7 +41,7 @@ class AchievementData(pydantic.BaseModel):
     is_locked: bool
     open_condition_string: str = ""
     accomplish_id: str = ""
-    reward_list: list[common.AnyItem]
+    reward_list: list[pydantic.SerializeAsAny[common.AnyItem]]
 
     @staticmethod
     def from_sqlalchemy(ach: main.Achievement, info: achievement.Achievement, rewards: list[item_model.Item]):
@@ -1309,7 +1309,7 @@ async def _check_impl(
     result = await context.db.main.execute(q)
     queue = collections.deque(result.scalars())  # for recursive checkers
     queue.extend(c for c in container.new if c.achievement_type in acceptable_achievement_type)
-    newly_added: set[main.Achievement] = set()
+    newly_added: set[int] = set()
 
     for ach in pop_iterator(queue):
         if ach.is_accomplished:
@@ -1320,7 +1320,9 @@ async def _check_impl(
         checker = info.get(ach_info.achievement_type)
 
         if checker is not None and await checker.test_param(context, update_instance, ach_info):
-            ach.count = await checker.update(context, target_user, ach.count, update_instance, ach_info)
+            if ach.achievement_id not in newly_added:
+                ach.count = await checker.update(context, target_user, ach.count, update_instance, ach_info)
+
             if await checker.is_accomplished(context, ach.count, ach_info):
                 # Accomplished
                 ach.is_accomplished = True
@@ -1342,13 +1344,14 @@ async def _check_impl(
 
                         if checker.recursive:
                             queue.append(new_ach)
+                            newly_added.add(new_ach.achievement_id)
 
                             if ach_info.achievement_type == new_ach_info.achievement_type:
                                 # Carryover value
                                 new_ach.count = ach.count
 
-        if ach.is_accomplished and ach in newly_added:
-            newly_added.remove(ach)
+        if ach.is_accomplished and ach.achievement_id in newly_added:
+            newly_added.remove(ach.achievement_id)
 
 
 async def check(context: idol.BasicSchoolIdolContext, target_user: main.User, /, *updates):
