@@ -45,6 +45,7 @@ async def unlock_backgrounds(
         unlocked, locked = await get_backgrounds(context, target_user)
 
         return template.template.TemplateResponse(
+            request,
             "unlock_backgrounds.html",
-            {"uid": uid, "request": request, "unlocked_backgrounds": unlocked, "locked_backgrounds": locked},
+            {"uid": uid, "unlocked_backgrounds": unlocked, "locked_backgrounds": locked},
         )

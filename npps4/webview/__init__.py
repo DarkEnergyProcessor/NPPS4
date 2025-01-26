@@ -34,4 +34,4 @@ async def maintenance_page(request: fastapi.Request):
                 if exc:
                     message = "\n".join(exc)
 
-        return app.templates.TemplateResponse("error.html", {"request": request, "error": message})
+        return app.templates.TemplateResponse(request, "error.html", {"error": message})

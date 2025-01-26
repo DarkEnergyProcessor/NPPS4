@@ -14,4 +14,4 @@ async def list_users(request: fastapi.Request):
         result = await context.db.main.execute(q)
         users = [{"name": user.name, "id": user.id} for user in result.scalars()]
 
-    return template.template.TemplateResponse("list_users.html", {"request": request, "users": users})
+    return template.template.TemplateResponse(request, "list_users.html", {"users": users})

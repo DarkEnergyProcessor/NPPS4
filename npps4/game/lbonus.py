@@ -27,13 +27,13 @@ class LoginBonusCalendarInfo(pydantic.BaseModel):
     current_date: str
     current_month: LoginBonusCalendarMonthInfo
     next_month: LoginBonusCalendarMonthInfo
-    get_item: item_model.Item | None = None
+    get_item: pydantic.SerializeAsAny[common.AnyItem] | None = None
 
 
 class LoginBonusTotalLogin(pydantic.BaseModel):
     login_count: int
     remaining_count: int = 2147483647  # TODO
-    reward: list[item_model.Item] | None = None
+    reward: list[pydantic.SerializeAsAny[common.AnyItem]] | None = None
 
 
 class LoginBonusResponse(achievement.AchievementMixin, common.TimestampMixin):

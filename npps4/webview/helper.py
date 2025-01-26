@@ -108,9 +108,7 @@ async def helper_achievement(
                 q = q.where(achievement.Achievement.achievement_type == achievement_type)
             result = await context.db.achievement.execute(q)
             achievements = [(ach.achievement_id, get_achievement_name(ach)) for ach in result.scalars()]
-            return app.templates.TemplateResponse(
-                "helper_achievement_list.html", {"request": request, "items": achievements}
-            )
+            return app.templates.TemplateResponse(request, "helper_achievement_list.html", {"items": achievements})
         else:
             ach = await context.db.achievement.get(achievement.Achievement, achievement_id)
             if ach is None:
@@ -154,9 +152,9 @@ async def helper_achievement(
             rewards = await achievement_system.get_achievement_rewards(context, achievement_id)
             rewards_json = json.dumps([r.model_dump() for r in rewards], ensure_ascii=False, indent="\t")
             return app.templates.TemplateResponse(
+                request,
                 "helper_achievement_info.html",
                 {
-                    "request": request,
                     "achievement": AchievementData(achievement_id, params, needs, opens),
                     "reward": autoescape_null(rewards_json, False),
                 },
