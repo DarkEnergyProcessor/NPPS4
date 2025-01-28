@@ -38333,6 +38333,7 @@
 			"order": 1000,
 			"start_time": 86400,
 			"end_time": 2147483647,
+			"achievement_secretbox_id": 1,
 			"add_gauge": 0,
 			"free_once_a_day_display": {
 				"cost_type": 100,
@@ -38923,6 +38924,7 @@
 			"order": 999,
 			"start_time": 86400,
 			"end_time": 2147483647,
+			"achievement_secretbox_id": 2,
 			"add_gauge": 0,
 			"buttons": [
 				{
@@ -43627,6 +43629,7 @@
 			"order": 1000,
 			"start_time": 86400,
 			"end_time": 2147483647,
+			"achievement_secretbox_id": 61,
 			"add_gauge": 0,
 			"free_once_a_day_display": {
 				"cost_type": 100,
@@ -44153,6 +44156,7 @@
 			"order": 999,
 			"start_time": 86400,
 			"end_time": 2147483647,
+			"achievement_secretbox_id": 62,
 			"add_gauge": 0,
 			"buttons": [
 				{

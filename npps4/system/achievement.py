@@ -13,7 +13,6 @@ from . import album
 from . import common
 from . import item
 from . import item_model
-from . import live
 from . import unit
 from . import reward
 from .. import const
@@ -24,7 +23,7 @@ from .. import util
 from ..db import achievement
 from ..db import main
 
-from typing import Any, Callable, Protocol
+from typing import Any
 
 ACHIEVEMENT_REWARD_DEFAULT = [item.base_loveca(1)]
 
@@ -357,14 +356,20 @@ class CheckGachaPon(AchievementChecker[AchievementUpdateSecretbox]):
     async def test_param(
         self,
         context: idol.BasicSchoolIdolContext,
-        data: AchievementUpdateSecretbox,
+        ach_data: AchievementUpdateSecretbox,
         achievement_info: achievement.Achievement,
     ) -> bool:
         if achievement_info.params1 is None or achievement_info.params3 is None:
             return False
 
+        npps4_data = data.get()
+        if ach_data.secretbox_id in npps4_data.secretbox_data:
+            sb_info = npps4_data.secretbox_data[ach_data.secretbox_id]
+            if sb_info.achievement_secretbox_id > 0 and sb_info.achievement_secretbox_id == achievement_info.params1:
+                return True
+
         # TODO: Perform aliased secretbox ID check in here.
-        return achievement_info.params1 == data.secretbox_id
+        return achievement_info.params1 == ach_data.secretbox_id
 
     async def update(
         self,
@@ -772,9 +777,9 @@ class CheckLiveAdvanced(AchievementChecker[AchievementUpdateLiveClear]):
             params7_data = set(data.team_unit_type_ids).intersection(unit_type_group_ids)
             match achievement_info.params7:
                 case 1:
-                    params7_ok = len(params7_data) > 0
-                case 2:
                     params7_ok = len(params7_data) == 9
+                case 2:
+                    params7_ok = len(params7_data) > 0
                 case _:
                     params7_ok = False
 
@@ -784,7 +789,8 @@ class CheckLiveAdvanced(AchievementChecker[AchievementUpdateLiveClear]):
             # Test params9
             params9_data = set(unit_type_group_ids)
             for unit_type_id in data.team_unit_type_ids:
-                params9_data.remove(unit_type_id)
+                if unit_type_id in params9_data:
+                    params9_data.remove(unit_type_id)
 
             match achievement_info.params9:
                 case 1:
@@ -876,7 +882,8 @@ class CheckAchievementClear(AchievementChecker[AchievementUpdateAchievementCompl
         assert achievement_info.params1 is not None
         ach_id_in_cat = set(await get_achievement_ids_from_category(context, achievement_info.params1))
         completed_ach_id = set(data.completed_achievement_id)
-        return oldvalue + len(ach_id_in_cat.intersection(completed_ach_id))
+        total_ach = await count_accomplished_achievement_by_set(context, user, ach_id_in_cat)
+        return total_ach + len(ach_id_in_cat.intersection(completed_ach_id))
 
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
@@ -1403,6 +1410,24 @@ async def count_accomplished_achievement_by_category(context: idol.BasicSchoolId
     )
     result = await context.db.achievement.execute(q)
     return [(int(r[0]), int(r[1])) for r in result]
+
+
+async def count_accomplished_achievement_by_set(
+    context: idol.BasicSchoolIdolContext, user: main.User, ach_ids: set[int]
+):
+    # Get all achieved
+    q = (
+        sqlalchemy.select(sqlalchemy.func.count())
+        .select_from(main.Achievement)
+        .where(
+            main.Achievement.user_id == user.id,
+            main.Achievement.is_accomplished == True,
+            main.Achievement.achievement_id.in_(ach_ids),
+        )
+    )
+    result = await context.db.main.execute(q)
+
+    return result.scalar() or 0
 
 
 async def give_achievement_reward(

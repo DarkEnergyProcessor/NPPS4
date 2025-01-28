@@ -74,6 +74,7 @@ class SecretboxData(HasIDString):
     order: int
     start_time: int
     end_time: int
+    achievement_secretbox_id: int = 0
 
     add_gauge: int
     free_once_a_day_display: SecretboxCost | None = None  # Always scout 1. None = no free once a day.

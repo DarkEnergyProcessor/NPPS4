@@ -246,7 +246,7 @@ When to check: Getting login bonus.
 When to check: When completing achievement.
 
 * `params1` - Achievement category in `achievement_category_m`. (compare equal)
-* `params2` - Amount of achievement to clear. (recursive track)
+* `params2` - Amount of achievement to clear. (global track)
 * `params3` - _Unknown_ (unknown)
 
 ### Collect Items (Type 55)

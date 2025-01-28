@@ -468,6 +468,11 @@
 					"title": "End Time",
 					"type": "integer"
 				},
+				"achievement_secretbox_id": {
+					"default": 0,
+					"title": "Achievement Secretbox Id",
+					"type": "integer"
+				},
 				"add_gauge": {
 					"title": "Add Gauge",
 					"type": "integer"
