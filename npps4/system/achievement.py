@@ -210,6 +210,14 @@ class AchievementChecker[T](abc.ABC):
         self, context: idol.BasicSchoolIdolContext, data: T, achievement_info: achievement.Achievement, /
     ) -> bool: ...
 
+    async def initvalue(
+        self, context: idol.BasicSchoolIdolContext, user: main.User, achievement_info: achievement.Achievement
+    ) -> int:
+        return 0
+
+    @abc.abstractmethod
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int: ...
+
     async def update(
         self,
         context: idol.BasicSchoolIdolContext,
@@ -255,6 +263,10 @@ class CheckLiveClear(AchievementChecker[AchievementUpdateLiveClear]):
     ) -> bool:
         return achievement_info.params1 is not None
 
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params1 is not None
+        return achievement_info.params1
+
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
     ) -> bool:
@@ -271,6 +283,10 @@ class CheckLiveClearWithDifficulty(AchievementChecker[AchievementUpdateLiveClear
         achievement_info: achievement.Achievement,
     ) -> bool:
         return achievement_info.params1 is not None and data.difficulty == achievement_info.params1
+
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params2 is not None
+        return achievement_info.params2
 
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
@@ -289,6 +305,10 @@ class CheckLiveClearWithScoreRank(AchievementChecker[AchievementUpdateLiveClear]
     ) -> bool:
         return achievement_info.params1 is not None and data.score_rank <= achievement_info.params1
 
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params2 is not None
+        return achievement_info.params2
+
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
     ) -> bool:
@@ -306,6 +326,10 @@ class CheckLiveClearWithComboRank(AchievementChecker[AchievementUpdateLiveClear]
     ) -> bool:
         return achievement_info.params1 is not None and data.combo_rank <= achievement_info.params1
 
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params2 is not None
+        return achievement_info.params2
+
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
     ) -> bool:
@@ -322,6 +346,10 @@ class CheckLiveClearWithUnitType(AchievementChecker[AchievementUpdateLiveClear])
         achievement_info: achievement.Achievement,
     ) -> bool:
         return achievement_info.params1 is not None and achievement_info.params1 in data.team_unit_type_ids
+
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params2 is not None
+        return achievement_info.params2
 
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
@@ -343,6 +371,10 @@ class CheckLiveClearWithTrackAndUnitGroup(AchievementChecker[AchievementUpdateLi
 
         unit_type_groups = await get_unit_type_groups(context, achievement_info.params3)
         return achievement_info.params1 is not None and achievement_info.params1 in data.team_unit_type_ids
+
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params3 is not None
+        return achievement_info.params3
 
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
@@ -368,8 +400,11 @@ class CheckGachaPon(AchievementChecker[AchievementUpdateSecretbox]):
             if sb_info.achievement_secretbox_id > 0 and sb_info.achievement_secretbox_id == achievement_info.params1:
                 return True
 
-        # TODO: Perform aliased secretbox ID check in here.
         return achievement_info.params1 == ach_data.secretbox_id
+
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params3 is not None
+        return achievement_info.params3
 
     async def update(
         self,
@@ -402,6 +437,10 @@ class CheckUnitMerge(AchievementChecker[AchievementUpdateUnitMerge]):
     ) -> bool:
         return achievement_info.params1 is not None
 
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params1 is not None
+        return achievement_info.params1
+
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
     ) -> bool:
@@ -422,6 +461,10 @@ class CheckUnitSkillUp(AchievementChecker[AchievementUpdateUnitMerge]):
         achievement_info: achievement.Achievement,
     ) -> bool:
         return achievement_info.params1 is not None
+
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params1 is not None
+        return achievement_info.params1
 
     async def update(
         self,
@@ -454,6 +497,10 @@ class CheckCollectUniqueUnit(AchievementChecker[AchievementUpdateNewUnit]):
     ) -> bool:
         return achievement_info.params1 is not None
 
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params1 is not None
+        return achievement_info.params1
+
     async def update(
         self,
         context: idol.BasicSchoolIdolContext,
@@ -484,6 +531,10 @@ class CheckRankUpUniqueUnit(AchievementChecker[AchievementUpdateUnitRankUp]):
         achievement_info: achievement.Achievement,
     ) -> bool:
         return achievement_info.params1 is not None
+
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params1 is not None
+        return achievement_info.params1
 
     async def update(
         self,
@@ -516,6 +567,10 @@ class CheckMaxLoveUnit(AchievementChecker[AchievementUpdateUnitMaxLove]):
     ) -> bool:
         return achievement_info.params1 is not None
 
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params1 is not None
+        return achievement_info.params1
+
     async def update(
         self,
         context: idol.BasicSchoolIdolContext,
@@ -546,6 +601,10 @@ class CheckMaxLevelUnit(AchievementChecker[AchievementUpdateUnitMaxLevel]):
         achievement_info: achievement.Achievement,
     ) -> bool:
         return achievement_info.params1 is not None
+
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params1 is not None
+        return achievement_info.params1
 
     async def update(
         self,
@@ -578,6 +637,9 @@ class CheckFinishScenario(AchievementChecker[AchievementUpdateFinishScenario]):
     ) -> bool:
         return achievement_info.params1 is not None and achievement_info.params1 == data.scenario_id
 
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        return 1
+
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
     ) -> bool:
@@ -593,6 +655,10 @@ class CheckFriendCount(AchievementChecker[AchievementUpdateAnywhere]):
         achievement_info: achievement.Achievement,
     ) -> bool:
         return achievement_info.params1 is not None
+
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params1 is not None
+        return achievement_info.params1
 
     async def update(
         self,
@@ -625,6 +691,10 @@ class CheckLogin(AchievementChecker[AchievementUpdateLoginBonus]):
     ) -> bool:
         return achievement_info.params1 is not None
 
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params1 is not None
+        return achievement_info.params1
+
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
     ) -> bool:
@@ -642,6 +712,9 @@ class CheckLoginSingle(AchievementChecker[AchievementUpdateLoginBonus]):
     ) -> bool:
         return True
 
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        return 1
+
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
     ) -> bool:
@@ -657,6 +730,15 @@ class CheckPlayerRankUp(AchievementChecker[AchievementUpdateLevelUp]):
         achievement_info: achievement.Achievement,
     ) -> bool:
         return achievement_info.params1 is not None
+
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params1 is not None
+        return achievement_info.params1
+
+    async def initvalue(
+        self, context: idol.BasicSchoolIdolContext, user: main.User, achievement_info: achievement.Achievement
+    ) -> int:
+        return user.level
 
     async def update(
         self,
@@ -690,6 +772,9 @@ class CheckLiveClearOnceWithTrack(AchievementChecker[AchievementUpdateLiveClear]
     ) -> bool:
         return achievement_info.params1 is not None and achievement_info.params1 == data.live_track_id
 
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        return achievement_info.params2 or 1
+
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
     ) -> bool:
@@ -710,6 +795,10 @@ class CheckSpecificUnitRankUp(AchievementChecker[AchievementUpdateUnitRankUp]):
 
         unit_type_ids = [(await unit.get_unit_info(context, unit_id)).unit_type_id for unit_id in data.unit_ids]
         return achievement_info.params1 in unit_type_ids
+
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params2 is not None
+        return achievement_info.params2
 
     async def update(
         self,
@@ -805,6 +894,10 @@ class CheckLiveAdvanced(AchievementChecker[AchievementUpdateLiveClear]):
 
         return True
 
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params10 is not None
+        return achievement_info.params10
+
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
     ) -> bool:
@@ -825,6 +918,10 @@ class CheckLiveClearWithUnitType2(AchievementChecker[AchievementUpdateLiveClear]
 
         return achievement_info.params2 in data.team_unit_type_ids
 
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params3 is not None
+        return achievement_info.params3
+
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
     ) -> bool:
@@ -841,6 +938,10 @@ class CheckLoginRecursive(AchievementChecker[AchievementUpdateLoginBonus]):
         achievement_info: achievement.Achievement,
     ) -> bool:
         return achievement_info.params1 is not None
+
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params1 is not None
+        return achievement_info.params1
 
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
@@ -870,6 +971,17 @@ class CheckAchievementClear(AchievementChecker[AchievementUpdateAchievementCompl
                 return True
 
         return False
+
+    async def initvalue(
+        self, context: idol.BasicSchoolIdolContext, user: main.User, achievement_info: achievement.Achievement
+    ) -> int:
+        assert achievement_info.params1 is not None
+        ach_id_in_cat = set(await get_achievement_ids_from_category(context, achievement_info.params1))
+        return await count_accomplished_achievement_by_set(context, user, ach_id_in_cat)
+
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params2 is not None
+        return achievement_info.params2
 
     async def update(
         self,
@@ -909,6 +1021,16 @@ class CheckCollectItem(AchievementChecker[AchievementUpdateItemCollect]):
 
         return data.item_id == achievement_info.params1
 
+    async def initvalue(
+        self, context: idol.BasicSchoolIdolContext, user: main.User, achievement_info: achievement.Achievement
+    ) -> int:
+        assert achievement_info.params1 is not None
+        return await item.get_item_count(context, user, achievement_info.params1)
+
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params1 is not None
+        return achievement_info.params1
+
     async def update(
         self,
         context: idol.BasicSchoolIdolContext,
@@ -940,6 +1062,10 @@ class CheckTotalScenarioClear(AchievementChecker[AchievementUpdateFinishScenario
     ) -> bool:
         return achievement_info.params1 is not None
 
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params1 is not None
+        return achievement_info.params1
+
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
     ) -> bool:
@@ -961,6 +1087,22 @@ class CheckTotalLiveClear(AchievementChecker[AchievementUpdateLiveClear]):
     ) -> bool:
         return achievement_info.params1 is not None
 
+    async def initvalue(
+        self, context: idol.BasicSchoolIdolContext, user: main.User, achievement_info: achievement.Achievement
+    ) -> int:
+        q = (
+            sqlalchemy.select(main.Achievement.count)
+            .where(main.Achievement.user_id == user.id, main.Achievement.achievement_type == 58)
+            .order_by(main.Achievement.count.desc())
+            .limit(1)
+        )
+        result = await context.db.main.execute(q)
+        return result.scalar() or 0
+
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params1 is not None
+        return achievement_info.params1
+
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
     ) -> bool:
@@ -981,6 +1123,10 @@ class CheckTotalUnlockedScenario(AchievementChecker[AchievementUpdateItemCollect
         achievement_info: achievement.Achievement,
     ) -> bool:
         return data.add_type == const.ADD_TYPE.SCENARIO and achievement_info.params1 is not None
+
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params1 is not None
+        return achievement_info.params1
 
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
@@ -1006,6 +1152,9 @@ class CheckLoginOnSpecificTime(AchievementChecker[AchievementUpdateLoginBonus]):
 
         dt = util.datetime()
         return achievement_info.params1 == dt.month and achievement_info.params2 == dt.day
+
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        return 1
 
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
@@ -1356,6 +1505,11 @@ async def _check_impl(
                             if ach_info.achievement_type == new_ach_info.achievement_type:
                                 # Carryover value
                                 new_ach.count = ach.count
+                            else:
+                                new_ach.count = await checker.initvalue(context, target_user, new_ach_info)
+
+                # Clamp
+                ach.count = min(ach.count, checker.maxvalue(ach_info))
 
         if ach.is_accomplished and ach.achievement_id in newly_added:
             newly_added.remove(ach.achievement_id)
