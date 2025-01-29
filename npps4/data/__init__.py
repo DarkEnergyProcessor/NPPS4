@@ -25,9 +25,9 @@ class ServerData:
     sticker_shop: list[schema.StickerShop]
 
 
-def ensure_no_conflict[
-    T: schema.HasIDString, E: Exception
-](items: list[T], exc_type: Callable[[str], E] = Exception, /):
+def ensure_no_conflict[T: schema.HasIDString, E: Exception](
+    items: list[T], exc_type: Callable[[str], E] = Exception, /
+):
     ids: dict[int, str] = {}
     for item in items:
         item_id = item._internal_id

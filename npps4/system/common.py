@@ -52,9 +52,7 @@ class CenterUnitInfo(pydantic.BaseModel):
     unit_removable_skill_capacity: int
 
 
-async def get_cached[
-    T: Hashable, U
-](
+async def get_cached[T: Hashable, U](
     context: idol.BasicSchoolIdolContext,
     key: str,
     id: T,

@@ -112,9 +112,9 @@ def datetime_to_timestamp(dt: str):
     return int(dtobj.timestamp())
 
 
-def ensure_no_none[
-    T, E: Exception, **P
-](list_to: collections.abc.Sequence[T | None], exc: Callable[P, E] = Exception, *args: P.args, **kwargs: P.kwargs):
+def ensure_no_none[T, E: Exception, **P](
+    list_to: collections.abc.Sequence[T | None], exc: Callable[P, E] = Exception, *args: P.args, **kwargs: P.kwargs
+):
     if None in list_to:
         raise exc(*args, **kwargs)
 

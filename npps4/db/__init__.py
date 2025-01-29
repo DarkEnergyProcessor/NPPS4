@@ -10,9 +10,9 @@ import sqlalchemy.ext.asyncio
 from typing import Any
 
 
-async def get_decrypted_row[
-    _T: common.MaybeEncrypted
-](session: sqlalchemy.ext.asyncio.AsyncSession, cls: type[_T], id: int) -> _T | None:
+async def get_decrypted_row[_T: common.MaybeEncrypted](
+    session: sqlalchemy.ext.asyncio.AsyncSession, cls: type[_T], id: int
+) -> _T | None:
     obj = await session.get(cls, id)
     return decrypt_row(session, obj)
 
