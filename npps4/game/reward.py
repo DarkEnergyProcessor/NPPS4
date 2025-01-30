@@ -135,7 +135,6 @@ async def reward_rewardlist(context: idol.SchoolIdolUserParams, request: RewardL
         RewardOrder.BY_EXPIRE_DATE in request.order,
     )
     incentive_total_count = await reward.count_presentbox(context, current_user, request)
-    print(request)
 
     return RewardListResponse(
         item_count=incentive_total_count,

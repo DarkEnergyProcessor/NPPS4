@@ -4660,6 +4660,15 @@
 			]
 		},
 		{
+			"achievement_id": 819,
+			"rewards": [
+				{
+					"add_type": 5300,
+					"item_id": 331
+				}
+			]
+		},
+		{
 			"achievement_id": 820,
 			"rewards": [
 				{
