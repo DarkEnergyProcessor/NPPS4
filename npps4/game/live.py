@@ -238,9 +238,9 @@ class LiveRewardBaseInfo(common.BaseRewardInfo):
 
 
 class LiveRewardUnitList(pydantic.BaseModel):
-    live_clear: list[common.AnyItem] = pydantic.Field(default_factory=list)
-    live_rank: list[common.AnyItem] = pydantic.Field(default_factory=list)
-    live_combo: list[common.AnyItem] = pydantic.Field(default_factory=list)
+    live_clear: list[pydantic.SerializeAsAny[common.AnyItem]] = pydantic.Field(default_factory=list)
+    live_rank: list[pydantic.SerializeAsAny[common.AnyItem]] = pydantic.Field(default_factory=list)
+    live_combo: list[pydantic.SerializeAsAny[common.AnyItem]] = pydantic.Field(default_factory=list)
 
 
 class LiveRewardResponseUnitList(pydantic.BaseModel):
@@ -281,7 +281,7 @@ class LiveRewardResponseUnitList(pydantic.BaseModel):
 
 class LiveRewardGoalAccomplishedInfo(pydantic.BaseModel):
     achieved_ids: list[int]
-    rewards: list[common.AnyItem]
+    rewards: list[pydantic.SerializeAsAny[common.AnyItem]]
 
 
 class LiveRewardResponse(achievement.AchievementMixin, common.TimestampMixin, user.UserDiffMixin):
@@ -301,9 +301,9 @@ class LiveRewardResponse(achievement.AchievementMixin, common.TimestampMixin, us
     unit_list: list[LiveRewardResponseUnitList]
     next_level_info: list[user.NextLevelInfo]
     goal_accomp_info: LiveRewardGoalAccomplishedInfo
-    special_reward_info: list[common.AnyItem]
+    special_reward_info: list[pydantic.SerializeAsAny[common.AnyItem]]
     event_info: list = pydantic.Field(default_factory=list)  # TODO
-    daily_reward_info: list[common.AnyItem] = pydantic.Field(default_factory=list)  # TODO
+    daily_reward_info: list[pydantic.SerializeAsAny[common.AnyItem]] = pydantic.Field(default_factory=list)  # TODO
     can_send_friend_request: bool = False
     using_buff_info: list = pydantic.Field(default_factory=list)  # TODO
     class_system: class_system_module.ClassSystemData = pydantic.Field(
