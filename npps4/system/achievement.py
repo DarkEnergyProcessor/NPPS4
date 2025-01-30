@@ -88,7 +88,10 @@ class AchievementContext:
             if ach in self.new:
                 self.new.remove(ach)
         else:
-            self.new.append(ach)
+            if ach in self.accomplished:
+                self.accomplished.remove(ach)
+            if ach not in self.new:
+                self.new.append(ach)
 
     def __add__(self, other: "AchievementContext"):
         return AchievementContext(self.accomplished + other.accomplished, self.new + other.new).fix()
@@ -1507,6 +1510,8 @@ async def _check_impl(
                                 new_ach.count = ach.count
                             else:
                                 new_ach.count = await checker.initvalue(context, target_user, new_ach_info)
+                        else:
+                            new_ach.count = await checker.initvalue(context, target_user, new_ach_info)
 
                 # Clamp
                 ach.count = min(ach.count, checker.maxvalue(ach_info))
