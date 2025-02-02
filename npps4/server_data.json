@@ -64688,6 +64688,19 @@
 					"cost": 60
 				}
 			]
+		},
+		{
+			"id_string": "cg?",
+			"add_type": 14000,
+			"item_id": 1698,
+			"name": "ささやかな幸せ",
+			"name_en": "Small Happiness",
+			"costs": [
+				{
+					"rarity": 6,
+					"cost": 5
+				}
+			]
 		}
 	]
 }
