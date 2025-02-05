@@ -373,17 +373,28 @@ class CheckLiveClearWithTrackAndUnitGroup(AchievementChecker[AchievementUpdateLi
             return False
 
         unit_type_groups = await get_unit_type_groups(context, achievement_info.params3)
-        return achievement_info.params1 is not None and achievement_info.params1 in data.team_unit_type_ids
+        unit_type_group_set = set(k[0] for k in unit_type_groups)
+
+        match achievement_info.params3:
+            case 1:
+                return len(unit_type_group_set - set(data.team_unit_type_ids)) == 0
+            case 2:
+                for unit_type_id in data.team_unit_type_ids:
+                    if unit_type_id in unit_type_group_set:
+                        return True
+                return False
+            case 3:
+                return len(set(data.team_unit_type_ids) - unit_type_group_set) == 0
+            case _:
+                return False
 
     def maxvalue(self, achievement_info: achievement.Achievement) -> int:
-        assert achievement_info.params3 is not None
-        return achievement_info.params3
+        return 1
 
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
     ) -> bool:
-        assert achievement_info.params3 is not None
-        return value >= achievement_info.params3
+        return value > 0
 
 
 @register_achievement_checker(10)

@@ -75,7 +75,7 @@ When to check: When clearing a live show.
 
 * `params1` - `live_track_id` in `live_track_m` table (compare equal).
 * `params2` - `achievement_unit_type_group_id` in `achievement_unit_type_group_m` table (compare equal).
-* `params3` - Amount of live show to clear (local track).
+* `params3` - 1 = all unit types in `params2` at least present; 2 = one of unit types in `params2` is present; 3 = all unit types in `params2` and only those teams (dupe allowed) (behavior).
 
 ### Scouting (Type 10)
 
