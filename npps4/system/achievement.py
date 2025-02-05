@@ -1513,9 +1513,6 @@ async def _check_impl(
                         container.add(new_ach)
 
                         if checker.recursive:
-                            queue.append(new_ach)
-                            newly_added.add(new_ach.achievement_id)
-
                             if ach_info.achievement_type == new_ach_info.achievement_type:
                                 # Carryover value
                                 new_ach.count = ach.count
@@ -1523,6 +1520,11 @@ async def _check_impl(
                                 new_ach.count = await checker.initvalue(context, target_user, new_ach_info)
                         else:
                             new_ach.count = await checker.initvalue(context, target_user, new_ach_info)
+
+                        if new_ach.count > 0 or checker.recursive:
+                            # Assume recursive check
+                            queue.append(new_ach)
+                            newly_added.add(new_ach.achievement_id)
 
                 # Clamp
                 ach.count = min(ach.count, checker.maxvalue(ach_info))
