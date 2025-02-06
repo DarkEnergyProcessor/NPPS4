@@ -130,18 +130,25 @@ async def get_presentbox(
         if order_ascending:
             # When ordering by expiry date ascending, show no expiration last
             q = q.order_by(
-                sqlalchemy.case((main.Incentive.expire_date == 0, 1), else_=0), main.Incentive.expire_date.asc()
+                sqlalchemy.case((main.Incentive.expire_date == 0, 1), else_=0),
+                main.Incentive.expire_date.asc(),
+                main.Incentive.id,
             )
         else:
             # When ordering by expiry date descending, show no expiration first
             q = q.order_by(
-                sqlalchemy.case((main.Incentive.expire_date == 0, 0), else_=1), main.Incentive.expire_date.desc()
+                sqlalchemy.case((main.Incentive.expire_date == 0, 0), else_=1),
+                main.Incentive.expire_date.desc(),
+                main.Incentive.id.desc(),
             )
     else:
-        q = q.order_by(main.Incentive.insert_date.asc() if order_ascending else main.Incentive.insert_date.desc())
+        q = q.order_by(
+            main.Incentive.insert_date.asc() if order_ascending else main.Incentive.insert_date.desc(),
+            main.Incentive.id.desc(),
+        )
 
     q = q.offset(offset)
-    if limit < 0:
+    if limit > 0:
         q = q.limit(limit)
 
     result = await context.db.main.execute(q)
