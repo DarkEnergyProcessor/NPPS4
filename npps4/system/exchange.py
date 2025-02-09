@@ -132,9 +132,7 @@ async def sub_exchange_point(
 
 
 async def get_exchange_points_response(context: idol.BasicSchoolIdolContext, /, user: main.User):
-    q = sqlalchemy.select(main.ExchangePointItem).where(
-        main.ExchangePointItem.user_id == user.id, main.ExchangePointItem.amount > 0
-    )
+    q = sqlalchemy.select(main.ExchangePointItem).where(main.ExchangePointItem.user_id == user.id)
     result = await context.db.main.execute(q)
     return [ExchangePointInfo(rarity=e.exchange_point_id, exchange_point=e.amount) for e in result.scalars()]
 
