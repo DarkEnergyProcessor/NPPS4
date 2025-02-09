@@ -173,6 +173,7 @@ class AchievementUpdateUnitMerge:
 
     unit_owning_user_id: int
     skill_level: int
+    amount: int
 
 
 @dataclasses.dataclass(kw_only=True)
@@ -454,6 +455,16 @@ class CheckUnitMerge(AchievementChecker[AchievementUpdateUnitMerge]):
     def maxvalue(self, achievement_info: achievement.Achievement) -> int:
         assert achievement_info.params1 is not None
         return achievement_info.params1
+
+    async def update(
+        self,
+        context: idol.BasicSchoolIdolContext,
+        user: main.User,
+        oldvalue: int,
+        data: AchievementUpdateUnitMerge,
+        achievement_info: achievement.Achievement,
+    ) -> int:
+        return oldvalue + data.amount
 
     async def is_accomplished(
         self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement

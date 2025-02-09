@@ -563,6 +563,7 @@ async def unit_merge(context: idol.SchoolIdolUserParams, request: UnitMergeReque
     total_exp = 0
     merge_cost = 0
     skill_exp = 0
+    member_count = 0
     for unit_owning_user_id in request.unit_owning_user_ids:
         unit_data = await unit.get_unit(context, unit_owning_user_id)
         unit.validate_unit(current_user, unit_data)
@@ -589,6 +590,8 @@ async def unit_merge(context: idol.SchoolIdolUserParams, request: UnitMergeReque
             if exchange_point_id > 0:
                 exchange_point[exchange_point_id] = exchange_point.get(exchange_point_id, 0) + 1
 
+        member_count = member_count + 1
+
     for supp_unit in request.unit_support_list:
         if supp_unit.amount > 0:
             unit_info = await unit.get_unit_info(context, supp_unit.unit_id)
@@ -611,6 +614,8 @@ async def unit_merge(context: idol.SchoolIdolUserParams, request: UnitMergeReque
                         skill_exp = skill_exp + skill_level_data.grant_exp * supp_unit.amount
             else:
                 raise idol.error.IdolError(detail="invalid unit amount")
+
+            member_count = member_count + supp_unit.amount
 
     if merge_cost > current_user.game_coin:
         raise idol.error.IdolError(detail="not enough game coin")
@@ -652,7 +657,9 @@ async def unit_merge(context: idol.SchoolIdolUserParams, request: UnitMergeReque
         context,
         current_user,
         achievement.AchievementUpdateUnitRankUp(unit_ids=[]),
-        achievement.AchievementUpdateUnitMerge(unit_owning_user_id=source_unit.id, skill_level=after_unit.skill_level),
+        achievement.AchievementUpdateUnitMerge(
+            unit_owning_user_id=source_unit.id, skill_level=after_unit.skill_level, amount=member_count
+        ),
     )
     accomplished_rewards = [
         await achievement.get_achievement_rewards(context, ach) for ach in achievement_list.accomplished
