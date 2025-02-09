@@ -10,6 +10,25 @@ from ..system import item_model
 from ..system import reward
 from ..system import user
 
+STACKABLE_ITEMS = (
+    const.ADD_TYPE.ITEM,
+    const.ADD_TYPE.GAME_COIN,
+    const.ADD_TYPE.LOVECA,
+    const.ADD_TYPE.SOCIAL_POINT,
+    const.ADD_TYPE.INVITE_POINT,
+    const.ADD_TYPE.PLAYER_EXP,
+    const.ADD_TYPE.UNIT_MAX,
+    const.ADD_TYPE.EXCHANGE_POINT,
+    const.ADD_TYPE.FRIEND_MAX,
+    const.ADD_TYPE.WAITING_UNIT_MAX,
+    const.ADD_TYPE.TRAINING_MAX,
+    const.ADD_TYPE.SCHOOL_IDOL_SKILL,
+    const.ADD_TYPE.EVENT_POINT,
+    const.ADD_TYPE.LOTTERY_TICKET,
+    const.ADD_TYPE.RECOVER_LP_ITEM,
+    const.ADD_TYPE.TRADE_CAPITAL,
+)
+
 
 class ExchangePointResponse(pydantic.BaseModel):
     exchange_point_list: list[exchange.ExchangePointInfo]
@@ -104,11 +123,23 @@ async def exchange_usepoint(
 
     # Perform the exchange
     item_result: list[pydantic.SerializeAsAny[item_model.Item]] = []
-    for _ in range(request.amount):
-        item_data = await advanced.deserialize_item_data(context, raw_exchange_info)
+    if raw_exchange_info.add_type in STACKABLE_ITEMS:
+        item_data_copy = item_model.BaseItem(
+            add_type=raw_exchange_info.add_type,
+            item_id=raw_exchange_info.item_id,
+            amount=raw_exchange_info.amount * request.amount,
+            extra_data=raw_exchange_info.extra_data,
+        )
+        item_data = await advanced.deserialize_item_data(context, item_data_copy)
         item_data.reward_box_flag = True
         await reward.add_item(context, current_user, item_data, "Sticker Shop")
         item_result.append(item_data)
+    else:
+        for _ in range(request.amount):
+            item_data = await advanced.deserialize_item_data(context, raw_exchange_info)
+            item_data.reward_box_flag = True
+            await reward.add_item(context, current_user, item_data, "Sticker Shop")
+            item_result.append(item_data)
 
     await exchange.sub_exchange_point(context, current_user, exchange_rarity.rarity, required_exchange_point)
     await exchange.add_exchange_item_got_count(context, current_user, exchange_info.exchange_item_id, request.amount)
