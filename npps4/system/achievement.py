@@ -373,7 +373,10 @@ class CheckLiveClearWithTrackAndUnitGroup(AchievementChecker[AchievementUpdateLi
         if achievement_info.params1 is None or achievement_info.params2 is None or achievement_info.params3 is None:
             return False
 
-        unit_type_groups = await get_unit_type_groups(context, achievement_info.params3)
+        if data.live_track_id != achievement_info.params1:
+            return False
+
+        unit_type_groups = await get_unit_type_groups(context, achievement_info.params2)
         unit_type_group_set = set(k[0] for k in unit_type_groups)
 
         match achievement_info.params3:
