@@ -1521,7 +1521,7 @@ async def _check_impl(
                         *await get_unlocked_achievements_by_id(
                             context, target_user, *await get_prerequisite_achievement_ids(context, open_ach_id)
                         ),
-                    ):
+                    ) and not await has_achievement(context, target_user, open_ach_id):
                         new_ach_info = await get_achievement_info(context, open_ach_id)
                         new_ach = await add_achievement(context, target_user, new_ach_info, flush=False)
                         container.add(new_ach)
