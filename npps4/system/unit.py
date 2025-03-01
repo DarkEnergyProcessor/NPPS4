@@ -590,9 +590,8 @@ async def add_love_by_deck(context: idol.BasicSchoolIdolContext, user: main.User
 def calculate_unit_stats(
     unit_info: unit.Unit, pattern: list[unit.UnitLevelUpPattern] | list[unit.LevelLimitPattern], exp: int
 ):
-    last = pattern[-1]
     result = UnitStatsResult(
-        level=last.unit_level,
+        level=1,
         smile=unit_info.smile_max,
         pure=unit_info.pure_max,
         cool=unit_info.cool_max,
@@ -604,16 +603,17 @@ def calculate_unit_stats(
     )
 
     for diff in pattern:
+        result.level = diff.unit_level
+        result.smile = unit_info.smile_max - diff.smile_diff
+        result.pure = unit_info.pure_max - diff.pure_diff
+        result.cool = unit_info.cool_max - diff.cool_diff
+        result.hp = unit_info.hp_max - diff.hp_diff
+        result.next_exp = diff.next_exp
+        result.merge_exp = diff.merge_exp
+        result.merge_cost = diff.merge_cost
+        result.sale_price = diff.sale_price
+
         if diff.next_exp > exp:
-            result.level = diff.unit_level
-            result.smile = result.smile - diff.smile_diff
-            result.pure = result.pure - diff.pure_diff
-            result.cool = result.cool - diff.cool_diff
-            result.hp = result.hp - diff.hp_diff
-            result.next_exp = diff.next_exp
-            result.merge_exp = diff.merge_exp
-            result.merge_cost = diff.merge_cost
-            result.sale_price = diff.sale_price
             break
 
     return result
