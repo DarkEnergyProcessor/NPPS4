@@ -1,4 +1,4 @@
-import npps4.script_dummy  # must be first
+import npps4.script_dummy  # isort:skip
 
 import collections.abc
 import sqlalchemy

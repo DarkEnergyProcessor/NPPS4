@@ -646,7 +646,7 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
             )
 
     # Add bond
-    love_count = request.love_cnt * live_in_progress.lp_factor
+    love_count = request.love_cnt * live_in_progress.lp_factor * 100  # DEBUG
     before_after_loves = await unit.add_love_by_deck(context, current_user, live_in_progress.unit_deck_id, love_count)
 
     # Add live effort

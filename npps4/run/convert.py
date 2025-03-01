@@ -1,4 +1,4 @@
-from .. import script_dummy  # type: ignore # must be first!
+from .. import script_dummy  # type: ignore # isort:skip!
 
 import base64
 import itertools

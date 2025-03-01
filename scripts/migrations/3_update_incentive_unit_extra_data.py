@@ -2,7 +2,7 @@ import json
 
 import sqlalchemy
 
-import npps4.script_dummy  # Must be first
+import npps4.script_dummy  # isort:skip
 import npps4.const
 import npps4.db.main
 import npps4.idol

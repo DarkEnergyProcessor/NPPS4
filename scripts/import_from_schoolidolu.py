@@ -124,7 +124,7 @@ async def convert_to_npps4_script(
 
     import sqlalchemy
 
-    import npps4.script_dummy  # must be first
+    import npps4.script_dummy  # isort:skip
     import npps4.idol
     import npps4.db.unit
     import npps4.system.unit

@@ -1,5 +1,5 @@
 import json
-import npps4.script_dummy  # Must be first
+import npps4.script_dummy  # isort:skip
 
 import sqlalchemy
 
