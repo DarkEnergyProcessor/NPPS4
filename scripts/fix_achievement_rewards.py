@@ -57,12 +57,6 @@ TO_FIX = {
     npps4.const.ADD_TYPE.SCENARIO: Fixer(npps4.system.scenario.is_unlocked, npps4.system.scenario.unlock),
     npps4.const.ADD_TYPE.MUSEUM: Fixer(npps4.system.museum.has, npps4.system.museum.unlock),
 }
-ADVANCED_FIX: dict[
-    npps4.const.ADD_TYPE,
-    Callable[[npps4.idol.BasicSchoolIdolContext, npps4.db.main.User, int], collections.abc.Awaitable[bool]],
-] = {
-    npps4.const.ADD_TYPE.SCENARIO: npps4.system.scenario.is_completed,
-}
 
 
 async def run_script(args: list[str]):
@@ -75,32 +69,21 @@ async def run_script(args: list[str]):
     async with npps4.idol.BasicSchoolIdolContext(lang=npps4.idol.Language.en) as context:
         q = sqlalchemy.select(npps4.db.main.Achievement).where(
             npps4.db.main.Achievement.achievement_id.in_(achievement_reward_target.keys()),
+            npps4.db.main.Achievement.is_accomplished == True,
         )
         result = await context.db.main.execute(q)
 
         for ach_data in result.scalars():
-            if ach_data.is_accomplished:
-                for reward_info in achievement_reward[ach_data.achievement_id]:
-                    if reward_info.add_type in TO_FIX:
-                        fixer = TO_FIX[reward_info.add_type]
-                        target = await npps4.system.user.get(context, ach_data.user_id)
-                        assert target is not None
-                        if not await fixer.has(context, target, reward_info.item_id):
-                            await fixer.add(context, target, reward_info.item_id)
-                            print(f"Fixed achievement_id {ach_data.achievement_id} for user_id {ach_data.user_id}")
-                            fixed_ach.add(ach_data.id)
-            else:
-                for reward_info in achievement_reward[ach_data.achievement_id]:
-                    if reward_info.add_type in ADVANCED_FIX:
-                        advfixer = ADVANCED_FIX[reward_info.add_type]
-                        target = await npps4.system.user.get(context, ach_data.user_id)
-                        assert target is not None
-                        if await advfixer(context, target, reward_info.item_id):
-                            ach_data.is_accomplished = True
-                            print(
-                                f"Fixed accomplish status of achievement_id {ach_data.achievement_id} for user_id {ach_data.user_id}"
-                            )
-                            fixed_user.add(ach_data.user_id)
+            for reward_info in achievement_reward[ach_data.achievement_id]:
+                if reward_info.add_type in TO_FIX:
+                    fixer = TO_FIX[reward_info.add_type]
+                    target = await npps4.system.user.get(context, ach_data.user_id)
+                    assert target is not None
+                    if not await fixer.has(context, target, reward_info.item_id):
+                        await fixer.add(context, target, reward_info.item_id)
+                        print(f"Fixed achievement_id {ach_data.achievement_id} for user_id {ach_data.user_id}")
+                        fixed_ach.add(ach_data.id)
+                        fixed_user.add(ach_data.user_id)
 
     print(f"Fixed {len(fixed_ach)} goal rewards across {len(fixed_user)} users")
 
