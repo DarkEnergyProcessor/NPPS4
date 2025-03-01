@@ -581,7 +581,7 @@ async def add_love_by_deck(context: idol.BasicSchoolIdolContext, user: main.User
         ud.love = new_love
 
         if ud.love >= ur.after_love_max:
-            await album.update(context, user, ud.unit_id, rank_max=True)
+            await album.update(context, user, ud.unit_id, love_max=True)
 
     await context.db.main.flush()
     return common.BeforeAfter[list[int]](before=before_love, after=loves)
