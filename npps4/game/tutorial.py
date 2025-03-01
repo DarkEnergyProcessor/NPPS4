@@ -34,11 +34,20 @@ async def tutorial_skip(context: idol.SchoolIdolUserParams) -> None:
     if current_user.tutorial_state == -1:
         raise error.IdolError(detail="Tutorial already finished")
 
-    if current_user.tutorial_state >= 0:
-        await tutorial.phase1(context, current_user)
-    if current_user.tutorial_state >= 1:
-        await tutorial.phase2(context, current_user)
-    if current_user.tutorial_state >= 2:
-        await tutorial.phase3(context, current_user)
-    if current_user.tutorial_state >= 3:
-        await tutorial.finalize(context, current_user)
+    match current_user.tutorial_state:
+        case 0:
+            await tutorial.phase1(context, current_user)
+            await tutorial.phase2(context, current_user)
+            await tutorial.phase3(context, current_user)
+            await tutorial.finalize(context, current_user)
+        case 1:
+            await tutorial.phase2(context, current_user)
+            await tutorial.phase3(context, current_user)
+            await tutorial.finalize(context, current_user)
+        case 2:
+            await tutorial.phase3(context, current_user)
+            await tutorial.finalize(context, current_user)
+        case 3:
+            await tutorial.finalize(context, current_user)
+        case _:
+            raise error.IdolError(detail=f"Invalid tutorial state: {current_user.tutorial_state}")
