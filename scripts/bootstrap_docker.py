@@ -46,15 +46,18 @@ def main() -> int:
 
         return 1
 
+    # Setup
+    port = int(os.environ.get("PORT", "51376"))
+    os.environ["NPPS4_CONFIG"] = config_toml
+    print("Using config.toml path in container:", config_toml, flush=True)
+
     if os.system("alembic upgrade head") != 0:
         print("alembic returned non-zero status code.")
         return 1
 
-    port = int(os.environ.get("PORT", "51376"))
-    os.environ["NPPS4_CONFIG"] = config_toml
-
     if worker_count > 1:
         os.execlp(
+            "gunicorn",
             "gunicorn",
             "--preload",
             "npps4.run.app:main",
@@ -66,7 +69,15 @@ def main() -> int:
             f"0.0.0.0:{port}",
         )
     else:
-        os.execlp("uvicorn", "npps4.run.app:main", "--port", str(port), "--host", "0.0.0.0")
+        os.execlp(
+            "uvicorn",
+            "uvicorn",
+            "npps4.run.app:main",
+            "--port",
+            str(port),
+            "--host",
+            "0.0.0.0",
+        )
 
     # In case os.exec* fails, this is executed
     return 1
