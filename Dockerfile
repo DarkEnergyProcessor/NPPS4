@@ -22,6 +22,5 @@ RUN PIP_ROOT_USER_ACTION=ignore python -m pip install -U pip
 RUN PIP_ROOT_USER_ACTION=ignore pip install -r requirements.txt gunicorn uvicorn-worker asyncpg asyncmy
 
 EXPOSE 51376/tcp
-STOPSIGNAL SIGINT
 
 ENTRYPOINT ["python", "scripts/bootstrap_docker.py"]
