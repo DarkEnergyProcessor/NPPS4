@@ -20,13 +20,43 @@ Requirements
 
 NPPS4 currently supports only Python 3.12 (and possibly later version). Python 3.11 and earlier is not supported.
 
-Install
+Install Manually
 ----
 
 1. Install Python 3.12 or later.
 2. Create virtual environment.
 3. Activate it.
 4. `pip install -r requirements.txt`
+
+Install with Docker
+-----
+
+If you want to build the container from source, run:
+```sh
+docker build -t npps4 .
+```
+
+Or, if you want to use pre-compiled container as part of NPPS4 CI, run:
+```sh
+docker pull ghcr.io/darkenergyprocessor/npps4:latest
+```
+
+Then run the container for the first time so it setup the necessary data in `path/to/data`:
+
+```sh
+docker run --name npps4 -v path/to/data:/NPPS4/data -p 0.0.0.0:51376:51376 -it npps4
+```
+
+Configure `config.sample.toml` then **save it as `config.toml`** (or save the modified `config.sample.toml` first then
+rename it). Now re-run the container:
+```sh
+docker start npps4
+```
+
+Observe that the app is started successfully using:
+```sh
+docker logs npps4
+```
 
 Starting Up
 -----
@@ -81,7 +111,7 @@ python make_server_key.py -p
 
 To generate a new private key, run:
 
-```
+```sh
 python make_server_key.py
 ```
 
@@ -124,16 +154,21 @@ Running
 -----
 
 After all is set, initialize the database:
-```
+```sh
 alembic upgrade head
 ```
 
 Then run the server
-```
+```sh
 uvicorn npps4.run.app:main --port 51376 --host <your lan IP or 0.0.0.0>
 ```
 
-**Caveat**: Currently, `--workers` option is not supported when using NPPS4-DLAPI download backend.
+If you need to run with multiple workers, you must additionally install `gunicorn` and `uvicorn-worker` Python package.
+```sh
+pip install gunicorn uvicorn-worker # only needs to be done once
+
+gunicorn --preload npps4.run.app:main -w 4 -k uvicorn_worker.UvicornWorker -b <your lan IP or 0.0.0.0>:51376
+```
 
 Updating
 -----

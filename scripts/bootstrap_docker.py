@@ -47,7 +47,6 @@ def main() -> int:
         return 1
 
     # Setup
-    port = int(os.environ.get("PORT", "51376"))
     os.environ["NPPS4_CONFIG"] = config_toml
     print("Using config.toml path in container:", config_toml, flush=True)
 
@@ -66,7 +65,7 @@ def main() -> int:
             "-k",
             "uvicorn_worker.UvicornWorker",
             "-b",
-            f"0.0.0.0:{port}",
+            "0.0.0.0:51376",
         )
     else:
         os.execlp(
@@ -74,7 +73,7 @@ def main() -> int:
             "uvicorn",
             "npps4.run.app:main",
             "--port",
-            str(port),
+            "51376",
             "--host",
             "0.0.0.0",
         )
