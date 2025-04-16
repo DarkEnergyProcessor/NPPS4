@@ -42,7 +42,7 @@ SERVERINFO_TEMPLATE = {
 
 
 def get_root_path(request: fastapi.Request):
-    root_path: str = request.headers.get("X-Forwarded-Prefix", request.scope.get("root_path", ""))
+    root_path: str = request.scope.get("root_path", "")
     if len(root_path) > 0:
         if root_path[0] != "/":
             root_path = "/" + root_path
