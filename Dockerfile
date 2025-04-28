@@ -18,8 +18,8 @@ COPY ./requirements.txt requirements.txt
 ARG PRIVATE_KEY=default_server_key.pem
 COPY ${PRIVATE_KEY} default_server_key.pem
 
-RUN PIP_ROOT_USER_ACTION=ignore python -m pip install -U pip
-RUN PIP_ROOT_USER_ACTION=ignore pip install -r requirements.txt gunicorn uvicorn-worker asyncpg asyncmy
+RUN python -m pip install --root-user-action=ignore --no-cache-dir -U pip
+RUN pip install --root-user-action=ignore --no-cache-dir -r requirements.txt gunicorn uvicorn-worker asyncpg asyncmy
 
 EXPOSE 51376/tcp
 
