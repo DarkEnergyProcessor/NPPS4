@@ -18,6 +18,15 @@ webview = fastapi.APIRouter(prefix="/webview.php", default_response_class=fastap
 templates = fastapi.templating.Jinja2Templates("templates")
 
 
+# https://github.com/encode/uvicorn/discussions/1386
+@core.middleware("http")
+async def root_path_from_x_forwarded_prefix(request: fastapi.Request, call_next):
+    prefix = request.headers.get("X-Forwarded-Prefix")
+    if prefix:
+        request.scope["root_path"] = prefix
+    return await call_next(request)
+
+
 @core.get("/")
 def todo_main_page():
     return fastapi.responses.RedirectResponse("/main.php/api")
