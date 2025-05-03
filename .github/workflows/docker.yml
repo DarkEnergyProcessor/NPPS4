@@ -23,57 +23,45 @@ jobs:
         uses: docker/setup-qemu-action@v3
         with:
           platforms: arm64
-
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
-
       - name: Inspect builder
         run: docker buildx inspect
-
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3.5.0
-
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
-
       - name: Extract version from NaN
-        shell: bash
-        run: |
-          echo "NPPS4_VERSION=0.1" >> $GITHUB_ENV
-
+        id: version
+        run: echo "npps4_version=0.1" >> $GITHUB_OUTPUT
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Calculate docker image tag
         id: set-tag
         uses: docker/metadata-action@master
         with:
-          images: |
-            ghcr.io/${{ github.repository }}
-          flavor: |
-            latest=true
-          tags: |
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
-
+          images: ghcr.io/${{ github.repository }}
+          flavor: latest=true
+          tags: type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
       - name: Build and push all platforms
         id: build-and-push
         uses: docker/build-push-action@v6
         with:
           push: true
+          context: '.'
           labels: |
             gitsha1=${{ github.sha }}
-            org.opencontainers.image.version=${{ env.NPPS4_VERSION }}
+            org.opencontainers.image.version=${{ steps.version.outputs.npps4_version }}
           tags: "${{ steps.set-tag.outputs.tags }}"
           file: "docker/Dockerfile"
           platforms: linux/amd64,linux/arm64
           build-args: |
             CARGO_NET_GIT_FETCH_WITH_CLI=true
-
       - name: Sign the images with GitHub OIDC Token
         env:
           DIGEST: ${{ steps.build-and-push.outputs.digest }}

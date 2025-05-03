@@ -2,7 +2,7 @@ services:
   npps4:
     image: ghcr.io/darkenergyprocessor/npps4:latest
     environment:
-      PORT: 51376
+      NPPS4_WORKER: 1
     ports:
       - 51376:51376
     volumes:

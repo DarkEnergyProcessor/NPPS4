@@ -5,6 +5,8 @@
 
 # Where's the data directory?
 # Path is relative to the project root directory.
+# Note: When running behind container, don't change this. All paths that
+# specify "data/" is the directory where this config.sample.toml is placed.
 data_directory = "data"
 
 # Secret key used for various things.
@@ -103,6 +105,7 @@ client_version = "59.4"
 # such that `http://example.com/n4dlapi/api/publicinfo` gives public
 # information about the NPPS4 Download API server, then specify
 # "http://example.com/n4dlapi"
+# Note: Make sure it's allowed to access internet if NPPS4 is behind container.
 server = "https://localhost:8000"
 
 # What's the Shared Key used to communicate with the NPPS4 Download API
@@ -113,6 +116,8 @@ shared_key = ""
 [download.internal]
 # Where's the "archive-root" directory is stored?
 # Path is relative to the project root directory.
+# Note: When NPPS4 is run behind container, extra care must be taken such that
+# the directory is accessible inside the container.
 archive_root = "archive-root"
 
 [download.custom]
