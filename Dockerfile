@@ -3,7 +3,7 @@ FROM python:${PYTHON_VERSION}-bookworm AS wheel_build
 
 COPY requirements.txt requirements.txt
 RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install build-essential cmake
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential cmake
 RUN pip wheel -r requirements.txt -w wheels gunicorn uvicorn-worker asyncpg asyncmy
 
 FROM python:${PYTHON_VERSION}-slim-bookworm
