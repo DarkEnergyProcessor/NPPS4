@@ -190,7 +190,7 @@ class Album(common.Base, kw_only=True):
     love_max_flag: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False, index=True)
     rank_level_max_flag: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False, index=True)
     highest_love_per_unit: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
-    favorite_point: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
+    favorite_point: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0, index=True)
     sign_flag: sqlalchemy.orm.Mapped[bool] = sqlalchemy.orm.mapped_column(default=False)
 
 

@@ -3,6 +3,8 @@ import pydantic
 from .. import idol
 from .. import util
 from ..system import advanced
+from ..system import album
+from ..system import live
 from ..system import museum
 from ..system import profile
 from ..system import unit
@@ -63,9 +65,13 @@ class ProfileCardRankingResponse(pydantic.RootModel[list[ProfileCardRanking]]):
 
 @idol.register("profile", "liveCnt")
 async def profile_livecount(context: idol.SchoolIdolUserParams, request: ProfileRequest) -> ProfileLiveCountResponse:
-    util.stub("profile", "liveCnt", request)
-    return ProfileLiveCountResponse.model_validate(
-        [ProfileLiveCount(difficulty=i, clear_cnt=0) for i in (1, 2, 3, 4, 6)]
+    target_user = await user.get(context, request.user_id)
+    if target_user is None:
+        raise idol.error.by_code(idol.error.ERROR_CODE_USER_NOT_EXIST)
+
+    cleared = await live.get_cleard_live_count(context, target_user)
+    return ProfileLiveCountResponse(
+        [ProfileLiveCount(difficulty=i, clear_cnt=cleared.get(i, 0)) for i in (1, 2, 3, 4, 6)]
     )
 
 
@@ -73,8 +79,21 @@ async def profile_livecount(context: idol.SchoolIdolUserParams, request: Profile
 async def profile_cardranking(
     context: idol.SchoolIdolUserParams, request: ProfileRequest
 ) -> ProfileCardRankingResponse:
-    util.stub("profile", "cardRanking", request)
-    return ProfileCardRankingResponse.model_validate([])
+    target_user = await user.get(context, request.user_id)
+    if target_user is None:
+        raise idol.error.by_code(idol.error.ERROR_CODE_USER_NOT_EXIST)
+
+    return ProfileCardRankingResponse(
+        [
+            ProfileCardRanking(
+                unit_id=album_info.unit_id,
+                total_love=album_info.highest_love_per_unit,
+                rank=album_info.rank_max_flag + 1,
+                sign_flag=album_info.sign_flag,
+            )
+            for album_info in await album.all_ranking(context, target_user)
+        ]
+    )
 
 
 @idol.register("profile", "profileInfo")

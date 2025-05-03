@@ -1,8 +1,15 @@
+import dataclasses
+
 import sqlalchemy
 
 from .. import idol
 from ..db import main
 from ..db import unit
+
+
+@dataclasses.dataclass
+class Increment:
+    value: int
 
 
 async def update(
@@ -13,9 +20,11 @@ async def update(
     rank_max: bool = False,
     love_max: bool = False,
     rank_level_max: bool = False,
-    highest_love: int = 0,
-    favorite_point: int = 0,
+    highest_love: int | Increment = 0,
+    favorite_point: int | Increment = 0,
     sign_flag: bool = False,
+    *,
+    flush: bool = True,
 ):
     q = sqlalchemy.select(main.Album).where(main.Album.user_id == user.id, main.Album.unit_id == unit_id)
     result = await context.db.main.execute(q)
@@ -28,16 +37,36 @@ async def update(
     album.rank_max_flag = rank_max or album.rank_max_flag
     album.love_max_flag = love_max or album.love_max_flag
     album.rank_level_max_flag = rank_level_max or album.rank_level_max_flag
-    album.highest_love_per_unit = max(album.highest_love_per_unit, highest_love)
-    album.favorite_point = max(album.favorite_point, favorite_point)
     album.sign_flag = sign_flag or album.sign_flag
-    await context.db.main.flush()
+
+    if isinstance(highest_love, Increment):
+        album.highest_love_per_unit = album.highest_love_per_unit + highest_love.value
+    else:
+        album.highest_love_per_unit = max(album.highest_love_per_unit, highest_love)
+    if isinstance(favorite_point, Increment):
+        album.favorite_point = album.favorite_point + favorite_point.value
+    else:
+        album.favorite_point = max(album.favorite_point, favorite_point)
+
+    if flush:
+        await context.db.main.flush()
 
 
 async def all(context: idol.BasicSchoolIdolContext, user: main.User):
     q = sqlalchemy.select(main.Album).where(main.Album.user_id == user.id)
     result = await context.db.main.execute(q)
     return list(result.scalars())
+
+
+async def all_ranking(context: idol.BasicSchoolIdolContext, user: main.User):
+    q = (
+        sqlalchemy.select(main.Album)
+        .where(main.Album.user_id == user.id)
+        .order_by(main.Album.highest_love_per_unit.desc(), main.Album.id.desc())
+        .limit(50)
+    )
+    result = await context.db.main.execute(q)
+    return result.scalars().all()
 
 
 async def all_series(context: idol.BasicSchoolIdolContext):
