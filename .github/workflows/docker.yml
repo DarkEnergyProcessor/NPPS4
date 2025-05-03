@@ -58,7 +58,7 @@ jobs:
             gitsha1=${{ github.sha }}
             org.opencontainers.image.version=${{ steps.version.outputs.npps4_version }}
           tags: "${{ steps.set-tag.outputs.tags }}"
-          file: "docker/Dockerfile"
+          file: Dockerfile
           platforms: linux/amd64,linux/arm64
           build-args: |
             CARGO_NET_GIT_FETCH_WITH_CLI=true
