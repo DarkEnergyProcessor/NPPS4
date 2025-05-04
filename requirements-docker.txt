@@ -1,0 +1,5 @@
+asyncmy; platform_machine != aarch64 # Rectify once asyncmy has ARM64 Linux wheels
+aiomysql
+asyncpg
+gunicorn
+uvicorn-worker

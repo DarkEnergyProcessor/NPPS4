@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # This script serve as entrypoint when NPPS4 runs under Docker.
 # This is not regular NPPS4 script!
 
