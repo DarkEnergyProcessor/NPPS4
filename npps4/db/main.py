@@ -451,6 +451,18 @@ class LiveReplay(common.Base, kw_only=True):
     __table_args__ = (sqlalchemy.UniqueConstraint(user_id, live_difficulty_id, use_skill),)
 
 
+class PlayerRanking(common.Base, kw_only=True):
+    id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, init=False, primary_key=True)
+    user_id: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, sqlalchemy.ForeignKey(User.id))
+    day: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column()
+    score: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger)
+
+    __table_args__ = (
+        sqlalchemy.UniqueConstraint(user_id, day),
+        sqlalchemy.Index(None, user_id.asc(), day.desc(), score.desc()),
+    )
+
+
 engine = sqlalchemy.ext.asyncio.create_async_engine(config.get_database_url())
 sessionmaker = sqlalchemy.ext.asyncio.async_sessionmaker(engine)
 

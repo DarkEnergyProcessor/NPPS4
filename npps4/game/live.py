@@ -10,13 +10,13 @@ from .. import util
 from ..config import config
 from ..system import achievement
 from ..system import advanced
-from ..system import album
 from ..system import class_system as class_system_module
 from ..system import common
 from ..system import effort
 from ..system import live
 from ..system import live_model
 from ..system import museum
+from ..system import ranking
 from ..system import reward
 from ..system import scenario
 from ..system import subscenario
@@ -771,6 +771,9 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
             beatmap_data.notes_list,
             request.precise_score_log,
         )
+
+    # Log current player ranking
+    await ranking.increment_daily_score(context, current_user, score)
 
     # Create response
     reward_unit_list = LiveRewardUnitList()
