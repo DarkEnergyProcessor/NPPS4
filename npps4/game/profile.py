@@ -87,7 +87,7 @@ async def profile_cardranking(
         [
             ProfileCardRanking(
                 unit_id=album_info.unit_id,
-                total_love=album_info.highest_love_per_unit,
+                total_love=album_info.favorite_point,
                 rank=album_info.rank_max_flag + 1,
                 sign_flag=album_info.sign_flag,
             )

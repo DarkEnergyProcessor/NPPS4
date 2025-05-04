@@ -62,7 +62,7 @@ async def all_ranking(context: idol.BasicSchoolIdolContext, user: main.User):
     q = (
         sqlalchemy.select(main.Album)
         .where(main.Album.user_id == user.id)
-        .order_by(main.Album.highest_love_per_unit.desc(), main.Album.id.desc())
+        .order_by(main.Album.favorite_point.desc(), main.Album.id.desc())
         .limit(50)
     )
     result = await context.db.main.execute(q)
