@@ -8,7 +8,6 @@ import pydantic
 import sqlalchemy
 
 from .. import idol
-from .. import util
 from ..app import app
 from ..config import config
 from ..db import achievement

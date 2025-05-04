@@ -3,9 +3,9 @@ import pydantic
 from .. import const
 from .. import idol
 from .. import util
+from ..app import app
 from ..system import achievement
 from ..system import advanced
-from ..system import album
 from ..system import common
 from ..system import item
 from ..system import museum
@@ -15,6 +15,8 @@ from ..system import secretbox_model
 from ..system import unit
 from ..system import unit_model
 from ..system import user
+
+from typing import Any
 
 
 class SecretboxAllResponse(pydantic.BaseModel):
@@ -57,12 +59,21 @@ class SecretboxPonResponse(achievement.AchievementMixin, common.TimestampMixin, 
     present_cnt: int
 
 
+class SecretboxShowDetailRequest(pydantic.BaseModel):
+    secret_box_id: int
+    unit_type_id: int | None = None
+
+
+class SecretboxShowDetailResponse(pydantic.BaseModel):
+    unit_line_up: list[Any] = pydantic.Field(default_factory=list)
+    url: str  # Scouting Rates URL
+    rule_url: str  # Box scouting URL
+
+
 USE_STUB_DATA = False
 
 if USE_STUB_DATA:
     import json
-
-    from typing import Any
 
     class CustomSecretBoxResponse(pydantic.BaseModel):
         use_cache: int
@@ -241,4 +252,17 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
         promotion_performance_rate=100 if umi_rare_mode else 10,
         secret_box_parcel_type=secretbox_data.parcel_type,
         lowest_rarity=LOWEST_RARITY_SORT_ORDER[lowest_rarity - 1],
+    )
+
+
+@idol.register("secretbox", "showDetail")
+async def secretbox_showdetail(
+    context: idol.SchoolIdolUserParams, request: SecretboxShowDetailRequest
+) -> SecretboxShowDetailResponse:
+    util.stub("secretbox", "showDetail", context.raw_request_data)
+    return SecretboxShowDetailResponse(
+        # FIXME: Don't hardcode URLs
+        # TODO: Make Member Filter in secretbox detail work.
+        url=f"/webview.php/secretbox/detail?secretbox_id={request.secret_box_id}",
+        rule_url="/something",
     )

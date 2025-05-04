@@ -8,6 +8,7 @@ from ..config import config
 if not config.is_script_mode():
     from . import announce
     from . import helper
+    from . import secretbox
     from . import serialcode
     from . import static
     from . import tos
