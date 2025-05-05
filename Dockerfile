@@ -14,6 +14,7 @@ COPY ./external external
 COPY ./npps4 npps4
 COPY ./scripts scripts
 COPY ./static static
+COPY ./templates templates
 COPY ./util util
 COPY ./alembic.ini alembic.ini
 COPY ./config.sample.toml config.sample.toml
