@@ -465,6 +465,12 @@ class TeamStatCalculator:
         guest: main.Unit,
         museum_param: museum.MuseumParameterData,
     ):
+        # A few references:
+        # https://github.com/NonSpicyBurrito/sif-team-simulator/blob/2b018170b509f93c0bff4f8f56e6cebd07c7f7fc/src/core/stats.ts
+        # https://web.archive.org/web/20181212085822/http://decaf.kouhi.me/lovelive/index.php?title=Scoring
+        # Note that the rest are trial-and-error, but it's assured that this method is exactly same as in calculated
+        # score by the client.
+
         base_stat, unit_full_data_list = await self.get_base_team_stats(player_units)
         love_stat = TeamStatCalculator.add_live_deck_stats_list(base_stat, await self.apply_bond_to_stat(player_units))
 
