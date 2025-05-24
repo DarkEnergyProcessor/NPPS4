@@ -2,6 +2,7 @@ import math
 
 import pydantic
 import sqlalchemy
+import sqlalchemy.orm
 
 from . import achievement
 from . import award
@@ -311,7 +312,10 @@ async def delete_user(context: idol.BasicSchoolIdolContext, user_id: int):
     await _clean_table(context, main.Award, user_id)
     await _clean_table(context, main.Background, user_id)
     await _clean_table(context, main.RequestCache, user_id)
-    await _clean_table(context, main.Session, user_id)
+
+    # Delete session
+    q = sqlalchemy.delete(main.Session).where(main.Session.user_id == user_id)
+    await context.db.main.execute(q)
 
     # Perform failsafe on party_user_id
     q = (
