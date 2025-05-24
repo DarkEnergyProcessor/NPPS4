@@ -1,5 +1,6 @@
 import collections.abc
 import dataclasses
+import functools
 
 import pydantic
 import sqlalchemy
@@ -93,6 +94,14 @@ class LiveDeckStats(pydantic.BaseModel):
     cute: int = 0
     cool: int = 0
     hp: int = 0
+
+    def __add__(self, other: "LiveDeckStats"):
+        return LiveDeckStats(
+            smile=self.smile + other.smile,
+            cute=self.cute + other.cute,
+            cool=self.cool + other.cool,
+            hp=self.hp + other.hp,
+        )
 
 
 class LiveDeckInfo(pydantic.BaseModel):
@@ -311,6 +320,7 @@ async def fixup_achievement_reward(
 
 
 class TeamStatCalculator:
+
     def __init__(self, context: idol.BasicSchoolIdolContext):
         self.context = context
         self.cached_unit_info: dict[int, unit.unit.Unit] = {}
@@ -319,6 +329,135 @@ class TeamStatCalculator:
         self.cached_extra_unit_leader_skill: dict[int, unit.unit.ExtraLeaderSkill | None] = {}
         self.cached_unit_tags: dict[tuple[int, int], bool] = {}
 
+    async def get_base_team_stats(self, player_units: list[main.Unit]):
+        result: list[LiveDeckStats] = []
+        unit_full_data_list: list[unit_model.UnitInfoData] = []
+
+        # Retrieve base stats
+        for unit_data in player_units:
+            unit_full_data, stats = await unit.get_unit_data_full_info(self.context, unit_data)
+            result.append(LiveDeckStats(smile=stats.smile, cute=stats.pure, cool=stats.cool, hp=stats.hp))
+            unit_full_data_list.append(unit_full_data)
+
+        return result, unit_full_data_list
+
+    async def apply_bond_to_stat(self, player_units: list[main.Unit]):
+        result: list[LiveDeckStats] = []
+
+        for unit_data in player_units:
+            unit_info = await unit.get_unit_info(self.context, unit_data.unit_id)
+            smile = 0
+            pure = 0
+            cool = 0
+
+            match unit_info.attribute_id:
+                case 1:
+                    smile = unit_data.love
+                case 2:
+                    pure = unit_data.love
+                case 3:
+                    cool = unit_data.love
+
+            result.append(LiveDeckStats(smile=smile, cute=pure, cool=cool))
+
+        return result
+
+    @staticmethod
+    def apply_museum_stats(museum_param: museum.MuseumParameterData):
+        return [
+            LiveDeckStats(
+                smile=museum_param.smile,
+                cute=museum_param.pure,
+                cool=museum_param.cool,
+                hp=0,
+            )
+        ] * 9
+
+    async def apply_leader_stats(
+        self, player_units: list[main.Unit], stats: list[LiveDeckStats], leader_unit: main.Unit
+    ):
+        if len(stats) != len(player_units):
+            raise ValueError("stats and player_units are different")
+
+        result: list[LiveDeckStats] = [LiveDeckStats() for _ in range(len(stats))]
+
+        center = await self.get_unit_info(leader_unit.unit_id)
+
+        if center.default_leader_skill_id:
+            leader_skill_data = await self.get_unit_leader_skill(center.default_leader_skill_id)
+
+            # Apply leader skill
+            for stat, base_stat in zip(result, stats):
+                smile, pure, cool = leader_skill.calculate_bonus(
+                    leader_skill_data.leader_skill_effect_type,
+                    leader_skill_data.effect_value,
+                    base_stat.smile,
+                    base_stat.cute,
+                    base_stat.cool,
+                )
+                stat.smile = stat.smile + smile
+                stat.cute = stat.cute + pure
+                stat.cool = stat.cool + cool
+
+            # Get extra leader skill
+            extra_leader_skill = await self.get_unit_extra_leader_skill(center.default_leader_skill_id)
+
+            if extra_leader_skill is not None:
+                # Apply extra leader skill
+                for stat, base_stat, unit_data in zip(result, stats, player_units):
+                    unit_info = await self.get_unit_info(unit_data.unit_id)
+
+                    if await self.has_member_tag(unit_info.unit_type_id, extra_leader_skill.member_tag_id):
+                        smile, pure, cool = leader_skill.calculate_bonus(
+                            extra_leader_skill.leader_skill_effect_type,
+                            extra_leader_skill.effect_value,
+                            base_stat.smile,
+                            base_stat.cute,
+                            base_stat.cool,
+                        )
+
+                        stat.smile = stat.smile + smile
+                        stat.cute = stat.cute + pure
+                        stat.cool = stat.cool + cool
+
+        return result
+
+    async def construct_live_deck_unit_attribute(
+        self,
+        player_units: list[main.Unit],
+        unit_full_data_list: list[unit_model.UnitInfoData],
+        stats: list[LiveDeckStats],
+    ):
+        result: list[LiveDeckUnitAttribute] = []
+
+        for i, stat, unit_data, unit_full_data in zip(range(9), stats, player_units, unit_full_data_list):
+            result.append(
+                LiveDeckUnitAttribute(
+                    unit_id=unit_data.unit_id,
+                    level=unit_full_data.level,
+                    love=unit_data.love,
+                    rank=unit_data.rank,
+                    display_rank=unit_data.display_rank,
+                    smile=stat.smile,
+                    cute=stat.cute,
+                    cool=stat.cool,
+                    is_love_max=unit_full_data.is_love_max,
+                    is_rank_max=unit_full_data.is_rank_max,
+                    is_level_max=unit_full_data.is_level_max,
+                    unit_skill_exp=unit_data.skill_exp,
+                    unit_skill_level=unit_full_data.unit_skill_level,
+                    unit_removable_skill_capacity=unit_data.unit_removable_skill_capacity,
+                    removable_skill_ids=await unit.get_unit_removable_skills(self.context, unit_data),
+                    position=i + 1,
+                )
+            )
+
+        return result
+
+    @staticmethod
+    def add_live_deck_stats_list(a: list[LiveDeckStats], b: list[LiveDeckStats]):
+        return list(map(LiveDeckStats.__add__, a, b))
+
     async def get_live_stats(
         self,
         unit_deck_id: int,
@@ -326,101 +465,22 @@ class TeamStatCalculator:
         guest: main.Unit,
         museum_param: museum.MuseumParameterData,
     ):
-        # A few references:
-        # https://github.com/NonSpicyBurrito/sif-team-simulator/blob/2b018170b509f93c0bff4f8f56e6cebd07c7f7fc/src/core/stats.ts
-        # https://web.archive.org/web/20181212085822/http://decaf.kouhi.me/lovelive/index.php?title=Scoring
-        # Note that the rest are trial-and-error, but it's assured that this method is exactly same as in calculated
-        # score by the client.
-        unit_infos: list[unit.unit.Unit] = []
-        base_stats: list[unit.UnitStatsResult] = []
-        love_stats: list[tuple[int, int, int]] = []
-        sis_stats: list[tuple[int, int, int]] = []
-        unit_types: list[int] = []
-
-        total = LiveDeckStats()
-        leader = LiveDeckStats()
-        sis = LiveDeckStats()
-        sis_ids: list[list[int]] = []
-        unit_full: list[unit_model.UnitInfoData] = []
-
-        # Retrieve base stats
-        for unit_data in player_units:
-            unit_info = await self.get_unit_info(unit_data.unit_id)
-            unit_infos.append(unit_info)
-            unit_types.append(unit_info.unit_type_id)
-
-            unit_full_data, stats = await unit.get_unit_data_full_info(self.context, unit_data)
-            unit_full.append(unit_full_data)
-            sis_ids.append(await unit.get_unit_removable_skills(self.context, unit_data))
-            base_stats.append(stats)
-            total.hp = total.hp + stats.hp
-
-        # Apply bond stat
-        for i in range(9):
-            unit_info = unit_infos[i]
-            stats_info = base_stats[i]
-            smile = stats_info.smile + museum_param.smile
-            pure = stats_info.pure + museum_param.pure
-            cool = stats_info.cool + museum_param.cool
-            love = player_units[i].love
-            match unit_info.attribute_id:
-                case 1:
-                    smile = smile + love
-                case 2:
-                    pure = pure + love
-                case 3:
-                    cool = cool + love
-
-            love_stats.append((smile, pure, cool))
+        base_stat, unit_full_data_list = await self.get_base_team_stats(player_units)
+        love_stat = TeamStatCalculator.add_live_deck_stats_list(base_stat, await self.apply_bond_to_stat(player_units))
 
         # TODO: Apply SIS stats
-        # TODO: Re-evaluate bond-SIS order with museum
-        for stats in love_stats:
-            sis_stats.append(stats)
 
-        # Calculate leader bonus
-        leader_stats = await self.calculate_leader_bonus(sis_stats, unit_types, player_units[4])
-        guest_stats = await self.calculate_leader_bonus(sis_stats, unit_types, guest)
+        museum_stat = TeamStatCalculator.add_live_deck_stats_list(
+            love_stat, TeamStatCalculator.apply_museum_stats(museum_param)
+        )
+        leader_stat = await self.apply_leader_stats(player_units, museum_stat, player_units[4])
+        guest_stat = await self.apply_leader_stats(player_units, museum_stat, guest)
 
-        final_stats: list[LiveDeckUnitAttribute] = []
-
-        for i in range(9):
-            sis.smile = sis.smile + sis_stats[i][0]
-            sis.cute = sis.cute + sis_stats[i][1]
-            sis.cool = sis.cool + sis_stats[i][2]
-            leader.smile = leader.smile + leader_stats[i][0]
-            leader.cute = leader.cute + leader_stats[i][1]
-            leader.cool = leader.cool + leader_stats[i][2]
-
-            current_smile = sis_stats[i][0] + leader_stats[i][0] + guest_stats[i][0]
-            current_pure = sis_stats[i][1] + leader_stats[i][1] + guest_stats[i][1]
-            current_cool = sis_stats[i][2] + leader_stats[i][2] + guest_stats[i][2]
-            total.smile = total.smile + current_smile
-            total.cute = total.cute + current_pure
-            total.cool = total.cool + current_cool
-
-            unit_data = player_units[i]
-            unit_full_data = unit_full[i]
-            final_stats.append(
-                LiveDeckUnitAttribute(
-                    unit_id=unit_data.unit_id,
-                    level=unit_full_data.level,
-                    love=unit_data.love,
-                    rank=unit_data.rank,
-                    display_rank=unit_data.display_rank,
-                    smile=current_smile,
-                    cute=current_pure,
-                    cool=current_cool,
-                    is_love_max=unit_full_data.is_love_max,
-                    is_rank_max=unit_full_data.is_rank_max,
-                    is_level_max=unit_full_data.is_level_max,
-                    unit_skill_exp=unit_data.skill_exp,
-                    unit_skill_level=unit_full_data.unit_skill_level,
-                    unit_removable_skill_capacity=unit_data.unit_removable_skill_capacity,
-                    removable_skill_ids=sis_ids[i],
-                    position=i + 1,
-                )
-            )
+        final_stat = functools.reduce(
+            TeamStatCalculator.add_live_deck_stats_list, [museum_stat, leader_stat, guest_stat]
+        )
+        total = functools.reduce(LiveDeckStats.__add__, final_stat)
+        leader = functools.reduce(LiveDeckStats.__add__, leader_stat)
 
         return LiveDeckInfo(
             unit_deck_id=unit_deck_id,
@@ -430,58 +490,15 @@ class TeamStatCalculator:
             total_hp=total.hp,
             total_status=total,
             center_bonus=leader,
-            si_bonus=sis,
-            unit_list=final_stats,
+            si_bonus=LiveDeckStats(),
+            unit_list=await self.construct_live_deck_unit_attribute(player_units, unit_full_data_list, final_stat),
         )
-
-    async def calculate_leader_bonus(
-        self, stats: list[tuple[int, int, int]], unit_type_ids: list[int], leader_unit: main.Unit
-    ):
-        if len(stats) != len(unit_type_ids):
-            raise ValueError("stats and unit_type_ids are different")
-        result: list[tuple[int, int, int]] = [(0, 0, 0)] * len(stats)
-        center = await self.get_unit_info(leader_unit.unit_id)
-
-        if center.default_leader_skill_id:
-            leader_skill_data = await self.get_unit_leader_skill(center.default_leader_skill_id)
-
-            # Apply leader skill
-            for i in range(len(stats)):
-                result[i] = leader_skill.calculate_bonus(
-                    leader_skill_data.leader_skill_effect_type, leader_skill_data.effect_value, *stats[i]
-                )
-
-            extra_leader_skill = await self.get_unit_extra_leader_skill(center.default_leader_skill_id)
-            if extra_leader_skill is not None:
-                # Apply extra leader skill
-                for i in range(len(stats)):
-                    if await self.has_member_tag(unit_type_ids[i], extra_leader_skill.member_tag_id):
-                        bonus_stats = leader_skill.calculate_bonus(
-                            extra_leader_skill.leader_skill_effect_type, extra_leader_skill.effect_value, *stats[i]
-                        )
-                    else:
-                        bonus_stats = (0, 0, 0)
-
-                    old_stats = result[i]
-                    result[i] = (
-                        old_stats[0] + bonus_stats[0],
-                        old_stats[1] + bonus_stats[1],
-                        old_stats[2] + bonus_stats[2],
-                    )
-
-        return result
 
     async def get_unit_info(self, unit_id: int):
         unit_info = await unit.get_unit_info(self.context, unit_id)
         if unit_info is None:
             raise ValueError("invalid unit_id (info is None)")
         return unit_info
-
-    async def get_unit_rarity(self, rarity: int):
-        unit_rarity = await unit.get_unit_rarity(self.context, rarity)
-        if unit_rarity is None:
-            raise ValueError("invalid rarity (unit_rarity is None)")
-        return unit_rarity
 
     async def get_unit_leader_skill(self, leader_skill: int):
         unit_leader_skill = await unit.get_leader_skill(self.context, leader_skill)
