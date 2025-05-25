@@ -767,13 +767,17 @@ def calculate_bonus_stat_of_removable_skill(removable_skill: unit.RemovableSkill
 
 
 @common.context_cacheable("unit_type_member_tag")
-async def unit_type_has_tag(context: idol.BasicSchoolIdolContext, unit_type_member_tag_ids: tuple[int, int], /):
+async def _unit_type_has_tag_impl(context: idol.BasicSchoolIdolContext, unit_type_member_tag_ids: tuple[int, int], /):
     q = sqlalchemy.select(unit.UnitTypeMemberTag).where(
         unit.UnitTypeMemberTag.unit_type_id == unit_type_member_tag_ids[0],
         unit.UnitTypeMemberTag.member_tag_id == unit_type_member_tag_ids[1],
     )
     result = await context.db.unit.execute(q)
     return result.scalar() is not None
+
+
+async def unit_type_has_tag(context: idol.BasicSchoolIdolContext, unit_type_id: int, member_tag_id: int):
+    return await _unit_type_has_tag_impl(context, (unit_type_id, member_tag_id))
 
 
 @common.context_cacheable("unit_leader_skill")
@@ -795,7 +799,8 @@ async def get_removable_skill_info(context: idol.BasicSchoolIdolContext, user: m
     return result.scalar()
 
 
-async def get_removable_skill_game_info(context: idol.BasicSchoolIdolContext, /, removable_skill_id: int):
+@common.context_cacheable("unit_removable_skill")
+async def get_removable_skill_game_info(context: idol.BasicSchoolIdolContext, removable_skill_id: int, /):
     return await db.get_decrypted_row(context.db.unit, unit.RemovableSkill, removable_skill_id)
 
 

@@ -14,6 +14,7 @@ from . import item_model
 from . import live
 from . import live_model
 from . import museum
+from . import removable_skill
 from . import scenario
 from . import scenario_model
 from . import unit
@@ -373,6 +374,59 @@ class TeamStatCalculator:
             )
         ] * 9
 
+    async def apply_sis_stats(self, player_units: list[main.Unit], stats: list[LiveDeckStats]):
+        result: list[LiveDeckStats] = [LiveDeckStats() for _ in range(len(stats))]
+
+        for i, unit_data in enumerate(player_units):
+            for sis_id in await unit.get_unit_removable_skills(self.context, unit_data):
+                sis_info = await unit.get_removable_skill_game_info(self.context, sis_id)
+
+                # Ignore certain SIS
+                if sis_info is None:
+                    continue
+                if sis_info.skill_type != 1:
+                    continue
+                if sis_info.effect_type not in (1, 2, 3):
+                    continue
+
+                if not await removable_skill.can_apply(
+                    self.context, sis_info.trigger_reference_type, sis_info.trigger_type, player_units
+                ):
+                    continue
+
+                match sis_info.effect_range:
+                    case 1:
+                        # Apply to self
+                        base_stat = stats[i]
+                        dest_stat = result[i]
+                        smile, pure, cool = removable_skill.apply_stats(
+                            sis_info.effect_type,
+                            sis_info.effect_value,
+                            sis_info.fixed_value_flag > 0,
+                            base_stat.smile,
+                            base_stat.cute,
+                            base_stat.cool,
+                        )
+                        dest_stat.smile = dest_stat.smile + smile
+                        dest_stat.cute = dest_stat.cute + pure
+                        dest_stat.cool = dest_stat.cool + cool
+                    case 2:
+                        # Apply to all team
+                        for dest_stat, base_stat in zip(result, stats):
+                            smile, pure, cool = removable_skill.apply_stats(
+                                sis_info.effect_type,
+                                sis_info.effect_value,
+                                sis_info.fixed_value_flag > 0,
+                                base_stat.smile,
+                                base_stat.cute,
+                                base_stat.cool,
+                            )
+                            dest_stat.smile = dest_stat.smile + smile
+                            dest_stat.cute = dest_stat.cute + pure
+                            dest_stat.cool = dest_stat.cool + cool
+
+        return result
+
     async def apply_leader_stats(
         self, player_units: list[main.Unit], stats: list[LiveDeckStats], leader_unit: main.Unit
     ):
@@ -473,18 +527,16 @@ class TeamStatCalculator:
 
         base_stat, unit_full_data_list = await self.get_base_team_stats(player_units)
         love_stat = TeamStatCalculator.add_live_deck_stats_list(base_stat, await self.apply_bond_to_stat(player_units))
-
-        # TODO: Apply SIS stats
-
         museum_stat = TeamStatCalculator.add_live_deck_stats_list(
             love_stat, TeamStatCalculator.apply_museum_stats(museum_param)
         )
-        leader_stat = await self.apply_leader_stats(player_units, museum_stat, player_units[4])
-        guest_stat = await self.apply_leader_stats(player_units, museum_stat, guest)
+        sis_stat_base = await self.apply_sis_stats(player_units, museum_stat)
+        sis_stat = TeamStatCalculator.add_live_deck_stats_list(museum_stat, sis_stat_base)
+        # TODO: SIS stat calculation is still inexact.
+        leader_stat = await self.apply_leader_stats(player_units, sis_stat, player_units[4])
+        guest_stat = await self.apply_leader_stats(player_units, sis_stat, guest)
 
-        final_stat = functools.reduce(
-            TeamStatCalculator.add_live_deck_stats_list, [museum_stat, leader_stat, guest_stat]
-        )
+        final_stat = functools.reduce(TeamStatCalculator.add_live_deck_stats_list, [sis_stat, leader_stat, guest_stat])
         total = functools.reduce(LiveDeckStats.__add__, final_stat)
         leader = functools.reduce(LiveDeckStats.__add__, leader_stat)
 
@@ -496,7 +548,7 @@ class TeamStatCalculator:
             total_hp=total.hp,
             total_status=total,
             center_bonus=leader,
-            si_bonus=LiveDeckStats(),
+            si_bonus=functools.reduce(LiveDeckStats.__add__, sis_stat_base),
             unit_list=await self.construct_live_deck_unit_attribute(player_units, unit_full_data_list, final_stat),
         )
 
@@ -516,7 +568,7 @@ class TeamStatCalculator:
         return await unit.get_extra_leader_skill(self.context, leader_skill)
 
     async def has_member_tag(self, unit_type_id: int, member_tag_id: int):
-        return await unit.unit_type_has_tag(self.context, (unit_type_id, member_tag_id))
+        return await unit.unit_type_has_tag(self.context, unit_type_id, member_tag_id)
 
 
 @overload
