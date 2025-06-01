@@ -236,7 +236,11 @@ async def has_at_least_one(
     q = (
         sqlalchemy.select(sqlalchemy.func.count())
         .select_from(main.Incentive)
-        .where(main.Incentive.add_type == add_type.value, main.Incentive.item_id == item_id)
+        .where(
+            main.Incentive.user_id == user.id,
+            main.Incentive.add_type == add_type.value,
+            main.Incentive.item_id == item_id,
+        )
         .limit(1)
     )
     result = await context.db.main.execute(q)
