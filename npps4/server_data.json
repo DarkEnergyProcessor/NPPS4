@@ -49250,6 +49250,7 @@
 		},
 		{
 			"serial_code": "HESOYAM",
+			"caster": "upper",
 			"action": {
 				"message_en": "Health, Armour, and Money ($250,000)",
 				"message_jp": "健康、防具、お金 ($250,000)",
@@ -49274,6 +49275,7 @@
 		},
 		{
 			"serial_code": "INEEDSOMEHELP",
+			"caster": "upper",
 			"action": {
 				"message_en": "Health, Armour, and Money ($250,000)",
 				"message_jp": "健康、防具、お金 ($250,000)",
@@ -49298,6 +49300,7 @@
 		},
 		{
 			"serial_code": "ICANGOALLNIGHT",
+			"caster": "upper",
 			"action": {
 				"message_en": "Foo",
 				"message_jp": "Bar",
@@ -49317,6 +49320,7 @@
 		},
 		{
 			"serial_code": "VKYPQCF",
+			"caster": "upper",
 			"action": {
 				"message_en": "Foo",
 				"message_jp": "Bar",
