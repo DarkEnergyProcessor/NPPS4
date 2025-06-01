@@ -11,7 +11,7 @@ from .. import const
 from .. import util
 from ..system import item_model
 
-from typing import Literal, cast
+from typing import Annotated, Literal, cast
 
 
 class LiveUnitDrop(pydantic.BaseModel):
@@ -96,26 +96,37 @@ class SecretboxData(HasIDString):
 
 
 class SerialCodeHashed(pydantic.BaseModel):
-    salt: pydantic.Base64UrlBytes
-    hash: str
+    salt: Annotated[pydantic.Base64UrlBytes, pydantic.Field(description="Salt used to encrypt the serial code.")]
+    hash: Annotated[str, pydantic.Field(description="Encrypted serial code string.")]
 
 
 class SerialCodeUsageLimit(pydantic.BaseModel):
-    id: str
-    global_: bool = pydantic.Field(alias="global")
-    amount: int
+    id: Annotated[str, pydantic.Field(description="Unique ID to identify serial code usage limit")]
+    global_: Annotated[
+        bool, pydantic.Field(alias="global", description="Is the usage limit shared across all players?")
+    ]
+    amount: Annotated[int, pydantic.Field(description="Maximum amount this serial code can be used.")]
 
 
 class SerialCodeGiveItem(pydantic.BaseModel):
     type: Literal["item"] = "item"
-    message_en: str = "Serial Code Reward"
-    message_jp: str = "Serial Code Reward"
-    items: list[item_model.BaseItem]
+    message_en: Annotated[
+        str, pydantic.Field(description="Message to be shown for people using English language of the game.")
+    ] = "Serial Code Reward"
+    message_jp: Annotated[
+        str, pydantic.Field(description="Message to be shown for people using Japanese language of the game.")
+    ] = "Serial Code Reward"
+    items: Annotated[list[item_model.BaseItem], pydantic.Field(description="List of items to be given.")]
 
 
 class SerialCodeRunFunction(pydantic.BaseModel):
     type: Literal["run"] = "run"
-    function: str  # Must be registered in npps4.serialcode:functions
+    function: Annotated[
+        str,
+        pydantic.Field(
+            description="Function name to execute. Function name must be registered in `npps4.serialcode:functions`"
+        ),
+    ]
 
 
 SERIAL_CODE_ACTION_ADAPTER: pydantic.TypeAdapter[SerialCodeGiveItem | SerialCodeRunFunction] = pydantic.TypeAdapter(
@@ -143,13 +154,28 @@ def initialize_aes_for_action_field(key: bytes, salt: bytes):
 
 
 class SerialCode(pydantic.BaseModel):
-    serial_code: str | SerialCodeHashed
+    serial_code: Annotated[
+        str | SerialCodeHashed, pydantic.Field(description="Unencrypted or encrypted form of the serial code")
+    ]
     usage_limit: SerialCodeUsageLimit | None = None  # Limit per user
     start_time: int = 0  # Code valid start time
     end_time: int = 2147483647  # Code valid end time
-    action: list[str] | SerialCodeGiveItem | SerialCodeRunFunction  # list of str means secure action
+    action: Annotated[
+        list[str] | SerialCodeGiveItem | SerialCodeRunFunction,
+        pydantic.Field(description="What the serial code do? If it's list of string, it means it's a secure action."),
+    ]  # list of str means secure action
+    caster: Annotated[
+        Literal["lower", "upper"] | None,
+        pydantic.Field(description='How should the input be transformed in case? "lower" or "upper"'),
+    ] = None
 
     def check_serial_code(self, input_code: str):
+        match self.caster:
+            case "lower":
+                input_code = input_code.lower()
+            case "upper":
+                input_code = input_code.upper()
+
         match self.serial_code:
             case str():
                 return self.serial_code == input_code

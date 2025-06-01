@@ -79,6 +79,7 @@
 				"extra_data": {
 					"anyOf": [
 						{
+							"additionalProperties": true,
 							"type": "object"
 						},
 						{
@@ -113,6 +114,7 @@
 				"extra_data": {
 					"anyOf": [
 						{
+							"additionalProperties": true,
 							"type": "object"
 						},
 						{
@@ -594,6 +596,7 @@
 							"$ref": "#/$defs/SerialCodeHashed"
 						}
 					],
+					"description": "Unencrypted or encrypted form of the serial code",
 					"title": "Serial Code"
 				},
 				"usage_limit": {
@@ -632,7 +635,25 @@
 							"$ref": "#/$defs/SerialCodeRunFunction"
 						}
 					],
+					"description": "What the serial code do? If it's list of string, it means it's a secure action.",
 					"title": "Action"
+				},
+				"caster": {
+					"anyOf": [
+						{
+							"enum": [
+								"lower",
+								"upper"
+							],
+							"type": "string"
+						},
+						{
+							"type": "null"
+						}
+					],
+					"default": null,
+					"description": "How should the input be transformed in case? \"lower\" or \"upper\"",
+					"title": "Caster"
 				}
 			},
 			"required": [
@@ -647,23 +668,23 @@
 				"type": {
 					"const": "item",
 					"default": "item",
-					"enum": [
-						"item"
-					],
 					"title": "Type",
 					"type": "string"
 				},
 				"message_en": {
 					"default": "Serial Code Reward",
+					"description": "Message to be shown for people using English language of the game.",
 					"title": "Message En",
 					"type": "string"
 				},
 				"message_jp": {
 					"default": "Serial Code Reward",
+					"description": "Message to be shown for people using Japanese language of the game.",
 					"title": "Message Jp",
 					"type": "string"
 				},
 				"items": {
+					"description": "List of items to be given.",
 					"items": {
 						"$ref": "#/$defs/BaseItem"
 					},
@@ -680,11 +701,13 @@
 		"SerialCodeHashed": {
 			"properties": {
 				"salt": {
+					"description": "Salt used to encrypt the serial code.",
 					"format": "base64url",
 					"title": "Salt",
 					"type": "string"
 				},
 				"hash": {
+					"description": "Encrypted serial code string.",
 					"title": "Hash",
 					"type": "string"
 				}
@@ -701,13 +724,11 @@
 				"type": {
 					"const": "run",
 					"default": "run",
-					"enum": [
-						"run"
-					],
 					"title": "Type",
 					"type": "string"
 				},
 				"function": {
+					"description": "Function name to execute. Function name must be registered in `npps4.serialcode:functions`",
 					"title": "Function",
 					"type": "string"
 				}
@@ -721,14 +742,17 @@
 		"SerialCodeUsageLimit": {
 			"properties": {
 				"id": {
+					"description": "Unique ID to identify serial code usage limit",
 					"title": "Id",
 					"type": "string"
 				},
 				"global": {
+					"description": "Is the usage limit shared across all players?",
 					"title": "Global",
 					"type": "boolean"
 				},
 				"amount": {
+					"description": "Maximum amount this serial code can be used.",
 					"title": "Amount",
 					"type": "integer"
 				}
@@ -762,6 +786,7 @@
 				"extra_data": {
 					"anyOf": [
 						{
+							"additionalProperties": true,
 							"type": "object"
 						},
 						{
