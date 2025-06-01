@@ -49361,6 +49361,26 @@
 			"action": {
 				"function": "give_all_supporter_units"
 			}
+		},
+		{
+			"serial_code": "PHOEBE IS CUTE",
+			"usage_limit": {
+				"id": "Phoebe",
+				"global": false,
+				"amount": 50
+			},
+			"caster": "upper",
+			"action": {
+				"message_en": "Phoebe is cute",
+				"message_jp": "フィービーかわいい",
+				"items": [
+					{
+						"add_type": 1000,
+						"item_id": 5,
+						"amount": 25
+					}
+				]
+			}
 		}
 	],
 	"sticker_shop": [
