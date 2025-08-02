@@ -268,6 +268,9 @@ def register(
     allow_retry_on_unhandled_exception: bool = False,
     profile_this_endpoint: bool = False,
 ):
+    if (module, action) in API_ROUTER_MAP:
+        raise ValueError(f"Endpoint {module}/{action} is already registered!")
+
     def wrap0(f: _PossibleEndpointFunction[_T, _U, _V]):
         nonlocal batchable, log_response_data, profile_this_endpoint
 

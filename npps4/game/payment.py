@@ -144,13 +144,14 @@ async def payment_productlist(context: idol.SchoolIdolUserParams) -> PaymentProd
     )
 
 
-@idol.register("payment", "productList", batchable=False)
+@idol.register("payment", "receipt", batchable=False)
 async def payment_receipt(context: idol.SchoolIdolUserParams, request: PaymentReceiptRequest) -> PaymentReceiptResponse:
     # TODO
     util.stub("payment", "receipt", request)
-    if re.match(
+    product_id = re.match(
         r"holy linus in heaven, blessed be thy name, give us our daily ([\w\.]+) as in heaven so be it on this earth\.\.\.",
         request.receipt_data,
-    ):
-        util.log("Got holy linus request")
+    )
+    if product_id is not None:
+        util.log(f"Got holy linus request: {product_id.group(1)}")
     raise idol.error.by_code(422)
