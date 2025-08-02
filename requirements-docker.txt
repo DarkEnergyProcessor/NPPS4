@@ -1,5 +1,3 @@
-asyncmy; platform_machine != "aarch64" # Rectify once asyncmy has ARM64 Linux wheels
-aiomysql
-asyncpg
+psycopg[binary]
 gunicorn
 uvicorn-worker

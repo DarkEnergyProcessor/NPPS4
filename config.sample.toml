@@ -54,10 +54,12 @@ save_notes_list = false
 # SQLite3 is available as part of NPPS4 requirements to access game DB files.
 # Note: An async backend must be used:
 # * SQLite3: sqlite+aiosqlite
-# * PostgreSQL: postgresql+asyncpg
+# * PostgreSQL: postgresql+psycopg
 # * MySQL/MariaDB: mysql+asyncmy, mysql+aiomysql
 # For additional database backend please consult SQLAlchemy dialects:
 # https://docs.sqlalchemy.org/en/20/dialects/
+# Note: Docker image of NPPS4 does NOT contain MySQL/MariaDB support. Consider
+# using PostgreSQL instead.
 url = "sqlite+aiosqlite:///data/main.sqlite3"
 
 [download]
