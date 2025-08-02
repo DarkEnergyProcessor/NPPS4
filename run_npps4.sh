@@ -3,9 +3,9 @@ if [ -z "$VIRTUAL_ENV" ]; then
 		echo "Cannot find virtual environment. Is it installed?"
 		exit 1
 	fi
-	UVICORN="venv/bin/uvicorn"
+	PYTHON="venv/bin/python"
 else
-	UVICORN="$VIRTUAL_ENV/bin/uvicorn"
+	PYTHON="$VIRTUAL_ENV/bin/python"
 fi
 
-"$UVICORN" npps4.run.app:main --port 51376 "$@"
+"$PYTHON" main.py "$@"

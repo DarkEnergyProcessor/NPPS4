@@ -5,10 +5,10 @@ if "%VIRTUAL_ENV%"=="" (
 		echo Cannot find virtual environment. Is it installed?
 		exit /b 1
 	)
-	set UVICORN=venv\Scripts\uvicorn
+	set PYTHON=venv\Scripts\python
 ) else (
-	set UVICORN=%VIRTUAL_ENV%\Scripts\uvicorn
+	set PYTHON=%VIRTUAL_ENV%\Scripts\python
 )
 
-"%UVICORN%" npps4.run.app:main --port 51376 %*
+"%PYTHON%" main.py %*
 endlocal

@@ -1,22 +1,37 @@
 import fastapi
 
 from . import none as none_backend
-from . import n4dlapi as n4dlapi_backend
-from . import internal as internal_backend
 
 from .. import idoltype
 from ..config import config, cfgtype
 
-BACKENDS: dict[str, cfgtype.DownloadBackendProtocol] = {
-    "none": none_backend,
-    "n4dlapi": n4dlapi_backend,
-    "internal": internal_backend,
-    "custom": config.get_custom_download_protocol(),
-}
+from typing import Callable
 
-CURRENT_BACKEND = BACKENDS.get(config.CONFIG_DATA.download.backend)
-if CURRENT_BACKEND is None:
+
+def n4dlapi_factory():
+    from . import n4dlapi as n4dlapi_backend
+
+    return n4dlapi_backend
+
+
+def internal_factory():
+    from . import internal as internal_backend
+
+    return internal_backend
+
+
+BACKEND_FACTORY: dict[str, Callable[[], cfgtype.DownloadBackendProtocol]] = {
+    "none": lambda: none_backend,
+    "n4dlapi": n4dlapi_factory,
+    "internal": internal_factory,
+    "custom": config.get_custom_download_protocol,
+}
+assert config.CONFIG_DATA.download.backend is not None
+_used_backend = BACKEND_FACTORY.get(config.CONFIG_DATA.download.backend)
+if _used_backend is None:
     raise Exception(f"Missing or unknown backend '{config.CONFIG_DATA.download.backend}'")
+
+CURRENT_BACKEND = _used_backend()
 
 
 def get_server_version():

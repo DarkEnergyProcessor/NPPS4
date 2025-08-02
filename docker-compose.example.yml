@@ -1,0 +1,34 @@
+# Example docker-compose.yml to run NPPS4 with PostgreSQL
+
+services:
+  postgresql:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: npps4
+      POSTGRES_PASSWORD: npps4
+      PGUSER: postgres
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "npps4"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s
+  npps4:
+    build:
+      context: .
+    environment:
+      NPPS4_CONFIG_DATABASE_URL: postgresql+psycopg://npps4:npps4@postgresql/npps4 # maps to database URL in config.toml
+      NPPS4_CONFIG_DOWNLOAD_BACKEND: n4dlapi # Use NPPS4 DLAPI
+      NPPS4_CONFIG_DOWNLOAD_N4DLAPI_SERVER: http://example.com/npps4-dlapi # Uses this server to provide game files.
+      # ... and so on
+      NPPS4_WORKER: 1
+    ports:
+      - 51376:51376
+    volumes:
+      - ./npps4_data:/data
+    restart: unless-stopped
+    depends_on:
+      postgresql:
+        condition: service_healthy
