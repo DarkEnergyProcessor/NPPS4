@@ -6,6 +6,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from alembic import context
+from alembic.ddl.sqlite import SQLiteImpl
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -69,7 +70,11 @@ async def run_async_migrations() -> None:
 
     """
 
-    connectable = create_async_engine(npps4_config.get_database_url(), poolclass=pool.NullPool, echo=True)
+    connectable = create_async_engine(
+        npps4_config.get_database_url(), poolclass=pool.NullPool, echo=True, connect_args={"autocommit": False}
+    )
+    # https://github.com/sqlalchemy/alembic/issues/1655
+    SQLiteImpl.transactional_ddl = True
 
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)

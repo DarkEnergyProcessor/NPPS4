@@ -463,7 +463,7 @@ class PlayerRanking(common.Base, kw_only=True):
     )
 
 
-engine = sqlalchemy.ext.asyncio.create_async_engine(config.get_database_url())
+engine = sqlalchemy.ext.asyncio.create_async_engine(config.get_database_url(), connect_args={"autocommit": False})
 sessionmaker = sqlalchemy.ext.asyncio.async_sessionmaker(engine)
 
 
