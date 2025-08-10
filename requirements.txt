@@ -7,6 +7,7 @@ itsdangerous
 jinja2
 pycryptodomex
 pydantic
+pydantic-settings
 python-multipart
 sqlalchemy[asyncio]
 uvicorn[standard]
