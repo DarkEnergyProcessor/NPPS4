@@ -463,6 +463,10 @@ class PlayerRanking(common.Base, kw_only=True):
     )
 
 
+class MigrationFixes(common.Base, kw_only=True):
+    revision: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(primary_key=True)
+
+
 engine = sqlalchemy.ext.asyncio.create_async_engine(config.get_database_url(), connect_args={"autocommit": False})
 sessionmaker = sqlalchemy.ext.asyncio.async_sessionmaker(engine)
 
