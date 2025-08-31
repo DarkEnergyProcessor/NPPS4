@@ -17,13 +17,16 @@ prev_revision = "2_populate_normal_live_unlock"
 
 
 def intdefval[T](x: Any, defval: T, /) -> int | T:
+    if x is None:
+        return defval
+
     try:
         return int(x)
     except ValueError:
         return defval
 
 
-async def run_script(context: npps4.idol.BasicSchoolIdolContext):
+async def main(context: npps4.idol.BasicSchoolIdolContext):
     q = sqlalchemy.select(npps4.db.main.Incentive).where(
         npps4.db.main.Incentive.add_type == int(npps4.const.ADD_TYPE.UNIT)
     )
@@ -67,4 +70,3 @@ async def run_script(context: npps4.idol.BasicSchoolIdolContext):
                         row.extra_data = None
                     else:
                         row.extra_data = json.dumps(unit_extra_data.model_dump(mode="json"), separators=(",", ":"))
-                    await context.db.main.flush()
