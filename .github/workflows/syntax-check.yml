@@ -4,11 +4,14 @@ on: [push, pull_request]
 jobs:
   syntax-check:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.12', '3.13']
     steps:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ matrix.python-version }}
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Virtual Environment
