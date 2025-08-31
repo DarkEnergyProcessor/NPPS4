@@ -90,7 +90,7 @@ def inject_server_info():
 
 
 def load_module_from_file(file: str, modulename: str):
-    return types.SimpleNamespace(runpy.run_path(file))
+    return types.SimpleNamespace(**runpy.run_path(file))
 
 
 _LOGIN_BONUS_FILE = os.path.join(ROOT_DIR, CONFIG_DATA.game.login_bonus)
