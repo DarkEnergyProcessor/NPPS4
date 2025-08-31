@@ -5230,11 +5230,83 @@
 			]
 		},
 		{
+			"achievement_id": 10090010,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 14
+				}
+			]
+		},
+		{
 			"achievement_id": 10090011,
 			"rewards": [
 				{
 					"add_type": 5100,
 					"item_id": 15
+				}
+			]
+		},
+		{
+			"achievement_id": 10090012,
+			"rewards": [
+				{
+					"add_type": 5100,
+					"item_id": 15
+				}
+			]
+		},
+		{
+			"achievement_id": 10090013,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 291
+				}
+			]
+		},
+		{
+			"achievement_id": 10090014,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 300
+				}
+			]
+		},
+		{
+			"achievement_id": 10090015,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 314
+				}
+			]
+		},
+		{
+			"achievement_id": 10090016,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 450
+				}
+			]
+		},
+		{
+			"achievement_id": 10090017,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 453
+				}
+			]
+		},
+		{
+			"achievement_id": 10090018,
+			"rewards": [
+				{
+					"add_type": 5000,
+					"item_id": 457
 				}
 			]
 		},
