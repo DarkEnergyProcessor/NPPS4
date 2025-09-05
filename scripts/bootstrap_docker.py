@@ -30,7 +30,7 @@ def main() -> int:
 
     print("Using config.toml path in container:", config_toml, flush=True)
 
-    os.execlp(python, python, "main.py" "-w", str(worker_count))
+    os.execlp(python, python, "main.py", "-w", str(worker_count))
 
     # In case os.exec* fails, this is executed
     return 1
