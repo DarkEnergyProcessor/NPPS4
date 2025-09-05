@@ -21,6 +21,7 @@ COPY ./config.sample.toml config.sample.toml
 COPY ./LICENSE.md LICENSE.md
 COPY ./requirements.txt requirements.txt
 COPY ./requirements-docker.txt requirements-docker.txt
+COPY ./main.py main.py
 ARG PRIVATE_KEY_FILE=default_server_key.pem
 COPY ${PRIVATE_KEY_FILE} default_server_key.pem
 
