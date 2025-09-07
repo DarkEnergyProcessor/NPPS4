@@ -1,4 +1,8 @@
 # NPPS4 sample configuration file.
+# NPPS4 can be configured in 2 ways:
+# 1. By copying this file to `config.toml` and modifying it
+# 2. By specifying environment variable to desired value for each field.
+# Values in this config.sample.toml is what NPPS4 is configured by default.
 
 [main]
 # This is main configuration.
@@ -7,16 +11,19 @@
 # Path is relative to the project root directory.
 # Note: When running behind container, don't change this. All paths that
 # specify "data/" is the directory where this config.sample.toml is placed.
+# Environment Variable: NPPS4_CONFIG_MAIN_DATADIR
 data_directory = "data"
 
 # Secret key used for various things.
 # If this secret key is compromised, please change it!
 # Also you definitely must change this!
+# Environment Variable: NPPS4_CONFIG_MAIN_SECRETKEY
 secret_key = "Hello World"
 
 # Server private key.
 # You must have server private key setup alongside with your client
 # patched to use the server public key.
+# Environment Variable: NPPS4_CONFIG_MAIN_PKEY
 server_private_key = "default_server_key.pem"
 
 # Server private key password.
@@ -24,16 +31,19 @@ server_private_key = "default_server_key.pem"
 # Alternatively, the environment variable "NPPS_KEY_PASSWORD" takes precedence
 # over this value.
 # IF your private key is not encrypted, specify empty string.
+# Environment Variable: NPPS4_CONFIG_MAIN_PKEYPASS (or) NPPS_KEY_PASSWORD
 server_private_key_password = ""
 
 # Server-specific data.
 # Server-specific data controls server-specific variable such as live-related drops.
 # A sensible default based on version 59.4 is provided.
+# Environment Variable: NPPS4_CONFIG_MAIN_SERVERDATA
 server_data = "npps4/server_data.json"
 
 # Session token expiration in seconds.
 # If you don't want user token to expire, set this to 0.
 # The default is 72 hours (3 days).
+# Environment Variable: NPPS4_CONFIG_MAIN_TOKENEXPIRY
 session_expiry = 259200
 
 # For live replay, store the backup of live show notes data?
@@ -41,6 +51,7 @@ session_expiry = 259200
 # beatmap data is modified.
 # If this is true, then player will still able to play their live show replays
 # with the unmodified beatmap data but increase the database size.
+# Environment Variable: NPPS4_CONFIG_MAIN_SAVENOTESLIST
 save_notes_list = false
 
 [database]
@@ -58,8 +69,10 @@ save_notes_list = false
 # * MySQL/MariaDB: mysql+asyncmy, mysql+aiomysql
 # For additional database backend please consult SQLAlchemy dialects:
 # https://docs.sqlalchemy.org/en/20/dialects/
-# Note: Docker image of NPPS4 does NOT contain MySQL/MariaDB support. Consider
-# using PostgreSQL instead.
+# Note: Docker image of NPPS4 only ships with these database dialect support:
+# * sqlite+aiosqlite
+# * postgresql+psycopg
+# Environment Variable: NPPS4_CONFIG_DATABASE_URL
 url = "sqlite+aiosqlite:///data/main.sqlite3"
 
 [download]
@@ -83,16 +96,19 @@ url = "sqlite+aiosqlite:///data/main.sqlite3"
 # "custom" - Use custom Python script to provide downloader.
 #            Please see "external/custom_downloader.py" on how to implement
 #            your own download backend provider.
+# Environment Variable: NPPS4_CONFIG_DOWNLOAD_BACKEND
 backend = "none"
 
 # Send patched server_info.json automatically?
 # This requires honky-py (installed as part of NPPS4 requirements). There's no
 # reason to turn this off unless your download API or archive already provides
 # patched server_info.json.
+# Environment Variable: NPPS4_CONFIG_DOWNLOAD_FIXSERVERINFO
 send_patched_server_info = true
 
 [download.none]
 # What's the latest client version?
+# Environment Variable: NPPS4_CONFIG_DOWNLOAD_NONE_VERSION
 client_version = "59.4"
 
 [download.n4dlapi]
@@ -108,11 +124,13 @@ client_version = "59.4"
 # information about the NPPS4 Download API server, then specify
 # "http://example.com/n4dlapi"
 # Note: Make sure it's allowed to access internet if NPPS4 is behind container.
+# Environment Variable: NPPS4_CONFIG_DOWNLOAD_N4DLAPI_SERVER
 server = "https://localhost:8000"
 
 # What's the Shared Key used to communicate with the NPPS4 Download API
 # server?
 # If your NPPS4 Download API server is public, then specify empty string.
+# Environment Variable: NPPS4_CONFIG_DOWNLOAD_N4DLAPI_KEY
 shared_key = ""
 
 [download.internal]
@@ -120,11 +138,13 @@ shared_key = ""
 # Path is relative to the project root directory.
 # Note: When NPPS4 is run behind container, extra care must be taken such that
 # the directory is accessible inside the container.
+# Environment Variable: NPPS4_CONFIG_DOWNLOAD_INTERNAL_ROOT
 archive_root = "archive-root"
 
 [download.custom]
 # Specify custom download provider script.
 # Path is relative to the project root directory.
+# Environment Variable: NPPS4_CONFIG_DOWNLOAD_CUSTOM_FILE
 file = "external/custom_downloader.py"
 
 [game]
@@ -132,22 +152,27 @@ file = "external/custom_downloader.py"
 
 # Specify badwords checker script.
 # Path is relative to the project root directory.
+# Environment Variable: NPPS4_CONFIG_GAME_BADWORDS
 badwords = "external/badwords.py"
 
 # Specify login bonus reward generator script.
 # Path is relative to the project root directory.
+# Environment Variable: NPPS4_CONFIG_GAME_LOGINBONUS
 login_bonus = "external/login_bonus.py"
 
 # Specify beatmap provider script.
 # Path is relative to the project root directory.
+# Environment Variable: NPPS4_CONFIG_GAME_BEATMAPS
 beatmaps = "external/beatmap.py"
 
 # Specify Live Show! unit drop script.
 # Path is relative to the project root directory.
+# Environment Variable: NPPS4_CONFIG_GAME_UNITDROP
 live_unit_drop = "external/live_unit_drop.py"
 
 # Specify Live Show! Reward Box drop script.
 # Path is relative to the project root directory.
+# Environment Variable: NPPS4_CONFIG_GAME_BOXDROP
 live_box_drop = "external/live_box_drop.py"
 
 [iex]
@@ -156,26 +181,33 @@ live_box_drop = "external/live_box_drop.py"
 
 # Enable account data export.
 # Export UI can be accessed through /webview.php/helper/export
+# Environment Variable: NPPS4_CONFIG_IEX_EXPORT
 enable_export = true
 
 # Enable account data import.
 # Import UI can be accessed through /webview.php/helper/import
+# Environment Variable: NPPS4_CONFIG_IEX_IMPORT
 enable_import = false
 
 # When importing account through import UI, bypass any signature check.
 # Normally, only account exported with same "main.secret_key" can be imported
 # back.
+# Environment Variable: NPPS4_CONFIG_IEX_BYPASS
 bypass_signature = false
 
 [advanced]
 # This is advanced configuration.
-# In most cases, you don't have to change anything.
+# In almost all cases, you don't have to change anything here.
 
 # Base XORPAD key.
+# Environment Variable: NPPS4_CONFIG_ADVANCED_BASEKEY
 base_xorpad = "eit4Ahph4aiX4ohmephuobei6SooX9xo"
 # The server application key.
+# Environment Variable: NPPS4_CONFIG_ADVANCED_APPKEY
 application_key = "b6e6c940a93af2357ea3e0ace0b98afc"
 # Consumer key.
+# Environment Variable: NPPS4_CONFIG_ADVANCED_CONSUMERKEY
 consumer_key = "lovelive_test"
 # Should be the X-Message-Code sent by client be verified?
+# Environment Variable: NPPS4_CONFIG_ADVANCED_XMC
 verify_xmc = true
