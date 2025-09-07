@@ -18,7 +18,6 @@ ARG PRIVATE_KEY_FILE=default_server_key.pem
 COPY ${PRIVATE_KEY_FILE} default_server_key.pem
 COPY ./beatmaps beatmaps
 COPY ./external external
-COPY ./alembic alembic
 COPY ./alembic.ini alembic.ini
 COPY ./LICENSE.md LICENSE.md
 COPY ./static static
