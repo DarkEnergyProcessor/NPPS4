@@ -8,25 +8,27 @@ WORKDIR /NPPS4
 RUN mkdir data
 VOLUME data
 
-COPY ./alembic alembic
+COPY ./requirements.txt requirements.txt
+COPY ./requirements-docker.txt requirements-docker.txt
+RUN python -m pip install --root-user-action=ignore --no-cache-dir -U pip
+RUN pip install --root-user-action=ignore --no-cache-dir -r requirements.txt -r requirements-docker.txt
+
+# Least modified file first
+ARG PRIVATE_KEY_FILE=default_server_key.pem
+COPY ${PRIVATE_KEY_FILE} default_server_key.pem
 COPY ./beatmaps beatmaps
 COPY ./external external
-COPY ./npps4 npps4
-COPY ./scripts scripts
+COPY ./alembic alembic
+COPY ./alembic.ini alembic.ini
+COPY ./LICENSE.md LICENSE.md
 COPY ./static static
 COPY ./templates templates
 COPY ./util util
-COPY ./alembic.ini alembic.ini
-COPY ./config.sample.toml config.sample.toml
-COPY ./LICENSE.md LICENSE.md
-COPY ./requirements.txt requirements.txt
-COPY ./requirements-docker.txt requirements-docker.txt
-COPY ./main.py main.py
-ARG PRIVATE_KEY_FILE=default_server_key.pem
-COPY ${PRIVATE_KEY_FILE} default_server_key.pem
 
-RUN python -m pip install --root-user-action=ignore --no-cache-dir -U pip
-RUN pip install --root-user-action=ignore --no-cache-dir -r requirements.txt -r requirements-docker.txt
+COPY ./npps4 npps4
+COPY ./scripts scripts
+COPY ./main.py main.py
+COPY ./config.sample.toml config.sample.toml
 
 EXPOSE 51376/tcp
 
