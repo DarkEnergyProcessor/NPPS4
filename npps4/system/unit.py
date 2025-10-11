@@ -20,7 +20,7 @@ from .. import util
 from ..db import main
 from ..db import unit
 
-from typing import Literal, overload
+from typing import Literal, cast, overload
 
 
 @dataclasses.dataclass
@@ -889,7 +889,7 @@ async def detach_unit_removable_skill(context: idol.BasicSchoolIdolContext, unit
         main.UnitRemovableSkill.unit_owning_user_id == unit.id,
         main.UnitRemovableSkill.unit_removable_skill_id == removable_skill_id,
     )
-    result = await context.db.main.execute(q)
+    result = cast(sqlalchemy.CursorResult, await context.db.main.execute(q))
     return result.rowcount > 0
 
 

@@ -18,7 +18,7 @@ from ..config import config
 from ..db import main
 from ..db import live
 
-from typing import Any, Literal, overload
+from typing import Any, Literal, cast, overload
 
 
 async def unlock_normal_live(context: idol.BasicSchoolIdolContext, user: main.User, live_track_id: int):
@@ -369,7 +369,7 @@ async def get_live_in_progress(context: idol.BasicSchoolIdolContext, user: main.
 
 async def clean_live_in_progress(context: idol.BasicSchoolIdolContext, user: main.User):
     q = sqlalchemy.delete(main.LiveInProgress).where(main.LiveInProgress.user_id == user.id)
-    result = await context.db.main.execute(q)
+    result = cast(sqlalchemy.CursorResult, await context.db.main.execute(q))
     return result.rowcount > 0
 
 

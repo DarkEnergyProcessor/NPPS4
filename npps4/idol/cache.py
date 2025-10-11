@@ -6,6 +6,8 @@ from . import session
 from .. import util
 from ..db import main
 
+from typing import cast
+
 ENABLE_CACHE = False
 
 
@@ -54,5 +56,5 @@ async def store_response(
 
 async def clear(context: session.BasicSchoolIdolContext, user_id: int):
     q = sqlalchemy.delete(main.RequestCache).where(main.RequestCache.user_id == user_id)
-    result = await context.db.main.execute(q)
+    result = cast(sqlalchemy.CursorResult, await context.db.main.execute(q))
     return result.rowcount
