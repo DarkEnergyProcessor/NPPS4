@@ -28,7 +28,7 @@ class User(common.Base, kw_only=True):
     exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
     previous_exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
     next_exp: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=core.get_next_exp_cumulative(1))
-    game_coin: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
+    game_coin: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(common.IDInteger, default=0)
     free_sns_coin: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
     paid_sns_coin: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
     social_point: sqlalchemy.orm.Mapped[int] = sqlalchemy.orm.mapped_column(default=0)
