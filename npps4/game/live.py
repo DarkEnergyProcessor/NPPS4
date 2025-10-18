@@ -1,4 +1,5 @@
 import copy
+import itertools
 import json
 import math
 
@@ -13,6 +14,7 @@ from ..system import advanced
 from ..system import class_system as class_system_module
 from ..system import common
 from ..system import effort
+from ..system import item
 from ..system import live
 from ..system import live_model
 from ..system import museum
@@ -588,6 +590,30 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
     live_clear_data.hi_combo_cnt = max(live_clear_data.hi_combo_cnt, request.max_combo)
     live_clear_data.clear_cnt = live_clear_data.clear_cnt + 1
 
+    special_reward: list[common.AnyItem] = []
+    if live_clear_data.clear_cnt == 1:
+        # First clear. Give loveca only if:
+        # * User cleared Easy, Normal, and Hard
+        # * User cleared Expert
+        # * User cleared Master
+        if live_setting.difficulty > 3:
+            # User cleared Expert or higher. Give loveca directly.
+            special_reward.append(item.loveca(1))
+        else:
+            # User cleared Easy, Normal, or Hard. Only give loveca if all is cleared.
+            enh_list = (await live.get_enh_live_difficulty_ids(context, request.live_difficulty_id)).copy()
+            enh_list[live_setting.difficulty] = request.live_difficulty_id
+            cleared = True
+
+            for i in range(1, 4):
+                live_clear_data_adjacent = await live.get_live_clear_data(context, current_user, enh_list[i])
+                if live_clear_data_adjacent is None or live_clear_data_adjacent.clear_cnt == 0:
+                    cleared = False
+                    break
+
+            if cleared:
+                special_reward.append(item.loveca(1))
+
     # Get accomplished live goals
     old_live_goals = set(await live.get_achieved_goal_id_list(context, old_live_clear_data))
     new_live_goals = set(await live.get_achieved_goal_id_list(context, live_clear_data))
@@ -598,7 +624,7 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
     )
 
     # Give live goal rewards
-    for reward_data in live_goal_rewards:
+    for reward_data in itertools.chain(live_goal_rewards, special_reward):
         await advanced.add_item(context, current_user, reward_data)
 
     # This is the intended EXP and G drop
@@ -815,7 +841,7 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
         goal_accomp_info=LiveRewardGoalAccomplishedInfo(
             achieved_ids=accomplished_live_goals, rewards=live_goal_rewards
         ),
-        special_reward_info=[],  # TODO: Give 1 loveca on clearing this track for the first time.
+        special_reward_info=special_reward,
         accomplished_achievement_list=await achievement.to_game_representation(
             context, accomplished_achievement.accomplished, accomplished_achievement_rewards
         ),

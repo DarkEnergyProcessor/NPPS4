@@ -44,10 +44,6 @@ async def init(context: idol.BasicSchoolIdolContext, user: main.User):
     for normallive in result.scalars():
         setting_data = await context.db.live.get(live.LiveSetting, normallive.live_setting_id)
         assert setting_data is not None
-        # live_clear = main.LiveClear(
-        #     user_id=user.id, live_difficulty_id=normallive.live_difficulty_id, difficulty=setting_data.difficulty
-        # )
-        # context.db.main.add(live_clear)
         if setting_data.live_track_id not in unlocked:
             if await unlock_normal_live(context, user, setting_data.live_track_id):
                 unlocked.add(setting_data.live_track_id)
@@ -618,9 +614,41 @@ async def pull_precise_score_with_beatmap(
     return json.loads(gzip.decompress(replay.precise_log)), notes_list, replay.timestamp
 
 
-async def get_cleard_live_count(context: idol.BasicSchoolIdolContext, /, user: main.User) -> dict[int, int]:
+async def get_cleared_live_count(context: idol.BasicSchoolIdolContext, /, user: main.User) -> dict[int, int]:
     q = sqlalchemy.select(main.LiveClear.difficulty, sqlalchemy.func.count(main.LiveClear.live_difficulty_id)).group_by(
         main.LiveClear.difficulty
     )
     result = await context.db.main.execute(q)
     return {r[0]: r[1] for r in result}
+
+
+@common.context_cacheable("adjacent_live_difficulty_id")
+async def get_enh_live_difficulty_ids(context: idol.BasicSchoolIdolContext, /, live_difficulty_id: int):
+    output: dict[int, int] = {}
+
+    live_info_base = await get_live_info_table(context, live_difficulty_id)
+    if live_info_base is None:
+        raise ValueError(f"invalid live_difficulty_id {live_difficulty_id}")
+
+    live_setting = await get_live_setting(context, live_info_base.live_setting_id)
+    if live_setting is None:
+        raise ValueError(f"invalid live_setting_id {live_info_base.live_setting_id}")
+
+    q = sqlalchemy.select(live.LiveSetting).where(
+        live.LiveSetting.live_track_id == live_setting.live_track_id, live.LiveSetting.difficulty <= 3
+    )
+    live_settings = (await context.db.live.execute(q)).scalars().all()
+    live_setting_map = {l.live_setting_id: l for l in live_settings}
+
+    live_info_type = type(live_info_base)
+    q = sqlalchemy.select(live_info_type).where(
+        live_info_type.live_setting_id.in_([l.live_setting_id for l in live_settings])
+    )
+    live_infos = (await context.db.live.execute(q)).scalars().all()
+
+    for live_info in live_infos:
+        output[live_setting_map[live_info.live_setting_id].difficulty] = live_info.live_difficulty_id
+        # Also set cache for the retrieved live difficulty ids
+        context.set_cache("adjacent_live_difficulty_id", live_info.live_difficulty_id, output)
+
+    return output

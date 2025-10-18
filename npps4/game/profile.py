@@ -69,7 +69,7 @@ async def profile_livecount(context: idol.SchoolIdolUserParams, request: Profile
     if target_user is None:
         raise idol.error.by_code(idol.error.ERROR_CODE_USER_NOT_EXIST)
 
-    cleared = await live.get_cleard_live_count(context, target_user)
+    cleared = await live.get_cleared_live_count(context, target_user)
     return ProfileLiveCountResponse(
         [ProfileLiveCount(difficulty=i, clear_cnt=cleared.get(i, 0)) for i in (1, 2, 3, 4, 6)]
     )
