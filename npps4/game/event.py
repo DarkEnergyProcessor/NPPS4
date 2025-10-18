@@ -1,3 +1,5 @@
+import enum
+
 import pydantic
 
 from .. import idol
@@ -5,9 +7,41 @@ from .. import util
 from ..system import common
 
 
+class EventBonus(pydantic.BaseModel):
+    limited_bonus_type: int
+    limited_bonus_value: int
+
+
+class EventCampaignList(pydantic.BaseModel):
+    fixed_message: str = ""
+    live_limited_bonuses: list[EventBonus]
+
+
+class EventBannerType(enum.IntEnum):
+    EVENT = 0
+    DUEL = 7
+    ARENA = 14
+    CONCERT = 15
+    CLASS_COMPETITION = 16
+    CLASS = 17
+
+
+class Event(pydantic.BaseModel):
+    banner_type: EventBannerType
+    asset_path: str
+    start_date: str
+    end_date: str
+    is_locked: bool
+    is_new: bool = True
+    description: str = ""
+    target_id: int | None = None
+    # campaign_list: EventCampaignList | None = None
+
+
 class EventTargetList(pydantic.BaseModel):
     position: int
     is_displayable: bool = True
+    event_list: list[Event]
 
 
 class EventListResponse(common.TimestampMixin):
