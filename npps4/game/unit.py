@@ -650,17 +650,20 @@ async def unit_merge(context: idol.SchoolIdolUserParams, request: UnitMergeReque
         await exchange.add_exchange_point(context, current_user, exchange_point_id, amount)
         get_exchange_point_list.append(exchange.ExchangePointInfo(rarity=exchange_point_id, exchange_point=amount))
 
-    # Update album and trigger achievement
+    # Update album
     after_unit, _ = await unit.get_unit_data_full_info(context, source_unit)
     await album.update(context, current_user, source_unit.unit_id, rank_level_max=after_unit.is_level_max)
-    achievement_list = await achievement.check(
-        context,
-        current_user,
+
+    # Trigger achievement
+    ach_list_to_test = [
         achievement.AchievementUpdateUnitRankUp(unit_ids=[]),
         achievement.AchievementUpdateUnitMerge(
             unit_owning_user_id=source_unit.id, skill_level=after_unit.skill_level, amount=member_count
         ),
-    )
+    ]
+    if after_unit.is_level_max:
+        ach_list_to_test.append(achievement.AchievementUpdateUnitMaxLevel())
+    achievement_list = await achievement.check(context, current_user, *ach_list_to_test)
     accomplished_rewards = [
         await achievement.get_achievement_rewards(context, ach) for ach in achievement_list.accomplished
     ]
