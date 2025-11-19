@@ -847,6 +847,37 @@ class CheckSpecificUnitRankUp(AchievementChecker[AchievementUpdateUnitRankUp]):
         return value >= achievement_info.params2
 
 
+@register_achievement_checker(38)
+class CheckUnitRankUp(AchievementChecker[AchievementUpdateUnitRankUp]):
+    async def test_param(
+        self,
+        context: idol.BasicSchoolIdolContext,
+        data: AchievementUpdateUnitRankUp,
+        achievement_info: achievement.Achievement,
+    ) -> bool:
+        return achievement_info.params1 is None and len(data.unit_ids) > 0
+
+    def maxvalue(self, achievement_info: achievement.Achievement) -> int:
+        assert achievement_info.params1 is not None
+        return achievement_info.params1
+
+    async def update(
+        self,
+        context: idol.BasicSchoolIdolContext,
+        user: main.User,
+        oldvalue: int,
+        data: AchievementUpdateUnitRankUp,
+        achievement_info: achievement.Achievement,
+    ) -> int:
+        return oldvalue + len(data.unit_ids)
+
+    async def is_accomplished(
+        self, context: idol.BasicSchoolIdolContext, value: int, achievement_info: achievement.Achievement
+    ) -> bool:
+        assert achievement_info.params1 is not None
+        return value >= achievement_info.params1
+
+
 @register_achievement_checker(50)
 class CheckLiveAdvanced(AchievementChecker[AchievementUpdateLiveClear]):
     async def test_param(
