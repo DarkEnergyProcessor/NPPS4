@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1
 # check=skip=SecretsUsedInArgOrEnv
 
-ARG PYTHON_VERSION=3.12
-FROM python:${PYTHON_VERSION}-slim-bookworm
+ARG PYTHON_VERSION=3.14
+FROM python:${PYTHON_VERSION}-slim-trixie
 
 WORKDIR /NPPS4
 RUN mkdir data
