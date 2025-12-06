@@ -1,9 +1,17 @@
+import npps4.script_dummy  # isort:skip
+
 import argparse
+import datetime
 import io
 import sys
 
 import httpx
 import pydantic
+import sqlalchemy
+
+import npps4.idol
+import npps4.db.unit
+import npps4.system.unit
 
 
 class SchoolidoluAccountMiniCenter(pydantic.BaseModel):
@@ -120,15 +128,6 @@ async def convert_to_npps4_script(
     teams: list[SchoolidoluTeam],
     client: httpx.AsyncClient,
 ):
-    import datetime
-
-    import sqlalchemy
-
-    import npps4.script_dummy  # isort:skip
-    import npps4.idol
-    import npps4.db.unit
-    import npps4.system.unit
-
     unit_number_info: dict[int, npps4.db.unit.Unit] = {}
     sit_unit_number_to_unit_id: dict[int, int] = {}
 

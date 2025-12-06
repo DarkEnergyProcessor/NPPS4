@@ -20,6 +20,7 @@
 
 import asyncio
 import os
+import sys
 
-if os.name == "nt":
+if os.name == "nt" and sys.version_info < (3, 14):
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
