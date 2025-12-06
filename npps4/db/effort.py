@@ -1,6 +1,7 @@
 import sqlalchemy
 import sqlalchemy.ext.asyncio
 import sqlalchemy.orm
+import sqlalchemy.pool
 
 from . import common
 from ..download import download
@@ -51,6 +52,7 @@ class LiveEffortPointBoxSpec(common.GameDBBase, common.MaybeEncrypted):
 
 engine = sqlalchemy.ext.asyncio.create_async_engine(
     f"sqlite+aiosqlite:///file:{download.get_db_path('effort')}?mode=ro&uri=true",
+    poolclass=sqlalchemy.pool.NullPool,
     connect_args={"check_same_thread": False},
 )
 sessionmaker = sqlalchemy.ext.asyncio.async_sessionmaker(engine)

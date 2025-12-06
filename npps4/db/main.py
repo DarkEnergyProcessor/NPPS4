@@ -3,6 +3,7 @@ import hashlib
 import hmac
 
 import sqlalchemy
+import sqlalchemy.engine.url
 import sqlalchemy.ext.asyncio
 import sqlalchemy.orm
 
@@ -467,7 +468,14 @@ class MigrationFixes(common.Base, kw_only=True):
     revision: sqlalchemy.orm.Mapped[str] = sqlalchemy.orm.mapped_column(primary_key=True)
 
 
-engine = sqlalchemy.ext.asyncio.create_async_engine(config.get_database_url(), connect_args={"autocommit": False})
+# Have 0 connection pool with default max_overflow on SQLite3 only
+if sqlalchemy.engine.url.make_url(config.get_database_url()).get_backend_name() == "sqlite":
+    _poolsize = 0
+else:
+    _poolsize = 5
+engine = sqlalchemy.ext.asyncio.create_async_engine(
+    config.get_database_url(), pool_size=_poolsize, connect_args={"autocommit": False}
+)
 sessionmaker = sqlalchemy.ext.asyncio.async_sessionmaker(engine)
 
 
