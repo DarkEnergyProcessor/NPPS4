@@ -27,7 +27,7 @@ services:
     ports:
       - 51376:51376
     volumes:
-      - ./npps4_data:/data
+      - ./npps4_data:/NPPS4/data
     restart: unless-stopped
     depends_on:
       postgresql:
