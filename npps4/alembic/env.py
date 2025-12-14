@@ -23,6 +23,7 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 import npps4.db.main as npps4_model
 import npps4.config.config as npps4_config
+import npps4.evloop
 
 target_metadata = npps4_model.common.Base.metadata
 
@@ -85,7 +86,7 @@ async def run_async_migrations() -> None:
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
 
-    asyncio.run(run_async_migrations())
+    asyncio.run(run_async_migrations(), loop_factory=npps4.evloop.new_event_loop)
 
 
 if context.is_offline_mode():

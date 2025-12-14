@@ -1,6 +1,7 @@
 import argparse
 import asyncio
 
+from . import evloop
 from . import script_dummy
 from .config import config
 
@@ -25,7 +26,7 @@ async def main():
 
 
 def entry():
-    asyncio.run(main())
+    asyncio.run(main(), loop_factory=evloop.new_event_loop)
 
 
 if __name__ == "__main__":
