@@ -11,7 +11,7 @@ VOLUME data
 COPY ./requirements.txt requirements.txt
 COPY ./requirements-docker.txt requirements-docker.txt
 RUN python -m pip install --root-user-action=ignore --no-cache-dir -U pip
-RUN pip install --root-user-action=ignore --no-cache-dir -r requirements.txt -r requirements-docker.txt
+RUN pip install --root-user-action=ignore --no-cache-dir -r requirements.txt -r requirements-perf.txt -r requirements-docker.txt
 
 # Least modified file first
 ARG PRIVATE_KEY_FILE=default_server_key.pem

@@ -11,5 +11,3 @@ pydantic-settings
 python-multipart
 sqlalchemy[asyncio]
 uvicorn[standard]
-uvloop; sys_platform != "win32"
-winloop; sys_platform == "win32"

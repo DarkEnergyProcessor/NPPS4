@@ -26,7 +26,9 @@ Install Manually
 1. Install Python 3.12 or later.
 2. Create virtual environment.
 3. Activate it.
-4. `pip install -r requirements.txt`
+4. `pip install -r requirements.txt -r requirements-perf.txt`
+
+Note: If you're using Termux, make sure to have Rust toolchain and remove `-r requirements-perf.txt`.
 
 Install with Docker
 -----
