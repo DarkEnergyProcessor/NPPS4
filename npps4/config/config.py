@@ -9,7 +9,13 @@ from . import cfgtype, data
 
 from typing import cast
 
-ROOT_DIR = os.path.normpath(os.path.dirname(__file__) + "/../..")
+if getattr(sys, "frozen", False):
+    ROOT_DIR = os.path.normpath(os.path.dirname(sys.executable))
+    IS_BUNDLED = True
+else:
+    ROOT_DIR = os.path.normpath(os.path.dirname(__file__) + "/../..")
+    IS_BUNDLED = False
+
 os.makedirs(os.path.join(ROOT_DIR, "data"), exist_ok=True)
 
 CONFIG_DATA = data.ConfigData.model_validate({})
