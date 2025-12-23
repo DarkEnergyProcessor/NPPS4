@@ -1,4 +1,6 @@
 /.vscode
+/build
+/dist
 /data
 /npps4.egg-info
 /util/sampledata
