@@ -34,7 +34,7 @@ class _Main(pydantic.BaseModel):
         "Hello World"
     )
     server_private_key: Annotated[
-        str, pydantic.Field(validation_alias=pydantic.AliasChoices("secret_private_key", "pkey"))
+        str, pydantic.Field(validation_alias=pydantic.AliasChoices("server_private_key", "pkey"))
     ] = "default_server_key.pem"
     server_private_key_password: Annotated[
         str, pydantic.Field(validation_alias=pydantic.AliasChoices("server_private_key_password", "pkeypass"))

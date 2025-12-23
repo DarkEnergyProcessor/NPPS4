@@ -10,6 +10,9 @@ from . import cfgtype, data
 from typing import cast
 
 if getattr(sys, "frozen", False):
+    import multiprocessing
+
+    multiprocessing.freeze_support()
     ROOT_DIR = os.path.normpath(os.path.dirname(sys.executable))
     IS_BUNDLED = True
 else:
