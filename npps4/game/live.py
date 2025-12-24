@@ -372,7 +372,7 @@ async def live_partylist(context: idol.SchoolIdolUserParams, request: LivePartyL
         raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_FOUND)
 
     # Check LP
-    cap_value = live_info.capital_value * request.lp_factor
+    cap_value = math.ceil(live_info.capital_value * request.lp_factor * config.CONFIG_DATA.gameplay.energy_multiplier)
     match live_info.capital_type:
         case 1:
             if not user.has_energy(current_user, cap_value):
@@ -494,7 +494,7 @@ async def live_play(context: idol.SchoolIdolUserParams, request: LivePlayRequest
         raise idol.error.by_code(idol.error.ERROR_CODE_LIVE_NOT_FOUND)
 
     # Check LP
-    cap_value = live_info.capital_value * request.lp_factor
+    cap_value = math.ceil(live_info.capital_value * request.lp_factor * config.CONFIG_DATA.gameplay.energy_multiplier)
     match live_info.capital_type:
         case 1:
             if not user.has_energy(current_user, cap_value):
@@ -683,7 +683,7 @@ async def live_reward(context: idol.SchoolIdolUserParams, request: LiveRewardReq
             )
 
     # Add bond
-    love_count = request.love_cnt * live_in_progress.lp_factor
+    love_count = math.ceil(request.love_cnt * live_in_progress.lp_factor * config.CONFIG_DATA.gameplay.love_multiplier)
     before_after_loves = await unit.add_love_by_deck(context, current_user, live_in_progress.unit_deck_id, love_count)
 
     # Add live effort

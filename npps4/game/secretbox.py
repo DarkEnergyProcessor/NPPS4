@@ -1,9 +1,11 @@
+import math
+
 import pydantic
 
 from .. import const
 from .. import idol
 from .. import util
-from ..app import app
+from ..config import config
 from ..system import achievement
 from ..system import advanced
 from ..system import common
@@ -130,9 +132,10 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
         raise idol.error.by_code(idol.error.ERROR_CODE_SECRET_BOX_COST_TYPE_IS_NOT_SPECIFIED) from e
 
     # Check currency
+    cost_amount = math.ceil(secretbox_cost.cost_amount * config.CONFIG_DATA.gameplay.secretbox_cost_multiplier)
     if (
         await secretbox.get_user_currency(context, current_user, secretbox_cost.cost_type, secretbox_cost.cost_item_id)
-        < secretbox_cost.cost_amount
+        < cost_amount
     ):
         raise idol.error.by_code(idol.error.ERROR_CODE_SECRET_BOX_REMAINING_COST_IS_NOT_ENOUGH)
 
@@ -215,7 +218,7 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
 
     # Subtract currency
     await secretbox.sub_user_currency(
-        context, current_user, secretbox_cost.cost_type, secretbox_cost.cost_item_id, secretbox_cost.cost_amount
+        context, current_user, secretbox_cost.cost_type, secretbox_cost.cost_item_id, cost_amount
     )
 
     if umi_rare_mode:
@@ -244,7 +247,7 @@ async def secretbox_gachapon(context: idol.SchoolIdolUserParams, request: Secret
             await secretbox.get_user_currency(
                 context, current_user, secretbox_cost.cost_type, secretbox_cost.cost_item_id
             )
-            >= secretbox_cost.cost_amount,
+            >= cost_amount,
         ),
         secret_box_items=SecretboxItems(unit=unit_data_list, item=[]),
         museum_info=await museum.get_museum_info_data(context, current_user),

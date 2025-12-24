@@ -175,6 +175,28 @@ live_unit_drop = "external/live_unit_drop.py"
 # Environment Variable: NPPS4_CONFIG_GAME_BOXDROP
 live_box_drop = "external/live_box_drop.py"
 
+[gameplay]
+# Gameplay-related configuration
+
+# Multiplier for required LP consumption for live show.
+# Final energy required will be rounded towards infinity.
+# Set this to 0 to disable LP consumption.
+# Environment Variable: NPPS4_CONFIG_GAMEPLAY_LPMUL
+energy_multiplier = 1
+
+# Multiplier for given bond after clearing live show.
+# Final given bond will be rounded towards infinity.
+# Environment Variable: NPPS4_CONFIG_GAMEPLAY_LOVEMUL
+love_multiplier = 1
+
+# Multiplier for scouting banner cost.
+# Final cost will be rounded towards infinity.
+# Note: While setting this to 0 means scouting will be free, do note
+# that the game still requires 50 love gems to perform 10+1 scouting.
+# That check is client-side, meaning it's done in the game itself.
+# Environment Variable: NPPS4_CONFIG_GAMEPLAY_GACHACOSTMUL
+secretbox_cost_multiplier = 1
+
 [iex]
 # This is account import/export setting.
 # Feel free to change as needed, but consider it when exposing them.

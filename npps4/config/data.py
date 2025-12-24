@@ -129,6 +129,18 @@ class _ImportExport(pydantic.BaseModel):
     ] = False
 
 
+class _Gameplay(pydantic.BaseModel):
+    energy_multiplier: Annotated[
+        float, pydantic.Field(validation_alias=pydantic.AliasChoices("energy_multiplier", "lpmul"))
+    ] = 1
+    love_multiplier: Annotated[
+        float, pydantic.Field(validation_alias=pydantic.AliasChoices("love_multiplier", "lovemul"))
+    ] = 1
+    secretbox_cost_multiplier: Annotated[
+        float, pydantic.Field(validation_alias=pydantic.AliasChoices("secretbox_cost_multiplier", "gachacostmul"))
+    ] = 1
+
+
 class ConfigData(pydantic_settings.BaseSettings):
     model_config = pydantic_settings.SettingsConfigDict(
         env_prefix="NPPS4_CONFIG_",
@@ -141,6 +153,7 @@ class ConfigData(pydantic_settings.BaseSettings):
     database: _Database = pydantic.Field(default_factory=_Database)
     download: _Download = pydantic.Field(default_factory=_Download)
     game: _Game = pydantic.Field(default_factory=_Game)
+    gameplay: _Gameplay = pydantic.Field(default_factory=_Gameplay)
     advanced: _Advanced = pydantic.Field(default_factory=_Advanced)
     iex: _ImportExport = pydantic.Field(default_factory=_ImportExport)
 
