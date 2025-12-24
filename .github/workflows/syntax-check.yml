@@ -27,23 +27,4 @@ jobs:
           set -e
           source venv/bin/activate
           npx pyright
-  artifact-docker:
-    runs-on: ${{ matrix.runs-on }}
-    strategy:
-      matrix:
-        runs-on: [ubuntu-24.04, ubuntu-24.04-arm]
-      fail-fast: false
-    needs: syntax-check
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Build Docker Images
-        run: docker build -t npps4 .
-      - name: Export Docker Images
-        run: docker save npps4 | gzip > npps4.tar.gz
-      - name: Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: npps4-docker-${{ runner.arch }}
-          path: npps4.tar.gz
-          if-no-files-found: error
+
