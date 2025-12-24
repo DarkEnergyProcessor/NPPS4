@@ -9,15 +9,18 @@ from . import cfgtype, data
 
 from typing import cast
 
+BUNDLE_DIR: str | None
+"""If running under pyinstaller, this will be pointing to sys._MEIPASS"""
+
 if getattr(sys, "frozen", False):
     import multiprocessing
 
     multiprocessing.freeze_support()
     ROOT_DIR = os.path.normpath(os.path.dirname(sys.executable))
-    IS_BUNDLED = True
+    BUNDLE_DIR = cast(str, sys._MEIPASS)  # type: ignore
 else:
     ROOT_DIR = os.path.normpath(os.path.dirname(__file__) + "/../..")
-    IS_BUNDLED = False
+    BUNDLE_DIR = None
 
 os.makedirs(os.path.join(ROOT_DIR, "data"), exist_ok=True)
 
