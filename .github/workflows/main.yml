@@ -9,11 +9,11 @@ jobs:
         python-version: ['3.12', '3.13', '3.14']
     steps:
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup Virtual Environment
         run: python -m venv venv
       - name: Install requirements and Black
@@ -36,18 +36,18 @@ jobs:
         runs-on: [ubuntu-24.04, ubuntu-24.04-arm]
       fail-fast: false
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Build Docker Images
-        run: docker build -t npps4 .
-      - name: Export Docker Images
-        run: docker save npps4 | gzip > npps4.tar.gz
-      - name: Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: npps4-docker-${{ runner.arch }}
-          path: npps4.tar.gz
-          if-no-files-found: error
+    - name: Checkout
+      uses: actions/checkout@v6
+    - name: Build Docker Images
+      run: docker build -t npps4 .
+    - name: Export Docker Images
+      run: docker save npps4 | gzip > npps4.tar.gz
+    - name: Artifact
+      uses: actions/upload-artifact@v6
+      with:
+        name: npps4-docker-${{ runner.arch }}
+        path: npps4.tar.gz
+        if-no-files-found: error
 
   pyinstaller-windows:
     runs-on: windows-latest
@@ -182,15 +182,15 @@ jobs:
     - name: Download pyuploadtool
       run: curl -LO https://github.com/TheAssassin/pyuploadtool/releases/download/continuous/pyuploadtool-x86_64.AppImage && chmod +x pyuploadtool-x86_64.AppImage
     - name: Download Artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v6
     - name: List All Files
       run: ls -alFR
     - name: Zip Files
       run: |
         set -e
-        zip -j pyinstaller-npps4-windows.zip pyinstaller-npps4-windows/*
-        zip -j pyinstaller-npps4-ubuntu-22.04.zip pyinstaller-npps4-ubuntu-22.04/*
-        zip -j pyinstaller-npps4-ubuntu-22.04-arm.zip pyinstaller-npps4-ubuntu-22.04-arm/*
+        (cd pyinstaller-npps4-windows && zip -r9 ../pyinstaller-npps4-windows.zip .)
+        (cd pyinstaller-npps4-ubuntu-22.04 && zip -r9 ../pyinstaller-npps4-ubuntu-22.04.zip .)
+        (cd pyinstaller-npps4-ubuntu-22.04-arm && zip -r9 ../pyinstaller-npps4-ubuntu-22.04-arm.zip .)
         mv npps4-docker-X64/npps4.tar.gz npps4-dockerimage-x86-64.tar.gz
         mv npps4-docker-ARM64/npps4.tar.gz npps4-dockerimage-aarch64.tar.gz
     - name: Upload to Release
