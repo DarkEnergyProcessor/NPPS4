@@ -5,7 +5,7 @@ name: Build docker images
 on:
   workflow_run:
     branches: [master]
-    workflows: [Syntax Check]
+    workflows: [Build]
     types: [completed]
   workflow_dispatch:
 

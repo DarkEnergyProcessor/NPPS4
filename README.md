@@ -4,7 +4,7 @@ Null-Pointer Private Server: Revisited
 [![Python: 3.14](https://img.shields.io/badge/Python-3.14-blue)](https://www.python.org/)
 [![Static Type Checker: Pyright](https://img.shields.io/badge/Static%20Type%20Checker-Pyright-CEB98F)](https://github.com/microsoft/pyright)
 [![Code Style: Black](https://img.shields.io/badge/Code%20Style-Black-000000.svg)](https://github.com/psf/black)
-[![Syntax Check](https://github.com/DarkEnergyProcessor/NPPS4/actions/workflows/syntax-check.yml/badge.svg)](https://github.com/DarkEnergyProcessor/NPPS4/actions/workflows/syntax-check.yml)
+[![Build](https://github.com/DarkEnergyProcessor/NPPS4/actions/workflows/main.yml/badge.svg)](https://github.com/DarkEnergyProcessor/NPPS4/actions/workflows/main.yml)
 
 WIP SIF1 v9.11 private server written in Python 3.12+ using FastAPI.
 

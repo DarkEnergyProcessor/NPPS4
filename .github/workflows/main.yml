@@ -1,13 +1,57 @@
-name: Build PyInstaller
-on:
-  workflow_run:
-    workflows: [Syntax Check]
-    types: [completed]
+name: Build
+on: [push, pull_request]
 
 jobs:
+  syntax-check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.12', '3.13', '3.14']
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Virtual Environment
+        run: python -m venv venv
+      - name: Install requirements and Black
+        run: venv/bin/pip install -r requirements.txt black
+      - name: Install PyRight
+        run: npm install -g pyright@">1.1.376||<1.1.376"
+      - name: Check Black Formatter
+        run: venv/bin/black -l 120 --check .
+      - name: Check PyRight Syntax
+        run: |
+          set -e
+          source venv/bin/activate
+          npx pyright
+
+  artifact-docker:
+    runs-on: ${{ matrix.runs-on }}
+    needs: syntax-check
+    strategy:
+      matrix:
+        runs-on: [ubuntu-24.04, ubuntu-24.04-arm]
+      fail-fast: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build Docker Images
+        run: docker build -t npps4 .
+      - name: Export Docker Images
+        run: docker save npps4 | gzip > npps4.tar.gz
+      - name: Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: npps4-docker-${{ runner.arch }}
+          path: npps4.tar.gz
+          if-no-files-found: error
+
   pyinstaller-windows:
     runs-on: windows-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs: syntax-check
     defaults:
       run:
         shell: cmd
@@ -27,15 +71,15 @@ jobs:
     - name: Copy Runtime Files
       run: |
         robocopy "beatmaps" "dist\npps4\beatmaps" /E
-        if errorlevel 1 exit /b 1
+        if errorlevel 8 exit /b 1
         robocopy "external" "dist\npps4\external" /E
-        if errorlevel 1 exit /b 1
+        if errorlevel 8 exit /b 1
         robocopy "scripts" "dist\npps4\scripts" /E
-        if errorlevel 1 exit /b 1
+        if errorlevel 8 exit /b 1
         robocopy "static" "dist\npps4\static" /E
-        if errorlevel 1 exit /b 1
+        if errorlevel 8 exit /b 1
         robocopy "templates" "dist\npps4\templates" /E
-        if errorlevel 1 exit /b 1
+        if errorlevel 8 exit /b 1
         copy npps4\server_data.json dist\npps4\server_data.json
         if errorlevel 1 exit /b 1
         copy default_server_key.pem dist\npps4\server_key.pem
@@ -74,7 +118,7 @@ jobs:
         runs-on: [ubuntu-22.04, ubuntu-22.04-arm]
       fail-fast: false
     runs-on: ${{ matrix.runs-on }}
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs: syntax-check
     steps:
     - name: Setup Python
       uses: actions/setup-python@v6
