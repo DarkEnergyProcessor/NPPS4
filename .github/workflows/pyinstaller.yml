@@ -1,0 +1,131 @@
+name: Build PyInstaller
+
+on:
+  workflow_run:
+    workflows: ["syntax-check"]
+    types:
+    - completed
+
+jobs:
+  pyinstaller-windows:
+    runs-on: windows-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    defaults:
+      run:
+        shell: cmd
+    steps:
+    - name: Setup Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.14'
+    - name: Checkout
+      uses: actions/checkout@v6
+    - name: Setup Virtual Environment
+      run: python -m venv venv
+    - name: Install Dependencies
+      run: venv\Scripts\pip install -r requirements.txt -r requirements-perf.txt psycopg[binary] pyinstaller
+    - name: Make Bundle
+      run: venv\Scripts\pyinstaller npps4.spec
+    - name: Copy Runtime Files
+      run: |
+        robocopy "beatmaps" "dist\npps4\beatmaps" /E
+        if errorlevel 1 exit /b 1
+        robocopy "external" "dist\npps4\external" /E
+        if errorlevel 1 exit /b 1
+        robocopy "scripts" "dist\npps4\scripts" /E
+        if errorlevel 1 exit /b 1
+        robocopy "static" "dist\npps4\static" /E
+        if errorlevel 1 exit /b 1
+        robocopy "templates" "dist\npps4\templates" /E
+        if errorlevel 1 exit /b 1
+        copy npps4\server_data.json dist\npps4\server_data.json
+        if errorlevel 1 exit /b 1
+        copy default_server_key.pem dist\npps4\server_key.pem
+        if errorlevel 1 exit /b 1
+    - name: Generate config.toml
+      env:
+        NPPS4_CONFIG_DOWNLOAD_N4DLAPI_SERVER: ${{ secrets.NPPS4_CONFIG_DOWNLOAD_N4DLAPI_SERVER }}
+      shell: python
+      run: |
+        import os
+
+        with open("config.sample.toml", "r", encoding="utf-8", newline="") as f:
+            config = f.read()
+
+        config = config.replace(
+            'server_private_key = "default_server_key.pem"', 'server_private_key = "server_key.pem"'
+        ).replace('server_data = "npps4/server_data.json"', 'server_data = "server_data.json"')
+
+        dlapi_server = os.environ.get("NPPS4_CONFIG_DOWNLOAD_N4DLAPI_SERVER", "")
+        if dlapi_server:
+            config = config.replace('backend = "none"', 'backend = "n4dlapi"').replace(
+                'server = "https://localhost:8000"', f'server = "{dlapi_server}"'
+            )
+
+        with open("dist/npps4/config.toml", "w", encoding="utf-8", newline="") as f:
+            f.write(config)
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v6
+      with:
+        name: pyinstaller-npps4-windows
+        path: dist
+        if-no-files-found: error
+  pyinstaller-linux:
+    strategy:
+      matrix:
+        runs-on: [ubuntu-22.04, ubuntu-22.04-arm]
+      fail-fast: false
+    runs-on: ${{ matrix.runs-on }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+    - name: Setup Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.14'
+    - name: Checkout
+      uses: actions/checkout@v6
+    - name: Setup Virtual Environment
+      run: python -m venv venv
+    - name: Install Dependencies
+      run: venv/bin/pip install -r requirements.txt -r requirements-perf.txt psycopg[binary] pyinstaller
+    - name: Make Bundle
+      run: venv/bin/pyinstaller npps4.spec
+    - name: Copy Runtime Files
+      run: |
+        set -e
+
+        cp -r beatmaps dist/npps4/
+        cp -r external dist/npps4/
+        cp -r scripts dist/npps4/
+        cp -r static dist/npps4/
+        cp -r templates dist/npps4/
+        cp npps4/server_data.json dist/npps4/server_data.json
+        cp default_server_key.pem dist/npps4/server_key.pem
+    - name: Generate config.toml
+      env:
+        NPPS4_CONFIG_DOWNLOAD_N4DLAPI_SERVER: ${{ secrets.NPPS4_CONFIG_DOWNLOAD_N4DLAPI_SERVER }}
+      shell: python
+      run: |
+        import os
+
+        with open("config.sample.toml", "r", encoding="utf-8", newline="") as f:
+            config = f.read()
+
+        config = config.replace(
+            'server_private_key = "default_server_key.pem"', 'server_private_key = "server_key.pem"'
+        ).replace('server_data = "npps4/server_data.json"', 'server_data = "server_data.json"')
+
+        dlapi_server = os.environ.get("NPPS4_CONFIG_DOWNLOAD_N4DLAPI_SERVER", "")
+        if dlapi_server:
+            config = config.replace('backend = "none"', 'backend = "n4dlapi"').replace(
+                'server = "https://localhost:8000"', f'server = "{dlapi_server}"'
+            )
+
+        with open("dist/npps4/config.toml", "w", encoding="utf-8", newline="") as f:
+            f.write(config)
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v6
+      with:
+        name: pyinstaller-npps4-${{ matrix.runs-on }}
+        path: dist
+        if-no-files-found: error
