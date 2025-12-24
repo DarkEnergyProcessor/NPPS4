@@ -1,4 +1,4 @@
-aiosqlite!=0.22 # https://github.com/sqlalchemy/sqlalchemy/issues/13039
+aiosqlite<0.22 # https://github.com/sqlalchemy/sqlalchemy/issues/13039
 alembic[tz]
 fastapi
 honkypy @ https://github.com/DarkEnergyProcessor/honky-py/releases/download/0.2.0/honkypy-0.2.0-py3-none-any.whl
@@ -9,5 +9,5 @@ pycryptodomex
 pydantic>=2
 pydantic-settings
 python-multipart
-sqlalchemy[asyncio]
+sqlalchemy[asyncio]>=2
 uvicorn[standard]
