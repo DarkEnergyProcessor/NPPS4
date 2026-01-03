@@ -175,7 +175,20 @@ def get_custom_download_protocol():
     return _custom_download_backend_module
 
 
+# HACK: Override script mode
+override_script_mode = None
+
+
+def _override_script_mode(mode: bool):
+    global override_script_mode
+    override_script_mode = mode
+
+
 def is_script_mode():
+    global override_script_mode
+    if override_script_mode is not None:
+        return override_script_mode
+
     # Doing "python -m npps4.script" implicitly loads "npps4" module which loads "npps4.config.config".
     # As per Python documentation, the sys.argv[0] will equal to "-m" if the module is being loaded, however
     # endpoint registration happends during loading.
