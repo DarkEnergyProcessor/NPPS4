@@ -1,9 +1,16 @@
+# This script serve as main entrypoint for Chaquopy-based Android environment.
+#
+# The idion is:
+# setup_server()
+# start_server() in another thread
+# stop_server()
+
 import asyncio
 import os
-import sys
+
+import uvicorn
 
 import npps4.config.config
-import uvicorn
 
 npps4.config.config._override_script_mode(False)
 
@@ -35,6 +42,11 @@ def run_data_migrations():
 server_instance = None
 
 
+def setup_server():
+    run_migrations()
+    run_data_migrations()
+
+
 def start_server():
     global server_instance
 
@@ -42,9 +54,6 @@ def start_server():
         raise RuntimeError("cannot start server twice")
 
     import npps4.run.app
-
-    run_migrations()
-    run_data_migrations()
 
     cfg = uvicorn.Config(npps4.run.app.main, host="127.0.0.1", port=51376, loop="npps4.evloop:new_event_loop")
     server_instance = uvicorn.Server(cfg)

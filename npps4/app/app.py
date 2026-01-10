@@ -1,3 +1,4 @@
+import os
 import traceback
 import urllib.parse
 
@@ -11,11 +12,12 @@ import fastapi.templating
 from .. import errhand
 from .. import util
 from .. import version
+from ..config import config
 
 core = fastapi.FastAPI(title="NPPS4", version="%d.%d.%d" % version.NPPS4_VERSION, docs_url="/main.php/api")
 main = fastapi.APIRouter(prefix="/main.php")
 webview = fastapi.APIRouter(prefix="/webview.php", default_response_class=fastapi.responses.HTMLResponse)
-templates = fastapi.templating.Jinja2Templates("templates")
+templates = fastapi.templating.Jinja2Templates(os.path.join(config.ROOT_DIR, "templates"))
 
 
 # https://github.com/encode/uvicorn/discussions/1386
@@ -87,4 +89,4 @@ async def request_validation_exception_handler(
     )
 
 
-core.mount("/static", fastapi.staticfiles.StaticFiles(directory="static"), "static_file")
+core.mount("/static", fastapi.staticfiles.StaticFiles(directory=os.path.join(config.ROOT_DIR, "static")), "static_file")

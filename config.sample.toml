@@ -144,6 +144,7 @@ archive_root = "archive-root"
 [download.custom]
 # Specify custom download provider script.
 # Path is relative to the project root directory.
+# Note: The file path is not configurable in Android.
 # Environment Variable: NPPS4_CONFIG_DOWNLOAD_CUSTOM_FILE
 file = "external/custom_downloader.py"
 
@@ -152,26 +153,31 @@ file = "external/custom_downloader.py"
 
 # Specify badwords checker script.
 # Path is relative to the project root directory.
+# Note: The file path is not configurable in Android.
 # Environment Variable: NPPS4_CONFIG_GAME_BADWORDS
 badwords = "external/badwords.py"
 
 # Specify login bonus reward generator script.
 # Path is relative to the project root directory.
+# Note: The file path is not configurable in Android.
 # Environment Variable: NPPS4_CONFIG_GAME_LOGINBONUS
 login_bonus = "external/login_bonus.py"
 
 # Specify beatmap provider script.
 # Path is relative to the project root directory.
+# Note: The file path is not configurable in Android.
 # Environment Variable: NPPS4_CONFIG_GAME_BEATMAPS
 beatmaps = "external/beatmap.py"
 
 # Specify Live Show! unit drop script.
 # Path is relative to the project root directory.
+# Note: The file path is not configurable in Android.
 # Environment Variable: NPPS4_CONFIG_GAME_UNITDROP
 live_unit_drop = "external/live_unit_drop.py"
 
 # Specify Live Show! Reward Box drop script.
 # Path is relative to the project root directory.
+# Note: The file path is not configurable in Android.
 # Environment Variable: NPPS4_CONFIG_GAME_BOXDROP
 live_box_drop = "external/live_box_drop.py"
 

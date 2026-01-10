@@ -102,11 +102,13 @@ def inject_server_info():
 
 
 def load_module_from_file(file: str, modulename: str):
+    if sys.platform == "android":
+        return vars(__import__(modulename))
     return types.SimpleNamespace(**runpy.run_path(file))
 
 
 _LOGIN_BONUS_FILE = os.path.join(ROOT_DIR, CONFIG_DATA.game.login_bonus)
-_login_bonus_module = cast(cfgtype.LoginBonusProtocol, load_module_from_file(_LOGIN_BONUS_FILE, "npps4_login_bonus"))
+_login_bonus_module = cast(cfgtype.LoginBonusProtocol, load_module_from_file(_LOGIN_BONUS_FILE, "external.login_bonus"))
 
 
 def get_login_bonus_protocol():
@@ -123,7 +125,7 @@ async def contains_badwords(string: str, context):
 
     if _badwords_check_module is None:
         _badwords_check_module = cast(
-            cfgtype.BadwordsCheckProtocol, load_module_from_file(BADWORDS_CHECK_FILE, "npps4_badwords_check")
+            cfgtype.BadwordsCheckProtocol, load_module_from_file(BADWORDS_CHECK_FILE, "external.badwords")
         )
 
     return await _badwords_check_module.has_badwords(string, context)
@@ -138,7 +140,7 @@ def get_beatmap_provider_protocol():
 
     if _beatmap_provider_module is None:
         _beatmap_provider_module = cast(
-            cfgtype.BeatmapProviderProtocol, load_module_from_file(BEATMAP_PROVIDER_FILE, "npps4_beatmap_provider")
+            cfgtype.BeatmapProviderProtocol, load_module_from_file(BEATMAP_PROVIDER_FILE, "external.beatmap")
         )
 
     return _beatmap_provider_module
@@ -153,7 +155,7 @@ def get_live_unit_drop_protocol():
 
     if _live_unit_drop_module is None:
         _live_unit_drop_module = cast(
-            cfgtype.LiveUnitDropProtocol, load_module_from_file(LIVE_UNIT_DROP_FILE, "npps4_live_unit_drop")
+            cfgtype.LiveUnitDropProtocol, load_module_from_file(LIVE_UNIT_DROP_FILE, "external.live_unit_drop")
         )
 
     return _live_unit_drop_module
@@ -169,7 +171,7 @@ def get_custom_download_protocol():
     if _custom_download_backend_module is None:
         _custom_download_backend_module = cast(
             cfgtype.DownloadBackendProtocol,
-            load_module_from_file(CUSTOM_DOWNLOAD_FILE, "npps4_custom_download_backend"),
+            load_module_from_file(CUSTOM_DOWNLOAD_FILE, "external.custom_downloader"),
         )
 
     return _custom_download_backend_module
@@ -212,7 +214,7 @@ def get_live_box_drop_protocol():
 
     if _live_box_drop_module is None:
         _live_box_drop_module = cast(
-            cfgtype.LiveDropBoxProtocol, load_module_from_file(LIVE_BOX_DROP_FILE, "npps4_live_box_drop")
+            cfgtype.LiveDropBoxProtocol, load_module_from_file(LIVE_BOX_DROP_FILE, "external.live_box_drop")
         )
 
     return _live_box_drop_module
