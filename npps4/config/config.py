@@ -103,7 +103,7 @@ def inject_server_info():
 
 def load_module_from_file(file: str, modulename: str):
     if sys.platform == "android":
-        return vars(__import__(modulename))
+        return __import__(modulename)
     return types.SimpleNamespace(**runpy.run_path(file))
 
 

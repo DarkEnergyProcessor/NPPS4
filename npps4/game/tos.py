@@ -29,6 +29,7 @@ async def tos_tosagree(context: idol.SchoolIdolUserParams, request: TOSAgreeRequ
         current_user = await user.get_current(context)
         if not await tos.is_agreed(context, current_user, 1):
             await tos.agree(context, current_user, 1)
-            return
+
+        return
 
     raise idol.error.IdolError(detail="Invalid ToS agreement")
