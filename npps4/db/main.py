@@ -471,10 +471,12 @@ class MigrationFixes(common.Base, kw_only=True):
 # Have 0 connection pool with default max_overflow on SQLite3 only
 if sqlalchemy.engine.url.make_url(config.get_database_url()).get_backend_name() == "sqlite":
     _poolsize = 0
+    _connect_args = {"autocommit": False, "timeout": 25}
 else:
     _poolsize = 5
+    _connect_args = {}
 engine = sqlalchemy.ext.asyncio.create_async_engine(
-    config.get_database_url(), pool_size=_poolsize, connect_args={"autocommit": False}
+    config.get_database_url(), pool_size=_poolsize, connect_args=_connect_args
 )
 sessionmaker = sqlalchemy.ext.asyncio.async_sessionmaker(engine)
 

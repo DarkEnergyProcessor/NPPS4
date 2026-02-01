@@ -1,3 +1,4 @@
+import importlib
 import os
 import runpy
 import sys
@@ -103,7 +104,7 @@ def inject_server_info():
 
 def load_module_from_file(file: str, modulename: str):
     if sys.platform == "android":
-        return __import__(modulename)
+        return importlib.import_module(modulename)
     return types.SimpleNamespace(**runpy.run_path(file))
 
 
