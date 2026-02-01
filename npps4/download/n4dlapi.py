@@ -14,7 +14,6 @@ from ..config import config
 
 from typing import Any, Literal, TypeVar, overload
 
-
 NEED_PROTOCOL_VERSION = (1, 1)
 
 

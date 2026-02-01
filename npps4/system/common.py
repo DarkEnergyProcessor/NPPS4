@@ -12,7 +12,6 @@ from .. import util
 
 from typing import Callable, Hashable, cast
 
-
 AnyItem = unit_model.AnyUnitItem | scenario_model.ScenarioItem | live_model.LiveItem | item_model.Item
 
 

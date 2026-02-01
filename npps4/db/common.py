@@ -7,7 +7,6 @@ import sqlalchemy.dialects.mysql
 import sqlalchemy.dialects.oracle
 import sqlalchemy.dialects.sqlite
 
-
 IDInteger = sqlalchemy.BigInteger().with_variant(sqlalchemy.dialects.sqlite.INTEGER(), "sqlite")
 
 
