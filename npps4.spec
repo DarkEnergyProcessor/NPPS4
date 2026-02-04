@@ -2,14 +2,21 @@
 import importlib.util
 
 a = Analysis(
-    ['pyinstaller_bootstrap.py'],
+    ["pyinstaller_bootstrap.py"],
     pathex=[],
     binaries=[],
     datas=[
         ("alembic.ini", "."),
         ("npps4/alembic", "npps4/alembic"),
     ],
-    hiddenimports=["aiosqlite", "psycopg", "winloop._noop"],
+    hiddenimports=[
+        "aiosqlite",
+        "psycopg",
+        "winloop._noop",
+        "npps4.scriptutils.boot",
+        "npps4.scriptutils.user",
+        "npps4.script_dummy",
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -24,7 +31,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='npps4',
+    name="npps4",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -43,5 +50,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='npps4',
+    name="npps4",
 )
