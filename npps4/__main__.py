@@ -39,13 +39,19 @@ def script_command(script: str, args: list[str]):
             print(f"* {k}")
         print()
     else:
-        import asyncio
-        import runpy
+        if script.endswith(".py"):
+            script = script[:-3]
 
-        from . import evloop
+        if script in valid_scripts:
+            import asyncio
+            import runpy
 
-        module = runpy.run_path(valid_scripts[script])
-        asyncio.run(module["run_script"](args), loop_factory=evloop.new_event_loop)
+            from . import evloop
+
+            module = runpy.run_path(valid_scripts[script])
+            asyncio.run(module["run_script"](args), loop_factory=evloop.new_event_loop)
+        else:
+            raise RuntimeError(f"Script '{script}' does not exist.")
 
 
 def main():
@@ -69,6 +75,7 @@ def main():
         "script", formatter_class=argparse.ArgumentDefaultsHelpFormatter, help="Run NPPS4 Script"
     )
     script_parser.add_argument("name", help="Script name, or 'list' to list all scripts.")
+    script_parser.add_argument("args", nargs=argparse.REMAINDER, help="Additional arguments to pass.")
 
     if len(argv) == 0 or argv[0] not in {"run", "script", "-h", "--help"}:
         argv.insert(0, "run")
@@ -78,7 +85,7 @@ def main():
         case "run":
             run_command(args.host, args.port)
         case "script":
-            script_command(args.name, argv[3:])
+            script_command(args.name, args.args or [])
 
 
 if __name__ == "__main__":
