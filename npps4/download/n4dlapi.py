@@ -215,7 +215,7 @@ async def get_raw_files(request: fastapi.Request, platform: idoltype.PlatformTyp
 
 def initialize():
     global _public_info, _base_url
-    print("Getting public info API from external server")
+    util.log("Getting public info API from external server", severity=util.logging.INFO)
     _public_info = _call_api("api/publicinfo")
 
     if (
@@ -226,5 +226,5 @@ def initialize():
             "The specified server does not implement NPPS4-DLAPI Protocol " + ("%d.%d" % NEED_PROTOCOL_VERSION)
         )
 
-    print("Getting release info keys")
+    util.log("Getting release info keys", severity=util.logging.INFO)
     release_key.update({int(k): v for k, v in _call_api("api/v1/release_info").items()})
