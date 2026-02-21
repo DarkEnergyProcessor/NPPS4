@@ -1,4 +1,5 @@
 import asyncio
+import os.path
 from logging.config import fileConfig
 
 from sqlalchemy import pool
@@ -71,11 +72,23 @@ async def run_async_migrations() -> None:
 
     """
 
+    # https://github.com/sqlalchemy/alembic/issues/1655
+    SQLiteImpl.transactional_ddl = True
     connectable = create_async_engine(
         npps4_config.get_database_url(), poolclass=pool.NullPool, echo=True, connect_args={"autocommit": False}
     )
-    # https://github.com/sqlalchemy/alembic/issues/1655
-    SQLiteImpl.transactional_ddl = True
+
+    if connectable.dialect.name == "sqlite":
+        # Unfortunately we have to set WAL journaling mode manually.
+        # See these issues:
+        # https://github.com/sqlalchemy/sqlalchemy/issues/12585
+        # https://github.com/omnilib/aiosqlite/pull/312
+        import sqlite3  # Import it here to improve migration startup times on non-SQLite3
+
+        assert connectable.url.database
+        dbfile = os.path.join(npps4_config.ROOT_DIR, connectable.url.database)
+        with sqlite3.connect(dbfile, isolation_level=None) as db:
+            db.execute("PRAGMA journal_mode=WAL")
 
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)
