@@ -743,7 +743,7 @@ async def get_unit_data_full_info(context: idol.BasicSchoolIdolContext, unit_dat
             is_rank_max=idolized,
             is_love_max=unit_data.love >= unit_rarity.after_love_max,
             is_level_max=stats.level >= unit_rarity.after_level_max,
-            is_signed=unit_data.is_signed,
+            is_signed=unit_data.is_signed and await has_signed_variant(context, unit_data.unit_id),
             is_skill_level_max=skill_max,
             is_removable_skill_capacity_max=removable_skill_max,
             insert_date=util.timestamp_to_datetime(unit_data.insert_date),
@@ -1027,6 +1027,7 @@ async def process_quick_add(
     return current_unit_count
 
 
+@common.context_cacheable("has_signed_variant")
 async def has_signed_variant(context: idol.BasicSchoolIdolContext, unit_id: int):
     return await context.db.unit.get(unit.SignAsset, unit_id) is not None
 
