@@ -22,13 +22,11 @@ def run_command(host: str, port: int):
     import alembic.command
     import uvicorn
 
-    import scripts.apply_fixes
-
     from .evloop import new_event_loop
     from .run import app
 
     alembic.command.upgrade(_get_alembic_config(), "head")
-    asyncio.run(scripts.apply_fixes.run_script([]), loop_factory=new_event_loop)
+    script_command("apply_fixes", [])
     uvicorn.run(app.main, host=host, port=port, loop="npps4.evloop:new_event_loop")
 
 
