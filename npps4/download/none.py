@@ -13,6 +13,10 @@ def get_server_version():
 
 
 def get_db_path(name: str) -> str:
+    path = f"{config.get_data_directory()}/db/{get_server_version()}/{name}.db_"
+    if os.path.isfile(path):
+        return path
+
     path = f"{config.get_data_directory()}/db/{name}.db_"
     if os.path.isfile(path):
         return path
