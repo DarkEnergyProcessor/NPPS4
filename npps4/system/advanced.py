@@ -378,6 +378,8 @@ class TeamStatCalculator:
         result: list[LiveDeckStats] = [LiveDeckStats() for _ in range(len(stats))]
 
         for i, unit_data in enumerate(player_units):
+            unit_info = await self.get_unit_info(unit_data.unit_id)
+
             for sis_id in await unit.get_unit_removable_skills(self.context, unit_data):
                 sis_info = await unit.get_removable_skill_game_info(self.context, sis_id)
 
@@ -387,6 +389,9 @@ class TeamStatCalculator:
                 if sis_info.skill_type != 1:
                     continue
                 if sis_info.effect_type not in (1, 2, 3):
+                    continue
+
+                if not await removable_skill.can_apply_to_unit(self.context, sis_info, unit_info):
                     continue
 
                 if not await removable_skill.can_apply(
@@ -527,16 +532,17 @@ class TeamStatCalculator:
 
         base_stat, unit_full_data_list = await self.get_base_team_stats(player_units)
         love_stat = TeamStatCalculator.add_live_deck_stats_list(base_stat, await self.apply_bond_to_stat(player_units))
+        sis_stat_base = await self.apply_sis_stats(player_units, love_stat)
+        sis_stat = TeamStatCalculator.add_live_deck_stats_list(love_stat, sis_stat_base)
         museum_stat = TeamStatCalculator.add_live_deck_stats_list(
-            love_stat, TeamStatCalculator.apply_museum_stats(museum_param)
+            sis_stat, TeamStatCalculator.apply_museum_stats(museum_param)
         )
-        sis_stat_base = await self.apply_sis_stats(player_units, museum_stat)
-        sis_stat = TeamStatCalculator.add_live_deck_stats_list(museum_stat, sis_stat_base)
-        # TODO: SIS stat calculation is still inexact.
-        leader_stat = await self.apply_leader_stats(player_units, sis_stat, player_units[4])
-        guest_stat = await self.apply_leader_stats(player_units, sis_stat, guest)
+        leader_stat = await self.apply_leader_stats(player_units, museum_stat, player_units[4])
+        guest_stat = await self.apply_leader_stats(player_units, museum_stat, guest)
 
-        final_stat = functools.reduce(TeamStatCalculator.add_live_deck_stats_list, [sis_stat, leader_stat, guest_stat])
+        final_stat = functools.reduce(
+            TeamStatCalculator.add_live_deck_stats_list, [museum_stat, leader_stat, guest_stat]
+        )
         total = functools.reduce(LiveDeckStats.__add__, final_stat)
         leader = functools.reduce(LiveDeckStats.__add__, leader_stat)
 

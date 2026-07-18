@@ -1,9 +1,9 @@
 import math
 
 from . import unit
-from . import unit_model
 from .. import idol
 from ..db import main
+from ..db import unit as unit_db
 
 
 def apply_stats(
@@ -14,17 +14,17 @@ def apply_stats(
             if fixed:
                 return int(effect_value), 0, 0
             else:
-                return math.floor(smile * effect_value / 100.0), 0, 0
+                return math.ceil(smile * effect_value / 100.0), 0, 0
         case 2:
             if fixed:
                 return 0, int(effect_value), 0
             else:
-                return 0, math.floor(pure * effect_value / 100.0), 0
+                return 0, math.ceil(pure * effect_value / 100.0), 0
         case 3:
             if fixed:
                 return 0, 0, int(effect_value)
             else:
-                return 0, 0, math.floor(cool * effect_value / 100.0)
+                return 0, 0, math.ceil(cool * effect_value / 100.0)
 
     return (0, 0, 0)
 
@@ -43,5 +43,21 @@ async def can_apply(
                     return False
 
             return True
+        case _:
+            return False
+
+
+async def can_apply_to_unit(
+    context: idol.BasicSchoolIdolContext, removable_skill: unit_db.RemovableSkill, unit_info: unit_db.Unit
+):
+    match removable_skill.target_reference_type:
+        case 0:
+            return True
+        case 1:
+            return await unit.unit_type_has_tag(context, unit_info.unit_type_id, removable_skill.target_type)
+        case 2:
+            return unit_info.unit_type_id == removable_skill.target_type
+        case 3:
+            return unit_info.attribute_id == removable_skill.target_type
         case _:
             return False
