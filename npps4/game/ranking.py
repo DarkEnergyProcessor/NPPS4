@@ -108,12 +108,20 @@ async def ranking_live(context: idol.SchoolIdolUserParams, request: RankingLiveR
 @idol.register("ranking", "player")
 async def ranking_player(context: idol.SchoolIdolUserParams, request: RankingPlayerRequest) -> RankingResponse:
     current_user = await user.get_current(context)
+    page = request.page
 
     if request.id > 0:
-        util.stub("ranking", "player", request)
-        raise idol.error.by_code(idol.error.ERROR_CODE_USER_NOT_EXIST)
+        result = await ranking.get_daily_ranking_by_user(context, request.id, request.daily_index == 2)
 
-    rankings, total_count = await ranking.get_daily_ranking(context, request.page, request.daily_index == 2)
+        if result is None:
+            raise idol.error.by_code(idol.error.ERROR_CODE_USER_NOT_EXIST)
+
+        rankings, page = result
+    else:
+        rankings = await ranking.get_daily_ranking(context, page, request.daily_index == 2)
+
+    total_count = await ranking.count_daily_ranking(context, request.daily_index == 2)
+
     items: list[RankingData] = []
     current_rank: int | None = None
 
@@ -168,7 +176,7 @@ async def ranking_player(context: idol.SchoolIdolUserParams, request: RankingPla
         raise idol.error.by_code(idol.error.ERROR_CODE_OUT_OF_RANG)
 
     return RankingResponse(
-        page=request.page,
+        page=page,
         rank=current_rank,
         items=items,
         total_cnt=total_count,

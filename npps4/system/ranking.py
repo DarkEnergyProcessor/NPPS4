@@ -68,18 +68,21 @@ async def increment_daily_score(context: idol.BasicSchoolIdolContext, user: main
     await context.db.main.flush()
 
 
-async def get_daily_ranking(context: idol.BasicSchoolIdolContext, page: int, yesterday: bool):
-    """Pagination is hardcoded to 20 entries per page."""
-
+async def count_daily_ranking(context: idol.BasicSchoolIdolContext, yesterday: bool):
     day_index = util.get_days_since_unix() - yesterday
-
-    # Count
     q = (
         sqlalchemy.select(sqlalchemy.func.count())
         .select_from(main.PlayerRanking)
         .where(main.PlayerRanking.day == day_index)
     )
     total_rankings = (await context.db.main.execute(q)).scalar() or 0
+    return total_rankings
+
+
+async def get_daily_ranking(context: idol.BasicSchoolIdolContext, page: int, yesterday: bool):
+    """Pagination is hardcoded to 20 entries per page."""
+
+    day_index = util.get_days_since_unix() - yesterday
 
     q = (
         sqlalchemy.select(main.PlayerRanking)
@@ -90,4 +93,42 @@ async def get_daily_ranking(context: idol.BasicSchoolIdolContext, page: int, yes
     )
     result = await context.db.main.execute(q)
 
-    return result.scalars().all(), total_rankings
+    return result.scalars().all()
+
+
+async def get_daily_ranking_by_user(context: idol.BasicSchoolIdolContext, user_id: int, yesterday: bool):
+    """Pagination is hardcoded to 20 entries per page. Returns list of adjacent player, and current page."""
+
+    day_index = util.get_days_since_unix() - yesterday
+
+    q = sqlalchemy.select(main.PlayerRanking).where(
+        main.PlayerRanking.user_id == user_id, main.PlayerRanking.day == day_index
+    )
+    result = await context.db.main.execute(q)
+    target = result.scalar()
+
+    if target is None:
+        return None
+
+    q = sqlalchemy.select(sqlalchemy.func.count(main.PlayerRanking.id)).where(
+        main.PlayerRanking.day == day_index,
+        (
+            (main.PlayerRanking.score > target.score)
+            | ((main.PlayerRanking.score == target.score) & (main.PlayerRanking.id < target.id))
+        ),
+    )
+    result = await context.db.main.execute(q)
+    players_before = result.scalar() or 0
+
+    page_index = players_before // 20
+    page_offset = page_index * 20
+
+    q = (
+        sqlalchemy.select(main.PlayerRanking)
+        .where(main.PlayerRanking.day == day_index)
+        .order_by(main.PlayerRanking.score.desc(), main.PlayerRanking.id.asc())
+        .offset(page_offset)
+        .limit(20)
+    )
+    result = await context.db.main.execute(q)
+    return result.scalars().all(), page_index
