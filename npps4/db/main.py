@@ -460,7 +460,7 @@ class PlayerRanking(common.Base, kw_only=True):
 
     __table_args__ = (
         sqlalchemy.UniqueConstraint(user_id, day),
-        sqlalchemy.Index(None, user_id.asc(), day.desc(), score.desc()),
+        sqlalchemy.Index(None, day, score.desc(), user_id.asc()),
     )
 
 
