@@ -50,7 +50,7 @@ def load_fixes_script():
 
         _, ext = os.path.splitext(info.name)
         ext = ext.lower()
-        if ext != ".py" or ext != ".pyc":
+        if ext != ".py" and ext != ".pyc":
             continue
 
         module = runpy.run_path(info.path)
