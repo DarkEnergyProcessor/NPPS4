@@ -28,7 +28,7 @@ class BasicSchoolIdolContext:
 
     async def __aenter__(self):
         mainsession = self.db.main
-        if mainsession.bind.dialect.name == "sqlite":
+        if mainsession.bind and mainsession.bind.dialect.name == "sqlite":
             # HACK: Set busy timeout to 25s
             await mainsession.execute(sqlalchemy.text("PRAGMA busy_timeout=25000"))
             # HACK: Increase WAL page size to 100000
