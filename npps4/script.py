@@ -5,7 +5,7 @@ from . import evloop
 from . import script_dummy
 from .config import config
 
-from typing import Protocol
+from typing import Protocol, cast
 
 
 class Script(Protocol):
@@ -18,10 +18,10 @@ def load_script(path: str):
 
 async def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("script", type=load_script, help="Script to run.")
+    parser.add_argument("script", help="Script to run.")
 
     args, unk_args = parser.parse_known_args()
-    script: Script = args.script
+    script = cast(Script, load_script(args.script))
     await script.run_script(unk_args)
 
 
