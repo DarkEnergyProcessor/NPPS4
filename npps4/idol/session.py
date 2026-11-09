@@ -98,7 +98,7 @@ class SchoolIdolParams(BasicSchoolIdolContext):
         client_version: Annotated[str, fastapi.Header(alias="Client-Version")],
         lang: Annotated[idoltype.Language, fastapi.Header(alias="LANG")],
         platform_type: Annotated[idoltype.PlatformType, fastapi.Header(alias="Platform-Type")],
-        request_data: Annotated[bytes | None, fastapi.Form(exclude=True, include=False)] = None,
+        request_data: Annotated[bytes | None, fastapi.Form()] = None,
     ):
         util.log(authorize)
         authorize_parsed = dict(urllib.parse.parse_qsl(authorize))
@@ -158,7 +158,7 @@ class SchoolIdolAuthParams(SchoolIdolParams):
         client_version: Annotated[str, fastapi.Header(alias="Client-Version")],
         lang: Annotated[idoltype.Language, fastapi.Header(alias="LANG")],
         platform_type: Annotated[idoltype.PlatformType, fastapi.Header(alias="Platform-Type")],
-        request_data: Annotated[bytes | None, fastapi.Form(exclude=True, include=False)] = None,
+        request_data: Annotated[bytes | None, fastapi.Form()] = None,
     ):
         super().__init__(request, background_task, authorize, client_version, lang, platform_type, request_data)
         self.token_async = None
@@ -185,7 +185,7 @@ class SchoolIdolUserParams(SchoolIdolAuthParams):
         client_version: Annotated[str, fastapi.Header(alias="Client-Version")],
         lang: Annotated[idoltype.Language, fastapi.Header(alias="LANG")],
         platform_type: Annotated[idoltype.PlatformType, fastapi.Header(alias="Platform-Type")],
-        request_data: Annotated[bytes | None, fastapi.Form(exclude=True, include=False)] = None,
+        request_data: Annotated[bytes | None, fastapi.Form()] = None,
     ):
         super().__init__(request, background_task, authorize, client_version, lang, platform_type, request_data)
 

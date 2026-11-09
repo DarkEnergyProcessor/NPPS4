@@ -129,8 +129,9 @@ class SerialCodeRunFunction(pydantic.BaseModel):
     ]
 
 
-SERIAL_CODE_ACTION_ADAPTER: pydantic.TypeAdapter[SerialCodeGiveItem | SerialCodeRunFunction] = pydantic.TypeAdapter(
-    SerialCodeGiveItem | SerialCodeRunFunction
+SerialCodeAction = SerialCodeGiveItem | SerialCodeRunFunction
+SERIAL_CODE_ACTION_ADAPTER: pydantic.TypeAdapter[SerialCodeAction] = pydantic.TypeAdapter(
+    SerialCodeAction  # pyright: ignore[reportArgumentType]
 )
 
 
