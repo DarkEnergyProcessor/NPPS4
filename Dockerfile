@@ -8,11 +8,11 @@ WORKDIR /NPPS4
 RUN mkdir data
 VOLUME data
 
-COPY ./requirements.txt requirements.txt
-COPY ./requirements-perf.txt requirements-perf.txt
+COPY ./requirements-baseline.txt requirements-baseline.txt
+COPY ./requirements-desktop.txt requirements-desktop.txt
 COPY ./requirements-docker.txt requirements-docker.txt
 RUN python -m pip install --root-user-action=ignore --no-cache-dir -U pip
-RUN pip install --root-user-action=ignore --no-cache-dir -r requirements.txt -r requirements-perf.txt -r requirements-docker.txt
+RUN pip install --root-user-action=ignore --no-cache-dir -r requirements-docker.txt
 
 # Least modified file first
 ARG PRIVATE_KEY_FILE=default_server_key.pem

@@ -1,6 +1,9 @@
 name: Build
 on: [push, pull_request]
 
+env:
+  PYINSTALLER_PYTHON_VERSION: 3.14
+
 jobs:
   syntax-check:
     runs-on: ubuntu-latest
@@ -8,25 +11,22 @@ jobs:
       matrix:
         python-version: ['3.12', '3.13', '3.14']
     steps:
-      - name: Setup Python
-        uses: actions/setup-python@v6
+      - name: astral-sh/setup-uv
+        uses: astral-sh/setup-uv@v10.4.0
         with:
           python-version: ${{ matrix.python-version }}
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Setup Virtual Environment
-        run: python -m venv venv
+        run: uv venv --python ${{ matrix.python-version }}
       - name: Install requirements and Black
-        run: venv/bin/pip install -r requirements.txt black
-      - name: Install PyRight
+        run: uv pip install -r requirements-docker.txt black
+      - name: Install Pyright
         run: npm install -g pyright@">1.1.376||<1.1.376"
       - name: Check Black Formatter
-        run: venv/bin/black -l 120 --check .
+        run: uv run black -l 120 --check .
       - name: Check PyRight Syntax
-        run: |
-          set -e
-          source venv/bin/activate
-          npx pyright
+        run: npx pyright --pythonpath .venv/bin/python
 
   artifact-docker:
     runs-on: ${{ matrix.runs-on }}
@@ -37,13 +37,13 @@ jobs:
       fail-fast: false
     steps:
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
     - name: Build Docker Images
       run: docker build -t npps4 .
     - name: Export Docker Images
       run: docker save npps4 | gzip > npps4.tar.gz
     - name: Artifact
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: npps4-docker-${{ runner.arch }}
         path: npps4.tar.gz
@@ -56,18 +56,18 @@ jobs:
       run:
         shell: cmd
     steps:
-    - name: Setup Python
-      uses: actions/setup-python@v6
+    - name: Setup uv
+      uses: astral-sh/setup-uv@v10.4.0
       with:
-        python-version: '3.14'
+        python-version: ${{ env.PYINSTALLER_PYTHON_VERSION }}
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
     - name: Setup Virtual Environment
-      run: python -m venv venv
+      run: uv venv --python ${{ env.PYINSTALLER_PYTHON_VERSION }}
     - name: Install Dependencies
-      run: venv\Scripts\pip install -r requirements.txt -r requirements-perf.txt psycopg[binary] pyinstaller
+      run: uv pip install -r requirements-desktop.txt psycopg[binary] pyinstaller
     - name: Make Bundle
-      run: venv\Scripts\pyinstaller npps4.spec
+      run: uv run pyinstaller npps4.spec
     - name: Copy Runtime Files
       run: |
         robocopy "beatmaps" "dist\npps4\beatmaps" /E
@@ -87,7 +87,7 @@ jobs:
     - name: Generate config.toml
       env:
         NPPS4_CONFIG_DOWNLOAD_N4DLAPI_SERVER: ${{ secrets.NPPS4_CONFIG_DOWNLOAD_N4DLAPI_SERVER }}
-      shell: python
+      shell: uv run python
       run: |
         import os
 
@@ -107,31 +107,32 @@ jobs:
         with open("dist/npps4/config.toml", "w", encoding="utf-8", newline="") as f:
             f.write(config)
     - name: Upload Artifact
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: pyinstaller-npps4-windows
         path: dist
         if-no-files-found: error
+
   pyinstaller-linux:
     strategy:
       matrix:
-        runs-on: [ubuntu-22.04, ubuntu-22.04-arm]
+        runs-on: [ubuntu-24.04, ubuntu-24.04-arm]
       fail-fast: false
     runs-on: ${{ matrix.runs-on }}
     needs: syntax-check
     steps:
-    - name: Setup Python
-      uses: actions/setup-python@v6
+    - name: Setup uv
+      uses: astral-sh/setup-uv@v10.4.0
       with:
-        python-version: '3.14'
+        python-version: ${{ env.PYINSTALLER_PYTHON_VERSION }}
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
     - name: Setup Virtual Environment
-      run: python -m venv venv
+      run: uv venv --python ${{ env.PYINSTALLER_PYTHON_VERSION }}
     - name: Install Dependencies
-      run: venv/bin/pip install -r requirements.txt -r requirements-perf.txt psycopg[binary] pyinstaller
+      run: uv pip install -r requirements-desktop.txt psycopg[binary] pyinstaller
     - name: Make Bundle
-      run: venv/bin/pyinstaller npps4.spec
+      run: uv run pyinstaller npps4.spec
     - name: Copy Runtime Files
       run: |
         set -e
@@ -166,7 +167,7 @@ jobs:
         with open("dist/npps4/config.toml", "w", encoding="utf-8", newline="") as f:
             f.write(config)
     - name: Upload Artifact
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: pyinstaller-npps4-${{ matrix.runs-on }}
         path: dist
