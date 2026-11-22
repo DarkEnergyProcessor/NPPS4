@@ -11,12 +11,12 @@ jobs:
       matrix:
         python-version: ['3.12', '3.13', '3.14']
     steps:
+      - name: Checkout
+        uses: actions/checkout@v7
       - name: astral-sh/setup-uv
         uses: astral-sh/setup-uv@v10.4.0
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Checkout
-        uses: actions/checkout@v7
       - name: Setup Virtual Environment
         run: uv venv --python ${{ matrix.python-version }}
       - name: Install requirements and Black
@@ -56,12 +56,12 @@ jobs:
       run:
         shell: cmd
     steps:
+    - name: Checkout
+      uses: actions/checkout@v7
     - name: Setup uv
       uses: astral-sh/setup-uv@v10.4.0
       with:
         python-version: ${{ env.PYINSTALLER_PYTHON_VERSION }}
-    - name: Checkout
-      uses: actions/checkout@v7
     - name: Setup Virtual Environment
       run: uv venv --python ${{ env.PYINSTALLER_PYTHON_VERSION }}
     - name: Install Dependencies
@@ -103,12 +103,12 @@ jobs:
     runs-on: ${{ matrix.runs-on }}
     needs: syntax-check
     steps:
+    - name: Checkout
+      uses: actions/checkout@v7
     - name: Setup uv
       uses: astral-sh/setup-uv@v10.4.0
       with:
         python-version: ${{ env.PYINSTALLER_PYTHON_VERSION }}
-    - name: Checkout
-      uses: actions/checkout@v7
     - name: Setup Virtual Environment
       run: uv venv --python ${{ env.PYINSTALLER_PYTHON_VERSION }}
     - name: Install Dependencies
