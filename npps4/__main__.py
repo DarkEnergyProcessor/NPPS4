@@ -17,16 +17,21 @@ def _get_alembic_config():
     return alembic_config
 
 
+def init_command():
+    import alembic.command
+
+    alembic.command.upgrade(_get_alembic_config(), "head")
+    script_command("apply_fixes", [])
+
+
 def run_command(host: str, port: int):
     # Exception has to be made: Importing here reduces time needed for bootstrap script.
-    import alembic.command
     import uvicorn
 
     from .evloop import new_event_loop
     from .run import app
 
-    alembic.command.upgrade(_get_alembic_config(), "head")
-    script_command("apply_fixes", [])
+    init_command()
     uvicorn.run(app.main, host=host, port=port, loop="npps4.evloop:new_event_loop")
 
 
@@ -64,6 +69,10 @@ def main():
     )
     subparser = parser.add_subparsers(title="Command", dest="command")
 
+    init_parser = subparser.add_parser(
+        "init", formatter_class=argparse.ArgumentDefaultsHelpFormatter, help="Initialize NPPS4"
+    )
+
     run_parser = subparser.add_parser(
         "run", formatter_class=argparse.ArgumentDefaultsHelpFormatter, help="Run NPPS4 Server"
     )
@@ -80,11 +89,13 @@ def main():
     script_parser.add_argument("name", help="Script name, or 'list' to list all scripts.")
     script_parser.add_argument("args", nargs=argparse.REMAINDER, help="Additional arguments to pass.")
 
-    if len(argv) == 0 or argv[0] not in {"run", "script", "-h", "--help"}:
+    if len(argv) == 0 or argv[0] not in {"init", "run", "script", "-h", "--help"}:
         argv.insert(0, "run")
 
     args = parser.parse_args(argv)
     match args.command:
+        case "init":
+            init_command()
         case "run":
             run_command(args.host, args.port)
         case "script":
