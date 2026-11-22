@@ -7,14 +7,13 @@ import os
 import zipfile
 
 import fastapi
-import honkypy
-import pydantic
 
 from . import util
 from .app import app
 from .config import config
+from .vendor import honkypy
 
-from typing import Annotated, Literal
+from typing import Annotated
 
 SERVERINFO_TEMPLATE = {
     "name": "server_information",
