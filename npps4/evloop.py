@@ -6,7 +6,7 @@ from . import util
 _loop = None
 
 try:
-    import zuvloop
+    import zuvloop  # type: ignore
 
     _loop = zuvloop.new_event_loop
     util.log("Using zuvloop.new_event_loop")

@@ -25,7 +25,7 @@ jobs:
         run: npm install -g pyright@">1.1.376||<1.1.376"
       - name: Check Black Formatter
         run: uv run black -l 120 --check .
-      - name: Check PyRight Syntax
+      - name: Check Pyright Syntax
         run: npx pyright --pythonpath .venv/bin/python
 
   artifact-docker:
