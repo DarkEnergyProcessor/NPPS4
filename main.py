@@ -23,6 +23,7 @@
 # containerized environment (e.g. Docker).
 
 import argparse
+import importlib.util
 import os
 import subprocess
 import sys
@@ -51,8 +52,7 @@ def main() -> int:
     parser.add_argument(
         "-w", "--workers", help="Amount of workers.", type=int, default=max(int(os.environ.get("NPPS4_WORKER", "1")), 1)
     )
-    parser.add_argument("--no-migrations", help="Disable alembic migrations.", action="store_true")
-    parser.add_argument("--no-fixes", help="Disable running fixes.", action="store_true")
+    parser.add_argument("--no-init", help="Disable initializations.", action="store_true")
     parser.add_argument("--python", help="Python executable.", default=sys.executable)
     parser.add_argument("--reload", help="Reload on file changes (forces using uvicorn)", action="store_true")
     args = parser.parse_args()
@@ -60,19 +60,15 @@ def main() -> int:
     python: str = args.python or "python"
     worker_count: int = args.workers
 
-    if not args.no_migrations:
-        if subprocess.call([python, "-m", "alembic", "upgrade", "head"], cwd=CURDIR) != 0:
-            print("alembic returned non-zero status code.")
-            return 1
-
-    if not args.no_fixes:
-        if subprocess.call([python, "-m", "npps4.script", "scripts/apply_fixes.py"], cwd=CURDIR) != 0:
+    if not args.no_init:
+        if subprocess.call([python, "-m", "npps4", "init"], cwd=CURDIR) != 0:
             print("NPPS4 fixes returned non-zero status code.")
             return 1
 
+    has_gunicorn = importlib.util.find_spec("gunicorn") is not None
     executor = runwaitwin32 if os.name == "nt" else wrapexec
 
-    if worker_count > 1 and os.name != "nt" and not args.reload:
+    if worker_count > 1 and os.name != "nt" and has_gunicorn and not args.reload:
         return executor(
             python,
             python,
@@ -88,39 +84,23 @@ def main() -> int:
             f"{args.host}:{args.port}",
         )
     else:
+        finalcmd = [
+            python,
+            "-m",
+            "uvicorn",
+            "npps4.run.app:main",
+            "--loop",
+            "npps4.evloop:new_event_loop",
+            "--port",
+            str(args.port),
+            "--host",
+            str(args.host),
+            "--workers",
+            str(worker_count),
+        ]
         if args.reload:
-            return executor(
-                python,
-                python,
-                "-m",
-                "uvicorn",
-                "npps4.run.app:main",
-                "--loop",
-                "npps4.evloop:new_event_loop",
-                "--port",
-                str(args.port),
-                "--host",
-                str(args.host),
-                "--workers",
-                str(worker_count),
-                "--reload",
-            )
-        else:
-            return executor(
-                python,
-                python,
-                "-m",
-                "uvicorn",
-                "npps4.run.app:main",
-                "--loop",
-                "npps4.evloop:new_event_loop",
-                "--port",
-                str(args.port),
-                "--host",
-                str(args.host),
-                "--workers",
-                str(worker_count),
-            )
+            finalcmd.append("--reload")
+        return executor(python, *finalcmd)
 
 
 if __name__ == "__main__":

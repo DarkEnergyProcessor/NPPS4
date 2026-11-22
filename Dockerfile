@@ -2,17 +2,18 @@
 # check=skip=SecretsUsedInArgOrEnv
 
 ARG PYTHON_VERSION=3.14
-FROM python:${PYTHON_VERSION}-slim-trixie
+FROM ghcr.io/astral-sh/uv:python${PYTHON_VERSION}-trixie-slim
 
 WORKDIR /NPPS4
 RUN mkdir data
 VOLUME data
 
-COPY ./requirements-baseline.txt requirements-baseline.txt
-COPY ./requirements-desktop.txt requirements-desktop.txt
-COPY ./requirements-docker.txt requirements-docker.txt
-RUN python -m pip install --root-user-action=ignore --no-cache-dir -U pip
-RUN pip install --root-user-action=ignore --no-cache-dir -r requirements-docker.txt
+ENV PYTHONUNBUFFERED=1
+ENV UV_NO_DEV=1
+ENV UV_TOOL_BIN_DIR=/usr/local/bin
+
+COPY ./pyproject.toml ./pyproject.toml
+RUN uv sync --extra docker --extra desktop
 
 # Least modified file first
 ARG PRIVATE_KEY_FILE=default_server_key.pem
@@ -32,4 +33,4 @@ COPY ./config.sample.toml config.sample.toml
 
 EXPOSE 51376/tcp
 
-ENTRYPOINT ["python", "scripts/bootstrap_docker.py"]
+ENTRYPOINT ["uv", "run", "scripts/bootstrap_docker.py"]

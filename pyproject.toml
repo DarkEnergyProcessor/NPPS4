@@ -1,0 +1,61 @@
+[project]
+name = "npps4"
+version = "2026.1122.0" # YYYY.MMDD.N
+description = "Null-Pointer Private Server 4th Iteration"
+readme = "README.md"
+license = "Zlib"
+license-files = ["LICENSE.md"]
+authors = [
+    { name = "Miku AuahDark" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "aiosqlite>=0.22", # https://github.com/sqlalchemy/sqlalchemy/issues/13039
+    "alembic[tz]",
+    "fastapi",
+    "httpx",
+    "itsdangerous",
+    "jinja2",
+    "pycryptodomex",
+    "pydantic>=2",
+    "pydantic-settings",
+    "python-multipart",
+    "PyYAML>=5.1",
+    "sqlalchemy[asyncio]>=2.1", # aiosqlite 0.22 requires SQLAlchemy 2.1
+    "uvicorn",
+]
+
+[project.optional-dependencies]
+android = [
+    "httptools>=0.6.3; sys_platform == 'android'",
+    "python-dotenv>=0.13; sys_platform == 'android'",
+    "watchfiles>=0.13; sys_platform == 'android'",
+    "websockets>=10.4; sys_platform == 'android'",
+]
+desktop = [
+    "uvloop; sys_platform != 'win32' and python_version < '3.14'",
+    "winloop; sys_platform == 'win32' and python_version < '3.14'",
+    "zuvloop; python_version >= '3.14'",
+]
+docker = [
+    "psycopg[binary]",
+    "gunicorn",
+    "uvicorn-worker",
+]
+
+[project.scripts]
+npps4 = "npps4.__main__:main"
+
+[build-system]
+requires = ["uv_build>=0.13.9,<0.14.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "npps4"
+module-root = ""
+
+[dependency-groups]
+dev = [
+    "pyinstaller",
+    "black"
+]

@@ -1,5 +1,0 @@
--r requirements-baseline.txt
--r requirements-desktop.txt
-psycopg[binary]
-gunicorn
-uvicorn-worker

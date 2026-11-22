@@ -1,6 +1,0 @@
--r requirements-baseline.txt
-# These are uvicorn[standard] dependency, minus uvloop
-httptools>=0.6.3; sys_platform == 'android'
-python-dotenv>=0.13; sys_platform == 'android'
-watchfiles>=0.13; sys_platform == 'android'
-websockets>=10.4; sys_platform == 'android'

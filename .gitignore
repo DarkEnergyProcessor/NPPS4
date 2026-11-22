@@ -13,3 +13,4 @@
 /config.toml
 /maintenance.txt
 /pyrefly.toml
+/uv.lock

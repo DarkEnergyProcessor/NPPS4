@@ -1,4 +1,0 @@
--r requirements-baseline.txt
-uvloop; sys_platform != "win32" and python_version < "3.14"
-winloop; sys_platform == "win32" and python_version < "3.14"
-zuvloop; python_version >= "3.14"

@@ -23,26 +23,31 @@ NPPS4 supports Python 3.12 and later. Python 3.14 is recommended.
 Install Manually
 ----
 
-1. Install Python 3.12 or later.
-2. Create virtual environment.
-3. Activate it.
-4. Install all dependencies in `requirements-desktop.txt`.
+> [!IMPORTANT]
+> Python 3.12 is required. Python 3.14 is recommended.
 
-Note: If you're using Termux (Unsupported), make sure to have Rust toolchain and use `requirements-android.txt` instead.
+### Standard Virtual Environment
 
-The command for normal Python is:
+The command is as follows:
+
 ```sh
 python -m venv .venv
-source .venv/bin/activate # if using sh/bash
-.venv\Scripts\activate # if using Command Prompt (NOT Powershell)
-pip install -r requirements-desktop.txt # or requirememnts-android.txt for Termux
+source .venv/bin/activate   # if using sh/bash
+.venv\Scripts\activate      # if using Command Prompt (NOT Powershell)
+pip install -e ".[desktop]" # or ".[android]" for Termux
 ```
 
-If using [`uv`](https://docs.astral.sh/uv/)
+> [!TIP]
+> If you consider writing code for NPPS4, you may want to install `black` and `pyinstaller` package as well.
+
+### With UV
+
 ```sh
-uv venv --python 3.14
-uv pip install -r requirements-desktop.txt
+uv sync --python 3.12 --extra desktop # Feel free to use another Python version (e.g. 3.14)
 ```
+
+> [!TIP]
+> If you consider writing code for NPPS4, add `--group dev`, which installs `black` and `pyinstaller` as well.
 
 Install with Docker
 -----
@@ -60,10 +65,15 @@ docker pull ghcr.io/darkenergyprocessor/npps4:latest
 Make a folder used for NPPS4 data directory (in this case, `path/to/data`), then copy `config.sample.toml` to
 `path/to/data/config.toml`. Afterwards, configure `config.toml` as needed, mainly the download backend.
 
+> [!TIP]
+> Alternatively, all NPPS4 configuration can be tweaked directly through environment variables. Each option in
+> `config.sample.toml` has the corresponding environment variable.
+
 Then run the container:
 ```sh
 docker run --name npps4 -v path/to/data:/NPPS4/data -p 0.0.0.0:51376:51376 -it npps4
 ```
+Add `-e NPPS4_WORKER=<n>` to use multiple workers.
 
 Observe that the app is started successfully using:
 ```sh
@@ -164,31 +174,41 @@ Running
 
 ```sh
 python -m npps4
-uv run python -m npps4 # if using uv
+uv run npps4 # if using uv
 ```
 
-### Using Uvicorn/Gunicorn
+### Live Reload/Multiple Workers
 
 > [!NOTE]
 > This method is useful if: you're developing NPPS4 and need script live reloading; or want to use multiple CPUs.
 
-Initialize the database first:
 ```sh
-python -m npps4 init
-uv run python -m npps4 init # if using uv
+python main.py
+uv run main.py # if using uv
 ```
 
-Then run the server (add `--reload` for live reloading)
+> [!TIP]
+> Add `--reload` for live reloading. Add `--workers <n>` for multiple workers.
+
+### Gunicorn/Production
+
+> [!NOTE]
+> This is for running NPPS4 in production. You might not need this.
+
+Make sure to install the "docker" and "desktop" extra:
 ```sh
-uvicorn npps4.run.app:main --port 51376 --host <your lan IP or 0.0.0.0> --loop npps4.evloop:new_event_loop
+pip install -e ".[desktop,docker]"
+uv sync --extra desktop --extra docker # if using uv
 ```
 
-If you need to run with multiple workers, you must additionally install `gunicorn` and `uvicorn-worker` Python package.
-```sh
-pip install gunicorn uvicorn-worker # only needs to be done once
+Then same command as above section for multiple workers:
 
-gunicorn --preload npps4.run.app:main -w 4 -k npps4.uvicorn_worker.UvicornWorker -b <your lan IP or 0.0.0.0>:51376
+```sh
+python main.py --workers 4
+uv run main.py --workers 4 # if using uv
 ```
+
+`4` is amount of workers, feel free to change.
 
 Updating
 -----
