@@ -38,9 +38,11 @@ desktop = [
     "zuvloop; python_version >= '3.14'",
 ]
 docker = [
-    "psycopg[binary]",
     "gunicorn",
     "uvicorn-worker",
+]
+dbsupp = [
+    "psycopg[binary]",
 ]
 
 [project.scripts]

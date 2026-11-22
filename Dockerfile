@@ -13,7 +13,7 @@ ENV UV_NO_DEV=1
 ENV UV_TOOL_BIN_DIR=/usr/local/bin
 
 COPY ./pyproject.toml ./pyproject.toml
-RUN uv sync --extra docker --extra desktop
+RUN uv sync --extra docker --extra dbsupp --extra desktop
 
 # Least modified file first
 ARG PRIVATE_KEY_FILE=default_server_key.pem

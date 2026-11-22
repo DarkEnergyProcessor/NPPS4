@@ -157,7 +157,7 @@ in `data/main.sqlite3`.
 However, if you plan opening server for lots of people, SQLite3 won't suffice. You'd need something better like
 PostgreSQL or MySQL. If installing manually, you need to install these additional dependencies:
 
-* PostgreSQL: `psycopg` (**not** `psycopg2`)
+* PostgreSQL: `psycopg` (**not** `psycopg2`) (`dbsupp` extra)
 * MySQL/MariaDB: `asyncmy`
 
 > [!NOTE]
@@ -165,7 +165,8 @@ PostgreSQL or MySQL. If installing manually, you need to install these additiona
 > information.
 
 If you're using the Docker images, only PostgreSQL (`psycopg`) is available. If you use/need other database support,
-you need to derive the build image and install it. Consider using the provided example Docker Compose () for easier configuration.
+you need to derive the build image and install it. Consider using the provided example Docker Compose for easier
+configuration.
 
 Running
 -----
