@@ -13,6 +13,7 @@ ENV UV_NO_DEV=1
 ENV UV_TOOL_BIN_DIR=/usr/local/bin
 
 COPY ./pyproject.toml ./pyproject.toml
+COPY ./npps4 npps4
 RUN uv sync --extra docker --extra dbsupp --extra desktop
 
 # Least modified file first
@@ -26,10 +27,8 @@ COPY ./static static
 COPY ./templates templates
 COPY ./util util
 
-COPY ./npps4 npps4
 COPY ./scripts scripts
 COPY ./main.py main.py
-COPY ./config.sample.toml config.sample.toml
 
 EXPOSE 51376/tcp
 
