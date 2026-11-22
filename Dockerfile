@@ -13,6 +13,8 @@ ENV UV_NO_DEV=1
 ENV UV_TOOL_BIN_DIR=/usr/local/bin
 
 COPY ./pyproject.toml ./pyproject.toml
+COPY ./README.md README.md
+COPY ./LICENSE.md LICENSE.md
 COPY ./npps4 npps4
 RUN uv sync --extra docker --extra dbsupp --extra desktop
 
@@ -22,7 +24,6 @@ COPY ${PRIVATE_KEY_FILE} default_server_key.pem
 COPY ./beatmaps beatmaps
 COPY ./external external
 COPY ./alembic.ini alembic.ini
-COPY ./LICENSE.md LICENSE.md
 COPY ./static static
 COPY ./templates templates
 COPY ./util util
