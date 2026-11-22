@@ -1,5 +1,8 @@
 # -*- mode: python ; coding: utf-8 -*-
-import importlib.util
+import pathlib
+
+from PyInstaller.building.datastruct import Tree
+from PyInstaller.utils.hooks import collect_submodules
 
 a = Analysis(
     ["pyinstaller_bootstrap.py"],
@@ -7,7 +10,14 @@ a = Analysis(
     binaries=[],
     datas=[
         ("alembic.ini", "."),
-        ("npps4/alembic", "npps4/alembic"),
+        *[
+            (src, pathlib.Path(dst).parent)
+            for src, dst, _ in Tree(
+                "npps4/alembic",
+                prefix="npps4/alembic",
+                excludes=["__pycache__", "*.pyc", "*.pyo"],
+            )
+        ],
     ],
     hiddenimports=[
         "aiosqlite",
@@ -16,6 +26,7 @@ a = Analysis(
         "npps4.scriptutils.boot",
         "npps4.scriptutils.user",
         "npps4.script_dummy",
+        *collect_submodules("npps4"),
     ],
     hookspath=[],
     hooksconfig={},
