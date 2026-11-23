@@ -11,7 +11,7 @@ from typing import Callable
 @dataclasses.dataclass
 class ServerData:
     json_schema_link: str | None
-    badwords: list[str]
+    badwords: set[str]
     achievement_reward: dict[int, list[item_model.BaseItem]]
     live_unit_drop_chance: schema.LiveUnitDropChance
     common_live_unit_drops: list[schema.LiveUnitDrop]

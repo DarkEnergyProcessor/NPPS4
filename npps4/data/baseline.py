@@ -8,7 +8,7 @@ from .server_data_baseline import serial_codes
 from .server_data_baseline import sticker_shop
 
 server_data = schema.SerializedServerData(
-    badwords=[],
+    badwords=set(),
     achievement_reward=achievement_reward.achievement_reward,
     live_unit_drop_chance=schema.LiveUnitDropChance(common=9, live_specific=1),
     common_live_unit_drops=common_live_unit_drops.common_live_unit_drops,

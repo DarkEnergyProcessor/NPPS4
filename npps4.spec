@@ -2,7 +2,6 @@
 import os.path
 import pathlib
 import shutil
-import sys
 
 from typing import TYPE_CHECKING
 

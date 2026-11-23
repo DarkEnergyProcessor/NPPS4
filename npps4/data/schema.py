@@ -228,7 +228,7 @@ class SerializedServerData(pydantic.BaseModel):
     json_schema_link: pydantic.json_schema.SkipJsonSchema[str | None] = pydantic.Field(
         default=None, validation_alias="$schema", serialization_alias="$schema"
     )
-    badwords: list[pydantic.Base64UrlStr]
+    badwords: set[str]
     achievement_reward: list[AchievementReward]
     live_unit_drop_chance: LiveUnitDropChance
     common_live_unit_drops: list[LiveUnitDrop]
