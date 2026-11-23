@@ -59,6 +59,8 @@ jobs:
             name: ubuntu-arm64
           - runner: windows-latest
             name: windows-amd64
+          - runner: windows-11-arm
+            name: windows-arm64
           - runner: macos-15-intel
             name: macos-intel
           - runner: macos-15
