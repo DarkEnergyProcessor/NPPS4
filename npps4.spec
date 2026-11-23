@@ -78,6 +78,7 @@ coll = COLLECT(
 target_dir = os.path.join(DISTPATH, coll.name)
 os.makedirs(target_dir, exist_ok=True)
 
+# Copy external files.
 for src in ["beatmaps", "external", "scripts", "static", "templates"]:
     shutil.copytree(src, os.path.join(target_dir, src), dirs_exist_ok=True)
 
@@ -89,6 +90,7 @@ for src, dst in [
     os.makedirs(os.path.dirname(dest_path), exist_ok=True)
     shutil.copy2(src, dest_path)
 
+# Build config.toml
 with open("config.sample.toml", "r", encoding="utf-8", newline="") as f:
     _npps4_config = f.read()
 
