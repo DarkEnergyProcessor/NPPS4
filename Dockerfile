@@ -16,7 +16,8 @@ COPY ./pyproject.toml ./pyproject.toml
 COPY ./README.md README.md
 COPY ./LICENSE.md LICENSE.md
 COPY ./npps4 npps4
-RUN uv sync --extra docker --extra dbsupp --extra desktop
+RUN uv sync --no-cache --extra docker --extra dbsupp --extra desktop
+ENV PATH="$PATH:/NPPS4/.venv/bin"
 
 # Least modified file first
 ARG PRIVATE_KEY_FILE=default_server_key.pem
