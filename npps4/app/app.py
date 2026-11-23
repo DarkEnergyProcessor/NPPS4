@@ -8,6 +8,7 @@ import fastapi.exceptions
 import fastapi.responses
 import fastapi.staticfiles
 import fastapi.templating
+import pydantic
 
 from .. import errhand
 from .. import util
@@ -46,6 +47,16 @@ def get_token_manual(request: fastapi.Request):
 @core.get("/docs", include_in_schema=False)
 async def docs_handler():
     return fastapi.responses.RedirectResponse("/", 302)
+
+
+class HealthResponse(pydantic.BaseModel):
+    version: str = "%d.%d.%d" % version.NPPS4_VERSION
+
+
+@core.get("/health")
+async def health() -> HealthResponse:
+    """Health check endpoint"""
+    return HealthResponse()
 
 
 @core.exception_handler(404)
