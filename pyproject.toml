@@ -42,8 +42,8 @@ docker = [
     "uvicorn-worker",
 ]
 dbsupp = [
-    "psycopg[binary]; not (sys_platform == 'win32' and platform_machine == 'ARM64')",
-    "asyncmy; not (sys_platform == 'win32' and platform_machine == 'ARM64')"
+    "psycopg[binary]; sys_platform != 'win32' or platform_machine != 'ARM64'",
+    "asyncmy; sys_platform != 'win32' or platform_machine != 'ARM64'"
 ]
 
 [project.scripts]

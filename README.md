@@ -157,8 +157,11 @@ in `data/main.sqlite3`.
 However, if you plan opening server for lots of people, SQLite3 won't suffice. You'd need something better like
 PostgreSQL or MySQL. If installing manually, you need to install these additional dependencies:
 
-* PostgreSQL: `psycopg` (**not** `psycopg2`) (`dbsupp` extra)
+* PostgreSQL: `psycopg` (**not** `psycopg2`)
 * MySQL/MariaDB: `asyncmy`
+
+> [!TIP]
+> Installing both can be done by installing `dbsupp` extra as well (`--extra dbsupp` with uv, `.[dbsupp]` with pip).
 
 > [!NOTE]
 > Please consult [SQLAlchemy supported database backends](https://docs.sqlalchemy.org/en/21/dialects/) for more
