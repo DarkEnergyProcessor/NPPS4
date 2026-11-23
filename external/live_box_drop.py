@@ -6,7 +6,6 @@
 # * Reward box selection is based on 1/4 of the effort point score.
 #   This means, completing a box with score of 1.1m will give 4m boxes and 900k score
 #   will give 2m boxes.
-# * The drop is configurable in `server_data.json`
 # * The determination of limited reward box is currently non-functional and will act as
 #   if no limited reward box is present. This is due to lack of drop data.
 #

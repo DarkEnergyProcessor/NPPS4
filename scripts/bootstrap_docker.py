@@ -16,10 +16,6 @@ def main() -> int:
     python = sys.executable or "python"
 
     # Setup paths
-    server_data = os.path.join(datadir, "server_data.json")
-    if not os.path.exists(server_data):
-        shutil.copy(os.path.join(rootdir, "npps4", "server_data.json"), server_data)
-
     external_script = os.path.join(datadir, "external")
     if not os.path.exists(external_script):
         shutil.copytree(os.path.join(rootdir, "external"), external_script, dirs_exist_ok=True)

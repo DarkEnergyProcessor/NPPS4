@@ -34,12 +34,6 @@ server_private_key = "default_server_key.pem"
 # Environment Variable: NPPS4_CONFIG_MAIN_PKEYPASS (or) NPPS_KEY_PASSWORD
 server_private_key_password = ""
 
-# Server-specific data.
-# Server-specific data controls server-specific variable such as live-related drops.
-# A sensible default based on version 59.4 is provided.
-# Environment Variable: NPPS4_CONFIG_MAIN_SERVERDATA
-server_data = "npps4/server_data.json"
-
 # Session token expiration in seconds.
 # If you don't want user token to expire, set this to 0.
 # The default is 72 hours (3 days).

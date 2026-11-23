@@ -209,10 +209,6 @@ def is_script_mode():
     )
 
 
-def get_server_data_path():
-    return os.path.join(ROOT_DIR, CONFIG_DATA.main.server_data)
-
-
 LIVE_BOX_DROP_FILE = os.path.join(ROOT_DIR, CONFIG_DATA.game.live_box_drop)
 _live_box_drop_module = None
 

@@ -83,7 +83,6 @@ for src in ["beatmaps", "external", "scripts", "static", "templates"]:
     shutil.copytree(src, os.path.join(target_dir, src), dirs_exist_ok=True)
 
 for src, dst in [
-    ("npps4/server_data.json", "server_data.json"),
     ("default_server_key.pem", "server_key.pem"),
 ]:
     dest_path = os.path.join(target_dir, dst)
@@ -96,7 +95,7 @@ with open("config.sample.toml", "r", encoding="utf-8", newline="") as f:
 
 _npps4_config = _npps4_config.replace(
     'server_private_key = "default_server_key.pem"', 'server_private_key = "server_key.pem"'
-).replace('server_data = "npps4/server_data.json"', 'server_data = "server_data.json"')
+)
 
 _dlapi_server = os.environ.get("NPPS4_CONFIG_DOWNLOAD_N4DLAPI_SERVER", "")
 if _dlapi_server:

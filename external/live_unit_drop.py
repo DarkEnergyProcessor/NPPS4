@@ -1,6 +1,6 @@
 # NPPS4 example Live Show! unit reward drop.
 # This file defines the drops of each club members when clearing a live show.
-# This sensible default is (configurable in server_data.json):
+# This sensible default is:
 # * 10% of dropping R cards if the live setting allows.
 # * 90% of dropping N cards.
 # Please read the comments on how to implement your own Live Show! unit reward drop.

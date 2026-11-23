@@ -226,8 +226,7 @@ python -m npps4 init
 uv run python -m npps4 init # if using uv
 ```
 
-Most changes requires a server restart. However, changes that only touch `server_data.json` does not require server
-restart as that particular file is hot-reloaded by the server.
+Most changes requires a server restart.
 
 Client App
 -----
